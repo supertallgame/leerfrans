@@ -13,6 +13,15 @@ function jsonResponse(body: Record<string, unknown>, status = 200) {
   });
 }
 
+function shuffleArray<T>(arr: T[]): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
 async function verifyPlayer(
   supabase: ReturnType<typeof createClient>,
   playerId: string,
@@ -29,6 +38,14 @@ async function verifyPlayer(
 
   if (error || !player) return null;
   return player;
+}
+
+function isHost(player: any, room: any): boolean {
+  // Prefer host_player_id if set, fall back to host_name for backward compatibility
+  if (room.host_player_id) {
+    return player.id === room.host_player_id;
+  }
+  return player.player_name === room.host_name;
 }
 
 Deno.serve(async (req) => {
@@ -63,6 +80,46 @@ Deno.serve(async (req) => {
 
     if (!room) return jsonResponse({ error: "Room not found" }, 404);
 
+    // ACTION: register-host
+    if (action === "register-host") {
+      if (room.host_player_id) {
+        return jsonResponse({ error: "Host already registered" }, 403);
+      }
+      if (player.player_name !== room.host_name) {
+        return jsonResponse({ error: "Not the host" }, 403);
+      }
+      await supabase
+        .from("game_rooms")
+        .update({ host_player_id: playerId })
+        .eq("id", roomId);
+      return jsonResponse({ success: true });
+    }
+
+    // ACTION: get-question
+    if (action === "get-question") {
+      if (room.status !== "playing") return jsonResponse({ error: "Game not in progress" }, 400);
+
+      const currentQ = room.questions[room.current_question_index];
+      const questionKey = room.direction === "nl_to_fr" ? "dutch" : "french";
+      const answerKey = room.direction === "nl_to_fr" ? "french" : "dutch";
+      const correctAnswer = currentQ[answerKey];
+
+      // Generate options from other questions in the pool
+      const otherAnswers = room.questions
+        .filter((_: any, i: number) => i !== room.current_question_index)
+        .map((q: any) => q[answerKey]);
+      const wrongOptions = shuffleArray(otherAnswers).slice(0, 3);
+      const options = shuffleArray([correctAnswer, ...wrongOptions]);
+
+      return jsonResponse({
+        question: currentQ[questionKey],
+        options,
+        questionIndex: room.current_question_index,
+        totalQuestions: room.total_questions,
+        direction: room.direction,
+      });
+    }
+
     // ACTION: submit-answer
     if (action === "submit-answer") {
       if (!answer) return jsonResponse({ error: "Missing answer" }, 400);
@@ -86,7 +143,7 @@ Deno.serve(async (req) => {
 
     // ACTION: start-game (host only)
     if (action === "start-game") {
-      if (player.player_name !== room.host_name) {
+      if (!isHost(player, room)) {
         return jsonResponse({ error: "Not the host" }, 403);
       }
 
@@ -109,7 +166,7 @@ Deno.serve(async (req) => {
 
     // ACTION: next-question (host only)
     if (action === "next-question") {
-      if (player.player_name !== room.host_name) {
+      if (!isHost(player, room)) {
         return jsonResponse({ error: "Not the host" }, 403);
       }
 
@@ -127,6 +184,7 @@ Deno.serve(async (req) => {
 
     return jsonResponse({ error: "Unknown action" }, 400);
   } catch (err) {
-    return jsonResponse({ error: err.message }, 500);
+    console.error("game-action error:", err);
+    return jsonResponse({ error: "Internal server error" }, 500);
   }
 });

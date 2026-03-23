@@ -62,6 +62,7 @@ export type Database = {
           current_question_index: number
           direction: string
           host_name: string
+          host_player_id: string | null
           id: string
           questions: Json
           status: string
@@ -73,6 +74,7 @@ export type Database = {
           current_question_index?: number
           direction?: string
           host_name: string
+          host_player_id?: string | null
           id?: string
           questions?: Json
           status?: string
@@ -84,12 +86,28 @@ export type Database = {
           current_question_index?: number
           direction?: string
           host_name?: string
+          host_player_id?: string | null
           id?: string
           questions?: Json
           status?: string
           total_questions?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "game_rooms_host_player_id_fkey"
+            columns: ["host_player_id"]
+            isOneToOne: false
+            referencedRelation: "game_players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "game_rooms_host_player_id_fkey"
+            columns: ["host_player_id"]
+            isOneToOne: false
+            referencedRelation: "game_players_public"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

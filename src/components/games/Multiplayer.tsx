@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, Users, Copy, Check, Trophy, Clock } from "lucide-react";
+import { ArrowLeft, Users, Copy, Check, Trophy } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { vocabulary, shuffle } from "@/data/vocabulary";
 import { toast } from "sonner";
@@ -18,11 +18,11 @@ interface Room {
   id: string;
   code: string;
   host_name: string;
+  host_player_id: string | null;
   status: string;
   current_question_index: number;
   total_questions: number;
   direction: string;
-  questions: any[];
 }
 
 interface Player {
@@ -54,18 +54,18 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
   const [copied, setCopied] = useState(false);
   const [options, setOptions] = useState<string[]>([]);
   const [countdown, setCountdown] = useState<number | null>(null);
+  const [currentQuestion, setCurrentQuestion] = useState<string>("");
+  const [correctAnswer, setCorrectAnswer] = useState<string>("");
 
-  // Generate options for current question
-  const generateOptions = useCallback((questions: any[], index: number, direction: string) => {
-    if (!questions || index >= questions.length) return [];
-    const current = questions[index];
-    const answerKey = direction === "nl_to_fr" ? "french" : "dutch";
-    const correctAnswer = current[answerKey];
-    const others = vocabulary
-      .filter((v) => v[answerKey] !== correctAnswer)
-      .map((v) => v[answerKey]);
-    const shuffledOthers = shuffle(others).slice(0, 3);
-    return shuffle([correctAnswer, ...shuffledOthers]);
+  // Fetch current question from edge function (server-side, no answers exposed)
+  const fetchQuestion = useCallback(async (roomId: string, playerId: string, playerToken: string) => {
+    const { data } = await supabase.functions.invoke("game-action", {
+      body: { action: "get-question", roomId, playerId, playerToken },
+    });
+    if (data && !data.error) {
+      setCurrentQuestion(data.question);
+      setOptions(data.options);
+    }
   }, []);
 
   // Subscribe to room and players changes
@@ -78,13 +78,27 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
         "postgres_changes",
         { event: "*", schema: "public", table: "game_rooms", filter: `id=eq.${room.id}` },
         (payload) => {
-          const newRoom = payload.new as Room;
-          setRoom(newRoom);
+          const newRoom = payload.new as any;
+          // Update room state without questions
+          const updatedRoom: Room = {
+            id: newRoom.id,
+            code: newRoom.code,
+            host_name: newRoom.host_name,
+            host_player_id: newRoom.host_player_id,
+            status: newRoom.status,
+            current_question_index: newRoom.current_question_index,
+            total_questions: newRoom.total_questions,
+            direction: newRoom.direction,
+          };
+          setRoom(updatedRoom);
           if (newRoom.status === "playing") {
             setPhase("playing");
             setSelectedAnswer(null);
             setShowResult(false);
-            setOptions(generateOptions(newRoom.questions, newRoom.current_question_index, newRoom.direction));
+            setCorrectAnswer("");
+            if (myPlayerId && myPlayerToken) {
+              fetchQuestion(updatedRoom.id, myPlayerId, myPlayerToken);
+            }
           }
           if (newRoom.status === "finished") {
             setPhase("results");
@@ -95,7 +109,6 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
         "postgres_changes",
         { event: "*", schema: "public", table: "game_players", filter: `room_id=eq.${room.id}` },
         () => {
-          // Refresh players list
           fetchPlayers(room.id);
         }
       )
@@ -104,16 +117,17 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
     return () => {
       supabase.removeChannel(roomChannel);
     };
-  }, [room?.id, generateOptions]);
+  }, [room?.id, myPlayerId, myPlayerToken, fetchQuestion]);
 
-  // When room question changes, reset answer state
+  // When room question changes, fetch new question from server
   useEffect(() => {
-    if (room && phase === "playing") {
+    if (room && phase === "playing" && myPlayerId && myPlayerToken) {
       setSelectedAnswer(null);
       setShowResult(false);
-      setOptions(generateOptions(room.questions, room.current_question_index, room.direction));
+      setCorrectAnswer("");
+      fetchQuestion(room.id, myPlayerId, myPlayerToken);
     }
-  }, [room?.current_question_index, phase, generateOptions]);
+  }, [room?.current_question_index, phase, myPlayerId, myPlayerToken, fetchQuestion]);
 
   const fetchPlayers = async (roomId: string) => {
     const { data } = await supabase
@@ -143,12 +157,31 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
       .select("id, player_token")
       .single();
 
-    setRoom(roomData as Room);
-    setMyPlayerId(playerData?.id ?? null);
-    setMyPlayerToken((playerData as any)?.player_token ?? null);
+    const pid = playerData?.id ?? null;
+    const ptoken = (playerData as any)?.player_token ?? null;
+
+    setRoom({
+      id: roomData.id,
+      code: roomData.code,
+      host_name: roomData.host_name,
+      host_player_id: null,
+      status: roomData.status,
+      current_question_index: roomData.current_question_index,
+      total_questions: roomData.total_questions,
+      direction: roomData.direction,
+    });
+    setMyPlayerId(pid);
+    setMyPlayerToken(ptoken);
     setIsHost(true);
     setPhase("lobby");
     fetchPlayers(roomData.id);
+
+    // Register as host via edge function
+    if (pid && ptoken) {
+      await supabase.functions.invoke("game-action", {
+        body: { action: "register-host", roomId: roomData.id, playerId: pid, playerToken: ptoken },
+      });
+    }
   };
 
   const joinRoom = async () => {
@@ -157,7 +190,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
 
     const { data: roomData, error } = await supabase
       .from("game_rooms")
-      .select("*")
+      .select("id, code, host_name, host_player_id, status, current_question_index, total_questions, direction")
       .eq("code", roomCode.toUpperCase().trim())
       .single();
 
@@ -201,9 +234,14 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
     setSelectedAnswer(answer);
     setShowResult(true);
 
-    await supabase.functions.invoke("game-action", {
+    const { data } = await supabase.functions.invoke("game-action", {
       body: { action: "submit-answer", roomId: room.id, playerId: myPlayerId, playerToken: myPlayerToken, answer },
     });
+
+    // Get correct answer from server response
+    if (data?.correctAnswer) {
+      setCorrectAnswer(data.correctAnswer);
+    }
   };
 
   const nextQuestion = async () => {
@@ -339,10 +377,6 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
 
   // PLAYING PHASE
   if (phase === "playing" && room) {
-    const currentQ = room.questions[room.current_question_index];
-    const questionKey = room.direction === "nl_to_fr" ? "dutch" : "french";
-    const answerKey = room.direction === "nl_to_fr" ? "french" : "dutch";
-    const correctAnswer = currentQ?.[answerKey];
     const progress = ((room.current_question_index + 1) / room.total_questions) * 100;
     const answeredCount = players.filter((p) => p.has_answered).length;
 
@@ -364,22 +398,21 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
               <p className="text-sm text-muted-foreground mb-2">
                 {room.direction === "nl_to_fr" ? "🇳🇱 Nederlands → Frans 🇫🇷" : "🇫🇷 Frans → Nederlands 🇳🇱"}
               </p>
-              <h2 className="text-2xl md:text-3xl font-bold">{currentQ?.[questionKey]}</h2>
+              <h2 className="text-2xl md:text-3xl font-bold">{currentQuestion}</h2>
             </CardContent>
           </Card>
 
           <div className="grid grid-cols-1 gap-3">
             {options.map((option, i) => {
-              let variant: "outline" | "default" | "destructive" = "outline";
               let extraClass = "h-14 text-base";
-              if (showResult) {
+              if (showResult && correctAnswer) {
                 if (option === correctAnswer) extraClass += " bg-green-100 border-green-500 text-green-800";
                 else if (option === selectedAnswer) extraClass += " bg-red-100 border-red-500 text-red-800";
               }
               return (
                 <Button
                   key={i}
-                  variant={variant}
+                  variant="outline"
                   className={extraClass}
                   onClick={() => submitAnswer(option)}
                   disabled={showResult}
