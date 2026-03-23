@@ -92,6 +92,7 @@ Deno.serve(async (req) => {
     }
 
     // ACTION: register-host
+    if (action === "register-host") {
       if (room.host_player_id) {
         return jsonResponse({ error: "Host already registered" }, 403);
       }
