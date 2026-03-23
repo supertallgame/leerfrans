@@ -198,6 +198,12 @@ Deno.serve(async (req) => {
       return jsonResponse({ success: true });
     }
 
+    // ACTION: leave-game (non-host player leaves)
+    if (action === "leave-game") {
+      await supabase.from("game_players").delete().eq("id", playerId).eq("room_id", roomId);
+      return jsonResponse({ success: true });
+    }
+
     return jsonResponse({ error: "Unknown action" }, 400);
   } catch (err) {
     console.error("game-action error:", err);

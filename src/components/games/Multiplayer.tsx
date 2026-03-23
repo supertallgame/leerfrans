@@ -170,11 +170,9 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
     window.addEventListener("touchstart", resetActivity);
 
     const interval = setInterval(() => {
-      supabase
-        .from("game_players")
-        .update({ last_active: new Date().toISOString() })
-        .eq("id", myPlayerId)
-        .then(() => {});
+      supabase.functions.invoke("game-action", {
+        body: { action: "heartbeat", roomId: room?.id, playerId: myPlayerId, playerToken: myPlayerToken },
+      }).catch(() => {});
 
       const inactiveMs = Date.now() - lastInteraction;
       if (inactiveMs >= 4 * 60 * 1000 && !warned) {
@@ -338,8 +336,10 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
       await supabase.functions.invoke("game-action", {
         body: { action: "delete-room", roomId: room.id, playerId: myPlayerId, playerToken: myPlayerToken },
       });
-    } else if (myPlayerId) {
-      await supabase.from("game_players").delete().eq("id", myPlayerId);
+    } else if (myPlayerId && myPlayerToken && room) {
+      await supabase.functions.invoke("game-action", {
+        body: { action: "leave-game", roomId: room.id, playerId: myPlayerId, playerToken: myPlayerToken },
+      });
     }
     setPhase("setup");
     setRoom(null);
@@ -360,16 +360,12 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
           url,
           JSON.stringify({ action: "delete-room", roomId: room.id, playerId: myPlayerId, playerToken: myPlayerToken })
         );
-      } else if (myPlayerId) {
-        const url = `${import.meta.env.VITE_SUPABASE_URL}/rest/v1/game_players?id=eq.${myPlayerId}`;
-        fetch(url, {
-          method: "DELETE",
-          headers: {
-            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-          },
-          keepalive: true,
-        }).catch(() => {});
+      } else if (myPlayerId && myPlayerToken && room) {
+        const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/game-action`;
+        navigator.sendBeacon(
+          url,
+          JSON.stringify({ action: "leave-game", roomId: room.id, playerId: myPlayerId, playerToken: myPlayerToken })
+        );
       }
     };
     window.addEventListener("beforeunload", handleBeforeUnload);
