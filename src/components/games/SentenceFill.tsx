@@ -50,11 +50,12 @@ function generateWrongOptions(correctWord: string, allSentences: typeof vocabula
 
 export default function SentenceFill({ onBack }: Props) {
   const sentences = useMemo(() => {
-    const both = vocabulary.flatMap((v) => [
-      { sentence: v.french, lang: "fr" as const, item: v },
-      { sentence: v.dutch, lang: "nl" as const, item: v },
-    ]);
-    return shuffle(both.filter((s) => isSentence(s.sentence)));
+    const frOnly = vocabulary.map((v) => ({
+      sentence: v.french,
+      lang: "fr" as const,
+      item: v,
+    }));
+    return shuffle(frOnly.filter((s) => isSentence(s.sentence)));
   }, []);
 
   const [index, setIndex] = useState(0);
