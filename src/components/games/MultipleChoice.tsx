@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { vocabulary, shuffle } from "@/data/vocabulary";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Check, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, X } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 
 interface Props {
@@ -34,10 +34,11 @@ export default function MultipleChoice({ onBack }: Props) {
     if (selected) return;
     setSelected(opt);
     if (opt === correctAnswer) setScore((s) => s + 1);
-    setTimeout(() => {
-      setSelected(null);
-      setQIndex((i) => i + 1);
-    }, 1200);
+  };
+
+  const handleNext = () => {
+    setSelected(null);
+    setQIndex((i) => i + 1);
   };
 
   if (finished) {
@@ -109,6 +110,12 @@ export default function MultipleChoice({ onBack }: Props) {
           );
         })}
       </div>
+
+      {selected && (
+        <Button onClick={handleNext} className="w-full gap-2">
+          Volgende <ArrowRight className="h-4 w-4" />
+        </Button>
+      )}
     </div>
   );
 }
