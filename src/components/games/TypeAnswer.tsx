@@ -64,12 +64,12 @@ export default function TypeAnswer({ onBack }: Props) {
   }
 
   return (
-    <div className="flex flex-col items-center gap-6 w-full max-w-lg mx-auto">
+    <div className="flex flex-col items-center gap-4 md:gap-6 w-full max-w-lg mx-auto">
       <div className="flex items-center justify-between w-full">
-        <Button variant="ghost" onClick={onBack} className="gap-2">
+        <Button variant="ghost" onClick={onBack} className="gap-2 text-sm">
           <ArrowLeft className="h-4 w-4" /> Terug
         </Button>
-        <Button variant="outline" size="sm" onClick={() => setShowDutch(!showDutch)}>
+        <Button variant="outline" size="sm" onClick={() => setShowDutch(!showDutch)} className="text-xs md:text-sm">
           {showDutch ? "NL → FR" : "FR → NL"}
         </Button>
       </div>
@@ -77,11 +77,11 @@ export default function TypeAnswer({ onBack }: Props) {
       <Progress value={(qIndex / questions.length) * 100} className="w-full h-2" />
 
       <Card className="w-full">
-        <CardContent className="p-6 text-center">
-          <p className="text-xs uppercase tracking-widest text-muted-foreground mb-2">
+        <CardContent className="p-4 md:p-6 text-center">
+          <p className="text-xs uppercase tracking-widest text-muted-foreground mb-1 md:mb-2">
             Vertaal naar {showDutch ? "Frans" : "Nederlands"}
           </p>
-          <p className="text-xl font-semibold">
+          <p className="text-lg md:text-xl font-semibold">
             {showDutch ? current.dutch : current.french}
           </p>
         </CardContent>

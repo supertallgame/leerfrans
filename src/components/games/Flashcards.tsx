@@ -27,18 +27,19 @@ export default function Flashcards({ onBack }: Props) {
   };
 
   return (
-    <div className="flex flex-col items-center gap-6 w-full max-w-lg mx-auto">
+    <div className="flex flex-col items-center gap-4 md:gap-6 w-full max-w-lg mx-auto">
       <div className="flex items-center justify-between w-full">
-        <Button variant="ghost" onClick={onBack} className="gap-2">
+        <Button variant="ghost" onClick={onBack} className="gap-2 text-sm">
           <ArrowLeft className="h-4 w-4" /> Terug
         </Button>
         <Button
           variant="outline"
           size="sm"
           onClick={() => { setShowDutch(!showDutch); setFlipped(false); }}
+          className="text-xs md:text-sm"
         >
-          <Eye className="h-4 w-4 mr-2" />
-          {showDutch ? "Start: NL → FR" : "Start: FR → NL"}
+          <Eye className="h-4 w-4 mr-1 md:mr-2" />
+          {showDutch ? "NL → FR" : "FR → NL"}
         </Button>
       </div>
 
@@ -47,20 +48,20 @@ export default function Flashcards({ onBack }: Props) {
       </p>
 
       <Card
-        className="w-full min-h-[250px] cursor-pointer transition-all duration-300 hover:shadow-lg flex items-center justify-center"
+        className="w-full min-h-[200px] md:min-h-[250px] cursor-pointer transition-all duration-300 hover:shadow-lg flex items-center justify-center"
         onClick={() => setFlipped(!flipped)}
       >
-        <CardContent className="flex flex-col items-center justify-center p-8 text-center">
-          <p className="text-xs uppercase tracking-widest text-muted-foreground mb-3">
+        <CardContent className="flex flex-col items-center justify-center p-6 md:p-8 text-center">
+          <p className="text-xs uppercase tracking-widest text-muted-foreground mb-2 md:mb-3">
             {!flipped ? (showDutch ? "Nederlands" : "Français") : (showDutch ? "Français" : "Nederlands")}
           </p>
-          <p className="text-2xl font-semibold">
+          <p className="text-xl md:text-2xl font-semibold">
             {!flipped
               ? (showDutch ? current.dutch : current.french)
               : (showDutch ? current.french : current.dutch)}
           </p>
           {!flipped && (
-            <p className="text-xs text-muted-foreground mt-4">Klik om te draaien</p>
+            <p className="text-xs text-muted-foreground mt-3 md:mt-4">Klik om te draaien</p>
           )}
         </CardContent>
       </Card>

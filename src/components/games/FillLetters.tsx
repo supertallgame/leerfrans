@@ -112,16 +112,17 @@ export default function FillLetters({ onBack }: Props) {
   }
 
   return (
-    <div className="max-w-lg mx-auto space-y-6">
+    <div className="max-w-lg mx-auto space-y-4 md:space-y-6">
       <div className="flex items-center justify-between">
-        <Button variant="ghost" onClick={onBack} className="gap-2">
+        <Button variant="ghost" onClick={onBack} className="gap-2 text-sm">
           <ArrowLeft className="h-4 w-4" /> Terug
         </Button>
-        <div className="flex gap-2">
+        <div className="flex gap-1.5 md:gap-2">
           <Button
             size="sm"
             variant={direction === "nl_to_fr" ? "default" : "outline"}
             onClick={() => { setDirection("nl_to_fr"); restart(); }}
+            className="text-xs md:text-sm px-2 md:px-3"
           >
             🇳🇱→🇫🇷
           </Button>
@@ -129,23 +130,24 @@ export default function FillLetters({ onBack }: Props) {
             size="sm"
             variant={direction === "fr_to_nl" ? "default" : "outline"}
             onClick={() => { setDirection("fr_to_nl"); restart(); }}
+            className="text-xs md:text-sm px-2 md:px-3"
           >
             🇫🇷→🇳🇱
           </Button>
         </div>
       </div>
 
-      <div className="flex items-center justify-between text-sm text-muted-foreground">
+      <div className="flex items-center justify-between text-xs md:text-sm text-muted-foreground">
         <span>Woord {index + 1} / {total}</span>
         <span>Score: {score}</span>
       </div>
       <Progress value={progress} className="h-2" />
 
       <Card className="border-2">
-        <CardContent className="p-8 text-center space-y-4">
-          <p className="text-sm text-muted-foreground">Hint: <span className="font-semibold">{hintWord}</span></p>
-          <h2 className="text-4xl font-bold font-mono tracking-[0.2em]">{puzzle.display}</h2>
-          <p className="text-sm text-muted-foreground">Vul het volledige woord in</p>
+        <CardContent className="p-5 md:p-8 text-center space-y-3 md:space-y-4">
+          <p className="text-xs md:text-sm text-muted-foreground">Hint: <span className="font-semibold">{hintWord}</span></p>
+          <h2 className="text-2xl md:text-4xl font-bold font-mono tracking-[0.15em] md:tracking-[0.2em]">{puzzle.display}</h2>
+          <p className="text-xs md:text-sm text-muted-foreground">Vul het volledige woord in</p>
         </CardContent>
       </Card>
 

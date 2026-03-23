@@ -106,25 +106,25 @@ export default function SentenceFill({ onBack }: Props) {
   const translationLabel = current.lang === "fr" ? current.item.dutch : current.item.french;
 
   return (
-    <div className="max-w-lg mx-auto space-y-6">
+    <div className="max-w-lg mx-auto space-y-4 md:space-y-6">
       <div className="flex items-center justify-between">
-        <Button variant="ghost" onClick={onBack} className="gap-2">
+        <Button variant="ghost" onClick={onBack} className="gap-2 text-sm">
           <ArrowLeft className="h-4 w-4" /> Terug
         </Button>
-        <span className="text-sm text-muted-foreground">Score: {score}/{total}</span>
+        <span className="text-xs md:text-sm text-muted-foreground">Score: {score}/{total}</span>
       </div>
 
-      <div className="flex items-center justify-between text-sm text-muted-foreground">
+      <div className="flex items-center justify-between text-xs md:text-sm text-muted-foreground">
         <span>Zin {index + 1} / {total}</span>
         <span>{langLabel}</span>
       </div>
       <Progress value={progress} className="h-2" />
 
       <Card className="border-2">
-        <CardContent className="p-6 text-center space-y-3">
+        <CardContent className="p-4 md:p-6 text-center space-y-2 md:space-y-3">
           <p className="text-xs text-muted-foreground">Vul het ontbrekende woord in:</p>
-          <h2 className="text-xl md:text-2xl font-bold leading-relaxed">{puzzle.display}</h2>
-          <p className="text-sm text-muted-foreground">
+          <h2 className="text-lg md:text-2xl font-bold leading-relaxed">{puzzle.display}</h2>
+          <p className="text-xs md:text-sm text-muted-foreground">
             Vertaling: <span className="italic">{translationLabel}</span>
           </p>
         </CardContent>
