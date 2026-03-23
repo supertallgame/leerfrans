@@ -306,7 +306,33 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
     setIsHost(false);
   };
 
-  // SETUP PHASE
+  // Leave game when tab/window is closed
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (!myPlayerId) return;
+      if (isHost && room && myPlayerToken) {
+        // Use sendBeacon for reliability during page unload
+        const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/game-action`;
+        navigator.sendBeacon(
+          url,
+          JSON.stringify({ action: "delete-room", roomId: room.id, playerId: myPlayerId, playerToken: myPlayerToken })
+        );
+      } else if (myPlayerId) {
+        const url = `${import.meta.env.VITE_SUPABASE_URL}/rest/v1/game_players?id=eq.${myPlayerId}`;
+        fetch(url, {
+          method: "DELETE",
+          headers: {
+            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+          keepalive: true,
+        }).catch(() => {});
+      }
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [myPlayerId, myPlayerToken, isHost, room]);
+
   if (phase === "setup") {
     return (
       <div className="min-h-screen flex flex-col items-center px-4 py-12">
