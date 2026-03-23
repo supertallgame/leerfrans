@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, Users, Copy, Check, Trophy } from "lucide-react";
+import { ArrowLeft, Users, Copy, Check, Trophy, LogOut } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { vocabulary, shuffle } from "@/data/vocabulary";
 import { toast } from "sonner";
@@ -259,6 +259,18 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
     }
   };
 
+  const leaveGame = async () => {
+    if (myPlayerId) {
+      await supabase.from("game_players").delete().eq("id", myPlayerId);
+    }
+    setPhase("setup");
+    setRoom(null);
+    setMyPlayerId(null);
+    setMyPlayerToken(null);
+    setPlayers([]);
+    setIsHost(false);
+  };
+
   // SETUP PHASE
   if (phase === "setup") {
     return (
@@ -366,9 +378,20 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
             </Button>
           )}
           {!isHost && (
-            <p className="text-center text-muted-foreground animate-pulse">
-              Wachten tot de host het spel start...
-            </p>
+            <div className="space-y-3">
+              <p className="text-center text-muted-foreground animate-pulse">
+                Wachten tot de host het spel start...
+              </p>
+              <Button onClick={leaveGame} variant="outline" className="w-full gap-2 text-destructive hover:text-destructive">
+                <LogOut className="h-4 w-4" /> Verlaat het spel
+              </Button>
+            </div>
+          )}
+
+          {isHost && countdown === null && (
+            <Button onClick={leaveGame} variant="ghost" className="w-full gap-2 text-muted-foreground">
+              <LogOut className="h-4 w-4" /> Annuleren
+            </Button>
           )}
         </div>
       </div>
