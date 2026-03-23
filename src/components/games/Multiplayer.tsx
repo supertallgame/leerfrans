@@ -48,6 +48,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
   const [room, setRoom] = useState<Room | null>(null);
   const [players, setPlayers] = useState<Player[]>([]);
   const [myPlayerId, setMyPlayerId] = useState<string | null>(null);
+  const [myPlayerToken, setMyPlayerToken] = useState<string | null>(null);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [showResult, setShowResult] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -116,7 +117,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
 
   const fetchPlayers = async (roomId: string) => {
     const { data } = await supabase
-      .from("game_players")
+      .from("game_players_public" as any)
       .select("*")
       .eq("room_id", roomId)
       .order("score", { ascending: false });
@@ -139,11 +140,12 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
     const { data: playerData } = await supabase
       .from("game_players")
       .insert({ room_id: roomData.id, player_name: playerName })
-      .select()
+      .select("id, player_token")
       .single();
 
     setRoom(roomData as Room);
     setMyPlayerId(playerData?.id ?? null);
+    setMyPlayerToken((playerData as any)?.player_token ?? null);
     setIsHost(true);
     setPhase("lobby");
     fetchPlayers(roomData.id);
@@ -165,11 +167,12 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
     const { data: playerData } = await supabase
       .from("game_players")
       .insert({ room_id: roomData.id, player_name: playerName })
-      .select()
+      .select("id, player_token")
       .single();
 
     setRoom(roomData as Room);
     setMyPlayerId(playerData?.id ?? null);
+    setMyPlayerToken((playerData as any)?.player_token ?? null);
     setIsHost(false);
     setPhase("lobby");
     fetchPlayers(roomData.id);
