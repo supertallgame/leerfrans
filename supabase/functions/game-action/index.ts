@@ -116,9 +116,7 @@ Deno.serve(async (req) => {
         return jsonResponse({ error: "Not the host" }, 403);
       }
 
-      const body = await req.clone().json().catch(() => ({}));
-      const questions = body.questions;
-      if (!Array.isArray(questions) || questions.length === 0) {
+      if (!Array.isArray(bodyQuestions) || bodyQuestions.length === 0) {
         return jsonResponse({ error: "Invalid questions" }, 400);
       }
 
@@ -135,7 +133,7 @@ Deno.serve(async (req) => {
 
       await supabase
         .from("game_questions")
-        .insert({ room_id: roomId, questions });
+        .insert({ room_id: roomId, questions: bodyQuestions });
 
       return jsonResponse({ success: true });
     }
