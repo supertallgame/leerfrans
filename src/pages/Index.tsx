@@ -101,11 +101,12 @@ const Index = () => {
     <div className="min-h-screen flex flex-col items-center px-3 py-6 md:px-4 md:py-12">
       <div className="max-w-2xl w-full flex flex-col items-center gap-5 md:gap-8">
         <div className="text-center space-y-2 md:space-y-3 relative w-full">
-          <Button
+           <Button
             variant="ghost"
             size="icon"
             className="absolute right-0 top-0"
             onClick={handleSettingsClick}
+            aria-label="Instellingen"
           >
             <Settings className="h-5 w-5" />
           </Button>
