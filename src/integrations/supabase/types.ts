@@ -110,7 +110,6 @@ export type Database = {
           host_name: string
           host_player_id: string | null
           id: string
-          questions: Json
           status: string
           total_questions: number
         }
@@ -122,7 +121,6 @@ export type Database = {
           host_name: string
           host_player_id?: string | null
           id?: string
-          questions?: Json
           status?: string
           total_questions?: number
         }
@@ -134,7 +132,6 @@ export type Database = {
           host_name?: string
           host_player_id?: string | null
           id?: string
-          questions?: Json
           status?: string
           total_questions?: number
         }
