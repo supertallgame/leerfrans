@@ -99,10 +99,6 @@ Deno.serve(async (req) => {
       if (player.player_name !== room.host_name) {
         return jsonResponse({ error: "Not the host" }, 403);
       }
-
-      // Seed questions if provided (done atomically with host registration)
-      const { questions } = await req.clone().then(() => ({})).catch(() => ({})) as any;
-      // Questions are passed via the original request body
       await supabase
         .from("game_rooms")
         .update({ host_player_id: playerId })
