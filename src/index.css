@@ -94,4 +94,23 @@
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Space Grotesk', sans-serif;
   }
+
+  /* Dark mode scrollbar */
+  .dark *::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  .dark *::-webkit-scrollbar-track {
+    background: hsl(240 15% 12%);
+  }
+  .dark *::-webkit-scrollbar-thumb {
+    background: hsl(240 10% 30%);
+    border-radius: 4px;
+  }
+  .dark *::-webkit-scrollbar-thumb:hover {
+    background: hsl(240 10% 40%);
+  }
+  .dark * {
+    scrollbar-color: hsl(240 10% 30%) hsl(240 15% 12%);
+  }
 }
