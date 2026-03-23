@@ -23,7 +23,7 @@ export default function MultipleChoice({ onBack }: Props) {
   const options = useMemo(() => {
     if (finished) return [];
     const correct = showDutch ? current.french : current.dutch;
-    const isSentence = (s: string) => s.includes(" ") && s.length > 10;
+    const isSentence = (s: string) => s.includes(" ") && s.length >= 20;
     const correctIsSentence = isSentence(correct);
     // Pick wrong options of the same type (sentence vs word)
     const sameType = vocabulary
