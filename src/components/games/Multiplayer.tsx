@@ -220,13 +220,10 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
       .insert({ room_id: roomData.id, questions } as any);
 
     const { data: playerData } = await supabase
-      .from("game_players")
-      .insert({ room_id: roomData.id, player_name: playerName })
-      .select("id, player_token")
-      .single();
+      .rpc("join_game_room", { p_room_id: roomData.id, p_player_name: playerName }) as any;
 
     const pid = playerData?.id ?? null;
-    const ptoken = (playerData as any)?.player_token ?? null;
+    const ptoken = playerData?.player_token ?? null;
 
     setRoom({
       id: roomData.id,
@@ -266,10 +263,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
     if (roomData.status !== "waiting") return toast.error("Dit spel is al begonnen!");
 
     const { data: playerData } = await supabase
-      .from("game_players")
-      .insert({ room_id: roomData.id, player_name: playerName })
-      .select("id, player_token")
-      .single();
+      .rpc("join_game_room", { p_room_id: roomData.id, p_player_name: playerName }) as any;
 
     setRoom(roomData as Room);
     setMyPlayerId(playerData?.id ?? null);
