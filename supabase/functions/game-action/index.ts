@@ -86,8 +86,12 @@ Deno.serve(async (req) => {
 
     if (!room) return jsonResponse({ error: "Room not found" }, 404);
 
+    // ACTION: heartbeat (last_active already updated above)
+    if (action === "heartbeat") {
+      return jsonResponse({ success: true });
+    }
+
     // ACTION: register-host
-    if (action === "register-host") {
       if (room.host_player_id) {
         return jsonResponse({ error: "Host already registered" }, 403);
       }
