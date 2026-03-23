@@ -71,6 +71,12 @@ Deno.serve(async (req) => {
       return jsonResponse({ error: "Invalid player token" }, 403);
     }
 
+    // Update last_active timestamp
+    await supabase
+      .from("game_players")
+      .update({ last_active: new Date().toISOString() })
+      .eq("id", playerId);
+
     // Get room
     const { data: room } = await supabase
       .from("game_rooms")
