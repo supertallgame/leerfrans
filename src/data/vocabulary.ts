@@ -44,6 +44,14 @@ export const vocabulary: VocabItem[] = [
   { french: "Il est neuf heures et demie.", dutch: "Het is half tien." },
   { french: "Tu es en quelle classe?", dutch: "In welke klas zit je?" },
   { french: "Je suis en cinquième.", dutch: "Ik zit in de vijfde (klas)." },
+  { french: "être", dutch: "zijn" },
+  { french: "je suis", dutch: "ik ben" },
+  { french: "tu es", dutch: "jij bent" },
+  { french: "il/elle est", dutch: "hij/zij is" },
+  { french: "on est", dutch: "men is / wij zijn" },
+  { french: "nous sommes", dutch: "wij zijn" },
+  { french: "vous êtes", dutch: "jullie zijn / u bent" },
+  { french: "ils/elles sont", dutch: "zij zijn" },
 ];
 
 export function shuffle<T>(array: T[]): T[] {
