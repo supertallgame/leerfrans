@@ -1,0 +1,1 @@
+REVOKE SELECT (questions) ON public.game_rooms FROM anon, authenticated;
