@@ -66,6 +66,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
   const [countdown, setCountdown] = useState<number | null>(null);
   const [currentQuestion, setCurrentQuestion] = useState<string>("");
   const [correctAnswer, setCorrectAnswer] = useState<string>("");
+  const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
 
   // Fetch current question from edge function (server-side, no answers exposed)
   const fetchQuestion = useCallback(async (roomId: string, playerId: string, playerToken: string) => {
