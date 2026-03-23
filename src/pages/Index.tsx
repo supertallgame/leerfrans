@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { BookOpen, Brain, Puzzle, Keyboard, Users, PenTool, MessageSquare, Bot, Settings, Volume2, VolumeX, LogOut } from "lucide-react";
+import { BookOpen, Brain, Puzzle, Keyboard, Users, PenTool, MessageSquare, Bot, Settings, Volume2, VolumeX, LogOut, Sun, Moon } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import {
   Dialog,
@@ -41,6 +41,7 @@ const Index = () => {
   const [soundOn, setSoundOn] = useState(isSoundEnabled());
   const [user, setUser] = useState<any>(null);
   const [authLoading, setAuthLoading] = useState(true);
+  const [darkMode, setDarkMode] = useState(() => document.documentElement.classList.contains("dark"));
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -71,6 +72,12 @@ const Index = () => {
   const toggleSound = (checked: boolean) => {
     setSoundOn(checked);
     setSoundEnabled(checked);
+  };
+
+  const toggleDarkMode = (checked: boolean) => {
+    setDarkMode(checked);
+    document.documentElement.classList.toggle("dark", checked);
+    localStorage.setItem("theme", checked ? "dark" : "light");
   };
 
   if (activeGame === "flashcards") return <div className="min-h-screen p-4 md:p-6"><Flashcards onBack={() => setActiveGame("menu")} /></div>;
@@ -167,6 +174,13 @@ const Index = () => {
                 <span className="text-sm font-medium">Geluidseffecten</span>
               </div>
               <Switch checked={soundOn} onCheckedChange={toggleSound} />
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                {darkMode ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+                <span className="text-sm font-medium">Donkere modus</span>
+              </div>
+              <Switch checked={darkMode} onCheckedChange={toggleDarkMode} />
             </div>
             <div className="pt-2 border-t">
               <p className="text-xs text-muted-foreground mb-2">
