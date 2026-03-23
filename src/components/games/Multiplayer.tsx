@@ -214,11 +214,6 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
 
     if (roomError || !roomData) return toast.error("Kon geen room aanmaken");
 
-    // Store questions in separate restricted table (not readable by clients)
-    await supabase
-      .from("game_questions" as any)
-      .insert({ room_id: roomData.id, questions } as any);
-
     const { data: playerData } = await supabase
       .rpc("join_game_room", { p_room_id: roomData.id, p_player_name: playerName }) as any;
 
@@ -241,10 +236,13 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
     setPhase("lobby");
     fetchPlayers(roomData.id);
 
-    // Register as host via edge function
+    // Register as host and seed questions via edge function (atomic, server-side)
     if (pid && ptoken) {
       await supabase.functions.invoke("game-action", {
         body: { action: "register-host", roomId: roomData.id, playerId: pid, playerToken: ptoken },
+      });
+      await supabase.functions.invoke("game-action", {
+        body: { action: "seed-questions", roomId: roomData.id, playerId: pid, playerToken: ptoken, questions },
       });
     }
   };

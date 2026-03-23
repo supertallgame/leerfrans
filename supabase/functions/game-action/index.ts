@@ -59,7 +59,7 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    const { action, roomId, playerId, playerToken, answer } = await req.json();
+    const { action, roomId, playerId, playerToken, answer, questions: bodyQuestions } = await req.json();
 
     if (!roomId || !playerId || !playerToken) {
       return jsonResponse({ error: "Missing fields" }, 400);
@@ -103,6 +103,34 @@ Deno.serve(async (req) => {
         .from("game_rooms")
         .update({ host_player_id: playerId })
         .eq("id", roomId);
+      return jsonResponse({ success: true });
+    }
+
+    // ACTION: seed-questions (host only, once)
+    if (action === "seed-questions") {
+      if (!isHost(player, room)) {
+        return jsonResponse({ error: "Not the host" }, 403);
+      }
+
+      if (!Array.isArray(bodyQuestions) || bodyQuestions.length === 0) {
+        return jsonResponse({ error: "Invalid questions" }, 400);
+      }
+
+      // Check no questions exist yet (prevent race condition)
+      const { data: existing } = await supabase
+        .from("game_questions")
+        .select("id")
+        .eq("room_id", roomId)
+        .single();
+
+      if (existing) {
+        return jsonResponse({ error: "Questions already seeded" }, 409);
+      }
+
+      await supabase
+        .from("game_questions")
+        .insert({ room_id: roomId, questions: bodyQuestions });
+
       return jsonResponse({ success: true });
     }
 
