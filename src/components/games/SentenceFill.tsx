@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { ArrowLeft, RotateCcw } from "lucide-react";
 import { vocabulary, shuffle } from "@/data/vocabulary";
@@ -27,26 +28,6 @@ function pickMissingWord(sentence: string): { display: string; correctWord: stri
   return { display, correctWord: pick.word, wordIndex: pick.index };
 }
 
-function generateWrongOptions(correctWord: string, allSentences: typeof vocabulary): string[] {
-  // Collect words from all sentences
-  const allWords = new Set<string>();
-  allSentences.forEach((v) => {
-    v.french.split(" ").forEach((w) => {
-      const cleaned = w.replace(/[.,?!]/g, "");
-      if (cleaned.length >= 3 && cleaned.toLowerCase() !== correctWord.replace(/[.,?!]/g, "").toLowerCase()) {
-        allWords.add(w);
-      }
-    });
-    v.dutch.split(" ").forEach((w) => {
-      const cleaned = w.replace(/[.,?!]/g, "");
-      if (cleaned.length >= 3 && cleaned.toLowerCase() !== correctWord.replace(/[.,?!]/g, "").toLowerCase()) {
-        allWords.add(w);
-      }
-    });
-  });
-
-  return shuffle(Array.from(allWords)).slice(0, 3);
-}
 
 export default function SentenceFill({ onBack }: Props) {
   const sentences = useMemo(() => {
@@ -60,7 +41,7 @@ export default function SentenceFill({ onBack }: Props) {
 
   const [index, setIndex] = useState(0);
   const [score, setScore] = useState(0);
-  const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
+  const [userInput, setUserInput] = useState("");
   const [showResult, setShowResult] = useState(false);
 
   const total = sentences.length;
@@ -72,30 +53,25 @@ export default function SentenceFill({ onBack }: Props) {
     return pickMissingWord(current.sentence);
   }, [current]);
 
-  const options = useMemo(() => {
-    if (!puzzle) return [];
-    const wrong = generateWrongOptions(puzzle.correctWord, vocabulary);
-    return shuffle([puzzle.correctWord, ...wrong]);
-  }, [puzzle]);
+  const normalize = (s: string) => s.toLowerCase().trim().replace(/[.,?!]/g, "");
 
-  const handleSelect = (answer: string) => {
-    if (showResult) return;
-    setSelectedAnswer(answer);
-    setShowResult(true);
-    const correct = answer === puzzle?.correctWord;
+  const checkAnswer = () => {
+    if (!userInput.trim() || !puzzle) return;
+    const correct = normalize(userInput) === normalize(puzzle.correctWord);
     if (correct) setScore((s) => s + 1);
+    setShowResult(true);
   };
 
   const next = () => {
     setIndex((i) => i + 1);
-    setSelectedAnswer(null);
+    setUserInput("");
     setShowResult(false);
   };
 
   const restart = () => {
     setIndex(0);
     setScore(0);
-    setSelectedAnswer(null);
+    setUserInput("");
     setShowResult(false);
   };
 
@@ -153,31 +129,42 @@ export default function SentenceFill({ onBack }: Props) {
         </CardContent>
       </Card>
 
-      <div className="grid grid-cols-1 gap-3">
-        {options.map((option, i) => {
-          let extraClass = "h-12 text-base justify-start px-6";
-          if (showResult) {
-            if (option === puzzle.correctWord) extraClass += " bg-green-100 border-green-500 text-green-800";
-            else if (option === selectedAnswer) extraClass += " bg-red-100 border-red-500 text-red-800";
-          }
-          return (
-            <Button
-              key={i}
-              variant="outline"
-              className={extraClass}
-              onClick={() => handleSelect(option)}
-              disabled={showResult}
-            >
-              {option}
-            </Button>
-          );
-        })}
+      <div className="flex gap-3">
+        <Input
+          value={userInput}
+          onChange={(e) => setUserInput(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !showResult) checkAnswer();
+            if (e.key === "Enter" && showResult) next();
+          }}
+          placeholder="Typ het ontbrekende woord..."
+          className="text-center text-lg"
+          disabled={showResult}
+          autoFocus
+        />
+        {!showResult ? (
+          <Button onClick={checkAnswer} disabled={!userInput.trim()}>Check</Button>
+        ) : (
+          <Button onClick={next}>
+            {index + 1 >= total ? "🏆 Resultaten" : "Volgende"}
+          </Button>
+        )}
       </div>
 
       {showResult && (
-        <Button onClick={next} className="w-full h-12 text-lg">
-          {index + 1 >= total ? "🏆 Resultaten" : "Volgende zin →"}
-        </Button>
+        <Card className={normalize(userInput) === normalize(puzzle.correctWord)
+          ? "border-green-500 bg-green-50"
+          : "border-destructive bg-destructive/5"}>
+          <CardContent className="p-4 text-center">
+            {normalize(userInput) === normalize(puzzle.correctWord) ? (
+              <p className="font-semibold text-green-700">✅ Correct!</p>
+            ) : (
+              <p className="font-semibold text-destructive">
+                ❌ Fout! Het juiste woord was: <span className="font-bold">{puzzle.correctWord}</span>
+              </p>
+            )}
+          </CardContent>
+        </Card>
       )}
     </div>
   );
