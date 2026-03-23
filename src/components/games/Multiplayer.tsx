@@ -1,0 +1,484 @@
+import { useState, useEffect, useCallback } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Progress } from "@/components/ui/progress";
+import { ArrowLeft, Users, Copy, Check, Trophy, Clock } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { vocabulary, shuffle } from "@/data/vocabulary";
+import { toast } from "sonner";
+
+interface MultiplayerProps {
+  onBack: () => void;
+}
+
+type Phase = "setup" | "lobby" | "playing" | "results";
+
+interface Room {
+  id: string;
+  code: string;
+  host_name: string;
+  status: string;
+  current_question_index: number;
+  total_questions: number;
+  direction: string;
+  questions: any[];
+}
+
+interface Player {
+  id: string;
+  room_id: string;
+  player_name: string;
+  score: number;
+  has_answered: boolean;
+}
+
+function generateCode(): string {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let code = "";
+  for (let i = 0; i < 5; i++) code += chars[Math.floor(Math.random() * chars.length)];
+  return code;
+}
+
+export default function Multiplayer({ onBack }: MultiplayerProps) {
+  const [phase, setPhase] = useState<Phase>("setup");
+  const [playerName, setPlayerName] = useState("");
+  const [roomCode, setRoomCode] = useState("");
+  const [isHost, setIsHost] = useState(false);
+  const [room, setRoom] = useState<Room | null>(null);
+  const [players, setPlayers] = useState<Player[]>([]);
+  const [myPlayerId, setMyPlayerId] = useState<string | null>(null);
+  const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
+  const [showResult, setShowResult] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [options, setOptions] = useState<string[]>([]);
+  const [countdown, setCountdown] = useState<number | null>(null);
+
+  // Generate options for current question
+  const generateOptions = useCallback((questions: any[], index: number, direction: string) => {
+    if (!questions || index >= questions.length) return [];
+    const current = questions[index];
+    const answerKey = direction === "nl_to_fr" ? "french" : "dutch";
+    const correctAnswer = current[answerKey];
+    const others = vocabulary
+      .filter((v) => v[answerKey] !== correctAnswer)
+      .map((v) => v[answerKey]);
+    const shuffledOthers = shuffle(others).slice(0, 3);
+    return shuffle([correctAnswer, ...shuffledOthers]);
+  }, []);
+
+  // Subscribe to room and players changes
+  useEffect(() => {
+    if (!room?.id) return;
+
+    const roomChannel = supabase
+      .channel(`room-${room.id}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "game_rooms", filter: `id=eq.${room.id}` },
+        (payload) => {
+          const newRoom = payload.new as Room;
+          setRoom(newRoom);
+          if (newRoom.status === "playing") {
+            setPhase("playing");
+            setSelectedAnswer(null);
+            setShowResult(false);
+            setOptions(generateOptions(newRoom.questions, newRoom.current_question_index, newRoom.direction));
+          }
+          if (newRoom.status === "finished") {
+            setPhase("results");
+          }
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "game_players", filter: `room_id=eq.${room.id}` },
+        () => {
+          // Refresh players list
+          fetchPlayers(room.id);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(roomChannel);
+    };
+  }, [room?.id, generateOptions]);
+
+  // When room question changes, reset answer state
+  useEffect(() => {
+    if (room && phase === "playing") {
+      setSelectedAnswer(null);
+      setShowResult(false);
+      setOptions(generateOptions(room.questions, room.current_question_index, room.direction));
+    }
+  }, [room?.current_question_index, phase, generateOptions]);
+
+  const fetchPlayers = async (roomId: string) => {
+    const { data } = await supabase
+      .from("game_players")
+      .select("*")
+      .eq("room_id", roomId)
+      .order("score", { ascending: false });
+    if (data) setPlayers(data as Player[]);
+  };
+
+  const createRoom = async () => {
+    if (!playerName.trim()) return toast.error("Vul je naam in!");
+    const code = generateCode();
+    const questions = shuffle(vocabulary).slice(0, 20).map((v) => ({ french: v.french, dutch: v.dutch }));
+
+    const { data: roomData, error: roomError } = await supabase
+      .from("game_rooms")
+      .insert({ code, host_name: playerName, questions, total_questions: 20 })
+      .select()
+      .single();
+
+    if (roomError || !roomData) return toast.error("Kon geen room aanmaken");
+
+    const { data: playerData } = await supabase
+      .from("game_players")
+      .insert({ room_id: roomData.id, player_name: playerName })
+      .select()
+      .single();
+
+    setRoom(roomData as Room);
+    setMyPlayerId(playerData?.id ?? null);
+    setIsHost(true);
+    setPhase("lobby");
+    fetchPlayers(roomData.id);
+  };
+
+  const joinRoom = async () => {
+    if (!playerName.trim()) return toast.error("Vul je naam in!");
+    if (!roomCode.trim()) return toast.error("Vul een code in!");
+
+    const { data: roomData, error } = await supabase
+      .from("game_rooms")
+      .select("*")
+      .eq("code", roomCode.toUpperCase().trim())
+      .single();
+
+    if (error || !roomData) return toast.error("Room niet gevonden!");
+    if (roomData.status !== "waiting") return toast.error("Dit spel is al begonnen!");
+
+    const { data: playerData } = await supabase
+      .from("game_players")
+      .insert({ room_id: roomData.id, player_name: playerName })
+      .select()
+      .single();
+
+    setRoom(roomData as Room);
+    setMyPlayerId(playerData?.id ?? null);
+    setIsHost(false);
+    setPhase("lobby");
+    fetchPlayers(roomData.id);
+  };
+
+  const startGame = async () => {
+    if (!room) return;
+    setCountdown(3);
+  };
+
+  useEffect(() => {
+    if (countdown === null) return;
+    if (countdown === 0) {
+      supabase.from("game_rooms").update({ status: "playing", current_question_index: 0 }).eq("id", room!.id).then();
+      setCountdown(null);
+      return;
+    }
+    const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [countdown, room]);
+
+  const submitAnswer = async (answer: string) => {
+    if (!room || !myPlayerId || showResult) return;
+    setSelectedAnswer(answer);
+    setShowResult(true);
+
+    const currentQ = room.questions[room.current_question_index];
+    const correctAnswer = room.direction === "nl_to_fr" ? currentQ.french : currentQ.dutch;
+    const isCorrect = answer === correctAnswer;
+
+    if (isCorrect) {
+      const me = players.find((p) => p.id === myPlayerId);
+      await supabase
+        .from("game_players")
+        .update({ score: (me?.score ?? 0) + 1, has_answered: true })
+        .eq("id", myPlayerId);
+    } else {
+      await supabase.from("game_players").update({ has_answered: true }).eq("id", myPlayerId);
+    }
+  };
+
+  const nextQuestion = async () => {
+    if (!room) return;
+    const nextIndex = room.current_question_index + 1;
+    if (nextIndex >= room.total_questions) {
+      await supabase.from("game_rooms").update({ status: "finished" }).eq("id", room.id);
+    } else {
+      // Reset all players' has_answered
+      await supabase.from("game_players").update({ has_answered: false }).eq("room_id", room.id);
+      await supabase.from("game_rooms").update({ current_question_index: nextIndex }).eq("id", room.id);
+    }
+  };
+
+  const copyCode = () => {
+    if (room) {
+      navigator.clipboard.writeText(room.code);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  // SETUP PHASE
+  if (phase === "setup") {
+    return (
+      <div className="min-h-screen flex flex-col items-center px-4 py-12">
+        <div className="max-w-md w-full space-y-6">
+          <Button variant="ghost" onClick={onBack} className="gap-2">
+            <ArrowLeft className="h-4 w-4" /> Terug
+          </Button>
+          <div className="text-center space-y-2">
+            <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto">
+              <Users className="h-8 w-8 text-primary" />
+            </div>
+            <h1 className="text-3xl font-bold">Multiplayer Quiz</h1>
+            <p className="text-muted-foreground">Speel tegen je vrienden!</p>
+          </div>
+
+          <Card>
+            <CardContent className="p-6 space-y-4">
+              <Input
+                placeholder="Jouw naam"
+                value={playerName}
+                onChange={(e) => setPlayerName(e.target.value)}
+                className="text-center text-lg"
+                maxLength={20}
+              />
+              <Button onClick={createRoom} className="w-full text-lg h-12" size="lg">
+                🎮 Nieuw spel starten
+              </Button>
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-card px-2 text-muted-foreground">of</span>
+                </div>
+              </div>
+              <Input
+                placeholder="Code invoeren (bv. ABC12)"
+                value={roomCode}
+                onChange={(e) => setRoomCode(e.target.value.toUpperCase())}
+                className="text-center text-lg tracking-widest font-mono"
+                maxLength={5}
+              />
+              <Button onClick={joinRoom} variant="outline" className="w-full text-lg h-12" size="lg">
+                🚀 Deelnemen
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  // LOBBY PHASE
+  if (phase === "lobby") {
+    return (
+      <div className="min-h-screen flex flex-col items-center px-4 py-12">
+        <div className="max-w-md w-full space-y-6">
+          <div className="text-center space-y-3">
+            <p className="text-sm text-muted-foreground uppercase tracking-wide">Game Code</p>
+            <div className="flex items-center justify-center gap-2">
+              <span className="text-5xl font-bold font-mono tracking-[0.3em]">{room?.code}</span>
+              <Button variant="ghost" size="icon" onClick={copyCode}>
+                {copied ? <Check className="h-5 w-5 text-green-500" /> : <Copy className="h-5 w-5" />}
+              </Button>
+            </div>
+            <p className="text-muted-foreground">Deel deze code met je vrienden!</p>
+          </div>
+
+          {countdown !== null && (
+            <div className="text-center">
+              <div className="text-7xl font-bold text-primary animate-pulse">{countdown}</div>
+            </div>
+          )}
+
+          <Card>
+            <CardContent className="p-6">
+              <h3 className="font-semibold mb-3 flex items-center gap-2">
+                <Users className="h-4 w-4" /> Spelers ({players.length})
+              </h3>
+              <div className="space-y-2">
+                {players.map((p) => (
+                  <div
+                    key={p.id}
+                    className="flex items-center justify-between p-3 rounded-lg bg-muted/50"
+                  >
+                    <span className="font-medium">{p.player_name}</span>
+                    {p.player_name === room?.host_name && (
+                      <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">Host</span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {isHost && countdown === null && (
+            <Button
+              onClick={startGame}
+              className="w-full text-lg h-12"
+              size="lg"
+              disabled={players.length < 2}
+            >
+              🚀 Start het spel! ({players.length} spelers)
+            </Button>
+          )}
+          {!isHost && (
+            <p className="text-center text-muted-foreground animate-pulse">
+              Wachten tot de host het spel start...
+            </p>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // PLAYING PHASE
+  if (phase === "playing" && room) {
+    const currentQ = room.questions[room.current_question_index];
+    const questionKey = room.direction === "nl_to_fr" ? "dutch" : "french";
+    const answerKey = room.direction === "nl_to_fr" ? "french" : "dutch";
+    const correctAnswer = currentQ?.[answerKey];
+    const progress = ((room.current_question_index + 1) / room.total_questions) * 100;
+    const answeredCount = players.filter((p) => p.has_answered).length;
+
+    return (
+      <div className="min-h-screen flex flex-col items-center px-4 py-8">
+        <div className="max-w-lg w-full space-y-6">
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-muted-foreground font-medium">
+              Vraag {room.current_question_index + 1}/{room.total_questions}
+            </span>
+            <span className="text-sm text-muted-foreground flex items-center gap-1">
+              <Users className="h-3 w-3" /> {answeredCount}/{players.length} beantwoord
+            </span>
+          </div>
+          <Progress value={progress} className="h-2" />
+
+          <Card className="border-2">
+            <CardContent className="p-8 text-center">
+              <p className="text-sm text-muted-foreground mb-2">
+                {room.direction === "nl_to_fr" ? "🇳🇱 Nederlands → Frans 🇫🇷" : "🇫🇷 Frans → Nederlands 🇳🇱"}
+              </p>
+              <h2 className="text-2xl md:text-3xl font-bold">{currentQ?.[questionKey]}</h2>
+            </CardContent>
+          </Card>
+
+          <div className="grid grid-cols-1 gap-3">
+            {options.map((option, i) => {
+              let variant: "outline" | "default" | "destructive" = "outline";
+              let extraClass = "h-14 text-base";
+              if (showResult) {
+                if (option === correctAnswer) extraClass += " bg-green-100 border-green-500 text-green-800";
+                else if (option === selectedAnswer) extraClass += " bg-red-100 border-red-500 text-red-800";
+              }
+              return (
+                <Button
+                  key={i}
+                  variant={variant}
+                  className={extraClass}
+                  onClick={() => submitAnswer(option)}
+                  disabled={showResult}
+                >
+                  {option}
+                </Button>
+              );
+            })}
+          </div>
+
+          {showResult && isHost && (
+            <Button onClick={nextQuestion} className="w-full h-12 text-lg" size="lg">
+              {room.current_question_index + 1 >= room.total_questions ? "🏆 Resultaten bekijken" : "Volgende vraag →"}
+            </Button>
+          )}
+
+          {/* Live scoreboard */}
+          <Card className="bg-muted/30">
+            <CardContent className="p-4">
+              <h3 className="text-sm font-semibold mb-2 flex items-center gap-1">
+                <Trophy className="h-3 w-3" /> Live Score
+              </h3>
+              <div className="space-y-1">
+                {players.map((p, i) => (
+                  <div key={p.id} className="flex justify-between items-center text-sm">
+                    <span className={p.id === myPlayerId ? "font-bold text-primary" : ""}>
+                      {i === 0 && "🥇 "}
+                      {i === 1 && "🥈 "}
+                      {i === 2 && "🥉 "}
+                      {p.player_name}
+                    </span>
+                    <span className="font-mono font-bold">{p.score}</span>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  // RESULTS PHASE
+  if (phase === "results") {
+    const sorted = [...players].sort((a, b) => b.score - a.score);
+    return (
+      <div className="min-h-screen flex flex-col items-center px-4 py-12">
+        <div className="max-w-md w-full space-y-6">
+          <div className="text-center space-y-3">
+            <div className="text-6xl">🏆</div>
+            <h1 className="text-3xl font-bold">Resultaten!</h1>
+          </div>
+
+          <Card>
+            <CardContent className="p-6 space-y-3">
+              {sorted.map((p, i) => (
+                <div
+                  key={p.id}
+                  className={`flex items-center justify-between p-4 rounded-xl ${
+                    i === 0
+                      ? "bg-yellow-50 border-2 border-yellow-400"
+                      : i === 1
+                      ? "bg-gray-50 border border-gray-300"
+                      : i === 2
+                      ? "bg-orange-50 border border-orange-300"
+                      : "bg-muted/30"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl">
+                      {i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `${i + 1}.`}
+                    </span>
+                    <span className={`font-semibold ${p.id === myPlayerId ? "text-primary" : ""}`}>
+                      {p.player_name}
+                    </span>
+                  </div>
+                  <span className="text-xl font-bold">{p.score}/{room?.total_questions}</span>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+
+          <Button onClick={onBack} className="w-full h-12 text-lg" size="lg">
+            Terug naar menu
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  return null;
+}
