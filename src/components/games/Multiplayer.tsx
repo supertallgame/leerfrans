@@ -153,6 +153,19 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
     }
   }, [room?.current_question_index, phase, myPlayerId, myPlayerToken, fetchQuestion]);
 
+  // Heartbeat: update last_active every 60 seconds
+  useEffect(() => {
+    if (!myPlayerId) return;
+    const interval = setInterval(() => {
+      supabase
+        .from("game_players")
+        .update({ last_active: new Date().toISOString() })
+        .eq("id", myPlayerId)
+        .then(() => {});
+    }, 60_000);
+    return () => clearInterval(interval);
+  }, [myPlayerId]);
+
   const fetchPlayers = async (roomId: string) => {
     const { data } = await supabase
       .from("game_players_public" as any)
