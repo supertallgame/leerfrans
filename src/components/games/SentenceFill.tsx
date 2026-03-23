@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { playCorrect, playWrong } from "@/lib/sounds";
+import { isAnswerCorrect } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -54,11 +55,9 @@ export default function SentenceFill({ onBack }: Props) {
     return pickMissingWord(current.sentence);
   }, [current]);
 
-  const normalize = (s: string) => s.toLowerCase().trim().replace(/[.,?!]/g, "");
-
   const checkAnswer = () => {
     if (!userInput.trim() || !puzzle) return;
-    const correct = normalize(userInput) === normalize(puzzle.correctWord);
+    const correct = isAnswerCorrect(userInput, puzzle.correctWord);
     if (correct) { setScore((s) => s + 1); playCorrect(); }
     else { playWrong(); }
     setShowResult(true);
