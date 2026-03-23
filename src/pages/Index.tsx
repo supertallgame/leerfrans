@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { BookOpen, Brain, Puzzle, Keyboard } from "lucide-react";
+import { BookOpen, Brain, Puzzle, Keyboard, Users } from "lucide-react";
 import Flashcards from "@/components/games/Flashcards";
 import MultipleChoice from "@/components/games/MultipleChoice";
 import MatchPairs from "@/components/games/MatchPairs";
 import TypeAnswer from "@/components/games/TypeAnswer";
+import Multiplayer from "@/components/games/Multiplayer";
 
-type Game = "menu" | "flashcards" | "quiz" | "match" | "type";
+type Game = "menu" | "flashcards" | "quiz" | "match" | "type" | "multiplayer";
 
 const games = [
   {
@@ -46,6 +47,7 @@ const Index = () => {
   if (activeGame === "quiz") return <div className="min-h-screen p-6"><MultipleChoice onBack={() => setActiveGame("menu")} /></div>;
   if (activeGame === "match") return <div className="min-h-screen p-6"><MatchPairs onBack={() => setActiveGame("menu")} /></div>;
   if (activeGame === "type") return <div className="min-h-screen p-6"><TypeAnswer onBack={() => setActiveGame("menu")} /></div>;
+  if (activeGame === "multiplayer") return <Multiplayer onBack={() => setActiveGame("menu")} />;
 
   return (
     <div className="min-h-screen flex flex-col items-center px-4 py-12">
@@ -82,10 +84,28 @@ const Index = () => {
           ))}
         </div>
 
+        {/* Multiplayer button */}
+        <Card
+          className="w-full cursor-pointer transition-all duration-200 hover:shadow-lg hover:-translate-y-1 active:scale-[0.98] border-2 border-primary/20 bg-gradient-to-r from-primary/5 to-accent/5"
+          onClick={() => setActiveGame("multiplayer")}
+        >
+          <CardContent className="p-6 flex items-center gap-4">
+            <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
+              <Users className="h-7 w-7 text-primary" />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold">🎮 Multiplayer Quiz</h2>
+              <p className="text-sm text-muted-foreground">
+                Start een quiz en speel tegen je vrienden met een deelcode!
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
         <Card className="w-full bg-muted/50">
           <CardContent className="p-4 text-center">
             <p className="text-sm text-muted-foreground">
-              📚 <span className="font-medium">20 woorden & zinnen</span> om te oefenen
+              📚 <span className="font-medium">39 woorden & zinnen</span> om te oefenen
             </p>
           </CardContent>
         </Card>
