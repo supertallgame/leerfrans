@@ -22,7 +22,6 @@ const Multiplayer = lazy(() => import("@/components/games/Multiplayer"));
 const FillLetters = lazy(() => import("@/components/games/FillLetters"));
 const SentenceFill = lazy(() => import("@/components/games/SentenceFill"));
 const AiChat = lazy(() => import("@/components/games/AiChat"));
-import { toast } from "sonner";
 
 type Game = "menu" | "flashcards" | "quiz" | "match" | "type" | "multiplayer" | "fill" | "sentence" | "ai";
 
