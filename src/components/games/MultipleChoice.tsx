@@ -110,6 +110,12 @@ export default function MultipleChoice({ onBack }: Props) {
           );
         })}
       </div>
+
+      {selected && (
+        <Button onClick={handleNext} className="w-full gap-2">
+          Volgende <ArrowRight className="h-4 w-4" />
+        </Button>
+      )}
     </div>
   );
 }
