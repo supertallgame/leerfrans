@@ -159,7 +159,7 @@ export default function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
               });
               setLoading(false);
               if (error) { toast.error(error.message); }
-              else { toast.success("Herstelmail verstuurd! Check je inbox."); setTab("login"); }
+              else { toast.success("Herstelmail verstuurd! Check je inbox en spam-map."); setTab("login"); }
             }} className="w-full" disabled={loading}>
               {loading ? "Bezig..." : "Herstelmail versturen"}
             </Button>
