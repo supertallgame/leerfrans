@@ -62,12 +62,12 @@
     --primary: 262 60% 60%;
     --primary-foreground: 0 0% 100%;
     --secondary: 45 70% 55%;
-    --secondary-foreground: 240 20% 12%;
+    --secondary-foreground: 45 20% 95%;
     --muted: 240 10% 18%;
     --muted-foreground: 240 10% 60%;
     --accent: 160 50% 50%;
     --accent-foreground: 0 0% 100%;
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 0 72% 55%;
     --destructive-foreground: 0 0% 100%;
     --border: 240 10% 20%;
     --input: 240 10% 20%;
