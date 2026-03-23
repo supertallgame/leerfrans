@@ -249,7 +249,10 @@ export type Database = {
       }
     }
     Functions: {
-      [_ in never]: never
+      join_game_room: {
+        Args: { p_player_name: string; p_room_id: string }
+        Returns: Json
+      }
     }
     Enums: {
       [_ in never]: never
