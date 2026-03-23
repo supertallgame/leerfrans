@@ -20,6 +20,7 @@ export type Database = {
           has_answered: boolean
           id: string
           joined_at: string
+          last_active: string
           player_name: string
           player_token: string
           room_id: string
@@ -30,6 +31,7 @@ export type Database = {
           has_answered?: boolean
           id?: string
           joined_at?: string
+          last_active?: string
           player_name: string
           player_token?: string
           room_id: string
@@ -40,6 +42,7 @@ export type Database = {
           has_answered?: boolean
           id?: string
           joined_at?: string
+          last_active?: string
           player_name?: string
           player_token?: string
           room_id?: string
