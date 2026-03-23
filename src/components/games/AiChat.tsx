@@ -4,7 +4,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ArrowLeft, Send, Bot, User } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { vocabulary } from "@/data/vocabulary";
 
 interface Props {
   onBack: () => void;
