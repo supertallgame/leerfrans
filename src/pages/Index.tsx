@@ -132,7 +132,7 @@ const Index = () => {
         <Card className="w-full bg-muted/50">
           <CardContent className="p-4 text-center">
             <p className="text-sm text-muted-foreground">
-              📚 <span className="font-medium">39 woorden & zinnen</span> om te oefenen
+              📚 <span className="font-medium">47 woorden & zinnen</span> om te oefenen
             </p>
           </CardContent>
         </Card>
