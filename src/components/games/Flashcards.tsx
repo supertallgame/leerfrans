@@ -1,0 +1,81 @@
+import { useState } from "react";
+import { vocabulary, shuffle, VocabItem } from "@/data/vocabulary";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft, ArrowRight, RotateCcw, Eye } from "lucide-react";
+
+interface Props {
+  onBack: () => void;
+}
+
+export default function Flashcards({ onBack }: Props) {
+  const [cards] = useState(() => shuffle(vocabulary));
+  const [index, setIndex] = useState(0);
+  const [flipped, setFlipped] = useState(false);
+  const [showDutch, setShowDutch] = useState(true);
+
+  const current = cards[index];
+
+  const next = () => {
+    setFlipped(false);
+    setIndex((i) => (i + 1) % cards.length);
+  };
+
+  const prev = () => {
+    setFlipped(false);
+    setIndex((i) => (i - 1 + cards.length) % cards.length);
+  };
+
+  return (
+    <div className="flex flex-col items-center gap-6 w-full max-w-lg mx-auto">
+      <div className="flex items-center justify-between w-full">
+        <Button variant="ghost" onClick={onBack} className="gap-2">
+          <ArrowLeft className="h-4 w-4" /> Terug
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => { setShowDutch(!showDutch); setFlipped(false); }}
+        >
+          <Eye className="h-4 w-4 mr-2" />
+          {showDutch ? "Start: NL → FR" : "Start: FR → NL"}
+        </Button>
+      </div>
+
+      <p className="text-sm text-muted-foreground">
+        {index + 1} / {cards.length}
+      </p>
+
+      <Card
+        className="w-full min-h-[250px] cursor-pointer transition-all duration-300 hover:shadow-lg flex items-center justify-center"
+        onClick={() => setFlipped(!flipped)}
+      >
+        <CardContent className="flex flex-col items-center justify-center p-8 text-center">
+          <p className="text-xs uppercase tracking-widest text-muted-foreground mb-3">
+            {!flipped ? (showDutch ? "Nederlands" : "Français") : (showDutch ? "Français" : "Nederlands")}
+          </p>
+          <p className="text-2xl font-semibold">
+            {!flipped
+              ? (showDutch ? current.dutch : current.french)
+              : (showDutch ? current.french : current.dutch)}
+          </p>
+          {!flipped && (
+            <p className="text-xs text-muted-foreground mt-4">Klik om te draaien</p>
+          )}
+        </CardContent>
+      </Card>
+
+      <div className="flex gap-3">
+        <Button variant="outline" onClick={prev}>
+          <ArrowLeft className="h-4 w-4" />
+        </Button>
+        <Button variant="outline" onClick={() => { setFlipped(false); setIndex(0); }}>
+          <RotateCcw className="h-4 w-4" />
+        </Button>
+        <Button variant="outline" onClick={next}>
+          <ArrowRight className="h-4 w-4" />
+        </Button>
+      </div>
+    </div>
+  );
+}
