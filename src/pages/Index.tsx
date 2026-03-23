@@ -105,20 +105,20 @@ const Index = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
+        <div className="grid grid-cols-2 sm:grid-cols-2 gap-2.5 md:gap-4 w-full">
           {games.map((game) => (
             <Card
               key={game.id}
               className="cursor-pointer transition-all duration-200 hover:shadow-lg hover:-translate-y-1 active:scale-[0.98]"
               onClick={() => setActiveGame(game.id)}
             >
-              <CardContent className="p-6 flex flex-col gap-3">
-                <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${game.color}`}>
-                  <game.icon className="h-6 w-6" />
+              <CardContent className="p-3 md:p-6 flex flex-col gap-2 md:gap-3">
+                <div className={`w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center ${game.color}`}>
+                  <game.icon className="h-5 w-5 md:h-6 md:w-6" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-semibold">{game.title}</h2>
-                  <p className="text-sm text-muted-foreground">{game.description}</p>
+                  <h2 className="text-sm md:text-lg font-semibold leading-tight">{game.title}</h2>
+                  <p className="text-xs md:text-sm text-muted-foreground hidden sm:block">{game.description}</p>
                 </div>
               </CardContent>
             </Card>
