@@ -421,17 +421,17 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
   // LOBBY PHASE
   if (phase === "lobby") {
     return (
-      <div className="min-h-screen flex flex-col items-center px-4 py-12">
-        <div className="max-w-md w-full space-y-6">
-          <div className="text-center space-y-3">
-            <p className="text-sm text-muted-foreground uppercase tracking-wide">Game Code</p>
+      <div className="min-h-screen flex flex-col items-center px-3 py-6 md:px-4 md:py-12">
+        <div className="max-w-md w-full space-y-4 md:space-y-6">
+          <div className="text-center space-y-2 md:space-y-3">
+            <p className="text-xs md:text-sm text-muted-foreground uppercase tracking-wide">Game Code</p>
             <div className="flex items-center justify-center gap-2">
-              <span className="text-5xl font-bold font-mono tracking-[0.3em]">{room?.code}</span>
+              <span className="text-4xl md:text-5xl font-bold font-mono tracking-[0.3em]">{room?.code}</span>
               <Button variant="ghost" size="icon" onClick={copyCode}>
                 {copied ? <Check className="h-5 w-5 text-green-500" /> : <Copy className="h-5 w-5" />}
               </Button>
             </div>
-            <p className="text-muted-foreground">Deel deze code met je vrienden!</p>
+            <p className="text-sm text-muted-foreground">Deel deze code!</p>
           </div>
 
           {countdown !== null && (
