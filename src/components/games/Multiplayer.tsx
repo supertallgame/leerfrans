@@ -4,6 +4,16 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { ArrowLeft, Users, Copy, Check, Trophy, LogOut } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { vocabulary, shuffle } from "@/data/vocabulary";
 import { toast } from "sonner";
@@ -56,6 +66,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
   const [countdown, setCountdown] = useState<number | null>(null);
   const [currentQuestion, setCurrentQuestion] = useState<string>("");
   const [correctAnswer, setCorrectAnswer] = useState<string>("");
+  const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
 
   // Fetch current question from edge function (server-side, no answers exposed)
   const fetchQuestion = useCallback(async (roomId: string, playerId: string, playerToken: string) => {
@@ -406,14 +417,14 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
               <p className="text-center text-muted-foreground animate-pulse">
                 Wachten tot de host het spel start...
               </p>
-              <Button onClick={leaveGame} variant="outline" className="w-full gap-2 text-destructive hover:text-destructive">
+              <Button onClick={() => setShowLeaveConfirm(true)} variant="outline" className="w-full gap-2 text-destructive hover:text-destructive">
                 <LogOut className="h-4 w-4" /> Verlaat het spel
               </Button>
             </div>
           )}
 
           {isHost && countdown === null && (
-            <Button onClick={leaveGame} variant="ghost" className="w-full gap-2 text-muted-foreground">
+            <Button onClick={() => setShowLeaveConfirm(true)} variant="ghost" className="w-full gap-2 text-muted-foreground">
               <LogOut className="h-4 w-4" /> Annuleren
             </Button>
           )}
@@ -431,7 +442,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
       <div className="min-h-screen flex flex-col items-center px-4 py-8">
         <div className="max-w-lg w-full space-y-6">
           <div className="flex items-center justify-between">
-            <Button variant="ghost" size="sm" onClick={leaveGame} className="gap-1 text-muted-foreground">
+            <Button variant="ghost" size="sm" onClick={() => setShowLeaveConfirm(true)} className="gap-1 text-muted-foreground">
               <LogOut className="h-3 w-3" /> Verlaten
             </Button>
             <span className="text-sm text-muted-foreground font-medium">
@@ -553,5 +564,24 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
     );
   }
 
-  return null;
+  return (
+    <AlertDialog open={showLeaveConfirm} onOpenChange={setShowLeaveConfirm}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Spel verlaten?</AlertDialogTitle>
+          <AlertDialogDescription>
+            {isHost
+              ? "Als host wordt de hele room verwijderd en kunnen andere spelers niet meer verder spelen."
+              : "Je verliest je voortgang als je nu het spel verlaat."}
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Annuleren</AlertDialogCancel>
+          <AlertDialogAction onClick={leaveGame} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+            Verlaten
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
 }
