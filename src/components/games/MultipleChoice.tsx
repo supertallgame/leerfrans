@@ -3,10 +3,6 @@ import { vocabulary, shuffle } from "@/data/vocabulary";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight, Check, X } from "lucide-react";
-import { vocabulary, shuffle } from "@/data/vocabulary";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft, Check, X } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 
 interface Props {
