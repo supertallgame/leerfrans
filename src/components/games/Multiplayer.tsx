@@ -76,10 +76,9 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
       .channel(`room-${room.id}`)
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "game_rooms", filter: `id=eq.${room.id}` },
+        { event: "UPDATE", schema: "public", table: "game_rooms", filter: `id=eq.${room.id}` },
         (payload) => {
           const newRoom = payload.new as any;
-          // Update room state without questions
           const updatedRoom: Room = {
             id: newRoom.id,
             code: newRoom.code,
@@ -103,6 +102,20 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
           if (newRoom.status === "finished") {
             setPhase("results");
           }
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "DELETE", schema: "public", table: "game_rooms", filter: `id=eq.${room.id}` },
+        () => {
+          // Room was deleted (host left)
+          toast.info("De host heeft het spel verlaten.");
+          setPhase("setup");
+          setRoom(null);
+          setMyPlayerId(null);
+          setMyPlayerToken(null);
+          setPlayers([]);
+          setIsHost(false);
         }
       )
       .on(
@@ -218,16 +231,22 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
 
   useEffect(() => {
     if (countdown === null) return;
-    if (countdown === 0) {
-      supabase.functions.invoke("game-action", {
-        body: { action: "start-game", roomId: room!.id, playerId: myPlayerId, playerToken: myPlayerToken },
-      });
+    if (countdown <= 0) {
       setCountdown(null);
       return;
     }
-    const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+    const timer = setTimeout(() => {
+      const next = countdown - 1;
+      setCountdown(next);
+      // Fire the start request at 1→0 so game begins immediately when countdown ends
+      if (next === 0) {
+        supabase.functions.invoke("game-action", {
+          body: { action: "start-game", roomId: room!.id, playerId: myPlayerId, playerToken: myPlayerToken },
+        });
+      }
+    }, 1000);
     return () => clearTimeout(timer);
-  }, [countdown, room, myPlayerId]);
+  }, [countdown, room, myPlayerId, myPlayerToken]);
 
   const submitAnswer = async (answer: string) => {
     if (!room || !myPlayerId || showResult) return;
@@ -260,7 +279,12 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
   };
 
   const leaveGame = async () => {
-    if (myPlayerId) {
+    if (isHost && room && myPlayerId && myPlayerToken) {
+      // Host leaves: delete the entire room (cascade deletes players)
+      await supabase.functions.invoke("game-action", {
+        body: { action: "delete-room", roomId: room.id, playerId: myPlayerId, playerToken: myPlayerToken },
+      });
+    } else if (myPlayerId) {
       await supabase.from("game_players").delete().eq("id", myPlayerId);
     }
     setPhase("setup");

@@ -182,6 +182,16 @@ Deno.serve(async (req) => {
       return jsonResponse({ success: true });
     }
 
+    // ACTION: delete-room (host only)
+    if (action === "delete-room") {
+      if (!isHost(player, room)) {
+        return jsonResponse({ error: "Not the host" }, 403);
+      }
+      // Cascade trigger will delete players
+      await supabase.from("game_rooms").delete().eq("id", roomId);
+      return jsonResponse({ success: true });
+    }
+
     return jsonResponse({ error: "Unknown action" }, 400);
   } catch (err) {
     console.error("game-action error:", err);
