@@ -56,6 +56,13 @@ export type Database = {
             referencedRelation: "game_rooms"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "game_players_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "game_rooms_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       game_rooms: {
@@ -145,6 +152,64 @@ export type Database = {
             columns: ["room_id"]
             isOneToOne: false
             referencedRelation: "game_rooms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "game_players_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "game_rooms_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      game_rooms_public: {
+        Row: {
+          code: string | null
+          created_at: string | null
+          current_question_index: number | null
+          direction: string | null
+          host_name: string | null
+          host_player_id: string | null
+          id: string | null
+          status: string | null
+          total_questions: number | null
+        }
+        Insert: {
+          code?: string | null
+          created_at?: string | null
+          current_question_index?: number | null
+          direction?: string | null
+          host_name?: string | null
+          host_player_id?: string | null
+          id?: string | null
+          status?: string | null
+          total_questions?: number | null
+        }
+        Update: {
+          code?: string | null
+          created_at?: string | null
+          current_question_index?: number | null
+          direction?: string | null
+          host_name?: string | null
+          host_player_id?: string | null
+          id?: string | null
+          status?: string | null
+          total_questions?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "game_rooms_host_player_id_fkey"
+            columns: ["host_player_id"]
+            isOneToOne: false
+            referencedRelation: "game_players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "game_rooms_host_player_id_fkey"
+            columns: ["host_player_id"]
+            isOneToOne: false
+            referencedRelation: "game_players_public"
             referencedColumns: ["id"]
           },
         ]
