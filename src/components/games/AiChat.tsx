@@ -4,7 +4,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ArrowLeft, Send, Bot, User } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { vocabulary } from "@/data/vocabulary";
 
 interface Props {
   onBack: () => void;
@@ -26,35 +25,13 @@ export default function AiChat({ onBack }: Props) {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const wordList = vocabulary
-    .map((v) => `${v.french} = ${v.dutch}`)
-    .join("\n");
-
-  const systemPrompt = `Je bent een vriendelijke Franse leraar die een leerling helpt met Frans-Nederlandse woordenschat. 
-
-Hier is de woordenlijst die de leerling moet leren:
-${wordList}
-
-REGELS:
-- Stel steeds EEN vraag per keer aan de leerling
-- Wissel af tussen: vertaal van Frans naar Nederlands, vertaal van Nederlands naar Frans, maak een zin met een woord, vul een woord aan
-- Als de leerling correct antwoordt, geef een compliment en stel de volgende vraag
-- Als het fout is, geef het juiste antwoord en leg kort uit, stel dan een nieuwe vraag
-- Houd de score bij en noem die af en toe
-- Praat in het Nederlands tegen de leerling, maar gebruik Frans voor de woorden/zinnen
-- Wees enthousiast en motiverend! Gebruik emoji's 🎉
-- Begin met een welkomstbericht en stel meteen de eerste vraag`;
-
   const startChat = async () => {
     setStarted(true);
     setIsLoading(true);
 
     try {
       const { data, error } = await supabase.functions.invoke("ai-chat", {
-        body: {
-          messages: [],
-          systemPrompt,
-        },
+        body: { messages: [] },
       });
 
       if (error) throw error;
@@ -77,10 +54,7 @@ REGELS:
 
     try {
       const { data, error } = await supabase.functions.invoke("ai-chat", {
-        body: {
-          messages: newMessages,
-          systemPrompt,
-        },
+        body: { messages: newMessages },
       });
 
       if (error) throw error;
