@@ -424,7 +424,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
           )}
 
           {isHost && countdown === null && (
-            <Button onClick={leaveGame} variant="ghost" className="w-full gap-2 text-muted-foreground">
+            <Button onClick={() => setShowLeaveConfirm(true)} variant="ghost" className="w-full gap-2 text-muted-foreground">
               <LogOut className="h-4 w-4" /> Annuleren
             </Button>
           )}
