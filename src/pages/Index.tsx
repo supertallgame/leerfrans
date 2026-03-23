@@ -18,6 +18,7 @@ import FillLetters from "@/components/games/FillLetters";
 import SentenceFill from "@/components/games/SentenceFill";
 import AiChat from "@/components/games/AiChat";
 import { supabase } from "@/integrations/supabase/client";
+import { lovable } from "@/integrations/lovable";
 import { isSoundEnabled, setSoundEnabled } from "@/lib/sounds";
 import { toast } from "sonner";
 
