@@ -251,11 +251,11 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
     if (!playerName.trim()) return toast.error("Vul je naam in!");
     if (!roomCode.trim()) return toast.error("Vul een code in!");
 
-    const { data: roomData, error } = await supabase
+    const { data: roomData, error } = await (supabase
       .from("game_rooms_public" as any)
       .select("id, code, host_name, host_player_id, status, current_question_index, total_questions, direction")
       .eq("code", roomCode.toUpperCase().trim())
-      .single();
+      .single() as any);
 
     if (error || !roomData) return toast.error("Room niet gevonden!");
     if (roomData.status !== "waiting") return toast.error("Dit spel is al begonnen!");
