@@ -231,16 +231,22 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
 
   useEffect(() => {
     if (countdown === null) return;
-    if (countdown === 0) {
-      supabase.functions.invoke("game-action", {
-        body: { action: "start-game", roomId: room!.id, playerId: myPlayerId, playerToken: myPlayerToken },
-      });
+    if (countdown <= 0) {
       setCountdown(null);
       return;
     }
-    const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+    const timer = setTimeout(() => {
+      const next = countdown - 1;
+      setCountdown(next);
+      // Fire the start request at 1→0 so game begins immediately when countdown ends
+      if (next === 0) {
+        supabase.functions.invoke("game-action", {
+          body: { action: "start-game", roomId: room!.id, playerId: myPlayerId, playerToken: myPlayerToken },
+        });
+      }
+    }, 1000);
     return () => clearTimeout(timer);
-  }, [countdown, room, myPlayerId]);
+  }, [countdown, room, myPlayerId, myPlayerToken]);
 
   const submitAnswer = async (answer: string) => {
     if (!room || !myPlayerId || showResult) return;
