@@ -7,6 +7,14 @@ import { componentTagger } from "lovable-tagger";
 export default defineConfig(({ mode }) => ({
   build: {
     sourcemap: true,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'supabase': ['@supabase/supabase-js'],
+          'react-markdown': ['react-markdown'],
+        },
+      },
+    },
   },
   server: {
     host: "::",
