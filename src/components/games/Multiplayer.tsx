@@ -153,17 +153,44 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
     }
   }, [room?.current_question_index, phase, myPlayerId, myPlayerToken, fetchQuestion]);
 
-  // Heartbeat: update last_active every 60 seconds
+  // Heartbeat: update last_active every 60 seconds + warn at 4 min inactivity
   useEffect(() => {
     if (!myPlayerId) return;
+    let lastInteraction = Date.now();
+    let warned = false;
+
+    const resetActivity = () => {
+      lastInteraction = Date.now();
+      warned = false;
+    };
+
+    window.addEventListener("click", resetActivity);
+    window.addEventListener("keydown", resetActivity);
+    window.addEventListener("touchstart", resetActivity);
+
     const interval = setInterval(() => {
       supabase
         .from("game_players")
         .update({ last_active: new Date().toISOString() })
         .eq("id", myPlayerId)
         .then(() => {});
-    }, 60_000);
-    return () => clearInterval(interval);
+
+      const inactiveMs = Date.now() - lastInteraction;
+      if (inactiveMs >= 4 * 60 * 1000 && !warned) {
+        warned = true;
+        toast.warning("Je wordt over 1 minuut verwijderd wegens inactiviteit!", {
+          duration: 30_000,
+          description: "Klik ergens om actief te blijven.",
+        });
+      }
+    }, 15_000);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("click", resetActivity);
+      window.removeEventListener("keydown", resetActivity);
+      window.removeEventListener("touchstart", resetActivity);
+    };
   }, [myPlayerId]);
 
   const fetchPlayers = async (roomId: string) => {
