@@ -260,7 +260,12 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
   };
 
   const leaveGame = async () => {
-    if (myPlayerId) {
+    if (isHost && room && myPlayerId && myPlayerToken) {
+      // Host leaves: delete the entire room (cascade deletes players)
+      await supabase.functions.invoke("game-action", {
+        body: { action: "delete-room", roomId: room.id, playerId: myPlayerId, playerToken: myPlayerToken },
+      });
+    } else if (myPlayerId) {
       await supabase.from("game_players").delete().eq("id", myPlayerId);
     }
     setPhase("setup");
