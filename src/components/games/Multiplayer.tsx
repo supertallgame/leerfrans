@@ -319,8 +319,6 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
         );
       } else if (myPlayerId) {
         const url = `${import.meta.env.VITE_SUPABASE_URL}/rest/v1/game_players?id=eq.${myPlayerId}`;
-        navigator.sendBeacon(url, "");
-        // sendBeacon can't do DELETE, so fall back to fetch with keepalive
         fetch(url, {
           method: "DELETE",
           headers: {
