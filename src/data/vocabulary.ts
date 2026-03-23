@@ -55,6 +55,25 @@ export const vocabulary: VocabItem[] = [
 ];
 
 export function shuffle<T>(array: T[]): T[] {
+  const maxAttempts = 50;
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    const arr = [...array];
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    // Check that no two items that were originally within 1 index are now adjacent
+    const origIndex = (item: T) => array.indexOf(item);
+    let valid = true;
+    for (let i = 0; i < arr.length - 1; i++) {
+      if (Math.abs(origIndex(arr[i]) - origIndex(arr[i + 1])) <= 1) {
+        valid = false;
+        break;
+      }
+    }
+    if (valid) return arr;
+  }
+  // Fallback: return best-effort shuffle
   const arr = [...array];
   for (let i = arr.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
