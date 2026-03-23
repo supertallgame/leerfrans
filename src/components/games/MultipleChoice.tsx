@@ -34,10 +34,11 @@ export default function MultipleChoice({ onBack }: Props) {
     if (selected) return;
     setSelected(opt);
     if (opt === correctAnswer) setScore((s) => s + 1);
-    setTimeout(() => {
-      setSelected(null);
-      setQIndex((i) => i + 1);
-    }, 1200);
+  };
+
+  const handleNext = () => {
+    setSelected(null);
+    setQIndex((i) => i + 1);
   };
 
   if (finished) {
