@@ -129,22 +129,22 @@ const Index = () => {
           className="w-full cursor-pointer transition-all duration-200 hover:shadow-lg hover:-translate-y-1 active:scale-[0.98] border-2 border-primary/20 bg-gradient-to-r from-primary/5 to-accent/5"
           onClick={() => setActiveGame("multiplayer")}
         >
-          <CardContent className="p-6 flex items-center gap-4">
-            <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
-              <Users className="h-7 w-7 text-primary" />
+          <CardContent className="p-4 md:p-6 flex items-center gap-3 md:gap-4">
+            <div className="w-11 h-11 md:w-14 md:h-14 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
+              <Users className="h-6 w-6 md:h-7 md:w-7 text-primary" />
             </div>
             <div>
-              <h2 className="text-xl font-bold">🎮 Multiplayer Quiz</h2>
-              <p className="text-sm text-muted-foreground">
-                Start een quiz en speel tegen je vrienden met een deelcode!
+              <h2 className="text-base md:text-xl font-bold">🎮 Multiplayer Quiz</h2>
+              <p className="text-xs md:text-sm text-muted-foreground">
+                Speel tegen je vrienden met een deelcode!
               </p>
             </div>
           </CardContent>
         </Card>
 
         <Card className="w-full bg-muted/50">
-          <CardContent className="p-4 text-center">
-            <p className="text-sm text-muted-foreground">
+          <CardContent className="p-3 md:p-4 text-center">
+            <p className="text-xs md:text-sm text-muted-foreground">
               📚 <span className="font-medium">47 woorden & zinnen</span> om te oefenen
             </p>
           </CardContent>
