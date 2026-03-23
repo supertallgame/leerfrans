@@ -417,7 +417,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
               <p className="text-center text-muted-foreground animate-pulse">
                 Wachten tot de host het spel start...
               </p>
-              <Button onClick={leaveGame} variant="outline" className="w-full gap-2 text-destructive hover:text-destructive">
+              <Button onClick={() => setShowLeaveConfirm(true)} variant="outline" className="w-full gap-2 text-destructive hover:text-destructive">
                 <LogOut className="h-4 w-4" /> Verlaat het spel
               </Button>
             </div>
