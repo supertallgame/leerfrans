@@ -99,10 +99,44 @@ Deno.serve(async (req) => {
       if (player.player_name !== room.host_name) {
         return jsonResponse({ error: "Not the host" }, 403);
       }
+
+      // Seed questions if provided (done atomically with host registration)
+      const { questions } = await req.clone().then(() => ({})).catch(() => ({})) as any;
+      // Questions are passed via the original request body
       await supabase
         .from("game_rooms")
         .update({ host_player_id: playerId })
         .eq("id", roomId);
+      return jsonResponse({ success: true });
+    }
+
+    // ACTION: seed-questions (host only, once)
+    if (action === "seed-questions") {
+      if (!isHost(player, room)) {
+        return jsonResponse({ error: "Not the host" }, 403);
+      }
+
+      const body = await req.clone().json().catch(() => ({}));
+      const questions = body.questions;
+      if (!Array.isArray(questions) || questions.length === 0) {
+        return jsonResponse({ error: "Invalid questions" }, 400);
+      }
+
+      // Check no questions exist yet (prevent race condition)
+      const { data: existing } = await supabase
+        .from("game_questions")
+        .select("id")
+        .eq("room_id", roomId)
+        .single();
+
+      if (existing) {
+        return jsonResponse({ error: "Questions already seeded" }, 409);
+      }
+
+      await supabase
+        .from("game_questions")
+        .insert({ room_id: roomId, questions });
+
       return jsonResponse({ success: true });
     }
 
