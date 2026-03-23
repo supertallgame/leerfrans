@@ -183,44 +183,31 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
   useEffect(() => {
     if (countdown === null) return;
     if (countdown === 0) {
-      supabase.from("game_rooms").update({ status: "playing", current_question_index: 0 }).eq("id", room!.id).then();
+      supabase.functions.invoke("game-action", {
+        body: { action: "start-game", roomId: room!.id, playerId: myPlayerId },
+      });
       setCountdown(null);
       return;
     }
     const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
     return () => clearTimeout(timer);
-  }, [countdown, room]);
+  }, [countdown, room, myPlayerId]);
 
   const submitAnswer = async (answer: string) => {
     if (!room || !myPlayerId || showResult) return;
     setSelectedAnswer(answer);
     setShowResult(true);
 
-    const currentQ = room.questions[room.current_question_index];
-    const correctAnswer = room.direction === "nl_to_fr" ? currentQ.french : currentQ.dutch;
-    const isCorrect = answer === correctAnswer;
-
-    if (isCorrect) {
-      const me = players.find((p) => p.id === myPlayerId);
-      await supabase
-        .from("game_players")
-        .update({ score: (me?.score ?? 0) + 1, has_answered: true })
-        .eq("id", myPlayerId);
-    } else {
-      await supabase.from("game_players").update({ has_answered: true }).eq("id", myPlayerId);
-    }
+    await supabase.functions.invoke("game-action", {
+      body: { action: "submit-answer", roomId: room.id, playerId: myPlayerId, answer },
+    });
   };
 
   const nextQuestion = async () => {
-    if (!room) return;
-    const nextIndex = room.current_question_index + 1;
-    if (nextIndex >= room.total_questions) {
-      await supabase.from("game_rooms").update({ status: "finished" }).eq("id", room.id);
-    } else {
-      // Reset all players' has_answered
-      await supabase.from("game_players").update({ has_answered: false }).eq("room_id", room.id);
-      await supabase.from("game_rooms").update({ current_question_index: nextIndex }).eq("id", room.id);
-    }
+    if (!room || !myPlayerId) return;
+    await supabase.functions.invoke("game-action", {
+      body: { action: "next-question", roomId: room.id, playerId: myPlayerId },
+    });
   };
 
   const copyCode = () => {
