@@ -57,6 +57,7 @@ export default function AiChat({ onBack }: Props) {
         body: { messages: newMessages },
       });
 
+      console.log("ai-chat response:", { data, error });
       if (error) throw error;
       const reply = data?.reply || "Sorry, er ging iets mis. Probeer het opnieuw!";
       setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
