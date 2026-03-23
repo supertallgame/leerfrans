@@ -143,59 +143,10 @@ export type Database = {
             referencedRelation: "game_players"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "game_rooms_host_player_id_fkey"
-            columns: ["host_player_id"]
-            isOneToOne: false
-            referencedRelation: "game_players_public"
-            referencedColumns: ["id"]
-          },
         ]
       }
     }
     Views: {
-      game_players_public: {
-        Row: {
-          has_answered: boolean | null
-          id: string | null
-          joined_at: string | null
-          player_name: string | null
-          room_id: string | null
-          score: number | null
-        }
-        Insert: {
-          has_answered?: boolean | null
-          id?: string | null
-          joined_at?: string | null
-          player_name?: string | null
-          room_id?: string | null
-          score?: number | null
-        }
-        Update: {
-          has_answered?: boolean | null
-          id?: string | null
-          joined_at?: string | null
-          player_name?: string | null
-          room_id?: string | null
-          score?: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "game_players_room_id_fkey"
-            columns: ["room_id"]
-            isOneToOne: false
-            referencedRelation: "game_rooms"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "game_players_room_id_fkey"
-            columns: ["room_id"]
-            isOneToOne: false
-            referencedRelation: "game_rooms_public"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       game_rooms_public: {
         Row: {
           code: string | null
@@ -238,17 +189,21 @@ export type Database = {
             referencedRelation: "game_players"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "game_rooms_host_player_id_fkey"
-            columns: ["host_player_id"]
-            isOneToOne: false
-            referencedRelation: "game_players_public"
-            referencedColumns: ["id"]
-          },
         ]
       }
     }
     Functions: {
+      get_room_players: {
+        Args: { p_room_id: string }
+        Returns: {
+          has_answered: boolean
+          id: string
+          joined_at: string
+          player_name: string
+          room_id: string
+          score: number
+        }[]
+      }
       join_game_room: {
         Args: { p_player_name: string; p_room_id: string }
         Returns: Json
