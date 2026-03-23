@@ -194,11 +194,8 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
 
   const fetchPlayers = async (roomId: string) => {
     const { data } = await supabase
-      .from("game_players_public" as any)
-      .select("*")
-      .eq("room_id", roomId)
-      .order("score", { ascending: false });
-    if (data) setPlayers(data as unknown as Player[]);
+      .rpc("get_room_players", { p_room_id: roomId }) as any;
+    if (data) setPlayers(data as Player[]);
   };
 
   const createRoom = async () => {
