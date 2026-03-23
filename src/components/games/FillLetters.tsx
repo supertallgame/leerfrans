@@ -16,7 +16,7 @@ interface Props {
 function isSingleWord(s: string): boolean {
   // Remove articles like "l'", "le ", "la ", "les ", "de ", "het ", "een "
   const cleaned = s.replace(/^(l'|le |la |les |de |het |een )/i, "").trim();
-  return !cleaned.includes(" ") && cleaned.length >= 4;
+  return !cleaned.includes(" ") && !cleaned.includes("-") && cleaned.length >= 4;
 }
 
 function removeSomeLetters(word: string): { display: string; removed: { index: number; letter: string }[] } {
@@ -62,7 +62,8 @@ export default function FillLetters({ onBack }: Props) {
   const hintWord = direction === "nl_to_fr" ? current?.dutch : current?.french;
   const puzzle = useMemo(
     () => (targetWord ? removeSomeLetters(targetWord) : { display: "", removed: [] }),
-    [targetWord]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [targetWord, index]
   );
 
   const total = words.length;
