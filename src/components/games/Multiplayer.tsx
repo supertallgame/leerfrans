@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, Users, Copy, Check, Trophy } from "lucide-react";
+import { ArrowLeft, Users, Copy, Check, Trophy, LogOut } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { vocabulary, shuffle } from "@/data/vocabulary";
 import { toast } from "sonner";
@@ -257,6 +257,18 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }
+  };
+
+  const leaveGame = async () => {
+    if (myPlayerId) {
+      await supabase.from("game_players").delete().eq("id", myPlayerId);
+    }
+    setPhase("setup");
+    setRoom(null);
+    setMyPlayerId(null);
+    setMyPlayerToken(null);
+    setPlayers([]);
+    setIsHost(false);
   };
 
   // SETUP PHASE
