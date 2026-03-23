@@ -21,6 +21,7 @@ export type Database = {
           id: string
           joined_at: string
           player_name: string
+          player_token: string
           room_id: string
           score: number
         }
@@ -30,6 +31,7 @@ export type Database = {
           id?: string
           joined_at?: string
           player_name: string
+          player_token?: string
           room_id: string
           score?: number
         }
@@ -39,6 +41,7 @@ export type Database = {
           id?: string
           joined_at?: string
           player_name?: string
+          player_token?: string
           room_id?: string
           score?: number
         }
@@ -90,7 +93,41 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      game_players_public: {
+        Row: {
+          has_answered: boolean | null
+          id: string | null
+          joined_at: string | null
+          player_name: string | null
+          room_id: string | null
+          score: number | null
+        }
+        Insert: {
+          has_answered?: boolean | null
+          id?: string | null
+          joined_at?: string | null
+          player_name?: string | null
+          room_id?: string | null
+          score?: number | null
+        }
+        Update: {
+          has_answered?: boolean | null
+          id?: string | null
+          joined_at?: string | null
+          player_name?: string | null
+          room_id?: string | null
+          score?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "game_players_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "game_rooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       [_ in never]: never
