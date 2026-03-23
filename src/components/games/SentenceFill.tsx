@@ -153,11 +153,11 @@ export default function SentenceFill({ onBack }: Props) {
       </div>
 
       {showResult && (
-        <Card className={normalize(userInput) === normalize(puzzle.correctWord)
+        <Card className={isAnswerCorrect(userInput, puzzle.correctWord)
           ? "border-green-500 bg-green-50"
           : "border-destructive bg-destructive/5"}>
           <CardContent className="p-4 text-center">
-            {normalize(userInput) === normalize(puzzle.correctWord) ? (
+            {isAnswerCorrect(userInput, puzzle.correctWord) ? (
               <p className="font-semibold text-green-700">✅ Correct!</p>
             ) : (
               <p className="font-semibold text-destructive">
