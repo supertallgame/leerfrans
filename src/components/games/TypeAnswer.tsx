@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { playCorrect, playWrong } from "@/lib/sounds";
 import { vocabulary, shuffle } from "@/data/vocabulary";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,8 +29,10 @@ export default function TypeAnswer({ onBack }: Props) {
     if (normalize(input) === normalize(answer)) {
       setResult("correct");
       setScore((s) => s + 1);
+      playCorrect();
     } else {
       setResult("wrong");
+      playWrong();
     }
   };
 

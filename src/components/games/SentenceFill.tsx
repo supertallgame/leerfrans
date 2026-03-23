@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { playCorrect, playWrong } from "@/lib/sounds";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -58,7 +59,8 @@ export default function SentenceFill({ onBack }: Props) {
   const checkAnswer = () => {
     if (!userInput.trim() || !puzzle) return;
     const correct = normalize(userInput) === normalize(puzzle.correctWord);
-    if (correct) setScore((s) => s + 1);
+    if (correct) { setScore((s) => s + 1); playCorrect(); }
+    else { playWrong(); }
     setShowResult(true);
   };
 

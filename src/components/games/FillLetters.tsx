@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { playCorrect, playWrong } from "@/lib/sounds";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -66,7 +67,8 @@ export default function FillLetters({ onBack }: Props) {
 
   const checkAnswer = () => {
     const correct = userInput.toLowerCase().trim() === targetWord.toLowerCase().trim();
-    if (correct) setScore((s) => s + 1);
+    if (correct) { setScore((s) => s + 1); playCorrect(); }
+    else { playWrong(); }
     setShowResult(true);
   };
 
