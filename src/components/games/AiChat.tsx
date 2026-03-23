@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import ReactMarkdown from "react-markdown";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -128,8 +129,8 @@ export default function AiChat({ onBack }: Props) {
                   : "bg-muted"
               }`}
             >
-              <CardContent className="p-3 text-sm whitespace-pre-wrap">
-                {msg.content}
+              <CardContent className="p-3 text-sm prose prose-sm max-w-none">
+                <ReactMarkdown>{msg.content}</ReactMarkdown>
               </CardContent>
             </Card>
             {msg.role === "user" && (
