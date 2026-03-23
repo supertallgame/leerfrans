@@ -76,10 +76,9 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
       .channel(`room-${room.id}`)
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "game_rooms", filter: `id=eq.${room.id}` },
+        { event: "UPDATE", schema: "public", table: "game_rooms", filter: `id=eq.${room.id}` },
         (payload) => {
           const newRoom = payload.new as any;
-          // Update room state without questions
           const updatedRoom: Room = {
             id: newRoom.id,
             code: newRoom.code,
@@ -103,6 +102,20 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
           if (newRoom.status === "finished") {
             setPhase("results");
           }
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "DELETE", schema: "public", table: "game_rooms", filter: `id=eq.${room.id}` },
+        () => {
+          // Room was deleted (host left)
+          toast.info("De host heeft het spel verlaten.");
+          setPhase("setup");
+          setRoom(null);
+          setMyPlayerId(null);
+          setMyPlayerToken(null);
+          setPlayers([]);
+          setIsHost(false);
         }
       )
       .on(
