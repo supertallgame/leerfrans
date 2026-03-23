@@ -92,42 +92,6 @@ export default function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
     });
     if (error) toast.error("Google login mislukt: " + error.message);
   };
-
-  const PasswordInput = ({
-    value,
-    onChange,
-    show,
-    onToggle,
-    placeholder,
-    id,
-  }: {
-    value: string;
-    onChange: (v: string) => void;
-    show: boolean;
-    onToggle: () => void;
-    placeholder: string;
-    id: string;
-  }) => (
-    <div className="relative">
-      <Input
-        id={id}
-        type={show ? "text" : "password"}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        className="pr-10"
-      />
-      <button
-        type="button"
-        onClick={onToggle}
-        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-        tabIndex={-1}
-      >
-        {show ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-      </button>
-    </div>
-  );
-
   return (
     <Dialog open={open} onOpenChange={(v) => { onOpenChange(v); if (!v) reset(); }}>
       <DialogContent className="sm:max-w-sm">
@@ -154,14 +118,12 @@ export default function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="login-password">Wachtwoord</Label>
-              <PasswordInput
-                id="login-password"
-                value={password}
-                onChange={setPassword}
-                show={showPassword}
-                onToggle={() => setShowPassword(!showPassword)}
-                placeholder="Wachtwoord"
-              />
+              <div className="relative">
+                <Input id="login-password" type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Wachtwoord" className="pr-10" />
+                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground" tabIndex={-1}>
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
             </div>
             <Button onClick={handleLogin} className="w-full" disabled={loading}>
               {loading ? "Bezig..." : "Inloggen"}
@@ -181,25 +143,21 @@ export default function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="signup-password">Wachtwoord</Label>
-              <PasswordInput
-                id="signup-password"
-                value={password}
-                onChange={setPassword}
-                show={showPassword}
-                onToggle={() => setShowPassword(!showPassword)}
-                placeholder="Minimaal 6 tekens"
-              />
+              <div className="relative">
+                <Input id="signup-password" type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Minimaal 6 tekens" className="pr-10" />
+                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground" tabIndex={-1}>
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="signup-confirm">Wachtwoord bevestigen</Label>
-              <PasswordInput
-                id="signup-confirm"
-                value={confirmPassword}
-                onChange={setConfirmPassword}
-                show={showConfirm}
-                onToggle={() => setShowConfirm(!showConfirm)}
-                placeholder="Typ je wachtwoord opnieuw"
-              />
+              <div className="relative">
+                <Input id="signup-confirm" type={showConfirm ? "text" : "password"} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Typ je wachtwoord opnieuw" className="pr-10" />
+                <button type="button" onClick={() => setShowConfirm(!showConfirm)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground" tabIndex={-1}>
+                  {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
             </div>
             <Button onClick={handleSignup} className="w-full" disabled={loading}>
               {loading ? "Bezig..." : "Account aanmaken"}
