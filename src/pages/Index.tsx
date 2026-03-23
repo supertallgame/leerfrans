@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { BookOpen, Brain, Puzzle, Keyboard, Users, PenTool, MessageSquare, Bot, Settings, Volume2, VolumeX, LogOut, Sun, Moon } from "lucide-react";
@@ -9,18 +9,19 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import Flashcards from "@/components/games/Flashcards";
-import MultipleChoice from "@/components/games/MultipleChoice";
-import MatchPairs from "@/components/games/MatchPairs";
-import TypeAnswer from "@/components/games/TypeAnswer";
-import Multiplayer from "@/components/games/Multiplayer";
-import FillLetters from "@/components/games/FillLetters";
-import SentenceFill from "@/components/games/SentenceFill";
-import AiChat from "@/components/games/AiChat";
 import AuthDialog from "@/components/AuthDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { isSoundEnabled, setSoundEnabled } from "@/lib/sounds";
 import { toast } from "sonner";
+
+const Flashcards = lazy(() => import("@/components/games/Flashcards"));
+const MultipleChoice = lazy(() => import("@/components/games/MultipleChoice"));
+const MatchPairs = lazy(() => import("@/components/games/MatchPairs"));
+const TypeAnswer = lazy(() => import("@/components/games/TypeAnswer"));
+const Multiplayer = lazy(() => import("@/components/games/Multiplayer"));
+const FillLetters = lazy(() => import("@/components/games/FillLetters"));
+const SentenceFill = lazy(() => import("@/components/games/SentenceFill"));
+const AiChat = lazy(() => import("@/components/games/AiChat"));
 
 type Game = "menu" | "flashcards" | "quiz" | "match" | "type" | "multiplayer" | "fill" | "sentence" | "ai";
 
@@ -88,14 +89,16 @@ const Index = () => {
     localStorage.setItem("theme", checked ? "dark" : "light");
   };
 
-  if (activeGame === "flashcards") return <div className="min-h-screen p-4 md:p-6"><Flashcards onBack={() => setActiveGame("menu")} /></div>;
-  if (activeGame === "quiz") return <div className="min-h-screen p-4 md:p-6"><MultipleChoice onBack={() => setActiveGame("menu")} /></div>;
-  if (activeGame === "match") return <div className="min-h-screen p-4 md:p-6"><MatchPairs onBack={() => setActiveGame("menu")} /></div>;
-  if (activeGame === "type") return <div className="min-h-screen p-4 md:p-6"><TypeAnswer onBack={() => setActiveGame("menu")} /></div>;
-  if (activeGame === "multiplayer") return <Multiplayer onBack={() => setActiveGame("menu")} />;
-  if (activeGame === "fill") return <div className="min-h-screen p-4 md:p-6"><FillLetters onBack={() => setActiveGame("menu")} /></div>;
-  if (activeGame === "sentence") return <div className="min-h-screen p-4 md:p-6"><SentenceFill onBack={() => setActiveGame("menu")} /></div>;
-  if (activeGame === "ai") return <div className="min-h-screen p-4 md:p-6"><AiChat onBack={() => setActiveGame("menu")} /></div>;
+  const gameLoader = <div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>;
+
+  if (activeGame === "flashcards") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6"><Flashcards onBack={() => setActiveGame("menu")} /></div></Suspense>;
+  if (activeGame === "quiz") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6"><MultipleChoice onBack={() => setActiveGame("menu")} /></div></Suspense>;
+  if (activeGame === "match") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6"><MatchPairs onBack={() => setActiveGame("menu")} /></div></Suspense>;
+  if (activeGame === "type") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6"><TypeAnswer onBack={() => setActiveGame("menu")} /></div></Suspense>;
+  if (activeGame === "multiplayer") return <Suspense fallback={gameLoader}><Multiplayer onBack={() => setActiveGame("menu")} /></Suspense>;
+  if (activeGame === "fill") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6"><FillLetters onBack={() => setActiveGame("menu")} /></div></Suspense>;
+  if (activeGame === "sentence") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6"><SentenceFill onBack={() => setActiveGame("menu")} /></div></Suspense>;
+  if (activeGame === "ai") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6"><AiChat onBack={() => setActiveGame("menu")} /></div></Suspense>;
 
   return (
     <main className="min-h-screen flex flex-col items-center px-3 py-6 md:px-4 md:py-12">
