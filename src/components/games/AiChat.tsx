@@ -95,7 +95,7 @@ export default function AiChat({ onBack }: Props) {
   }
 
   return (
-    <div className="max-w-lg mx-auto flex flex-col h-[calc(100vh-3rem)]">
+    <div className="max-w-lg mx-auto flex flex-col h-[calc(100vh-2rem)] md:h-[calc(100vh-3rem)]">
       <div className="flex items-center gap-3 pb-4 border-b">
         <Button variant="ghost" size="icon" onClick={onBack}>
           <ArrowLeft className="h-4 w-4" />

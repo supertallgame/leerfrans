@@ -368,29 +368,29 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
 
   if (phase === "setup") {
     return (
-      <div className="min-h-screen flex flex-col items-center px-4 py-12">
-        <div className="max-w-md w-full space-y-6">
-          <Button variant="ghost" onClick={onBack} className="gap-2">
+      <div className="min-h-screen flex flex-col items-center px-3 py-6 md:px-4 md:py-12">
+        <div className="max-w-md w-full space-y-4 md:space-y-6">
+          <Button variant="ghost" onClick={onBack} className="gap-2 text-sm">
             <ArrowLeft className="h-4 w-4" /> Terug
           </Button>
           <div className="text-center space-y-2">
-            <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto">
-              <Users className="h-8 w-8 text-primary" />
+            <div className="w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto">
+              <Users className="h-7 w-7 md:h-8 md:w-8 text-primary" />
             </div>
-            <h1 className="text-3xl font-bold">Multiplayer Quiz</h1>
-            <p className="text-muted-foreground">Speel tegen je vrienden!</p>
+            <h1 className="text-2xl md:text-3xl font-bold">Multiplayer Quiz</h1>
+            <p className="text-sm md:text-base text-muted-foreground">Speel tegen je vrienden!</p>
           </div>
 
           <Card>
-            <CardContent className="p-6 space-y-4">
+            <CardContent className="p-4 md:p-6 space-y-3 md:space-y-4">
               <Input
                 placeholder="Jouw naam"
                 value={playerName}
                 onChange={(e) => setPlayerName(e.target.value)}
-                className="text-center text-lg"
+                className="text-center text-base md:text-lg"
                 maxLength={20}
               />
-              <Button onClick={createRoom} className="w-full text-lg h-12" size="lg">
+              <Button onClick={createRoom} className="w-full text-base md:text-lg h-11 md:h-12" size="lg">
                 🎮 Nieuw spel starten
               </Button>
               <div className="relative">
@@ -405,10 +405,10 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
                 placeholder="Code invoeren (bv. ABC12)"
                 value={roomCode}
                 onChange={(e) => setRoomCode(e.target.value.toUpperCase())}
-                className="text-center text-lg tracking-widest font-mono"
+                className="text-center text-base md:text-lg tracking-widest font-mono"
                 maxLength={5}
               />
-              <Button onClick={joinRoom} variant="outline" className="w-full text-lg h-12" size="lg">
+              <Button onClick={joinRoom} variant="outline" className="w-full text-base md:text-lg h-11 md:h-12" size="lg">
                 🚀 Deelnemen
               </Button>
             </CardContent>
@@ -421,17 +421,17 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
   // LOBBY PHASE
   if (phase === "lobby") {
     return (
-      <div className="min-h-screen flex flex-col items-center px-4 py-12">
-        <div className="max-w-md w-full space-y-6">
-          <div className="text-center space-y-3">
-            <p className="text-sm text-muted-foreground uppercase tracking-wide">Game Code</p>
+      <div className="min-h-screen flex flex-col items-center px-3 py-6 md:px-4 md:py-12">
+        <div className="max-w-md w-full space-y-4 md:space-y-6">
+          <div className="text-center space-y-2 md:space-y-3">
+            <p className="text-xs md:text-sm text-muted-foreground uppercase tracking-wide">Game Code</p>
             <div className="flex items-center justify-center gap-2">
-              <span className="text-5xl font-bold font-mono tracking-[0.3em]">{room?.code}</span>
+              <span className="text-4xl md:text-5xl font-bold font-mono tracking-[0.3em]">{room?.code}</span>
               <Button variant="ghost" size="icon" onClick={copyCode}>
                 {copied ? <Check className="h-5 w-5 text-green-500" /> : <Copy className="h-5 w-5" />}
               </Button>
             </div>
-            <p className="text-muted-foreground">Deel deze code met je vrienden!</p>
+            <p className="text-sm text-muted-foreground">Deel deze code!</p>
           </div>
 
           {countdown !== null && (
