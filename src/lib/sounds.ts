@@ -1,6 +1,26 @@
+let soundEnabled = true;
+
+export function isSoundEnabled() {
+  return soundEnabled;
+}
+
+export function setSoundEnabled(enabled: boolean) {
+  soundEnabled = enabled;
+  try {
+    localStorage.setItem("sound-enabled", JSON.stringify(enabled));
+  } catch {}
+}
+
+// Load from localStorage on init
+try {
+  const stored = localStorage.getItem("sound-enabled");
+  if (stored !== null) soundEnabled = JSON.parse(stored);
+} catch {}
+
 const ctx = () => new (window.AudioContext || (window as any).webkitAudioContext)();
 
 function beep(frequency: number, duration: number, type: OscillatorType = "sine", volume = 0.3) {
+  if (!soundEnabled) return;
   const ac = ctx();
   const osc = ac.createOscillator();
   const gain = ac.createGain();

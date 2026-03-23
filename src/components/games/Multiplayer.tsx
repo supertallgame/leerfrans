@@ -17,6 +17,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { vocabulary, shuffle } from "@/data/vocabulary";
 import { toast } from "sonner";
+import { playCorrect, playWrong } from "@/lib/sounds";
 
 interface MultiplayerProps {
   onBack: () => void;
@@ -308,9 +309,11 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
       body: { action: "submit-answer", roomId: room.id, playerId: myPlayerId, playerToken: myPlayerToken, answer },
     });
 
-    // Get correct answer from server response
+    // Get correct answer from server response and play sound
     if (data?.correctAnswer) {
       setCorrectAnswer(data.correctAnswer);
+      if (data.correct) playCorrect();
+      else playWrong();
     }
   };
 
