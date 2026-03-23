@@ -73,19 +73,19 @@ const Index = () => {
     setSoundEnabled(checked);
   };
 
-  if (activeGame === "flashcards") return <div className="min-h-screen p-6"><Flashcards onBack={() => setActiveGame("menu")} /></div>;
-  if (activeGame === "quiz") return <div className="min-h-screen p-6"><MultipleChoice onBack={() => setActiveGame("menu")} /></div>;
-  if (activeGame === "match") return <div className="min-h-screen p-6"><MatchPairs onBack={() => setActiveGame("menu")} /></div>;
-  if (activeGame === "type") return <div className="min-h-screen p-6"><TypeAnswer onBack={() => setActiveGame("menu")} /></div>;
+  if (activeGame === "flashcards") return <div className="min-h-screen p-4 md:p-6"><Flashcards onBack={() => setActiveGame("menu")} /></div>;
+  if (activeGame === "quiz") return <div className="min-h-screen p-4 md:p-6"><MultipleChoice onBack={() => setActiveGame("menu")} /></div>;
+  if (activeGame === "match") return <div className="min-h-screen p-4 md:p-6"><MatchPairs onBack={() => setActiveGame("menu")} /></div>;
+  if (activeGame === "type") return <div className="min-h-screen p-4 md:p-6"><TypeAnswer onBack={() => setActiveGame("menu")} /></div>;
   if (activeGame === "multiplayer") return <Multiplayer onBack={() => setActiveGame("menu")} />;
-  if (activeGame === "fill") return <div className="min-h-screen p-6"><FillLetters onBack={() => setActiveGame("menu")} /></div>;
-  if (activeGame === "sentence") return <div className="min-h-screen p-6"><SentenceFill onBack={() => setActiveGame("menu")} /></div>;
-  if (activeGame === "ai") return <div className="min-h-screen p-6"><AiChat onBack={() => setActiveGame("menu")} /></div>;
+  if (activeGame === "fill") return <div className="min-h-screen p-4 md:p-6"><FillLetters onBack={() => setActiveGame("menu")} /></div>;
+  if (activeGame === "sentence") return <div className="min-h-screen p-4 md:p-6"><SentenceFill onBack={() => setActiveGame("menu")} /></div>;
+  if (activeGame === "ai") return <div className="min-h-screen p-4 md:p-6"><AiChat onBack={() => setActiveGame("menu")} /></div>;
 
   return (
-    <div className="min-h-screen flex flex-col items-center px-4 py-12">
-      <div className="max-w-2xl w-full flex flex-col items-center gap-8">
-        <div className="text-center space-y-3 relative w-full">
+    <div className="min-h-screen flex flex-col items-center px-3 py-6 md:px-4 md:py-12">
+      <div className="max-w-2xl w-full flex flex-col items-center gap-5 md:gap-8">
+        <div className="text-center space-y-2 md:space-y-3 relative w-full">
           <Button
             variant="ghost"
             size="icon"
@@ -97,10 +97,10 @@ const Index = () => {
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium tracking-wide uppercase">
             🇳🇱 Nederlands ↔ Français 🇫🇷
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
+          <h1 className="text-3xl md:text-5xl font-bold tracking-tight">
             Woordjes Leren
           </h1>
-          <p className="text-muted-foreground text-lg max-w-md mx-auto">
+          <p className="text-muted-foreground text-sm md:text-lg max-w-md mx-auto">
             Kies een spel en oefen je Frans-Nederlandse woordenschat
           </p>
         </div>
