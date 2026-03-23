@@ -1,13 +1,16 @@
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { BookOpen, Brain, Puzzle, Keyboard, Users } from "lucide-react";
+import { BookOpen, Brain, Puzzle, Keyboard, Users, PenTool, MessageSquare, Bot } from "lucide-react";
 import Flashcards from "@/components/games/Flashcards";
 import MultipleChoice from "@/components/games/MultipleChoice";
 import MatchPairs from "@/components/games/MatchPairs";
 import TypeAnswer from "@/components/games/TypeAnswer";
 import Multiplayer from "@/components/games/Multiplayer";
+import FillLetters from "@/components/games/FillLetters";
+import SentenceFill from "@/components/games/SentenceFill";
+import AiChat from "@/components/games/AiChat";
 
-type Game = "menu" | "flashcards" | "quiz" | "match" | "type" | "multiplayer";
+type Game = "menu" | "flashcards" | "quiz" | "match" | "type" | "multiplayer" | "fill" | "sentence" | "ai";
 
 const games = [
   {
@@ -38,6 +41,27 @@ const games = [
     icon: Keyboard,
     color: "bg-destructive/10 text-destructive",
   },
+  {
+    id: "fill" as Game,
+    title: "Ontbrekende Letters",
+    description: "Vul de ontbrekende letters in het woord aan",
+    icon: PenTool,
+    color: "bg-primary/10 text-primary",
+  },
+  {
+    id: "sentence" as Game,
+    title: "Zin Aanvullen",
+    description: "Kies het ontbrekende woord in de zin",
+    icon: MessageSquare,
+    color: "bg-accent/10 text-accent",
+  },
+  {
+    id: "ai" as Game,
+    title: "AI Leraar",
+    description: "Chat met een AI die je overhoort",
+    icon: Bot,
+    color: "bg-secondary/40 text-secondary-foreground",
+  },
 ];
 
 const Index = () => {
@@ -48,6 +72,9 @@ const Index = () => {
   if (activeGame === "match") return <div className="min-h-screen p-6"><MatchPairs onBack={() => setActiveGame("menu")} /></div>;
   if (activeGame === "type") return <div className="min-h-screen p-6"><TypeAnswer onBack={() => setActiveGame("menu")} /></div>;
   if (activeGame === "multiplayer") return <Multiplayer onBack={() => setActiveGame("menu")} />;
+  if (activeGame === "fill") return <div className="min-h-screen p-6"><FillLetters onBack={() => setActiveGame("menu")} /></div>;
+  if (activeGame === "sentence") return <div className="min-h-screen p-6"><SentenceFill onBack={() => setActiveGame("menu")} /></div>;
+  if (activeGame === "ai") return <div className="min-h-screen p-6"><AiChat onBack={() => setActiveGame("menu")} /></div>;
 
   return (
     <div className="min-h-screen flex flex-col items-center px-4 py-12">
