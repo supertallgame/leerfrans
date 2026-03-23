@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { isAnswerCorrect } from "@/lib/utils";
 import { playCorrect, playWrong } from "@/lib/sounds";
 import { vocabulary, shuffle } from "@/data/vocabulary";
 import { Button } from "@/components/ui/button";
@@ -21,12 +22,10 @@ export default function TypeAnswer({ onBack }: Props) {
   const finished = qIndex >= questions.length;
   const current = questions[qIndex];
 
-  const normalize = (s: string) => s.toLowerCase().trim().replace(/\s+/g, " ");
-
   const handleCheck = () => {
     if (!input.trim()) return;
     const answer = showDutch ? current.french : current.dutch;
-    if (normalize(input) === normalize(answer)) {
+    if (isAnswerCorrect(input, answer)) {
       setResult("correct");
       setScore((s) => s + 1);
       playCorrect();
