@@ -202,7 +202,7 @@ const Index = () => {
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+     </main>
   );
 };
 
