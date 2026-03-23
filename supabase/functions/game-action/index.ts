@@ -147,7 +147,17 @@ Deno.serve(async (req) => {
       if (room.status !== "playing") return jsonResponse({ error: "Game not in progress" }, 400);
       if (player.has_answered) return jsonResponse({ correct: false, error: "Already answered" });
 
-      const currentQ = room.questions[room.current_question_index];
+      // Read questions from restricted table
+      const { data: questionsData } = await supabase
+        .from("game_questions")
+        .select("questions")
+        .eq("room_id", roomId)
+        .single();
+
+      if (!questionsData) return jsonResponse({ error: "Questions not found" }, 404);
+
+      const questions = questionsData.questions as any[];
+      const currentQ = questions[room.current_question_index];
       const correctAnswer = room.direction === "nl_to_fr" ? currentQ.french : currentQ.dutch;
       const isCorrect = answer === correctAnswer;
 
