@@ -65,6 +65,42 @@ export type Database = {
           },
         ]
       }
+      game_questions: {
+        Row: {
+          created_at: string
+          id: string
+          questions: Json
+          room_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          questions?: Json
+          room_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          questions?: Json
+          room_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "game_questions_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: true
+            referencedRelation: "game_rooms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "game_questions_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: true
+            referencedRelation: "game_rooms_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       game_rooms: {
         Row: {
           code: string
