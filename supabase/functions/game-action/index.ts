@@ -110,13 +110,23 @@ Deno.serve(async (req) => {
     if (action === "get-question") {
       if (room.status !== "playing") return jsonResponse({ error: "Game not in progress" }, 400);
 
-      const currentQ = room.questions[room.current_question_index];
+      // Read questions from restricted game_questions table (service role only)
+      const { data: questionsData } = await supabase
+        .from("game_questions")
+        .select("questions")
+        .eq("room_id", roomId)
+        .single();
+
+      if (!questionsData) return jsonResponse({ error: "Questions not found" }, 404);
+
+      const questions = questionsData.questions as any[];
+      const currentQ = questions[room.current_question_index];
       const questionKey = room.direction === "nl_to_fr" ? "dutch" : "french";
       const answerKey = room.direction === "nl_to_fr" ? "french" : "dutch";
       const correctAnswer = currentQ[answerKey];
 
       // Generate options from other questions in the pool
-      const otherAnswers = room.questions
+      const otherAnswers = questions
         .filter((_: any, i: number) => i !== room.current_question_index)
         .map((q: any) => q[answerKey]);
       const wrongOptions = shuffleArray(otherAnswers).slice(0, 3);
@@ -137,7 +147,17 @@ Deno.serve(async (req) => {
       if (room.status !== "playing") return jsonResponse({ error: "Game not in progress" }, 400);
       if (player.has_answered) return jsonResponse({ correct: false, error: "Already answered" });
 
-      const currentQ = room.questions[room.current_question_index];
+      // Read questions from restricted table
+      const { data: questionsData } = await supabase
+        .from("game_questions")
+        .select("questions")
+        .eq("room_id", roomId)
+        .single();
+
+      if (!questionsData) return jsonResponse({ error: "Questions not found" }, 404);
+
+      const questions = questionsData.questions as any[];
+      const currentQ = questions[room.current_question_index];
       const correctAnswer = room.direction === "nl_to_fr" ? currentQ.french : currentQ.dutch;
       const isCorrect = answer === correctAnswer;
 
