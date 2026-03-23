@@ -80,7 +80,7 @@ export default function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
     if (error) {
       toast.error(error.message);
     } else {
-      toast.success("Account aangemaakt! Check je inbox om je e-mail te bevestigen.");
+      toast.success("Account aangemaakt! Check je inbox en spam-map om je e-mail te bevestigen.");
       reset();
       setTab("login");
     }
