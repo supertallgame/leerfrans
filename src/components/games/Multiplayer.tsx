@@ -431,11 +431,14 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
       <div className="min-h-screen flex flex-col items-center px-4 py-8">
         <div className="max-w-lg w-full space-y-6">
           <div className="flex items-center justify-between">
+            <Button variant="ghost" size="sm" onClick={leaveGame} className="gap-1 text-muted-foreground">
+              <LogOut className="h-3 w-3" /> Verlaten
+            </Button>
             <span className="text-sm text-muted-foreground font-medium">
               Vraag {room.current_question_index + 1}/{room.total_questions}
             </span>
             <span className="text-sm text-muted-foreground flex items-center gap-1">
-              <Users className="h-3 w-3" /> {answeredCount}/{players.length} beantwoord
+              <Users className="h-3 w-3" /> {answeredCount}/{players.length}
             </span>
           </div>
           <Progress value={progress} className="h-2" />
