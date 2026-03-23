@@ -21,6 +21,7 @@ export type Database = {
           id: string
           joined_at: string
           player_name: string
+          player_token: string
           room_id: string
           score: number
         }
@@ -30,6 +31,7 @@ export type Database = {
           id?: string
           joined_at?: string
           player_name: string
+          player_token?: string
           room_id: string
           score?: number
         }
@@ -39,6 +41,7 @@ export type Database = {
           id?: string
           joined_at?: string
           player_name?: string
+          player_token?: string
           room_id?: string
           score?: number
         }
