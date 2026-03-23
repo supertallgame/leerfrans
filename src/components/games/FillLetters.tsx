@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { playCorrect, playWrong } from "@/lib/sounds";
+import { isAnswerCorrect } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -65,9 +66,10 @@ export default function FillLetters({ onBack }: Props) {
   const progress = ((index + 1) / total) * 100;
   const finished = index >= total;
 
+  const isCorrect = (input: string) => isAnswerCorrect(input, targetWord);
+
   const checkAnswer = () => {
-    const correct = userInput.toLowerCase().trim() === targetWord.toLowerCase().trim();
-    if (correct) { setScore((s) => s + 1); playCorrect(); }
+    if (isCorrect(userInput)) { setScore((s) => s + 1); playCorrect(); }
     else { playWrong(); }
     setShowResult(true);
   };
@@ -161,11 +163,11 @@ export default function FillLetters({ onBack }: Props) {
       </div>
 
       {showResult && (
-        <Card className={userInput.toLowerCase().trim() === targetWord.toLowerCase().trim()
+        <Card className={isCorrect(userInput)
           ? "border-green-500 bg-green-50"
           : "border-destructive bg-destructive/5"}>
           <CardContent className="p-4 text-center">
-            {userInput.toLowerCase().trim() === targetWord.toLowerCase().trim() ? (
+            {isCorrect(userInput) ? (
               <p className="font-semibold text-green-700">✅ Correct!</p>
             ) : (
               <p className="font-semibold text-destructive">

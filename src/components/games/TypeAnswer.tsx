@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { isAnswerCorrect } from "@/lib/utils";
 import { playCorrect, playWrong } from "@/lib/sounds";
 import { vocabulary, shuffle } from "@/data/vocabulary";
 import { Button } from "@/components/ui/button";
