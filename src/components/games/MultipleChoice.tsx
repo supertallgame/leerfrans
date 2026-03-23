@@ -22,9 +22,15 @@ export default function MultipleChoice({ onBack }: Props) {
   const options = useMemo(() => {
     if (finished) return [];
     const correct = showDutch ? current.french : current.dutch;
-    const others = shuffle(
-      vocabulary.filter((v) => v !== current).map((v) => (showDutch ? v.french : v.dutch))
-    ).slice(0, 3);
+    const isSentence = (s: string) => s.includes(" ") && s.length > 20;
+    const correctIsSentence = isSentence(correct);
+    // Pick wrong options of the same type (sentence vs word)
+    const sameType = vocabulary
+      .filter((v) => v !== current && isSentence(showDutch ? v.french : v.dutch) === correctIsSentence)
+      .map((v) => (showDutch ? v.french : v.dutch));
+    // Fallback to all if not enough of same type
+    const pool = sameType.length >= 3 ? sameType : vocabulary.filter((v) => v !== current).map((v) => (showDutch ? v.french : v.dutch));
+    const others = shuffle(pool).slice(0, 3);
     return shuffle([correct, ...others]);
   }, [qIndex, showDutch, finished]);
 
