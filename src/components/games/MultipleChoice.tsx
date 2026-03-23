@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { playCorrect, playWrong } from "@/lib/sounds";
 import { vocabulary, shuffle } from "@/data/vocabulary";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -39,7 +40,8 @@ export default function MultipleChoice({ onBack }: Props) {
   const handleSelect = (opt: string) => {
     if (selected) return;
     setSelected(opt);
-    if (opt === correctAnswer) setScore((s) => s + 1);
+    if (opt === correctAnswer) { setScore((s) => s + 1); playCorrect(); }
+    else { playWrong(); }
   };
 
   const handleNext = () => {
