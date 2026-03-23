@@ -442,7 +442,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
       <div className="min-h-screen flex flex-col items-center px-4 py-8">
         <div className="max-w-lg w-full space-y-6">
           <div className="flex items-center justify-between">
-            <Button variant="ghost" size="sm" onClick={leaveGame} className="gap-1 text-muted-foreground">
+            <Button variant="ghost" size="sm" onClick={() => setShowLeaveConfirm(true)} className="gap-1 text-muted-foreground">
               <LogOut className="h-3 w-3" /> Verlaten
             </Button>
             <span className="text-sm text-muted-foreground font-medium">
