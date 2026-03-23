@@ -20,7 +20,7 @@ interface AuthDialogProps {
 }
 
 export default function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
-  const [tab, setTab] = useState<"login" | "signup">("login");
+  const [tab, setTab] = useState<"login" | "signup" | "forgot">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -99,7 +99,7 @@ export default function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
           <DialogTitle>Inloggen</DialogTitle>
         </DialogHeader>
 
-        <Tabs value={tab} onValueChange={(v) => { setTab(v as "login" | "signup"); reset(); }}>
+        <Tabs value={tab} onValueChange={(v) => { setTab(v as "login" | "signup" | "forgot"); reset(); }}>
           <TabsList className="w-full">
             <TabsTrigger value="login" className="flex-1">Inloggen</TabsTrigger>
             <TabsTrigger value="signup" className="flex-1">Registreren</TabsTrigger>
@@ -128,6 +128,48 @@ export default function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
             <Button onClick={handleLogin} className="w-full" disabled={loading}>
               {loading ? "Bezig..." : "Inloggen"}
             </Button>
+            <button
+              type="button"
+              onClick={() => setTab("forgot")}
+              className="text-xs text-muted-foreground hover:text-foreground underline w-full text-center"
+            >
+              Wachtwoord vergeten?
+            </button>
+          </TabsContent>
+
+          <TabsContent value="forgot" className="space-y-3 mt-4">
+            <p className="text-sm text-muted-foreground">
+              Vul je e-mailadres in en we sturen je een link om je wachtwoord te herstellen.
+            </p>
+            <div className="space-y-1.5">
+              <Label htmlFor="forgot-email">E-mailadres</Label>
+              <Input
+                id="forgot-email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="naam@voorbeeld.nl"
+              />
+            </div>
+            <Button onClick={async () => {
+              if (!email) { toast.error("Vul je e-mailadres in"); return; }
+              setLoading(true);
+              const { error } = await supabase.auth.resetPasswordForEmail(email, {
+                redirectTo: `${window.location.origin}/reset-password`,
+              });
+              setLoading(false);
+              if (error) { toast.error(error.message); }
+              else { toast.success("Herstelmail verstuurd! Check je inbox."); setTab("login"); }
+            }} className="w-full" disabled={loading}>
+              {loading ? "Bezig..." : "Herstelmail versturen"}
+            </Button>
+            <button
+              type="button"
+              onClick={() => setTab("login")}
+              className="text-xs text-muted-foreground hover:text-foreground underline w-full text-center"
+            >
+              Terug naar inloggen
+            </button>
           </TabsContent>
 
           <TabsContent value="signup" className="space-y-3 mt-4">
