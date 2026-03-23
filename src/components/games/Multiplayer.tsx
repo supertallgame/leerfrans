@@ -121,7 +121,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
       .select("*")
       .eq("room_id", roomId)
       .order("score", { ascending: false });
-    if (data) setPlayers(data as Player[]);
+    if (data) setPlayers(data as unknown as Player[]);
   };
 
   const createRoom = async () => {
@@ -187,7 +187,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
     if (countdown === null) return;
     if (countdown === 0) {
       supabase.functions.invoke("game-action", {
-        body: { action: "start-game", roomId: room!.id, playerId: myPlayerId },
+        body: { action: "start-game", roomId: room!.id, playerId: myPlayerId, playerToken: myPlayerToken },
       });
       setCountdown(null);
       return;
@@ -202,14 +202,14 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
     setShowResult(true);
 
     await supabase.functions.invoke("game-action", {
-      body: { action: "submit-answer", roomId: room.id, playerId: myPlayerId, answer },
+      body: { action: "submit-answer", roomId: room.id, playerId: myPlayerId, playerToken: myPlayerToken, answer },
     });
   };
 
   const nextQuestion = async () => {
     if (!room || !myPlayerId) return;
     await supabase.functions.invoke("game-action", {
-      body: { action: "next-question", roomId: room.id, playerId: myPlayerId },
+      body: { action: "next-question", roomId: room.id, playerId: myPlayerId, playerToken: myPlayerToken },
     });
   };
 
