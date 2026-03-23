@@ -73,19 +73,19 @@ const Index = () => {
     setSoundEnabled(checked);
   };
 
-  if (activeGame === "flashcards") return <div className="min-h-screen p-6"><Flashcards onBack={() => setActiveGame("menu")} /></div>;
-  if (activeGame === "quiz") return <div className="min-h-screen p-6"><MultipleChoice onBack={() => setActiveGame("menu")} /></div>;
-  if (activeGame === "match") return <div className="min-h-screen p-6"><MatchPairs onBack={() => setActiveGame("menu")} /></div>;
-  if (activeGame === "type") return <div className="min-h-screen p-6"><TypeAnswer onBack={() => setActiveGame("menu")} /></div>;
+  if (activeGame === "flashcards") return <div className="min-h-screen p-4 md:p-6"><Flashcards onBack={() => setActiveGame("menu")} /></div>;
+  if (activeGame === "quiz") return <div className="min-h-screen p-4 md:p-6"><MultipleChoice onBack={() => setActiveGame("menu")} /></div>;
+  if (activeGame === "match") return <div className="min-h-screen p-4 md:p-6"><MatchPairs onBack={() => setActiveGame("menu")} /></div>;
+  if (activeGame === "type") return <div className="min-h-screen p-4 md:p-6"><TypeAnswer onBack={() => setActiveGame("menu")} /></div>;
   if (activeGame === "multiplayer") return <Multiplayer onBack={() => setActiveGame("menu")} />;
-  if (activeGame === "fill") return <div className="min-h-screen p-6"><FillLetters onBack={() => setActiveGame("menu")} /></div>;
-  if (activeGame === "sentence") return <div className="min-h-screen p-6"><SentenceFill onBack={() => setActiveGame("menu")} /></div>;
-  if (activeGame === "ai") return <div className="min-h-screen p-6"><AiChat onBack={() => setActiveGame("menu")} /></div>;
+  if (activeGame === "fill") return <div className="min-h-screen p-4 md:p-6"><FillLetters onBack={() => setActiveGame("menu")} /></div>;
+  if (activeGame === "sentence") return <div className="min-h-screen p-4 md:p-6"><SentenceFill onBack={() => setActiveGame("menu")} /></div>;
+  if (activeGame === "ai") return <div className="min-h-screen p-4 md:p-6"><AiChat onBack={() => setActiveGame("menu")} /></div>;
 
   return (
-    <div className="min-h-screen flex flex-col items-center px-4 py-12">
-      <div className="max-w-2xl w-full flex flex-col items-center gap-8">
-        <div className="text-center space-y-3 relative w-full">
+    <div className="min-h-screen flex flex-col items-center px-3 py-6 md:px-4 md:py-12">
+      <div className="max-w-2xl w-full flex flex-col items-center gap-5 md:gap-8">
+        <div className="text-center space-y-2 md:space-y-3 relative w-full">
           <Button
             variant="ghost"
             size="icon"
@@ -97,28 +97,28 @@ const Index = () => {
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium tracking-wide uppercase">
             🇳🇱 Nederlands ↔ Français 🇫🇷
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
+          <h1 className="text-3xl md:text-5xl font-bold tracking-tight">
             Woordjes Leren
           </h1>
-          <p className="text-muted-foreground text-lg max-w-md mx-auto">
+          <p className="text-muted-foreground text-sm md:text-lg max-w-md mx-auto">
             Kies een spel en oefen je Frans-Nederlandse woordenschat
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
+        <div className="grid grid-cols-2 sm:grid-cols-2 gap-2.5 md:gap-4 w-full">
           {games.map((game) => (
             <Card
               key={game.id}
               className="cursor-pointer transition-all duration-200 hover:shadow-lg hover:-translate-y-1 active:scale-[0.98]"
               onClick={() => setActiveGame(game.id)}
             >
-              <CardContent className="p-6 flex flex-col gap-3">
-                <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${game.color}`}>
-                  <game.icon className="h-6 w-6" />
+              <CardContent className="p-3 md:p-6 flex flex-col gap-2 md:gap-3">
+                <div className={`w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center ${game.color}`}>
+                  <game.icon className="h-5 w-5 md:h-6 md:w-6" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-semibold">{game.title}</h2>
-                  <p className="text-sm text-muted-foreground">{game.description}</p>
+                  <h2 className="text-sm md:text-lg font-semibold leading-tight">{game.title}</h2>
+                  <p className="text-xs md:text-sm text-muted-foreground hidden sm:block">{game.description}</p>
                 </div>
               </CardContent>
             </Card>
@@ -129,22 +129,22 @@ const Index = () => {
           className="w-full cursor-pointer transition-all duration-200 hover:shadow-lg hover:-translate-y-1 active:scale-[0.98] border-2 border-primary/20 bg-gradient-to-r from-primary/5 to-accent/5"
           onClick={() => setActiveGame("multiplayer")}
         >
-          <CardContent className="p-6 flex items-center gap-4">
-            <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
-              <Users className="h-7 w-7 text-primary" />
+          <CardContent className="p-4 md:p-6 flex items-center gap-3 md:gap-4">
+            <div className="w-11 h-11 md:w-14 md:h-14 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
+              <Users className="h-6 w-6 md:h-7 md:w-7 text-primary" />
             </div>
             <div>
-              <h2 className="text-xl font-bold">🎮 Multiplayer Quiz</h2>
-              <p className="text-sm text-muted-foreground">
-                Start een quiz en speel tegen je vrienden met een deelcode!
+              <h2 className="text-base md:text-xl font-bold">🎮 Multiplayer Quiz</h2>
+              <p className="text-xs md:text-sm text-muted-foreground">
+                Speel tegen je vrienden met een deelcode!
               </p>
             </div>
           </CardContent>
         </Card>
 
         <Card className="w-full bg-muted/50">
-          <CardContent className="p-4 text-center">
-            <p className="text-sm text-muted-foreground">
+          <CardContent className="p-3 md:p-4 text-center">
+            <p className="text-xs md:text-sm text-muted-foreground">
               📚 <span className="font-medium">47 woorden & zinnen</span> om te oefenen
             </p>
           </CardContent>
