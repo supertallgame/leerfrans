@@ -208,11 +208,16 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
 
     const { data: roomData, error: roomError } = await supabase
       .from("game_rooms")
-      .insert({ code, host_name: playerName, questions, total_questions: 20 })
+      .insert({ code, host_name: playerName, total_questions: 20 })
       .select()
       .single();
 
     if (roomError || !roomData) return toast.error("Kon geen room aanmaken");
+
+    // Store questions in separate restricted table (not readable by clients)
+    await supabase
+      .from("game_questions" as any)
+      .insert({ room_id: roomData.id, questions } as any);
 
     const { data: playerData } = await supabase
       .from("game_players")
