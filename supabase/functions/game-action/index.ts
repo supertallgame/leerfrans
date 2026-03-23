@@ -86,6 +86,11 @@ Deno.serve(async (req) => {
 
     if (!room) return jsonResponse({ error: "Room not found" }, 404);
 
+    // ACTION: heartbeat (last_active already updated above)
+    if (action === "heartbeat") {
+      return jsonResponse({ success: true });
+    }
+
     // ACTION: register-host
     if (action === "register-host") {
       if (room.host_player_id) {
@@ -195,6 +200,12 @@ Deno.serve(async (req) => {
       }
       // Cascade trigger will delete players
       await supabase.from("game_rooms").delete().eq("id", roomId);
+      return jsonResponse({ success: true });
+    }
+
+    // ACTION: leave-game (non-host player leaves)
+    if (action === "leave-game") {
+      await supabase.from("game_players").delete().eq("id", playerId).eq("room_id", roomId);
       return jsonResponse({ success: true });
     }
 
