@@ -2,9 +2,9 @@ import { useState, useEffect, lazy, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { BookOpen, Brain, Puzzle, Keyboard, Users, PenTool, MessageSquare, Bot, Settings, Volume2, VolumeX, LogOut, Sun, Moon, Star, Lock } from "lucide-react";
+import { BookOpen, Brain, Puzzle, Keyboard, Users, PenTool, MessageSquare, Bot, Settings, Volume2, VolumeX, LogOut, Sun, Moon, Star, Lock, BookMarked } from "lucide-react";
 import { FlagNL, FlagFR } from "@/components/Flags";
-import { chapters } from "@/data/vocabulary";
+import { chapters, getChapter } from "@/data/vocabulary";
 import { useChapter } from "@/contexts/ChapterContext";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -138,6 +138,13 @@ const Index = () => {
           <p className="text-muted-foreground text-sm md:text-lg max-w-md mx-auto">
             Kies een spel en oefen je Frans-Nederlandse woordenschat
           </p>
+          <button
+            onClick={handleSettingsClick}
+            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent/10 text-accent-foreground text-xs font-medium hover:bg-accent/20 transition-colors cursor-pointer mx-auto"
+          >
+            <BookMarked className="h-3.5 w-3.5" />
+            {getChapter(chapterId)?.title ?? "Chapitre 3"}
+          </button>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-2 gap-2.5 md:gap-4 w-full">
