@@ -121,6 +121,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
             game_mode: newRoom.game_mode || "normal",
             team_mode: newRoom.team_mode || "solo",
             num_teams: newRoom.num_teams || 2,
+            team_names: newRoom.team_names || [],
           };
           setRoom(updatedRoom);
           if (newRoom.status === "playing") {
@@ -255,7 +256,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
 
     const { data: roomData, error: roomError } = await supabase
       .from("game_rooms")
-      .insert({ code, host_name: playerName, total_questions: 20, game_mode: gameMode, team_mode: tm, num_teams: teams } as any)
+      .insert({ code, host_name: playerName, total_questions: 20, game_mode: gameMode, team_mode: tm, num_teams: teams, team_names: teamNames.slice(0, teams) } as any)
       .select()
       .single();
 
@@ -279,6 +280,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
       game_mode: gameMode,
       team_mode: tm,
       num_teams: teams,
+      team_names: teamNames.slice(0, teams),
     });
     setMyPlayerId(pid);
     setMyPlayerToken(ptoken);
@@ -317,6 +319,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
       game_mode: roomData.game_mode || "normal",
       team_mode: roomData.team_mode || "solo",
       num_teams: roomData.num_teams || 2,
+      team_names: roomData.team_names || [],
     } as Room);
     setMyPlayerId(playerData?.id ?? null);
     setMyPlayerToken((playerData as any)?.player_token ?? null);
