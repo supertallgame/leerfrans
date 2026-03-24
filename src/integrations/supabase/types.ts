@@ -273,6 +273,7 @@ export type Database = {
           player_name: string
           room_id: string
           score: number
+          team_number: number
         }[]
       }
       join_game_room: {
