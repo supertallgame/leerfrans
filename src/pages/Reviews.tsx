@@ -241,7 +241,11 @@ export default function Reviews() {
     setDeleteReplyId(null);
   };
 
-  const sortedReviews = [...reviews].sort((a, b) => {
+  const filteredReviews = filterRating
+    ? reviews.filter((r) => r.rating === filterRating)
+    : reviews;
+
+  const sortedReviews = [...filteredReviews].sort((a, b) => {
     if (sortBy === "rating") return b.rating - a.rating;
     return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
   });
