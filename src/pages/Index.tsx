@@ -268,6 +268,18 @@ const Index = () => {
               </div>
               <Switch checked={darkMode} onCheckedChange={toggleDarkMode} />
             </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <BookMarked className="h-4 w-4" />
+                <span className="text-sm font-medium">Chapitre</span>
+              </div>
+              <button
+                onClick={() => { setShowSettings(false); setShowChapterPicker(true); }}
+                className="text-sm font-medium px-3 py-1 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+              >
+                {getChapter(chapterId)?.title ?? "Chapitre 3"}
+              </button>
+            </div>
             {user && (
               <div className="pt-2 border-t">
                 <p className="text-xs text-muted-foreground mb-2">
