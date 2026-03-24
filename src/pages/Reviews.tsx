@@ -197,6 +197,7 @@ export default function Reviews() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleteReplyId, setDeleteReplyId] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<"newest" | "rating">("newest");
+  const [filterRating, setFilterRating] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
