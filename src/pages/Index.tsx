@@ -114,7 +114,7 @@ const Index = () => {
             <Settings className="h-5 w-5" />
           </Button>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium tracking-wide uppercase">
-            🇳🇱 Nederlands ↔ Français 🇫🇷
+            <span className="fi fi-nl inline-block w-4 h-3 rounded-sm bg-gradient-to-b from-red-500 via-white to-blue-600" aria-label="Nederlands"></span> Nederlands ↔ Français <span className="inline-block w-4 h-3 rounded-sm bg-gradient-to-r from-blue-600 via-white to-red-500" aria-label="Français"></span>
           </div>
           <h1 className="text-3xl md:text-5xl font-bold tracking-tight">
             Woordjes Leren

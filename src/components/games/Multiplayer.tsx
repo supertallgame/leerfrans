@@ -516,7 +516,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
           <Card className="border-2">
             <CardContent className="p-8 text-center">
               <p className="text-sm text-muted-foreground mb-2">
-                {room.direction === "nl_to_fr" ? "🇳🇱 Nederlands → Frans 🇫🇷" : "🇫🇷 Frans → Nederlands 🇳🇱"}
+                {room.direction === "nl_to_fr" ? "NL Nederlands → Frans FR" : "FR Frans → Nederlands NL"}
               </p>
               <h2 className="text-2xl md:text-3xl font-bold">{currentQuestion}</h2>
             </CardContent>

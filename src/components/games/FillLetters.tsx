@@ -124,7 +124,7 @@ export default function FillLetters({ onBack }: Props) {
             onClick={() => { setDirection("nl_to_fr"); restart(); }}
             className="text-xs md:text-sm px-2 md:px-3"
           >
-            🇳🇱→🇫🇷
+            NL→FR
           </Button>
           <Button
             size="sm"
@@ -132,7 +132,7 @@ export default function FillLetters({ onBack }: Props) {
             onClick={() => { setDirection("fr_to_nl"); restart(); }}
             className="text-xs md:text-sm px-2 md:px-3"
           >
-            🇫🇷→🇳🇱
+            FR→NL
           </Button>
         </div>
       </div>
