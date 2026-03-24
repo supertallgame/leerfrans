@@ -3,6 +3,16 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, Star, MessageSquare, Trash2 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -50,6 +60,7 @@ export default function Reviews() {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const [isOperator, setIsOperator] = useState(false);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchReviews = async () => {
@@ -67,14 +78,16 @@ export default function Reviews() {
     });
   }, []);
 
-  const handleDelete = async (id: string) => {
-    const { error } = await (supabase.from("reviews" as any) as any).delete().eq("id", id);
+  const handleDelete = async () => {
+    if (!deleteId) return;
+    const { error } = await (supabase.from("reviews" as any) as any).delete().eq("id", deleteId);
     if (error) {
       toast.error("Kon review niet verwijderen");
-      return;
+    } else {
+      setReviews((prev) => prev.filter((r) => r.id !== deleteId));
+      toast.success("Review verwijderd");
     }
-    setReviews((prev) => prev.filter((r) => r.id !== id));
-    toast.success("Review verwijderd");
+    setDeleteId(null);
   };
 
   const avgRating = reviews.length
@@ -140,7 +153,7 @@ export default function Reviews() {
                           variant="ghost"
                           size="icon"
                           className="h-6 w-6 text-destructive hover:text-destructive"
-                          onClick={() => handleDelete(review.id)}
+                          onClick={() => setDeleteId(review.id)}
                         >
                           <Trash2 className="h-3.5 w-3.5" />
                         </Button>
@@ -155,6 +168,23 @@ export default function Reviews() {
           </div>
         )}
       </div>
+
+      <AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Review verwijderen?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Weet je zeker dat je deze review wilt verwijderen? Dit kan niet ongedaan worden gemaakt.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuleren</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Verwijderen
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </main>
   );
 }
