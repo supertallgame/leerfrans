@@ -145,13 +145,19 @@ const chapitre3Words: VocabItem[] = [
 
 export const chapters: Chapter[] = [
   {
+    id: "chapitre1",
+    title: "Chapitre 1",
+    description: "Kennismaken, dieren & familie",
+    words: chapitre1Words,
+    requiresLogin: false,
+  },
+  {
     id: "chapitre3",
     title: "Chapitre 3",
     description: "School, vakken & de kamer",
     words: chapitre3Words,
     requiresLogin: false,
   },
-  // More chapters will be added later
 ];
 
 export const DEFAULT_CHAPTER_ID = "chapitre3";
