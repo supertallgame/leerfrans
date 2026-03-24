@@ -78,14 +78,16 @@ export default function Reviews() {
     });
   }, []);
 
-  const handleDelete = async (id: string) => {
-    const { error } = await (supabase.from("reviews" as any) as any).delete().eq("id", id);
+  const handleDelete = async () => {
+    if (!deleteId) return;
+    const { error } = await (supabase.from("reviews" as any) as any).delete().eq("id", deleteId);
     if (error) {
       toast.error("Kon review niet verwijderen");
-      return;
+    } else {
+      setReviews((prev) => prev.filter((r) => r.id !== deleteId));
+      toast.success("Review verwijderd");
     }
-    setReviews((prev) => prev.filter((r) => r.id !== id));
-    toast.success("Review verwijderd");
+    setDeleteId(null);
   };
 
   const avgRating = reviews.length
