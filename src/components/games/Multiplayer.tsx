@@ -124,6 +124,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
             team_names: newRoom.team_names || [],
           };
           setRoom(updatedRoom);
+          if (updatedRoom.team_names?.length > 0) setTeamNames(updatedRoom.team_names);
           if (newRoom.status === "playing") {
             setPhase("playing");
             setSelectedAnswer(null);
