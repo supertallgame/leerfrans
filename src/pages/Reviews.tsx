@@ -212,7 +212,7 @@ export default function Reviews() {
     fetchData();
 
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setIsOperator(session?.user?.email === OPERATOR_EMAIL);
+      setIsOperator(OPERATOR_EMAILS.includes(session?.user?.email ?? ""));
     });
   }, []);
 
