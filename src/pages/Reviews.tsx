@@ -61,6 +61,7 @@ export default function Reviews() {
   const [loading, setLoading] = useState(true);
   const [isOperator, setIsOperator] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [sortBy, setSortBy] = useState<"newest" | "rating">("newest");
 
   useEffect(() => {
     const fetchReviews = async () => {
