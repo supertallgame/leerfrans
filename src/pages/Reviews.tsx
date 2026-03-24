@@ -61,6 +61,7 @@ export default function Reviews() {
   const [loading, setLoading] = useState(true);
   const [isOperator, setIsOperator] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [sortBy, setSortBy] = useState<"newest" | "rating">("newest");
 
   useEffect(() => {
     const fetchReviews = async () => {
@@ -89,6 +90,11 @@ export default function Reviews() {
     }
     setDeleteId(null);
   };
+
+  const sortedReviews = [...reviews].sort((a, b) => {
+    if (sortBy === "rating") return b.rating - a.rating;
+    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+  });
 
   const avgRating = reviews.length
     ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
@@ -127,6 +133,23 @@ export default function Reviews() {
           </CardContent>
         </Card>
 
+        <div className="flex gap-2">
+          <Button
+            variant={sortBy === "newest" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setSortBy("newest")}
+          >
+            Nieuwste eerst
+          </Button>
+          <Button
+            variant={sortBy === "rating" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setSortBy("rating")}
+          >
+            Hoogste score
+          </Button>
+        </div>
+
         {loading ? (
           <div className="flex justify-center py-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
@@ -139,7 +162,7 @@ export default function Reviews() {
           </Card>
         ) : (
           <div className="space-y-3">
-            {reviews.map((review) => (
+            {sortedReviews.map((review) => (
               <Card key={review.id} className="animate-fade-in">
                 <CardContent className="p-4 space-y-2">
                   <div className="flex items-center justify-between">
