@@ -71,11 +71,7 @@ const Index = () => {
   }, []);
 
   const handleSettingsClick = () => {
-    if (!user) {
-      setShowLoginPrompt(true);
-    } else {
-      setShowSettings(true);
-    }
+    setShowSettings(true);
   };
 
   const handleLogout = async () => {
