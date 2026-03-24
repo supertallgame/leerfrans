@@ -636,8 +636,12 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
             {options.map((option, i) => {
               let extraClass = "h-14 text-base";
               if (showResult && correctAnswer) {
-                if (option === correctAnswer) extraClass += " bg-green-100 border-green-500 text-green-800";
-                else if (option === selectedAnswer) extraClass += " bg-red-100 border-red-500 text-red-800";
+                // Result revealed: show correct/wrong colors
+                if (option === correctAnswer) extraClass += " bg-green-100 border-green-500 text-green-800 dark:bg-green-900/30 dark:border-green-600 dark:text-green-300";
+                else if (option === selectedAnswer) extraClass += " bg-red-100 border-red-500 text-red-800 dark:bg-red-900/30 dark:border-red-600 dark:text-red-300";
+              } else if (selectedAnswer && !showResult && option === selectedAnswer) {
+                // Kahoot: selected but not yet revealed
+                extraClass += " bg-primary/10 border-primary text-primary";
               }
               return (
                 <Button
@@ -645,13 +649,19 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
                   variant="outline"
                   className={extraClass}
                   onClick={() => submitAnswer(option)}
-                  disabled={showResult}
+                  disabled={!!selectedAnswer}
                 >
                   {option}
                 </Button>
               );
             })}
           </div>
+
+          {selectedAnswer && !showResult && room.game_mode === "kahoot" && (
+            <p className="text-center text-sm text-muted-foreground animate-pulse">
+              ✅ Antwoord vergrendeld! Wachten op andere spelers... ({answeredCount}/{players.length})
+            </p>
+          )}
 
           {showResult && isHost && room.game_mode === "normal" && (
             <Button onClick={nextQuestion} className="w-full h-12 text-lg" size="lg">
