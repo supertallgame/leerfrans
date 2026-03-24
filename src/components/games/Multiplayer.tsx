@@ -157,6 +157,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
       setSelectedAnswer(null);
       setShowResult(false);
       setCorrectAnswer("");
+      setPendingCorrect(null);
       setShowKahootScoreboard(false);
       setKahootCountdown(null);
       fetchQuestion(room.id, myPlayerId, myPlayerToken);
@@ -169,9 +170,13 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
     if (players.length === 0 || showKahootScoreboard) return;
     const allAnswered = players.every((p) => p.has_answered);
     if (!allAnswered) return;
+    setShowResult(true);
     setShowKahootScoreboard(true);
     setKahootCountdown(5);
-  }, [players, room, phase, showKahootScoreboard]);
+    // Play sound now that result is revealed
+    if (pendingCorrect === true) playCorrect();
+    else if (pendingCorrect === false) playWrong();
+  }, [players, room, phase, showKahootScoreboard, pendingCorrect]);
 
   // Kahoot scoreboard countdown + auto-advance
   useEffect(() => {
