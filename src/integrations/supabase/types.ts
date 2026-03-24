@@ -156,6 +156,7 @@ export type Database = {
           created_at: string | null
           current_question_index: number | null
           direction: string | null
+          game_mode: string | null
           host_name: string | null
           host_player_id: string | null
           id: string | null
@@ -167,6 +168,7 @@ export type Database = {
           created_at?: string | null
           current_question_index?: number | null
           direction?: string | null
+          game_mode?: string | null
           host_name?: string | null
           host_player_id?: string | null
           id?: string | null
@@ -178,6 +180,7 @@ export type Database = {
           created_at?: string | null
           current_question_index?: number | null
           direction?: string | null
+          game_mode?: string | null
           host_name?: string | null
           host_player_id?: string | null
           id?: string | null
