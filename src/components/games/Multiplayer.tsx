@@ -694,9 +694,20 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
                 return (
                   <Card key={teamNum} className={`border-2 ${tc?.border}`}>
                     <CardContent className="p-4">
-                      <h3 className={`font-semibold mb-2 flex items-center gap-2 ${tc?.text}`}>
-                        {tc?.emoji} {tc?.name} ({teamPlayers.length})
-                      </h3>
+                      <div className={`font-semibold mb-2 flex items-center gap-2 ${tc?.text}`}>
+                        {tc?.emoji}
+                        {isHost ? (
+                          <Input
+                            value={getTeamName(teamNum)}
+                            onChange={(e) => updateTeamName(teamNum - 1, e.target.value)}
+                            className={`h-7 text-sm font-semibold border-dashed ${tc?.text}`}
+                            maxLength={20}
+                          />
+                        ) : (
+                          <span>{getTeamName(teamNum)}</span>
+                        )}
+                        <span className="text-sm font-normal">({teamPlayers.length})</span>
+                      </div>
                       <div className="space-y-1">
                         {teamPlayers.map((p) => (
                           <div key={p.id} className={`flex items-center justify-between p-2 rounded-lg ${tc?.bg}`}>
@@ -871,7 +882,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
                         <div key={team.teamNumber} className={`p-3 rounded-lg animate-fade-in ${tc?.bg} border ${tc?.border}`} style={{ animationDelay: `${i * 150}ms`, animationFillMode: "backwards" }}>
                           <div className="flex items-center justify-between mb-1">
                             <span className={`font-bold ${tc?.text}`}>
-                              {i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `${i + 1}.`} {tc?.emoji} {tc?.name}
+                              {i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `${i + 1}.`} {tc?.emoji} {getTeamName(team.teamNumber)}
                             </span>
                             <span className="font-mono font-bold text-lg">{team.total}</span>
                           </div>
@@ -916,7 +927,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
                     return (
                       <div key={team.teamNumber} className="space-y-1">
                         <div className={`flex justify-between items-center text-sm font-bold ${tc?.text}`}>
-                          <span>{i === 0 && "🥇 "}{i === 1 && "🥈 "}{i === 2 && "🥉 "}{tc?.emoji} {tc?.name}</span>
+                          <span>{i === 0 && "🥇 "}{i === 1 && "🥈 "}{i === 2 && "🥉 "}{tc?.emoji} {getTeamName(team.teamNumber)}</span>
                           <span className="font-mono">{team.total}</span>
                         </div>
                         {team.players.map((p) => (
@@ -975,7 +986,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
                         <div className="flex items-center gap-3">
                           <span className="text-2xl">{i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `${i + 1}.`}</span>
                           <div>
-                            <span className={`font-semibold ${tc?.text}`}>{tc?.emoji} {tc?.name}</span>
+                            <span className={`font-semibold ${tc?.text}`}>{tc?.emoji} {getTeamName(team.teamNumber)}</span>
                             <p className="text-xs text-muted-foreground">{team.players.map((p) => p.player_name).join(", ")}</p>
                           </div>
                         </div>
