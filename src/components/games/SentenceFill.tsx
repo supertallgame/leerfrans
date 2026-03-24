@@ -102,7 +102,7 @@ export default function SentenceFill({ onBack }: Props) {
   }
 
   const progress = ((index + 1) / total) * 100;
-  const langLabel = current.lang === "fr" ? "🇫🇷 Frans" : "🇳🇱 Nederlands";
+  const langLabel = current.lang === "fr" ? "FR Frans" : "NL Nederlands";
   const translationLabel = current.lang === "fr" ? current.item.dutch : current.item.french;
 
   return (
