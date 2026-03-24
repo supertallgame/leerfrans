@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { isAnswerCorrect } from "@/lib/utils";
 import { playCorrect, playWrong } from "@/lib/sounds";
-import { vocabulary, shuffle } from "@/data/vocabulary";
+import { shuffle } from "@/data/vocabulary";
+import { useChapter } from "@/contexts/ChapterContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";

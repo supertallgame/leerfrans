@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { playCorrect, playWrong } from "@/lib/sounds";
-import { vocabulary, shuffle } from "@/data/vocabulary";
+import { shuffle } from "@/data/vocabulary";
+import { useChapter } from "@/contexts/ChapterContext";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight, Check, X } from "lucide-react";
@@ -11,7 +12,8 @@ interface Props {
 }
 
 export default function MultipleChoice({ onBack }: Props) {
-  const [questions] = useState(() => shuffle(vocabulary));
+  const { activeVocabulary } = useChapter();
+  const [questions] = useState(() => shuffle(activeVocabulary));
   const [qIndex, setQIndex] = useState(0);
   const [selected, setSelected] = useState<string | null>(null);
   const [score, setScore] = useState(0);
