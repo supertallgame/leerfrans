@@ -236,6 +236,13 @@ export const chapters: Chapter[] = [
     requiresLogin: false,
   },
   {
+    id: "chapitre2",
+    title: "Chapitre 2",
+    description: "Eten, drinken & winkelen",
+    words: chapitre2Words,
+    requiresLogin: false,
+  },
+  {
     id: "chapitre3",
     title: "Chapitre 3",
     description: "School, vakken & de kamer",
