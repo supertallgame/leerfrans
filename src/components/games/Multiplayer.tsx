@@ -40,6 +40,7 @@ interface Room {
   team_mode: TeamMode;
   num_teams: number;
   team_names: string[];
+  team_emojis: string[];
 }
 
 interface Player {
@@ -58,6 +59,8 @@ const TEAM_COLORS = [
   { name: "Team 4", bg: "bg-yellow-100 dark:bg-yellow-900/30", border: "border-yellow-400", text: "text-yellow-700 dark:text-yellow-300", emoji: "🟡" },
 ];
 
+const EMOJI_OPTIONS = ["🔵", "🔴", "🟢", "🟡", "🟣", "🟠", "⚫", "⚪", "🦁", "🐺", "🦊", "🐻", "🦅", "🐉", "🔥", "⚡", "💎", "🌟", "🎯", "🚀", "👑", "🛡️", "⚔️", "🏆"];
+
 function generateCode(): string {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   let code = "";
@@ -73,6 +76,8 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
   const [teamMode, setTeamMode] = useState<TeamMode>("solo");
   const [numTeams, setNumTeams] = useState(2);
   const [teamNames, setTeamNames] = useState<string[]>(["Team 1", "Team 2", "Team 3", "Team 4"]);
+  const [teamEmojis, setTeamEmojis] = useState<string[]>(["🔵", "🔴", "🟢", "🟡"]);
+  const [showEmojiPicker, setShowEmojiPicker] = useState<number | null>(null);
   const [isHost, setIsHost] = useState(false);
   const [room, setRoom] = useState<Room | null>(null);
   const [players, setPlayers] = useState<Player[]>([]);
@@ -122,9 +127,11 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
             team_mode: newRoom.team_mode || "solo",
             num_teams: newRoom.num_teams || 2,
             team_names: newRoom.team_names || [],
+            team_emojis: newRoom.team_emojis || ["🔵", "🔴", "🟢", "🟡"],
           };
           setRoom(updatedRoom);
           if (updatedRoom.team_names?.length > 0) setTeamNames(updatedRoom.team_names);
+          if (updatedRoom.team_emojis?.length > 0) setTeamEmojis(updatedRoom.team_emojis);
           if (newRoom.status === "playing") {
             setPhase("playing");
             setSelectedAnswer(null);
@@ -257,7 +264,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
 
     const { data: roomData, error: roomError } = await supabase
       .from("game_rooms")
-      .insert({ code, host_name: playerName, total_questions: 20, game_mode: gameMode, team_mode: tm, num_teams: teams, team_names: teamNames.slice(0, teams) } as any)
+      .insert({ code, host_name: playerName, total_questions: 20, game_mode: gameMode, team_mode: tm, num_teams: teams, team_names: teamNames.slice(0, teams), team_emojis: teamEmojis.slice(0, teams) } as any)
       .select()
       .single();
 
@@ -282,6 +289,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
       team_mode: tm,
       num_teams: teams,
       team_names: teamNames.slice(0, teams),
+      team_emojis: teamEmojis.slice(0, teams),
     });
     setMyPlayerId(pid);
     setMyPlayerToken(ptoken);
@@ -305,7 +313,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
 
     const { data: roomData, error } = await (supabase
       .from("game_rooms_public" as any)
-      .select("id, code, host_name, host_player_id, status, current_question_index, total_questions, direction, game_mode, team_mode, num_teams")
+      .select("id, code, host_name, host_player_id, status, current_question_index, total_questions, direction, game_mode, team_mode, num_teams, team_names, team_emojis")
       .eq("code", roomCode.toUpperCase().trim())
       .single() as any);
 
@@ -321,7 +329,9 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
       team_mode: roomData.team_mode || "solo",
       num_teams: roomData.num_teams || 2,
       team_names: roomData.team_names || [],
+      team_emojis: roomData.team_emojis || ["🔵", "🔴", "🟢", "🟡"],
     } as Room);
+    if (roomData.team_emojis?.length > 0) setTeamEmojis(roomData.team_emojis);
     setMyPlayerId(playerData?.id ?? null);
     setMyPlayerToken((playerData as any)?.player_token ?? null);
     setIsHost(false);
