@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
-import { vocabulary, shuffle } from "@/data/vocabulary";
+import { shuffle } from "@/data/vocabulary";
+import { useChapter } from "@/contexts/ChapterContext";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, RotateCcw } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -12,7 +13,8 @@ interface Props {
 const PAIRS_PER_ROUND = 5;
 
 export default function MatchPairs({ onBack }: Props) {
-  const [allWords] = useState(() => shuffle(vocabulary));
+  const { activeVocabulary } = useChapter();
+  const [allWords] = useState(() => shuffle(activeVocabulary));
   const totalRounds = Math.ceil(allWords.length / PAIRS_PER_ROUND);
   const [roundIndex, setRoundIndex] = useState(0);
   const [resetKey, setResetKey] = useState(0);

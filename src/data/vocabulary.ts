@@ -3,7 +3,15 @@ export interface VocabItem {
   dutch: string;
 }
 
-export const vocabulary: VocabItem[] = [
+export interface Chapter {
+  id: string;
+  title: string;
+  description: string;
+  words: VocabItem[];
+  requiresLogin: boolean;
+}
+
+const chapitre3Words: VocabItem[] = [
   { french: "l'anglais", dutch: "Engels" },
   { french: "le français", dutch: "Frans" },
   { french: "le néerlandais", dutch: "Nederlands" },
@@ -28,31 +36,54 @@ export const vocabulary: VocabItem[] = [
   { french: "noter", dutch: "noteren / opschrijven" },
   { french: "peut-être", dutch: "misschien" },
   { french: "la chambre", dutch: "de kamer" },
-  { french: "la classe", dutch: "de klas" },
-  { french: "en quatrième", dutch: "in de vierde (klas)" },
-  { french: "trop", dutch: "te / te veel" },
-  { french: "aujourd'hui", dutch: "vandaag" },
-  { french: "le secret", dutch: "het geheim" },
-  { french: "les devoirs", dutch: "het huiswerk" },
-  { french: "le sac à dos", dutch: "de rugzak" },
-  { french: "la trousse", dutch: "het etui" },
-  { french: "le/la prof", dutch: "de leraar / lerares" },
-  { french: "toujours", dutch: "altijd" },
-  { french: "sympa", dutch: "leuk / aardig" },
-  { french: "surtout", dutch: "vooral" },
-  { french: "Quelle heure est-il?", dutch: "Hoe laat is het?" },
-  { french: "Il est neuf heures et demie.", dutch: "Het is half tien." },
-  { french: "Tu es en quelle classe?", dutch: "In welke klas zit je?" },
-  { french: "Je suis en cinquième.", dutch: "Ik zit in de vijfde (klas)." },
-  { french: "être", dutch: "zijn" },
-  { french: "je suis", dutch: "ik ben" },
-  { french: "tu es", dutch: "jij bent" },
-  { french: "il/elle est", dutch: "hij/zij is" },
-  { french: "on est", dutch: "men is / wij zijn" },
-  { french: "nous sommes", dutch: "wij zijn" },
-  { french: "vous êtes", dutch: "jullie zijn / u bent" },
-  { french: "ils/elles sont", dutch: "zij zijn" },
+  { french: "le poster", dutch: "de poster" },
+  { french: "les affaires (f)", dutch: "de spullen" },
+  { french: "l'étagère (f)", dutch: "de plank / het rek" },
+  { french: "le bureau", dutch: "het bureau" },
+  { french: "l'ordinateur (m)", dutch: "de computer" },
+  { french: "la porte", dutch: "de deur" },
+  { french: "la fenêtre", dutch: "het raam" },
+  { french: "le mur", dutch: "de muur" },
+  { french: "le lit", dutch: "het bed" },
+  { french: "la couleur", dutch: "de kleur" },
+  { french: "blanc / blanche", dutch: "wit" },
+  { french: "bleu(e)", dutch: "blauw" },
+  { french: "jaune", dutch: "geel" },
+  { french: "noir(e)", dutch: "zwart" },
+  { french: "orange", dutch: "oranje" },
+  { french: "rose", dutch: "roze" },
+  { french: "rouge", dutch: "rood" },
+  { french: "vert(e)", dutch: "groen" },
+  { french: "violet / violette", dutch: "paars" },
+  { french: "C'est comment, ta chambre?", dutch: "Hoe is jouw kamer?" },
+  { french: "Ma chambre est assez grande.", dutch: "Mijn kamer is vrij groot." },
+  { french: "petit(e)", dutch: "klein" },
+  { french: "grand(e)", dutch: "groot" },
 ];
+
+export const chapters: Chapter[] = [
+  {
+    id: "chapitre3",
+    title: "Chapitre 3",
+    description: "School, vakken & de kamer",
+    words: chapitre3Words,
+    requiresLogin: false,
+  },
+  // More chapters will be added later
+];
+
+export const DEFAULT_CHAPTER_ID = "chapitre3";
+
+export function getChapter(id: string): Chapter | undefined {
+  return chapters.find((c) => c.id === id);
+}
+
+export function getActiveVocabulary(chapterId: string): VocabItem[] {
+  return getChapter(chapterId)?.words ?? chapitre3Words;
+}
+
+// Backward compatibility
+export const vocabulary: VocabItem[] = chapitre3Words;
 
 export function shuffle<T>(array: T[]): T[] {
   const maxAttempts = 50;
@@ -62,7 +93,6 @@ export function shuffle<T>(array: T[]): T[] {
       const j = Math.floor(Math.random() * (i + 1));
       [arr[i], arr[j]] = [arr[j], arr[i]];
     }
-    // Check that no two items that were originally within 1 index are now adjacent
     const origIndex = (item: T) => array.indexOf(item);
     let valid = true;
     for (let i = 0; i < arr.length - 1; i++) {
@@ -73,7 +103,6 @@ export function shuffle<T>(array: T[]): T[] {
     }
     if (valid) return arr;
   }
-  // Fallback: return best-effort shuffle
   const arr = [...array];
   for (let i = arr.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));

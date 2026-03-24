@@ -15,7 +15,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { supabase } from "@/integrations/supabase/client";
-import { vocabulary, shuffle } from "@/data/vocabulary";
+import { shuffle } from "@/data/vocabulary";
+import { useChapter } from "@/contexts/ChapterContext";
 import { toast } from "sonner";
 import { playCorrect, playWrong } from "@/lib/sounds";
 
@@ -69,6 +70,7 @@ function generateCode(): string {
 }
 
 export default function Multiplayer({ onBack }: MultiplayerProps) {
+  const { activeVocabulary } = useChapter();
   const [phase, setPhase] = useState<Phase>("setup");
   const [playerName, setPlayerName] = useState("");
   const [roomCode, setRoomCode] = useState("");
@@ -260,7 +262,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
     setTeamMode(tm);
     setNumTeams(teams);
     const code = generateCode();
-    const questions = shuffle(vocabulary).slice(0, 20).map((v) => ({ french: v.french, dutch: v.dutch }));
+    const questions = shuffle(activeVocabulary).slice(0, 20).map((v: any) => ({ french: v.french, dutch: v.dutch }));
 
     const { data: roomData, error: roomError } = await supabase
       .from("game_rooms")

@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { vocabulary, shuffle, VocabItem } from "@/data/vocabulary";
+import { shuffle, VocabItem } from "@/data/vocabulary";
+import { useChapter } from "@/contexts/ChapterContext";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight, RotateCcw, Eye } from "lucide-react";
@@ -9,7 +10,8 @@ interface Props {
 }
 
 export default function Flashcards({ onBack }: Props) {
-  const [cards] = useState(() => shuffle(vocabulary));
+  const { activeVocabulary } = useChapter();
+  const [cards] = useState(() => shuffle(activeVocabulary));
   const [index, setIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
   const [showDutch, setShowDutch] = useState(true);

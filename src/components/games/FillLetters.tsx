@@ -6,7 +6,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { ArrowLeft, RotateCcw } from "lucide-react";
-import { vocabulary, shuffle, VocabItem } from "@/data/vocabulary";
+import { shuffle, VocabItem } from "@/data/vocabulary";
+import { useChapter } from "@/contexts/ChapterContext";
 
 interface Props {
   onBack: () => void;
@@ -46,10 +47,11 @@ function removeSomeLetters(word: string): { display: string; removed: { index: n
 }
 
 export default function FillLetters({ onBack }: Props) {
+  const { activeVocabulary } = useChapter();
   const words = useMemo(() => {
-    const singles = vocabulary.filter((v) => isSingleWord(v.french));
+    const singles = activeVocabulary.filter((v) => isSingleWord(v.french));
     return shuffle(singles);
-  }, []);
+  }, [activeVocabulary]);
 
   const [index, setIndex] = useState(0);
   const [userInput, setUserInput] = useState("");

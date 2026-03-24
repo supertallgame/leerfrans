@@ -6,7 +6,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { ArrowLeft, RotateCcw } from "lucide-react";
-import { vocabulary, shuffle } from "@/data/vocabulary";
+import { shuffle } from "@/data/vocabulary";
+import { useChapter } from "@/contexts/ChapterContext";
 
 interface Props {
   onBack: () => void;
@@ -32,8 +33,9 @@ function pickMissingWord(sentence: string): { display: string; correctWord: stri
 
 
 export default function SentenceFill({ onBack }: Props) {
+  const { activeVocabulary } = useChapter();
   const sentences = useMemo(() => {
-    const frOnly = vocabulary.map((v) => ({
+    const frOnly = activeVocabulary.map((v) => ({
       sentence: v.french,
       lang: "fr" as const,
       item: v,

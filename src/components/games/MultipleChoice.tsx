@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { playCorrect, playWrong } from "@/lib/sounds";
-import { vocabulary, shuffle } from "@/data/vocabulary";
+import { shuffle } from "@/data/vocabulary";
+import { useChapter } from "@/contexts/ChapterContext";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight, Check, X } from "lucide-react";
@@ -11,7 +12,8 @@ interface Props {
 }
 
 export default function MultipleChoice({ onBack }: Props) {
-  const [questions] = useState(() => shuffle(vocabulary));
+  const { activeVocabulary } = useChapter();
+  const [questions] = useState(() => shuffle(activeVocabulary));
   const [qIndex, setQIndex] = useState(0);
   const [selected, setSelected] = useState<string | null>(null);
   const [score, setScore] = useState(0);
@@ -26,11 +28,11 @@ export default function MultipleChoice({ onBack }: Props) {
     const isSentence = (s: string) => s.includes(" ") && s.length >= 20;
     const correctIsSentence = isSentence(correct);
     // Pick wrong options of the same type (sentence vs word)
-    const sameType = vocabulary
+    const sameType = activeVocabulary
       .filter((v) => v !== current && isSentence(showDutch ? v.french : v.dutch) === correctIsSentence)
       .map((v) => (showDutch ? v.french : v.dutch));
     // Fallback to all if not enough of same type
-    const pool = sameType.length >= 3 ? sameType : vocabulary.filter((v) => v !== current).map((v) => (showDutch ? v.french : v.dutch));
+    const pool = sameType.length >= 3 ? sameType : activeVocabulary.filter((v) => v !== current).map((v) => (showDutch ? v.french : v.dutch));
     const others = shuffle(pool).slice(0, 3);
     return shuffle([correct, ...others]);
   }, [qIndex, showDutch, finished]);
