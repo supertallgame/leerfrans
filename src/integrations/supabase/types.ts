@@ -148,6 +148,30 @@ export type Database = {
           },
         ]
       }
+      reviews: {
+        Row: {
+          created_at: string
+          display_name: string
+          id: string
+          message: string
+          rating: number
+        }
+        Insert: {
+          created_at?: string
+          display_name: string
+          id?: string
+          message: string
+          rating: number
+        }
+        Update: {
+          created_at?: string
+          display_name?: string
+          id?: string
+          message?: string
+          rating?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       game_rooms_public: {
