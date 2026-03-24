@@ -605,10 +605,16 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
             })}
           </div>
 
-          {showResult && isHost && (
+          {showResult && isHost && room.game_mode === "normal" && (
             <Button onClick={nextQuestion} className="w-full h-12 text-lg" size="lg">
               {room.current_question_index + 1 >= room.total_questions ? "🏆 Resultaten bekijken" : "Volgende vraag →"}
             </Button>
+          )}
+
+          {room.game_mode === "kahoot" && showResult && answeredCount < players.length && (
+            <p className="text-center text-sm text-muted-foreground animate-pulse">
+              Wachten op andere spelers... ({answeredCount}/{players.length})
+            </p>
           )}
 
           {/* Live scoreboard */}
