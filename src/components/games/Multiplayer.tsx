@@ -70,6 +70,7 @@ function generateCode(): string {
 }
 
 export default function Multiplayer({ onBack }: MultiplayerProps) {
+  const { activeVocabulary } = useChapter();
   const [phase, setPhase] = useState<Phase>("setup");
   const [playerName, setPlayerName] = useState("");
   const [roomCode, setRoomCode] = useState("");
