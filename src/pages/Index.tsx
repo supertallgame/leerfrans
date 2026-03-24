@@ -1,7 +1,8 @@
 import { useState, useEffect, lazy, Suspense } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { BookOpen, Brain, Puzzle, Keyboard, Users, PenTool, MessageSquare, Bot, Settings, Volume2, VolumeX, LogOut, Sun, Moon } from "lucide-react";
+import { BookOpen, Brain, Puzzle, Keyboard, Users, PenTool, MessageSquare, Bot, Settings, Volume2, VolumeX, LogOut, Sun, Moon, Star } from "lucide-react";
 import { FlagNL, FlagFR } from "@/components/Flags";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -37,6 +38,7 @@ const games = [
 ];
 
 const Index = () => {
+  const navigate = useNavigate();
   const [activeGame, setActiveGame] = useState<Game>("menu");
   const [showSettings, setShowSettings] = useState(false);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
@@ -162,13 +164,24 @@ const Index = () => {
           </CardContent>
         </Card>
 
-        <Card className="w-full bg-muted/50">
-          <CardContent className="p-3 md:p-4 text-center">
-            <p className="text-xs md:text-sm text-muted-foreground">
-              📚 <span className="font-medium">47 woorden & zinnen</span> om te oefenen
-            </p>
-          </CardContent>
-        </Card>
+        <div className="flex gap-2 w-full">
+          <Card className="flex-1 bg-muted/50">
+            <CardContent className="p-3 md:p-4 text-center">
+              <p className="text-xs md:text-sm text-muted-foreground">
+                📚 <span className="font-medium">47 woorden & zinnen</span>
+              </p>
+            </CardContent>
+          </Card>
+          <Card
+            className="cursor-pointer transition-all hover:shadow-md hover:-translate-y-0.5 active:scale-[0.98] bg-primary/5 border-primary/20"
+            onClick={() => navigate("/feedback")}
+          >
+            <CardContent className="p-3 md:p-4 flex items-center gap-2">
+              <Star className="h-4 w-4 text-primary" />
+              <span className="text-xs md:text-sm font-medium text-primary">Feedback</span>
+            </CardContent>
+          </Card>
+        </div>
       </div>
 
       {/* Login dialog */}
