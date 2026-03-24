@@ -57,7 +57,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
   const [phase, setPhase] = useState<Phase>("setup");
   const [playerName, setPlayerName] = useState("");
   const [roomCode, setRoomCode] = useState("");
-  const [isHost, setIsHost] = useState(false);
+  const [gameMode, setGameMode] = useState<GameMode>("normal");
   const [room, setRoom] = useState<Room | null>(null);
   const [players, setPlayers] = useState<Player[]>([]);
   const [myPlayerId, setMyPlayerId] = useState<string | null>(null);
@@ -102,6 +102,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
             current_question_index: newRoom.current_question_index,
             total_questions: newRoom.total_questions,
             direction: newRoom.direction,
+            game_mode: newRoom.game_mode || "normal",
           };
           setRoom(updatedRoom);
           if (newRoom.status === "playing") {
