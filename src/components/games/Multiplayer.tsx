@@ -454,13 +454,30 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
     return names[teamNum - 1] || TEAM_COLORS[teamNum - 1]?.name || `Team ${teamNum}`;
   };
 
+  const getTeamEmoji = (teamNum: number): string => {
+    const emojis = room?.team_emojis || teamEmojis;
+    return emojis[teamNum - 1] || TEAM_COLORS[teamNum - 1]?.emoji || "🔵";
+  };
+
   const updateTeamName = async (index: number, name: string) => {
     const newNames = [...teamNames];
     newNames[index] = name;
     setTeamNames(newNames);
     if (room && myPlayerId && myPlayerToken) {
       await supabase.functions.invoke("game-action", {
-        body: { action: "update-team-names", roomId: room.id, playerId: myPlayerId, playerToken: myPlayerToken, teamNames: newNames },
+        body: { action: "update-team-names", roomId: room.id, playerId: myPlayerId, playerToken: myPlayerToken, teamNames: newNames, teamEmojis },
+      });
+    }
+  };
+
+  const updateTeamEmoji = async (index: number, emoji: string) => {
+    const newEmojis = [...teamEmojis];
+    newEmojis[index] = emoji;
+    setTeamEmojis(newEmojis);
+    setShowEmojiPicker(null);
+    if (room && myPlayerId && myPlayerToken) {
+      await supabase.functions.invoke("game-action", {
+        body: { action: "update-team-names", roomId: room.id, playerId: myPlayerId, playerToken: myPlayerToken, teamNames, teamEmojis: newEmojis },
       });
     }
   };
