@@ -39,6 +39,7 @@ interface Room {
   game_mode: GameMode;
   team_mode: TeamMode;
   num_teams: number;
+  team_names: string[];
 }
 
 interface Player {
@@ -71,6 +72,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
   const [gameMode, setGameMode] = useState<GameMode>("normal");
   const [teamMode, setTeamMode] = useState<TeamMode>("solo");
   const [numTeams, setNumTeams] = useState(2);
+  const [teamNames, setTeamNames] = useState<string[]>(["Team 1", "Team 2", "Team 3", "Team 4"]);
   const [isHost, setIsHost] = useState(false);
   const [room, setRoom] = useState<Room | null>(null);
   const [players, setPlayers] = useState<Player[]>([]);
