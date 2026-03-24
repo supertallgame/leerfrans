@@ -158,6 +158,19 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
     }
   }, [room?.current_question_index, phase, myPlayerId, myPlayerToken, fetchQuestion]);
 
+  // Kahoot mode: auto-advance when all players answered
+  useEffect(() => {
+    if (!room || room.game_mode !== "kahoot" || phase !== "playing" || !isHost) return;
+    if (players.length === 0) return;
+    const allAnswered = players.every((p) => p.has_answered);
+    if (!allAnswered) return;
+
+    const timer = setTimeout(() => {
+      nextQuestion();
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, [players, room, phase, isHost]);
+
   // Heartbeat: update last_active every 60 seconds + warn at 4 min inactivity
   useEffect(() => {
     if (!myPlayerId) return;
