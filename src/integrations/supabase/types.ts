@@ -225,7 +225,9 @@ export type Database = {
           host_name: string | null
           host_player_id: string | null
           id: string | null
+          num_teams: number | null
           status: string | null
+          team_mode: string | null
           total_questions: number | null
         }
         Insert: {
@@ -237,7 +239,9 @@ export type Database = {
           host_name?: string | null
           host_player_id?: string | null
           id?: string | null
+          num_teams?: number | null
           status?: string | null
+          team_mode?: string | null
           total_questions?: number | null
         }
         Update: {
@@ -249,7 +253,9 @@ export type Database = {
           host_name?: string | null
           host_player_id?: string | null
           id?: string | null
+          num_teams?: number | null
           status?: string | null
+          team_mode?: string | null
           total_questions?: number | null
         }
         Relationships: [
