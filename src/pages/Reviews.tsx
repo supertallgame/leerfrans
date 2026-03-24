@@ -197,6 +197,7 @@ export default function Reviews() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleteReplyId, setDeleteReplyId] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<"newest" | "rating">("newest");
+  const [filterRating, setFilterRating] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -240,7 +241,11 @@ export default function Reviews() {
     setDeleteReplyId(null);
   };
 
-  const sortedReviews = [...reviews].sort((a, b) => {
+  const filteredReviews = filterRating
+    ? reviews.filter((r) => r.rating === filterRating)
+    : reviews;
+
+  const sortedReviews = [...filteredReviews].sort((a, b) => {
     if (sortBy === "rating") return b.rating - a.rating;
     return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
   });
@@ -282,7 +287,7 @@ export default function Reviews() {
           </CardContent>
         </Card>
 
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Button
             variant={sortBy === "newest" ? "default" : "outline"}
             size="sm"
@@ -297,6 +302,29 @@ export default function Reviews() {
           >
             Hoogste score
           </Button>
+        </div>
+
+        <div className="flex gap-1.5 items-center">
+          <span className="text-xs text-muted-foreground mr-1">Filter:</span>
+          <Button
+            variant={filterRating === null ? "default" : "outline"}
+            size="sm"
+            className="h-7 px-2.5 text-xs"
+            onClick={() => setFilterRating(null)}
+          >
+            Alle
+          </Button>
+          {[5, 4, 3, 2, 1].map((n) => (
+            <Button
+              key={n}
+              variant={filterRating === n ? "default" : "outline"}
+              size="sm"
+              className="h-7 px-2 text-xs gap-0.5"
+              onClick={() => setFilterRating(filterRating === n ? null : n)}
+            >
+              {n} <Star className="h-3 w-3 fill-current" />
+            </Button>
+          ))}
         </div>
 
         {loading ? (
