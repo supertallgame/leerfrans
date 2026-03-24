@@ -25,6 +25,7 @@ export type Database = {
           player_token: string
           room_id: string
           score: number
+          team_number: number | null
         }
         Insert: {
           current_answer?: string | null
@@ -36,6 +37,7 @@ export type Database = {
           player_token?: string
           room_id: string
           score?: number
+          team_number?: number | null
         }
         Update: {
           current_answer?: string | null
@@ -47,6 +49,7 @@ export type Database = {
           player_token?: string
           room_id?: string
           score?: number
+          team_number?: number | null
         }
         Relationships: [
           {
@@ -111,7 +114,9 @@ export type Database = {
           host_name: string
           host_player_id: string | null
           id: string
+          num_teams: number
           status: string
+          team_mode: string
           total_questions: number
         }
         Insert: {
@@ -123,7 +128,9 @@ export type Database = {
           host_name: string
           host_player_id?: string | null
           id?: string
+          num_teams?: number
           status?: string
+          team_mode?: string
           total_questions?: number
         }
         Update: {
@@ -135,7 +142,9 @@ export type Database = {
           host_name?: string
           host_player_id?: string | null
           id?: string
+          num_teams?: number
           status?: string
+          team_mode?: string
           total_questions?: number
         }
         Relationships: [
