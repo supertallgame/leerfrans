@@ -655,9 +655,9 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
 
           {/* Kahoot scoreboard overlay */}
           {room.game_mode === "kahoot" && showKahootScoreboard && (
-            <Card className="border-2 border-primary/30 bg-background shadow-xl">
+            <Card className="border-2 border-primary/30 bg-background shadow-xl animate-scale-in">
               <CardContent className="p-6 space-y-4">
-                <div className="text-center">
+                <div className="text-center animate-fade-in">
                   <h3 className="text-lg font-bold flex items-center justify-center gap-2">
                     <Trophy className="h-5 w-5 text-primary" /> Tussenstand
                   </h3>
@@ -671,9 +671,10 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
                   {[...players].sort((a, b) => b.score - a.score).map((p, i) => (
                     <div
                       key={p.id}
-                      className={`flex items-center justify-between p-3 rounded-lg ${
+                      className={`flex items-center justify-between p-3 rounded-lg animate-fade-in ${
                         p.id === myPlayerId ? "bg-primary/10 border border-primary/20" : "bg-muted/50"
                       }`}
+                      style={{ animationDelay: `${i * 150}ms`, animationFillMode: "backwards" }}
                     >
                       <div className="flex items-center gap-2">
                         <span className="text-lg">
