@@ -622,10 +622,37 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <span className="text-sm text-muted-foreground">Teamnamen:</span>
+                  <span className="text-sm text-muted-foreground">Teams:</span>
                   {Array.from({ length: numTeams }, (_, i) => (
                     <div key={i} className="flex items-center gap-2">
-                      <span className="text-lg">{TEAM_COLORS[i]?.emoji}</span>
+                      <div className="relative">
+                        <button
+                          className="text-lg w-9 h-9 flex items-center justify-center rounded-md border border-input hover:bg-accent transition-colors"
+                          onClick={(e) => { e.stopPropagation(); setShowEmojiPicker(showEmojiPicker === i ? null : i); }}
+                          title="Kies emoji"
+                        >
+                          {teamEmojis[i] || TEAM_COLORS[i]?.emoji}
+                        </button>
+                        {showEmojiPicker === i && (
+                          <div className="absolute z-50 top-10 left-0 bg-popover border border-border rounded-lg shadow-lg p-2 grid grid-cols-6 gap-1 w-56" onClick={(e) => e.stopPropagation()}>
+                            {EMOJI_OPTIONS.map((em) => (
+                              <button
+                                key={em}
+                                className={`text-lg w-8 h-8 flex items-center justify-center rounded hover:bg-accent transition-colors ${teamEmojis[i] === em ? "bg-primary/20 ring-2 ring-primary" : ""}`}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  const newEmojis = [...teamEmojis];
+                                  newEmojis[i] = em;
+                                  setTeamEmojis(newEmojis);
+                                  setShowEmojiPicker(null);
+                                }}
+                              >
+                                {em}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                       <Input
                         value={teamNames[i] || ""}
                         onChange={(e) => {
@@ -723,7 +750,31 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
                   <Card key={teamNum} className={`border-2 ${tc?.border}`}>
                     <CardContent className="p-4">
                       <div className={`font-semibold mb-2 flex items-center gap-2 ${tc?.text}`}>
-                        {tc?.emoji}
+                        {isHost ? (
+                          <div className="relative">
+                            <button
+                              className="text-lg w-8 h-8 flex items-center justify-center rounded hover:bg-accent transition-colors"
+                              onClick={() => setShowEmojiPicker(showEmojiPicker === (teamNum - 1) ? null : (teamNum - 1))}
+                            >
+                              {getTeamEmoji(teamNum)}
+                            </button>
+                            {showEmojiPicker === (teamNum - 1) && (
+                              <div className="absolute z-50 top-9 left-0 bg-popover border border-border rounded-lg shadow-lg p-2 grid grid-cols-6 gap-1 w-56">
+                                {EMOJI_OPTIONS.map((em) => (
+                                  <button
+                                    key={em}
+                                    className={`text-lg w-8 h-8 flex items-center justify-center rounded hover:bg-accent transition-colors ${getTeamEmoji(teamNum) === em ? "bg-primary/20 ring-2 ring-primary" : ""}`}
+                                    onClick={() => updateTeamEmoji(teamNum - 1, em)}
+                                  >
+                                    {em}
+                                  </button>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-lg">{getTeamEmoji(teamNum)}</span>
+                        )}
                         {isHost ? (
                           <Input
                             value={getTeamName(teamNum)}
@@ -910,7 +961,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
                         <div key={team.teamNumber} className={`p-3 rounded-lg animate-fade-in ${tc?.bg} border ${tc?.border}`} style={{ animationDelay: `${i * 150}ms`, animationFillMode: "backwards" }}>
                           <div className="flex items-center justify-between mb-1">
                             <span className={`font-bold ${tc?.text}`}>
-                              {i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `${i + 1}.`} {tc?.emoji} {getTeamName(team.teamNumber)}
+                              {i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `${i + 1}.`} {getTeamEmoji(team.teamNumber)} {getTeamName(team.teamNumber)}
                             </span>
                             <span className="font-mono font-bold text-lg">{team.total}</span>
                           </div>
@@ -955,7 +1006,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
                     return (
                       <div key={team.teamNumber} className="space-y-1">
                         <div className={`flex justify-between items-center text-sm font-bold ${tc?.text}`}>
-                          <span>{i === 0 && "🥇 "}{i === 1 && "🥈 "}{i === 2 && "🥉 "}{tc?.emoji} {getTeamName(team.teamNumber)}</span>
+                          <span>{i === 0 && "🥇 "}{i === 1 && "🥈 "}{i === 2 && "🥉 "}{getTeamEmoji(team.teamNumber)} {getTeamName(team.teamNumber)}</span>
                           <span className="font-mono">{team.total}</span>
                         </div>
                         {team.players.map((p) => (
@@ -1014,7 +1065,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
                         <div className="flex items-center gap-3">
                           <span className="text-2xl">{i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `${i + 1}.`}</span>
                           <div>
-                            <span className={`font-semibold ${tc?.text}`}>{tc?.emoji} {getTeamName(team.teamNumber)}</span>
+                            <span className={`font-semibold ${tc?.text}`}>{getTeamEmoji(team.teamNumber)} {getTeamName(team.teamNumber)}</span>
                             <p className="text-xs text-muted-foreground">{team.players.map((p) => p.player_name).join(", ")}</p>
                           </div>
                         </div>
