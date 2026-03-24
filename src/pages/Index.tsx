@@ -133,9 +133,6 @@ const Index = () => {
           </div>
         </div>
         <div className="text-center space-y-2 md:space-y-3 w-full">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium tracking-wide uppercase">
-            <FlagNL className="w-5 h-3.5 rounded-sm" /> Nederlands ↔ Français <FlagFR className="w-5 h-3.5 rounded-sm" />
-          </div>
           <h1 className="text-3xl md:text-5xl font-bold tracking-tight">
             Woordjes Leren
           </h1>
