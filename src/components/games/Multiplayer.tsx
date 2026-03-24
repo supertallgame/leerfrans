@@ -58,6 +58,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
   const [playerName, setPlayerName] = useState("");
   const [roomCode, setRoomCode] = useState("");
   const [gameMode, setGameMode] = useState<GameMode>("normal");
+  const [isHost, setIsHost] = useState(false);
   const [room, setRoom] = useState<Room | null>(null);
   const [players, setPlayers] = useState<Player[]>([]);
   const [myPlayerId, setMyPlayerId] = useState<string | null>(null);
