@@ -23,7 +23,8 @@ interface MultiplayerProps {
   onBack: () => void;
 }
 
-type Phase = "setup" | "lobby" | "playing" | "results";
+type Phase = "setup" | "mode-select" | "lobby" | "playing" | "results";
+type GameMode = "normal" | "kahoot";
 
 interface Room {
   id: string;
@@ -34,6 +35,7 @@ interface Room {
   current_question_index: number;
   total_questions: number;
   direction: string;
+  game_mode: GameMode;
 }
 
 interface Player {
