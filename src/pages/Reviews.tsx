@@ -162,7 +162,7 @@ export default function Reviews() {
           </Card>
         ) : (
           <div className="space-y-3">
-            {reviews.map((review) => (
+            {sortedReviews.map((review) => (
               <Card key={review.id} className="animate-fade-in">
                 <CardContent className="p-4 space-y-2">
                   <div className="flex items-center justify-between">
