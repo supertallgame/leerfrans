@@ -751,6 +751,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
               </div>
             </CardContent>
           </Card>
+          {leaveConfirmDialog}
         </div>
       </div>
     );
