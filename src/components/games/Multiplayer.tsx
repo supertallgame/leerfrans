@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, Users, Copy, Check, Trophy, LogOut } from "lucide-react";
+import { ArrowLeft, Users, Copy, Check, Trophy, LogOut, Zap, Clock } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,7 +23,8 @@ interface MultiplayerProps {
   onBack: () => void;
 }
 
-type Phase = "setup" | "lobby" | "playing" | "results";
+type Phase = "setup" | "mode-select" | "lobby" | "playing" | "results";
+type GameMode = "normal" | "kahoot";
 
 interface Room {
   id: string;
@@ -34,6 +35,7 @@ interface Room {
   current_question_index: number;
   total_questions: number;
   direction: string;
+  game_mode: GameMode;
 }
 
 interface Player {
@@ -55,6 +57,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
   const [phase, setPhase] = useState<Phase>("setup");
   const [playerName, setPlayerName] = useState("");
   const [roomCode, setRoomCode] = useState("");
+  const [gameMode, setGameMode] = useState<GameMode>("normal");
   const [isHost, setIsHost] = useState(false);
   const [room, setRoom] = useState<Room | null>(null);
   const [players, setPlayers] = useState<Player[]>([]);
@@ -100,6 +103,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
             current_question_index: newRoom.current_question_index,
             total_questions: newRoom.total_questions,
             direction: newRoom.direction,
+            game_mode: newRoom.game_mode || "normal",
           };
           setRoom(updatedRoom);
           if (newRoom.status === "playing") {
@@ -154,6 +158,19 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
     }
   }, [room?.current_question_index, phase, myPlayerId, myPlayerToken, fetchQuestion]);
 
+  // Kahoot mode: auto-advance when all players answered
+  useEffect(() => {
+    if (!room || room.game_mode !== "kahoot" || phase !== "playing" || !isHost) return;
+    if (players.length === 0) return;
+    const allAnswered = players.every((p) => p.has_answered);
+    if (!allAnswered) return;
+
+    const timer = setTimeout(() => {
+      nextQuestion();
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, [players, room, phase, isHost]);
+
   // Heartbeat: update last_active every 60 seconds + warn at 4 min inactivity
   useEffect(() => {
     if (!myPlayerId) return;
@@ -200,12 +217,17 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
 
   const createRoom = async () => {
     if (!playerName.trim()) return toast.error("Vul je naam in!");
+    setPhase("mode-select");
+  };
+
+  const startWithMode = async (mode: GameMode) => {
+    setGameMode(mode);
     const code = generateCode();
     const questions = shuffle(vocabulary).slice(0, 20).map((v) => ({ french: v.french, dutch: v.dutch }));
 
     const { data: roomData, error: roomError } = await supabase
       .from("game_rooms")
-      .insert({ code, host_name: playerName, total_questions: 20 })
+      .insert({ code, host_name: playerName, total_questions: 20, game_mode: mode } as any)
       .select()
       .single();
 
@@ -226,6 +248,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
       current_question_index: roomData.current_question_index,
       total_questions: roomData.total_questions,
       direction: roomData.direction,
+      game_mode: mode,
     });
     setMyPlayerId(pid);
     setMyPlayerToken(ptoken);
@@ -233,7 +256,6 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
     setPhase("lobby");
     fetchPlayers(roomData.id);
 
-    // Register as host and seed questions via edge function (atomic, server-side)
     if (pid && ptoken) {
       await supabase.functions.invoke("game-action", {
         body: { action: "register-host", roomId: roomData.id, playerId: pid, playerToken: ptoken },
@@ -250,7 +272,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
 
     const { data: roomData, error } = await (supabase
       .from("game_rooms_public" as any)
-      .select("id, code, host_name, host_player_id, status, current_question_index, total_questions, direction")
+      .select("id, code, host_name, host_player_id, status, current_question_index, total_questions, direction, game_mode")
       .eq("code", roomCode.toUpperCase().trim())
       .single() as any);
 
@@ -260,7 +282,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
     const { data: playerData } = await supabase
       .rpc("join_game_room", { p_room_id: roomData.id, p_player_name: playerName }) as any;
 
-    setRoom(roomData as Room);
+    setRoom({ ...roomData, game_mode: roomData.game_mode || "normal" } as Room);
     setMyPlayerId(playerData?.id ?? null);
     setMyPlayerToken((playerData as any)?.player_token ?? null);
     setIsHost(false);
@@ -418,6 +440,59 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
     );
   }
 
+  // MODE SELECT PHASE
+  if (phase === "mode-select") {
+    return (
+      <div className="min-h-screen flex flex-col items-center px-3 py-6 md:px-4 md:py-12">
+        <div className="max-w-md w-full space-y-4 md:space-y-6">
+          <Button variant="ghost" onClick={() => setPhase("setup")} className="gap-2 text-sm">
+            <ArrowLeft className="h-4 w-4" /> Terug
+          </Button>
+          <div className="text-center space-y-2">
+            <h1 className="text-2xl md:text-3xl font-bold">Kies een modus</h1>
+            <p className="text-sm md:text-base text-muted-foreground">Hoe wil je spelen?</p>
+          </div>
+
+          <div className="grid gap-3">
+            <Card
+              className="cursor-pointer transition-all hover:shadow-lg hover:-translate-y-1 active:scale-[0.98] border-2 hover:border-primary/50"
+              onClick={() => startWithMode("normal")}
+            >
+              <CardContent className="p-4 md:p-6 flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                  <Zap className="h-6 w-6 text-primary" />
+                </div>
+                <div>
+                  <h2 className="text-base md:text-lg font-bold">⚡ Normaal</h2>
+                  <p className="text-xs md:text-sm text-muted-foreground">
+                    De host bepaalt het tempo en gaat door naar de volgende vraag
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card
+              className="cursor-pointer transition-all hover:shadow-lg hover:-translate-y-1 active:scale-[0.98] border-2 hover:border-accent/50"
+              onClick={() => startWithMode("kahoot")}
+            >
+              <CardContent className="p-4 md:p-6 flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center shrink-0">
+                  <Clock className="h-6 w-6 text-accent" />
+                </div>
+                <div>
+                  <h2 className="text-base md:text-lg font-bold">🎯 Kahoot-stijl</h2>
+                  <p className="text-xs md:text-sm text-muted-foreground">
+                    Iedereen moet antwoorden voordat de volgende vraag komt
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // LOBBY PHASE
   if (phase === "lobby") {
     return (
@@ -543,10 +618,16 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
             })}
           </div>
 
-          {showResult && isHost && (
+          {showResult && isHost && room.game_mode === "normal" && (
             <Button onClick={nextQuestion} className="w-full h-12 text-lg" size="lg">
               {room.current_question_index + 1 >= room.total_questions ? "🏆 Resultaten bekijken" : "Volgende vraag →"}
             </Button>
+          )}
+
+          {room.game_mode === "kahoot" && showResult && answeredCount < players.length && (
+            <p className="text-center text-sm text-muted-foreground animate-pulse">
+              Wachten op andere spelers... ({answeredCount}/{players.length})
+            </p>
           )}
 
           {/* Live scoreboard */}
