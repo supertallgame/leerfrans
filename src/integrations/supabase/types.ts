@@ -117,6 +117,7 @@ export type Database = {
           num_teams: number
           status: string
           team_mode: string
+          team_names: Json
           total_questions: number
         }
         Insert: {
@@ -131,6 +132,7 @@ export type Database = {
           num_teams?: number
           status?: string
           team_mode?: string
+          team_names?: Json
           total_questions?: number
         }
         Update: {
@@ -145,6 +147,7 @@ export type Database = {
           num_teams?: number
           status?: string
           team_mode?: string
+          team_names?: Json
           total_questions?: number
         }
         Relationships: [
@@ -228,6 +231,7 @@ export type Database = {
           num_teams: number | null
           status: string | null
           team_mode: string | null
+          team_names: Json | null
           total_questions: number | null
         }
         Insert: {
@@ -242,6 +246,7 @@ export type Database = {
           num_teams?: number | null
           status?: string | null
           team_mode?: string | null
+          team_names?: Json | null
           total_questions?: number | null
         }
         Update: {
@@ -256,6 +261,7 @@ export type Database = {
           num_teams?: number | null
           status?: string | null
           team_mode?: string | null
+          team_names?: Json | null
           total_questions?: number | null
         }
         Relationships: [

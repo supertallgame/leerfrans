@@ -39,6 +39,7 @@ interface Room {
   game_mode: GameMode;
   team_mode: TeamMode;
   num_teams: number;
+  team_names: string[];
 }
 
 interface Player {
@@ -71,6 +72,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
   const [gameMode, setGameMode] = useState<GameMode>("normal");
   const [teamMode, setTeamMode] = useState<TeamMode>("solo");
   const [numTeams, setNumTeams] = useState(2);
+  const [teamNames, setTeamNames] = useState<string[]>(["Team 1", "Team 2", "Team 3", "Team 4"]);
   const [isHost, setIsHost] = useState(false);
   const [room, setRoom] = useState<Room | null>(null);
   const [players, setPlayers] = useState<Player[]>([]);
@@ -119,8 +121,10 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
             game_mode: newRoom.game_mode || "normal",
             team_mode: newRoom.team_mode || "solo",
             num_teams: newRoom.num_teams || 2,
+            team_names: newRoom.team_names || [],
           };
           setRoom(updatedRoom);
+          if (updatedRoom.team_names?.length > 0) setTeamNames(updatedRoom.team_names);
           if (newRoom.status === "playing") {
             setPhase("playing");
             setSelectedAnswer(null);
@@ -253,7 +257,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
 
     const { data: roomData, error: roomError } = await supabase
       .from("game_rooms")
-      .insert({ code, host_name: playerName, total_questions: 20, game_mode: gameMode, team_mode: tm, num_teams: teams } as any)
+      .insert({ code, host_name: playerName, total_questions: 20, game_mode: gameMode, team_mode: tm, num_teams: teams, team_names: teamNames.slice(0, teams) } as any)
       .select()
       .single();
 
@@ -277,6 +281,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
       game_mode: gameMode,
       team_mode: tm,
       num_teams: teams,
+      team_names: teamNames.slice(0, teams),
     });
     setMyPlayerId(pid);
     setMyPlayerToken(ptoken);
@@ -315,6 +320,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
       game_mode: roomData.game_mode || "normal",
       team_mode: roomData.team_mode || "solo",
       num_teams: roomData.num_teams || 2,
+      team_names: roomData.team_names || [],
     } as Room);
     setMyPlayerId(playerData?.id ?? null);
     setMyPlayerToken((playerData as any)?.player_token ?? null);
@@ -430,6 +436,23 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
       body: { action: "shuffle-teams", roomId: room.id, playerId: myPlayerId, playerToken: myPlayerToken, numTeams: room.num_teams },
     });
     fetchPlayers(room.id);
+  };
+
+  // Get team display name
+  const getTeamName = (teamNum: number): string => {
+    const names = room?.team_names || teamNames;
+    return names[teamNum - 1] || TEAM_COLORS[teamNum - 1]?.name || `Team ${teamNum}`;
+  };
+
+  const updateTeamName = async (index: number, name: string) => {
+    const newNames = [...teamNames];
+    newNames[index] = name;
+    setTeamNames(newNames);
+    if (room && myPlayerId && myPlayerToken) {
+      await supabase.functions.invoke("game-action", {
+        body: { action: "update-team-names", roomId: room.id, playerId: myPlayerId, playerToken: myPlayerToken, teamNames: newNames },
+      });
+    }
   };
 
   // Team scores helper
@@ -571,6 +594,26 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
                     ))}
                   </div>
                 </div>
+                <div className="space-y-2">
+                  <span className="text-sm text-muted-foreground">Teamnamen:</span>
+                  {Array.from({ length: numTeams }, (_, i) => (
+                    <div key={i} className="flex items-center gap-2">
+                      <span className="text-lg">{TEAM_COLORS[i]?.emoji}</span>
+                      <Input
+                        value={teamNames[i] || ""}
+                        onChange={(e) => {
+                          const newNames = [...teamNames];
+                          newNames[i] = e.target.value;
+                          setTeamNames(newNames);
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                        placeholder={`Team ${i + 1}`}
+                        maxLength={20}
+                        className="text-sm h-9"
+                      />
+                    </div>
+                  ))}
+                </div>
                 <Button className="w-full" onClick={(e) => { e.stopPropagation(); startWithSettings("teams", numTeams); }}>
                   Starten met {numTeams} teams
                 </Button>
@@ -652,9 +695,20 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
                 return (
                   <Card key={teamNum} className={`border-2 ${tc?.border}`}>
                     <CardContent className="p-4">
-                      <h3 className={`font-semibold mb-2 flex items-center gap-2 ${tc?.text}`}>
-                        {tc?.emoji} {tc?.name} ({teamPlayers.length})
-                      </h3>
+                      <div className={`font-semibold mb-2 flex items-center gap-2 ${tc?.text}`}>
+                        {tc?.emoji}
+                        {isHost ? (
+                          <Input
+                            value={getTeamName(teamNum)}
+                            onChange={(e) => updateTeamName(teamNum - 1, e.target.value)}
+                            className={`h-7 text-sm font-semibold border-dashed ${tc?.text}`}
+                            maxLength={20}
+                          />
+                        ) : (
+                          <span>{getTeamName(teamNum)}</span>
+                        )}
+                        <span className="text-sm font-normal">({teamPlayers.length})</span>
+                      </div>
                       <div className="space-y-1">
                         {teamPlayers.map((p) => (
                           <div key={p.id} className={`flex items-center justify-between p-2 rounded-lg ${tc?.bg}`}>
@@ -829,7 +883,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
                         <div key={team.teamNumber} className={`p-3 rounded-lg animate-fade-in ${tc?.bg} border ${tc?.border}`} style={{ animationDelay: `${i * 150}ms`, animationFillMode: "backwards" }}>
                           <div className="flex items-center justify-between mb-1">
                             <span className={`font-bold ${tc?.text}`}>
-                              {i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `${i + 1}.`} {tc?.emoji} {tc?.name}
+                              {i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `${i + 1}.`} {tc?.emoji} {getTeamName(team.teamNumber)}
                             </span>
                             <span className="font-mono font-bold text-lg">{team.total}</span>
                           </div>
@@ -874,7 +928,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
                     return (
                       <div key={team.teamNumber} className="space-y-1">
                         <div className={`flex justify-between items-center text-sm font-bold ${tc?.text}`}>
-                          <span>{i === 0 && "🥇 "}{i === 1 && "🥈 "}{i === 2 && "🥉 "}{tc?.emoji} {tc?.name}</span>
+                          <span>{i === 0 && "🥇 "}{i === 1 && "🥈 "}{i === 2 && "🥉 "}{tc?.emoji} {getTeamName(team.teamNumber)}</span>
                           <span className="font-mono">{team.total}</span>
                         </div>
                         {team.players.map((p) => (
@@ -933,7 +987,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
                         <div className="flex items-center gap-3">
                           <span className="text-2xl">{i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `${i + 1}.`}</span>
                           <div>
-                            <span className={`font-semibold ${tc?.text}`}>{tc?.emoji} {tc?.name}</span>
+                            <span className={`font-semibold ${tc?.text}`}>{tc?.emoji} {getTeamName(team.teamNumber)}</span>
                             <p className="text-xs text-muted-foreground">{team.players.map((p) => p.player_name).join(", ")}</p>
                           </div>
                         </div>

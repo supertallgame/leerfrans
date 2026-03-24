@@ -58,7 +58,7 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    const { action, roomId, playerId, playerToken, answer, questions: bodyQuestions, teamAssignments, numTeams } = await req.json();
+    const { action, roomId, playerId, playerToken, answer, questions: bodyQuestions, teamAssignments, numTeams, teamNames } = await req.json();
 
     if (!roomId || !playerId || !playerToken) {
       return jsonResponse({ error: "Missing fields" }, 400);
@@ -121,6 +121,21 @@ Deno.serve(async (req) => {
       await supabase
         .from("game_questions")
         .insert({ room_id: roomId, questions: bodyQuestions });
+      return jsonResponse({ success: true });
+    }
+
+    // ACTION: update-team-names (host only)
+    if (action === "update-team-names") {
+      if (!isHost(player, room)) {
+        return jsonResponse({ error: "Not the host" }, 403);
+      }
+      if (!Array.isArray(teamNames)) {
+        return jsonResponse({ error: "Invalid team names" }, 400);
+      }
+      await supabase
+        .from("game_rooms")
+        .update({ team_names: teamNames })
+        .eq("id", roomId);
       return jsonResponse({ success: true });
     }
 
