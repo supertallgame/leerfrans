@@ -2,8 +2,9 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowLeft, Star, MessageSquare } from "lucide-react";
+import { ArrowLeft, Star, MessageSquare, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface Review {
   id: string;
@@ -12,6 +13,8 @@ interface Review {
   message: string;
   created_at: string;
 }
+
+const OPERATOR_EMAIL = "brankovantland@gmail.com";
 
 function Stars({ rating }: { rating: number }) {
   return (
@@ -46,6 +49,7 @@ export default function Reviews() {
   const navigate = useNavigate();
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isOperator, setIsOperator] = useState(false);
 
   useEffect(() => {
     const fetchReviews = async () => {
@@ -57,7 +61,21 @@ export default function Reviews() {
       setLoading(false);
     };
     fetchReviews();
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setIsOperator(session?.user?.email === OPERATOR_EMAIL);
+    });
   }, []);
+
+  const handleDelete = async (id: string) => {
+    const { error } = await (supabase.from("reviews" as any) as any).delete().eq("id", id);
+    if (error) {
+      toast.error("Kon review niet verwijderen");
+      return;
+    }
+    setReviews((prev) => prev.filter((r) => r.id !== id));
+    toast.success("Review verwijderd");
+  };
 
   const avgRating = reviews.length
     ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
@@ -82,7 +100,6 @@ export default function Reviews() {
           </p>
         </div>
 
-        {/* Summary */}
         <Card className="bg-primary/5 border-primary/20">
           <CardContent className="p-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -97,7 +114,6 @@ export default function Reviews() {
           </CardContent>
         </Card>
 
-        {/* Reviews list */}
         {loading ? (
           <div className="flex justify-center py-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
@@ -115,9 +131,21 @@ export default function Reviews() {
                 <CardContent className="p-4 space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="font-semibold text-sm">{review.display_name}</span>
-                    <span className="text-xs text-muted-foreground">
-                      {timeAgo(review.created_at)}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-muted-foreground">
+                        {timeAgo(review.created_at)}
+                      </span>
+                      {isOperator && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6 text-destructive hover:text-destructive"
+                          onClick={() => handleDelete(review.id)}
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      )}
+                    </div>
                   </div>
                   <Stars rating={review.rating} />
                   <p className="text-sm text-foreground/80">{review.message}</p>
