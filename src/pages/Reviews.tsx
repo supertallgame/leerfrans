@@ -94,9 +94,6 @@ export default function Reviews() {
                 </p>
               </div>
             </div>
-            <Button onClick={() => navigate("/feedback")} size="sm" className="gap-1.5">
-              <MessageSquare className="h-3.5 w-3.5" /> Schrijf review
-            </Button>
           </CardContent>
         </Card>
 
