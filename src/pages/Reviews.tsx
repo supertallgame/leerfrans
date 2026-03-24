@@ -133,6 +133,23 @@ export default function Reviews() {
           </CardContent>
         </Card>
 
+        <div className="flex gap-2">
+          <Button
+            variant={sortBy === "newest" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setSortBy("newest")}
+          >
+            Nieuwste eerst
+          </Button>
+          <Button
+            variant={sortBy === "rating" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setSortBy("rating")}
+          >
+            Hoogste score
+          </Button>
+        </div>
+
         {loading ? (
           <div className="flex justify-center py-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
