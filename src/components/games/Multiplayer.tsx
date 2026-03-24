@@ -223,6 +223,15 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
     };
   }, [myPlayerId]);
 
+  // Poll players list every 3 seconds to keep it in sync (realtime blocked by RLS)
+  useEffect(() => {
+    if (!room?.id) return;
+    const interval = setInterval(() => {
+      fetchPlayers(room.id);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [room?.id]);
+
   const fetchPlayers = async (roomId: string) => {
     const { data } = await supabase
       .rpc("get_room_players", { p_room_id: roomId }) as any;
