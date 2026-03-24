@@ -73,6 +73,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
   const [showKahootScoreboard, setShowKahootScoreboard] = useState(false);
   const [kahootCountdown, setKahootCountdown] = useState<number | null>(null);
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
+  const [pendingCorrect, setPendingCorrect] = useState<boolean | null>(null);
 
   // Fetch current question from edge function (server-side, no answers exposed)
   const fetchQuestion = useCallback(async (roomId: string, playerId: string, playerToken: string) => {
@@ -156,6 +157,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
       setSelectedAnswer(null);
       setShowResult(false);
       setCorrectAnswer("");
+      setPendingCorrect(null);
       setShowKahootScoreboard(false);
       setKahootCountdown(null);
       fetchQuestion(room.id, myPlayerId, myPlayerToken);
@@ -168,9 +170,13 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
     if (players.length === 0 || showKahootScoreboard) return;
     const allAnswered = players.every((p) => p.has_answered);
     if (!allAnswered) return;
+    setShowResult(true);
     setShowKahootScoreboard(true);
     setKahootCountdown(5);
-  }, [players, room, phase, showKahootScoreboard]);
+    // Play sound now that result is revealed
+    if (pendingCorrect === true) playCorrect();
+    else if (pendingCorrect === false) playWrong();
+  }, [players, room, phase, showKahootScoreboard, pendingCorrect]);
 
   // Kahoot scoreboard countdown + auto-advance
   useEffect(() => {
@@ -338,19 +344,25 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
   }, [countdown, room, myPlayerId, myPlayerToken]);
 
   const submitAnswer = async (answer: string) => {
-    if (!room || !myPlayerId || showResult) return;
+    if (!room || !myPlayerId || selectedAnswer) return;
     setSelectedAnswer(answer);
-    setShowResult(true);
 
     const { data } = await supabase.functions.invoke("game-action", {
       body: { action: "submit-answer", roomId: room.id, playerId: myPlayerId, playerToken: myPlayerToken, answer },
     });
 
-    // Get correct answer from server response and play sound
+    // In kahoot mode, store the result but don't reveal yet
     if (data?.correctAnswer) {
-      setCorrectAnswer(data.correctAnswer);
-      if (data.correct) playCorrect();
-      else playWrong();
+      if (room.game_mode === "kahoot") {
+        // Save for later reveal
+        setCorrectAnswer(data.correctAnswer);
+        setPendingCorrect(data.correct);
+      } else {
+        setShowResult(true);
+        setCorrectAnswer(data.correctAnswer);
+        if (data.correct) playCorrect();
+        else playWrong();
+      }
     }
   };
 
@@ -624,8 +636,12 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
             {options.map((option, i) => {
               let extraClass = "h-14 text-base";
               if (showResult && correctAnswer) {
-                if (option === correctAnswer) extraClass += " bg-green-100 border-green-500 text-green-800";
-                else if (option === selectedAnswer) extraClass += " bg-red-100 border-red-500 text-red-800";
+                // Result revealed: show correct/wrong colors
+                if (option === correctAnswer) extraClass += " bg-green-100 border-green-500 text-green-800 dark:bg-green-900/30 dark:border-green-600 dark:text-green-300";
+                else if (option === selectedAnswer) extraClass += " bg-red-100 border-red-500 text-red-800 dark:bg-red-900/30 dark:border-red-600 dark:text-red-300";
+              } else if (selectedAnswer && !showResult && option === selectedAnswer) {
+                // Kahoot: selected but not yet revealed
+                extraClass += " bg-primary/10 border-primary text-primary";
               }
               return (
                 <Button
@@ -633,7 +649,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
                   variant="outline"
                   className={extraClass}
                   onClick={() => submitAnswer(option)}
-                  disabled={showResult}
+                  disabled={!!selectedAnswer}
                 >
                   {option}
                 </Button>
@@ -641,17 +657,18 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
             })}
           </div>
 
+          {selectedAnswer && !showResult && room.game_mode === "kahoot" && (
+            <p className="text-center text-sm text-muted-foreground animate-pulse">
+              ✅ Antwoord vergrendeld! Wachten op andere spelers... ({answeredCount}/{players.length})
+            </p>
+          )}
+
           {showResult && isHost && room.game_mode === "normal" && (
             <Button onClick={nextQuestion} className="w-full h-12 text-lg" size="lg">
               {room.current_question_index + 1 >= room.total_questions ? "🏆 Resultaten bekijken" : "Volgende vraag →"}
             </Button>
           )}
 
-          {room.game_mode === "kahoot" && showResult && !showKahootScoreboard && answeredCount < players.length && (
-            <p className="text-center text-sm text-muted-foreground animate-pulse">
-              Wachten op andere spelers... ({answeredCount}/{players.length})
-            </p>
-          )}
 
           {/* Kahoot scoreboard overlay */}
           {room.game_mode === "kahoot" && showKahootScoreboard && (
