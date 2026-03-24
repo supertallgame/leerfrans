@@ -107,15 +107,24 @@ const Index = () => {
     <main className="min-h-screen flex flex-col items-center px-3 py-6 md:px-4 md:py-12">
       <div className="max-w-2xl w-full flex flex-col items-center gap-5 md:gap-8">
         <div className="text-center space-y-2 md:space-y-3 relative w-full">
-           <Button
-            variant="ghost"
-            size="icon"
-            className="absolute right-0 top-0"
-            onClick={handleSettingsClick}
-            aria-label="Instellingen"
-          >
-            <Settings className="h-5 w-5" />
-          </Button>
+          <div className="absolute right-0 top-0 flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate("/reviews")}
+              aria-label="Reviews"
+            >
+              <Star className="h-5 w-5" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleSettingsClick}
+              aria-label="Instellingen"
+            >
+              <Settings className="h-5 w-5" />
+            </Button>
+          </div>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium tracking-wide uppercase">
             <FlagNL className="w-5 h-3.5 rounded-sm" /> Nederlands ↔ Français <FlagFR className="w-5 h-3.5 rounded-sm" />
           </div>
