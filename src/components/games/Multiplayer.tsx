@@ -160,18 +160,28 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
     }
   }, [room?.current_question_index, phase, myPlayerId, myPlayerToken, fetchQuestion]);
 
-  // Kahoot mode: auto-advance when all players answered
+  // Kahoot mode: show scoreboard when all players answered
   useEffect(() => {
-    if (!room || room.game_mode !== "kahoot" || phase !== "playing" || !isHost) return;
-    if (players.length === 0) return;
+    if (!room || room.game_mode !== "kahoot" || phase !== "playing") return;
+    if (players.length === 0 || showKahootScoreboard) return;
     const allAnswered = players.every((p) => p.has_answered);
     if (!allAnswered) return;
+    setShowKahootScoreboard(true);
+    setKahootCountdown(5);
+  }, [players, room, phase, showKahootScoreboard]);
 
-    const timer = setTimeout(() => {
-      nextQuestion();
-    }, 2000);
+  // Kahoot scoreboard countdown + auto-advance
+  useEffect(() => {
+    if (kahootCountdown === null) return;
+    if (kahootCountdown <= 0) {
+      setKahootCountdown(null);
+      setShowKahootScoreboard(false);
+      if (isHost) nextQuestion();
+      return;
+    }
+    const timer = setTimeout(() => setKahootCountdown(kahootCountdown - 1), 1000);
     return () => clearTimeout(timer);
-  }, [players, room, phase, isHost]);
+  }, [kahootCountdown, isHost]);
 
   // Heartbeat: update last_active every 60 seconds + warn at 4 min inactivity
   useEffect(() => {
