@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, Users, Copy, Check, Trophy, LogOut } from "lucide-react";
+import { ArrowLeft, Users, Copy, Check, Trophy, LogOut, Zap, Clock } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -204,12 +204,17 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
 
   const createRoom = async () => {
     if (!playerName.trim()) return toast.error("Vul je naam in!");
+    setPhase("mode-select");
+  };
+
+  const startWithMode = async (mode: GameMode) => {
+    setGameMode(mode);
     const code = generateCode();
     const questions = shuffle(vocabulary).slice(0, 20).map((v) => ({ french: v.french, dutch: v.dutch }));
 
     const { data: roomData, error: roomError } = await supabase
       .from("game_rooms")
-      .insert({ code, host_name: playerName, total_questions: 20 })
+      .insert({ code, host_name: playerName, total_questions: 20, game_mode: mode } as any)
       .select()
       .single();
 
@@ -230,6 +235,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
       current_question_index: roomData.current_question_index,
       total_questions: roomData.total_questions,
       direction: roomData.direction,
+      game_mode: mode,
     });
     setMyPlayerId(pid);
     setMyPlayerToken(ptoken);
@@ -237,7 +243,6 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
     setPhase("lobby");
     fetchPlayers(roomData.id);
 
-    // Register as host and seed questions via edge function (atomic, server-side)
     if (pid && ptoken) {
       await supabase.functions.invoke("game-action", {
         body: { action: "register-host", roomId: roomData.id, playerId: pid, playerToken: ptoken },
@@ -254,7 +259,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
 
     const { data: roomData, error } = await (supabase
       .from("game_rooms_public" as any)
-      .select("id, code, host_name, host_player_id, status, current_question_index, total_questions, direction")
+      .select("id, code, host_name, host_player_id, status, current_question_index, total_questions, direction, game_mode")
       .eq("code", roomCode.toUpperCase().trim())
       .single() as any);
 
@@ -264,7 +269,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
     const { data: playerData } = await supabase
       .rpc("join_game_room", { p_room_id: roomData.id, p_player_name: playerName }) as any;
 
-    setRoom(roomData as Room);
+    setRoom({ ...roomData, game_mode: roomData.game_mode || "normal" } as Room);
     setMyPlayerId(playerData?.id ?? null);
     setMyPlayerToken((playerData as any)?.player_token ?? null);
     setIsHost(false);
