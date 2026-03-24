@@ -7,6 +7,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 
 const Index = lazy(() => import("./pages/Index.tsx"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword.tsx"));
+const Feedback = lazy(() => import("./pages/Feedback.tsx"));
+const Reviews = lazy(() => import("./pages/Reviews.tsx"));
 const NotFound = lazy(() => import("./pages/NotFound.tsx"));
 
 const queryClient = new QueryClient();
@@ -21,6 +23,8 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/feedback" element={<Feedback />} />
+            <Route path="/reviews" element={<Reviews />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
