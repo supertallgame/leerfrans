@@ -261,7 +261,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
     setTeamMode(tm);
     setNumTeams(teams);
     const code = generateCode();
-    const questions = shuffle(vocabulary).slice(0, 20).map((v) => ({ french: v.french, dutch: v.dutch }));
+    const questions = shuffle(activeVocabulary).slice(0, 20).map((v: any) => ({ french: v.french, dutch: v.dutch }));
 
     const { data: roomData, error: roomError } = await supabase
       .from("game_rooms")

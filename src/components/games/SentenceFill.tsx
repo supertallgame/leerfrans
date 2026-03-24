@@ -33,8 +33,9 @@ function pickMissingWord(sentence: string): { display: string; correctWord: stri
 
 
 export default function SentenceFill({ onBack }: Props) {
+  const { activeVocabulary } = useChapter();
   const sentences = useMemo(() => {
-    const frOnly = vocabulary.map((v) => ({
+    const frOnly = activeVocabulary.map((v) => ({
       sentence: v.french,
       lang: "fr" as const,
       item: v,

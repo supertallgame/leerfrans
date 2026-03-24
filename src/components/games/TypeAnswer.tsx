@@ -14,7 +14,8 @@ interface Props {
 }
 
 export default function TypeAnswer({ onBack }: Props) {
-  const [questions] = useState(() => shuffle(vocabulary));
+  const { activeVocabulary } = useChapter();
+  const [questions] = useState(() => shuffle(activeVocabulary));
   const [qIndex, setQIndex] = useState(0);
   const [input, setInput] = useState("");
   const [result, setResult] = useState<"correct" | "wrong" | null>(null);

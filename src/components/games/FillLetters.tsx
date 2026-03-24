@@ -47,10 +47,11 @@ function removeSomeLetters(word: string): { display: string; removed: { index: n
 }
 
 export default function FillLetters({ onBack }: Props) {
+  const { activeVocabulary } = useChapter();
   const words = useMemo(() => {
-    const singles = vocabulary.filter((v) => isSingleWord(v.french));
+    const singles = activeVocabulary.filter((v) => isSingleWord(v.french));
     return shuffle(singles);
-  }, []);
+  }, [activeVocabulary]);
 
   const [index, setIndex] = useState(0);
   const [userInput, setUserInput] = useState("");
