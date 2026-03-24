@@ -140,7 +140,7 @@ const Index = () => {
           </p>
           <button
             onClick={handleSettingsClick}
-            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent/10 text-accent-foreground text-xs font-medium hover:bg-accent/20 transition-colors cursor-pointer mx-auto"
+            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors cursor-pointer mx-auto"
           >
             <BookMarked className="h-3.5 w-3.5" />
             {getChapter(chapterId)?.title ?? "Chapitre 3"}
