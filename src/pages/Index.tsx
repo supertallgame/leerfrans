@@ -44,6 +44,7 @@ const Index = () => {
   const { chapterId, setChapterId, activeVocabulary } = useChapter();
   const [activeGame, setActiveGame] = useState<Game>("menu");
   const [showSettings, setShowSettings] = useState(false);
+  const [showChapterPicker, setShowChapterPicker] = useState(false);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   const [soundOn, setSoundOn] = useState(isSoundEnabled());
   const [user, setUser] = useState<any>(null);
@@ -71,7 +72,11 @@ const Index = () => {
   }, []);
 
   const handleSettingsClick = () => {
-    setShowSettings(true);
+    if (!user) {
+      setShowLoginPrompt(true);
+    } else {
+      setShowSettings(true);
+    }
   };
 
   const handleLogout = async () => {
@@ -139,7 +144,7 @@ const Index = () => {
             Kies een spel en oefen je Frans-Nederlandse woordenschat
           </p>
           <button
-            onClick={handleSettingsClick}
+            onClick={() => setShowChapterPicker(true)}
             className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors cursor-pointer mx-auto"
           >
             <BookMarked className="h-3.5 w-3.5" />
@@ -204,6 +209,41 @@ const Index = () => {
         </div>
       </div>
 
+      {/* Chapter picker dialog */}
+      <Dialog open={showChapterPicker} onOpenChange={setShowChapterPicker}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Kies een Chapitre</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-1.5">
+            {chapters.map((ch) => {
+              const locked = ch.requiresLogin && !user;
+              const isActive = chapterId === ch.id;
+              return (
+                <button
+                  key={ch.id}
+                  onClick={() => { if (!locked) { setChapterId(ch.id); setShowChapterPicker(false); } }}
+                  disabled={locked}
+                  className={`w-full text-left px-3 py-2 rounded-lg border text-sm transition-all ${
+                    isActive
+                      ? "border-primary bg-primary/10 font-medium"
+                      : locked
+                      ? "border-muted bg-muted/50 opacity-60 cursor-not-allowed"
+                      : "border-border hover:border-primary/50 hover:bg-primary/5 cursor-pointer"
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span>{ch.title}</span>
+                    {locked && <Lock className="h-3.5 w-3.5 text-muted-foreground" />}
+                  </div>
+                  <span className="text-xs text-muted-foreground">{ch.description} · {ch.words.length} woorden</span>
+                </button>
+              );
+            })}
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* Login dialog */}
       <AuthDialog open={showLoginPrompt} onOpenChange={setShowLoginPrompt} />
 
@@ -214,35 +254,6 @@ const Index = () => {
             <DialogTitle>Instellingen</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div>
-              <span className="text-sm font-medium mb-2 block">Chapitre</span>
-              <div className="space-y-1.5">
-                {chapters.map((ch) => {
-                  const locked = ch.requiresLogin && !user;
-                  const isActive = chapterId === ch.id;
-                  return (
-                    <button
-                      key={ch.id}
-                      onClick={() => !locked && setChapterId(ch.id)}
-                      disabled={locked}
-                      className={`w-full text-left px-3 py-2 rounded-lg border text-sm transition-all ${
-                        isActive
-                          ? "border-primary bg-primary/10 font-medium"
-                          : locked
-                          ? "border-muted bg-muted/50 opacity-60 cursor-not-allowed"
-                          : "border-border hover:border-primary/50 hover:bg-primary/5 cursor-pointer"
-                      }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <span>{ch.title}</span>
-                        {locked && <Lock className="h-3.5 w-3.5 text-muted-foreground" />}
-                      </div>
-                      <span className="text-xs text-muted-foreground">{ch.description} · {ch.words.length} woorden</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 {soundOn ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
