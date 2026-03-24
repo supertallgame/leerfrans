@@ -91,6 +91,11 @@ export default function Reviews() {
     setDeleteId(null);
   };
 
+  const sortedReviews = [...reviews].sort((a, b) => {
+    if (sortBy === "rating") return b.rating - a.rating;
+    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+  });
+
   const avgRating = reviews.length
     ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
     : "–";
