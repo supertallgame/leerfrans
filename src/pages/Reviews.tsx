@@ -153,7 +153,7 @@ export default function Reviews() {
                           variant="ghost"
                           size="icon"
                           className="h-6 w-6 text-destructive hover:text-destructive"
-                          onClick={() => handleDelete(review.id)}
+                          onClick={() => setDeleteId(review.id)}
                         >
                           <Trash2 className="h-3.5 w-3.5" />
                         </Button>
