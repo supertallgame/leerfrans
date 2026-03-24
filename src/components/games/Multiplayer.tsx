@@ -172,7 +172,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
     if (!allAnswered) return;
     setShowResult(true);
     setShowKahootScoreboard(true);
-    setKahootCountdown(5);
+    setKahootCountdown(3);
     // Play sound now that result is revealed
     if (pendingCorrect === true) playCorrect();
     else if (pendingCorrect === false) playWrong();
@@ -234,7 +234,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
     if (!room?.id) return;
     const interval = setInterval(() => {
       fetchPlayers(room.id);
-    }, 3000);
+    }, 1500);
     return () => clearInterval(interval);
   }, [room?.id]);
 
