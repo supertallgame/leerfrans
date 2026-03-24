@@ -602,6 +602,27 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
     );
   }
 
+  const leaveConfirmDialog = (
+    <AlertDialog open={showLeaveConfirm} onOpenChange={setShowLeaveConfirm}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Spel verlaten?</AlertDialogTitle>
+          <AlertDialogDescription>
+            {isHost
+              ? "Als host wordt de hele room verwijderd en kunnen andere spelers niet meer verder spelen."
+              : "Je verliest je voortgang als je nu het spel verlaat."}
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Annuleren</AlertDialogCancel>
+          <AlertDialogAction onClick={leaveGame} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+            Verlaten
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+
   // PLAYING PHASE
   if (phase === "playing" && room) {
     const progress = ((room.current_question_index + 1) / room.total_questions) * 100;
