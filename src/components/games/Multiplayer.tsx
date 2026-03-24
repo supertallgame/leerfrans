@@ -669,11 +669,6 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
             </Button>
           )}
 
-          {room.game_mode === "kahoot" && showResult && !showKahootScoreboard && answeredCount < players.length && (
-            <p className="text-center text-sm text-muted-foreground animate-pulse">
-              Wachten op andere spelers... ({answeredCount}/{players.length})
-            </p>
-          )}
 
           {/* Kahoot scoreboard overlay */}
           {room.game_mode === "kahoot" && showKahootScoreboard && (
