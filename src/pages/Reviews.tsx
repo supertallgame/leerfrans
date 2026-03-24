@@ -34,7 +34,7 @@ interface Review {
   created_at: string;
 }
 
-const OPERATOR_EMAIL = "brankovantland@gmail.com";
+const OPERATOR_EMAILS = ["brankovantland@gmail.com", "branko18vantland@gmail.com"];
 
 function Stars({ rating }: { rating: number }) {
   return (
@@ -212,7 +212,7 @@ export default function Reviews() {
     fetchData();
 
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setIsOperator(session?.user?.email === OPERATOR_EMAIL);
+      setIsOperator(OPERATOR_EMAILS.includes(session?.user?.email ?? ""));
     });
   }, []);
 
