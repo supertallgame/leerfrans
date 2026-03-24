@@ -41,7 +41,6 @@ async function verifyPlayer(
 }
 
 function isHost(player: any, room: any): boolean {
-  // Prefer host_player_id if set, fall back to host_name for backward compatibility
   if (room.host_player_id) {
     return player.id === room.host_player_id;
   }
@@ -59,25 +58,22 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    const { action, roomId, playerId, playerToken, answer, questions: bodyQuestions } = await req.json();
+    const { action, roomId, playerId, playerToken, answer, questions: bodyQuestions, teamAssignments, numTeams } = await req.json();
 
     if (!roomId || !playerId || !playerToken) {
       return jsonResponse({ error: "Missing fields" }, 400);
     }
 
-    // Verify the caller owns this player record
     const player = await verifyPlayer(supabase, playerId, playerToken, roomId);
     if (!player) {
       return jsonResponse({ error: "Invalid player token" }, 403);
     }
 
-    // Update last_active timestamp
     await supabase
       .from("game_players")
       .update({ last_active: new Date().toISOString() })
       .eq("id", playerId);
 
-    // Get room
     const { data: room } = await supabase
       .from("game_rooms")
       .select("*")
@@ -86,7 +82,7 @@ Deno.serve(async (req) => {
 
     if (!room) return jsonResponse({ error: "Room not found" }, 404);
 
-    // ACTION: heartbeat (last_active already updated above)
+    // ACTION: heartbeat
     if (action === "heartbeat") {
       return jsonResponse({ success: true });
     }
@@ -106,60 +102,87 @@ Deno.serve(async (req) => {
       return jsonResponse({ success: true });
     }
 
-    // ACTION: seed-questions (host only, once)
+    // ACTION: seed-questions
     if (action === "seed-questions") {
       if (!isHost(player, room)) {
         return jsonResponse({ error: "Not the host" }, 403);
       }
-
       if (!Array.isArray(bodyQuestions) || bodyQuestions.length === 0) {
         return jsonResponse({ error: "Invalid questions" }, 400);
       }
-
-      // Check no questions exist yet (prevent race condition)
       const { data: existing } = await supabase
         .from("game_questions")
         .select("id")
         .eq("room_id", roomId)
         .single();
-
       if (existing) {
         return jsonResponse({ error: "Questions already seeded" }, 409);
       }
-
       await supabase
         .from("game_questions")
         .insert({ room_id: roomId, questions: bodyQuestions });
+      return jsonResponse({ success: true });
+    }
 
+    // ACTION: assign-teams (host only)
+    if (action === "assign-teams") {
+      if (!isHost(player, room)) {
+        return jsonResponse({ error: "Not the host" }, 403);
+      }
+      if (!teamAssignments || typeof teamAssignments !== "object") {
+        return jsonResponse({ error: "Invalid team assignments" }, 400);
+      }
+      // teamAssignments is { playerId: teamNumber }
+      for (const [pid, teamNum] of Object.entries(teamAssignments)) {
+        await supabase
+          .from("game_players")
+          .update({ team_number: teamNum as number })
+          .eq("id", pid)
+          .eq("room_id", roomId);
+      }
+      return jsonResponse({ success: true });
+    }
+
+    // ACTION: shuffle-teams (host only, random assignment)
+    if (action === "shuffle-teams") {
+      if (!isHost(player, room)) {
+        return jsonResponse({ error: "Not the host" }, 403);
+      }
+      const teams = numTeams || room.num_teams || 2;
+      const { data: allPlayers } = await supabase
+        .from("game_players")
+        .select("id")
+        .eq("room_id", roomId);
+      if (!allPlayers) return jsonResponse({ error: "No players" }, 400);
+      const shuffled = shuffleArray(allPlayers);
+      for (let i = 0; i < shuffled.length; i++) {
+        await supabase
+          .from("game_players")
+          .update({ team_number: (i % teams) + 1 })
+          .eq("id", shuffled[i].id);
+      }
       return jsonResponse({ success: true });
     }
 
     // ACTION: get-question
     if (action === "get-question") {
       if (room.status !== "playing") return jsonResponse({ error: "Game not in progress" }, 400);
-
-      // Read questions from restricted game_questions table (service role only)
       const { data: questionsData } = await supabase
         .from("game_questions")
         .select("questions")
         .eq("room_id", roomId)
         .single();
-
       if (!questionsData) return jsonResponse({ error: "Questions not found" }, 404);
-
       const questions = questionsData.questions as any[];
       const currentQ = questions[room.current_question_index];
       const questionKey = room.direction === "nl_to_fr" ? "dutch" : "french";
       const answerKey = room.direction === "nl_to_fr" ? "french" : "dutch";
       const correctAnswer = currentQ[answerKey];
-
-      // Generate options from other questions in the pool
       const otherAnswers = questions
         .filter((_: any, i: number) => i !== room.current_question_index)
         .map((q: any) => q[answerKey]);
       const wrongOptions = shuffleArray(otherAnswers).slice(0, 3);
       const options = shuffleArray([correctAnswer, ...wrongOptions]);
-
       return jsonResponse({
         question: currentQ[questionKey],
         options,
@@ -174,21 +197,16 @@ Deno.serve(async (req) => {
       if (!answer) return jsonResponse({ error: "Missing answer" }, 400);
       if (room.status !== "playing") return jsonResponse({ error: "Game not in progress" }, 400);
       if (player.has_answered) return jsonResponse({ correct: false, error: "Already answered" });
-
-      // Read questions from restricted table
       const { data: questionsData } = await supabase
         .from("game_questions")
         .select("questions")
         .eq("room_id", roomId)
         .single();
-
       if (!questionsData) return jsonResponse({ error: "Questions not found" }, 404);
-
       const questions = questionsData.questions as any[];
       const currentQ = questions[room.current_question_index];
       const correctAnswer = room.direction === "nl_to_fr" ? currentQ.french : currentQ.dutch;
       const isCorrect = answer === correctAnswer;
-
       await supabase
         .from("game_players")
         .update({
@@ -196,62 +214,53 @@ Deno.serve(async (req) => {
           score: isCorrect ? player.score + 1 : player.score,
         })
         .eq("id", playerId);
-
       return jsonResponse({ correct: isCorrect, correctAnswer });
     }
 
-    // ACTION: start-game (host only)
+    // ACTION: start-game
     if (action === "start-game") {
       if (!isHost(player, room)) {
         return jsonResponse({ error: "Not the host" }, 403);
       }
-
       const { count } = await supabase
         .from("game_players")
         .select("*", { count: "exact", head: true })
         .eq("room_id", roomId);
-
       if ((count ?? 0) < 2) {
         return jsonResponse({ error: "Need at least 2 players" }, 400);
       }
-
       await supabase
         .from("game_rooms")
         .update({ status: "playing", current_question_index: 0 })
         .eq("id", roomId);
-
       return jsonResponse({ success: true });
     }
 
-    // ACTION: next-question (host only)
+    // ACTION: next-question
     if (action === "next-question") {
       if (!isHost(player, room)) {
         return jsonResponse({ error: "Not the host" }, 403);
       }
-
       const nextIndex = room.current_question_index + 1;
-
       if (nextIndex >= room.total_questions) {
         await supabase.from("game_rooms").update({ status: "finished" }).eq("id", roomId);
       } else {
         await supabase.from("game_players").update({ has_answered: false }).eq("room_id", roomId);
         await supabase.from("game_rooms").update({ current_question_index: nextIndex }).eq("id", roomId);
       }
-
       return jsonResponse({ success: true });
     }
 
-    // ACTION: delete-room (host only)
+    // ACTION: delete-room
     if (action === "delete-room") {
       if (!isHost(player, room)) {
         return jsonResponse({ error: "Not the host" }, 403);
       }
-      // Cascade trigger will delete players
       await supabase.from("game_rooms").delete().eq("id", roomId);
       return jsonResponse({ success: true });
     }
 
-    // ACTION: leave-game (non-host player leaves)
+    // ACTION: leave-game
     if (action === "leave-game") {
       await supabase.from("game_players").delete().eq("id", playerId).eq("room_id", roomId);
       return jsonResponse({ success: true });
