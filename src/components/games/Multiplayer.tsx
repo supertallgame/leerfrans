@@ -338,19 +338,25 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
   }, [countdown, room, myPlayerId, myPlayerToken]);
 
   const submitAnswer = async (answer: string) => {
-    if (!room || !myPlayerId || showResult) return;
+    if (!room || !myPlayerId || selectedAnswer) return;
     setSelectedAnswer(answer);
-    setShowResult(true);
 
     const { data } = await supabase.functions.invoke("game-action", {
       body: { action: "submit-answer", roomId: room.id, playerId: myPlayerId, playerToken: myPlayerToken, answer },
     });
 
-    // Get correct answer from server response and play sound
+    // In kahoot mode, store the result but don't reveal yet
     if (data?.correctAnswer) {
-      setCorrectAnswer(data.correctAnswer);
-      if (data.correct) playCorrect();
-      else playWrong();
+      if (room.game_mode === "kahoot") {
+        // Save for later reveal
+        setCorrectAnswer(data.correctAnswer);
+        setPendingCorrect(data.correct);
+      } else {
+        setShowResult(true);
+        setCorrectAnswer(data.correctAnswer);
+        if (data.correct) playCorrect();
+        else playWrong();
+      }
     }
   };
 
