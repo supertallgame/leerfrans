@@ -124,6 +124,21 @@ Deno.serve(async (req) => {
       return jsonResponse({ success: true });
     }
 
+    // ACTION: update-team-names (host only)
+    if (action === "update-team-names") {
+      if (!isHost(player, room)) {
+        return jsonResponse({ error: "Not the host" }, 403);
+      }
+      if (!Array.isArray(teamNames)) {
+        return jsonResponse({ error: "Invalid team names" }, 400);
+      }
+      await supabase
+        .from("game_rooms")
+        .update({ team_names: teamNames })
+        .eq("id", roomId);
+      return jsonResponse({ success: true });
+    }
+
     // ACTION: assign-teams (host only)
     if (action === "assign-teams") {
       if (!isHost(player, room)) {
