@@ -1,0 +1,1 @@
+ALTER FUNCTION public.validate_review() SET search_path = public;
