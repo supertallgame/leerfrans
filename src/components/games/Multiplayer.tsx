@@ -70,6 +70,8 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
   const [countdown, setCountdown] = useState<number | null>(null);
   const [currentQuestion, setCurrentQuestion] = useState<string>("");
   const [correctAnswer, setCorrectAnswer] = useState<string>("");
+  const [showKahootScoreboard, setShowKahootScoreboard] = useState(false);
+  const [kahootCountdown, setKahootCountdown] = useState<number | null>(null);
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
 
   // Fetch current question from edge function (server-side, no answers exposed)
@@ -154,22 +156,34 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
       setSelectedAnswer(null);
       setShowResult(false);
       setCorrectAnswer("");
+      setShowKahootScoreboard(false);
+      setKahootCountdown(null);
       fetchQuestion(room.id, myPlayerId, myPlayerToken);
     }
   }, [room?.current_question_index, phase, myPlayerId, myPlayerToken, fetchQuestion]);
 
-  // Kahoot mode: auto-advance when all players answered
+  // Kahoot mode: show scoreboard when all players answered
   useEffect(() => {
-    if (!room || room.game_mode !== "kahoot" || phase !== "playing" || !isHost) return;
-    if (players.length === 0) return;
+    if (!room || room.game_mode !== "kahoot" || phase !== "playing") return;
+    if (players.length === 0 || showKahootScoreboard) return;
     const allAnswered = players.every((p) => p.has_answered);
     if (!allAnswered) return;
+    setShowKahootScoreboard(true);
+    setKahootCountdown(5);
+  }, [players, room, phase, showKahootScoreboard]);
 
-    const timer = setTimeout(() => {
-      nextQuestion();
-    }, 2000);
+  // Kahoot scoreboard countdown + auto-advance
+  useEffect(() => {
+    if (kahootCountdown === null) return;
+    if (kahootCountdown <= 0) {
+      setKahootCountdown(null);
+      setShowKahootScoreboard(false);
+      if (isHost) nextQuestion();
+      return;
+    }
+    const timer = setTimeout(() => setKahootCountdown(kahootCountdown - 1), 1000);
     return () => clearTimeout(timer);
-  }, [players, room, phase, isHost]);
+  }, [kahootCountdown, isHost]);
 
   // Heartbeat: update last_active every 60 seconds + warn at 4 min inactivity
   useEffect(() => {
@@ -624,10 +638,48 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
             </Button>
           )}
 
-          {room.game_mode === "kahoot" && showResult && answeredCount < players.length && (
+          {room.game_mode === "kahoot" && showResult && !showKahootScoreboard && answeredCount < players.length && (
             <p className="text-center text-sm text-muted-foreground animate-pulse">
               Wachten op andere spelers... ({answeredCount}/{players.length})
             </p>
+          )}
+
+          {/* Kahoot scoreboard overlay */}
+          {room.game_mode === "kahoot" && showKahootScoreboard && (
+            <Card className="border-2 border-primary/30 bg-background shadow-xl">
+              <CardContent className="p-6 space-y-4">
+                <div className="text-center">
+                  <h3 className="text-lg font-bold flex items-center justify-center gap-2">
+                    <Trophy className="h-5 w-5 text-primary" /> Tussenstand
+                  </h3>
+                  {kahootCountdown !== null && (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Volgende vraag over {kahootCountdown}s...
+                    </p>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  {[...players].sort((a, b) => b.score - a.score).map((p, i) => (
+                    <div
+                      key={p.id}
+                      className={`flex items-center justify-between p-3 rounded-lg ${
+                        p.id === myPlayerId ? "bg-primary/10 border border-primary/20" : "bg-muted/50"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg">
+                          {i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `${i + 1}.`}
+                        </span>
+                        <span className={`font-medium ${p.id === myPlayerId ? "text-primary font-bold" : ""}`}>
+                          {p.player_name}
+                        </span>
+                      </div>
+                      <span className="font-mono font-bold text-lg">{p.score}</span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
           )}
 
           {/* Live scoreboard */}
