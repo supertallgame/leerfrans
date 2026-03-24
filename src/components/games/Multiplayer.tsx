@@ -593,6 +593,26 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
                     ))}
                   </div>
                 </div>
+                <div className="space-y-2">
+                  <span className="text-sm text-muted-foreground">Teamnamen:</span>
+                  {Array.from({ length: numTeams }, (_, i) => (
+                    <div key={i} className="flex items-center gap-2">
+                      <span className="text-lg">{TEAM_COLORS[i]?.emoji}</span>
+                      <Input
+                        value={teamNames[i] || ""}
+                        onChange={(e) => {
+                          const newNames = [...teamNames];
+                          newNames[i] = e.target.value;
+                          setTeamNames(newNames);
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                        placeholder={`Team ${i + 1}`}
+                        maxLength={20}
+                        className="text-sm h-9"
+                      />
+                    </div>
+                  ))}
+                </div>
                 <Button className="w-full" onClick={(e) => { e.stopPropagation(); startWithSettings("teams", numTeams); }}>
                   Starten met {numTeams} teams
                 </Button>
