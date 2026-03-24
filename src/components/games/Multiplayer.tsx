@@ -70,6 +70,8 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
   const [countdown, setCountdown] = useState<number | null>(null);
   const [currentQuestion, setCurrentQuestion] = useState<string>("");
   const [correctAnswer, setCorrectAnswer] = useState<string>("");
+  const [showKahootScoreboard, setShowKahootScoreboard] = useState(false);
+  const [kahootCountdown, setKahootCountdown] = useState<number | null>(null);
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
 
   // Fetch current question from edge function (server-side, no answers exposed)
