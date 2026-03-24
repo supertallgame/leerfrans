@@ -41,6 +41,7 @@ const games = [
 
 const Index = () => {
   const navigate = useNavigate();
+  const { chapterId, setChapterId, activeVocabulary } = useChapter();
   const [activeGame, setActiveGame] = useState<Game>("menu");
   const [showSettings, setShowSettings] = useState(false);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
