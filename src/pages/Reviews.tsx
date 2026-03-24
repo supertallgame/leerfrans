@@ -2,7 +2,9 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowLeft, Star, MessageSquare, Trash2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { ArrowLeft, Star, MessageSquare, Trash2, Reply, ChevronDown, ChevronUp, Send } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -15,6 +17,14 @@ import {
 } from "@/components/ui/alert-dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+
+interface ReviewReply {
+  id: string;
+  review_id: string;
+  display_name: string;
+  message: string;
+  created_at: string;
+}
 
 interface Review {
   id: string;
@@ -55,24 +65,150 @@ function timeAgo(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString("nl-NL");
 }
 
+function ReplySection({
+  reviewId,
+  replies,
+  isOperator,
+  onReplyAdded,
+  onDeleteReply,
+}: {
+  reviewId: string;
+  replies: ReviewReply[];
+  isOperator: boolean;
+  onReplyAdded: (reply: ReviewReply) => void;
+  onDeleteReply: (id: string) => void;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const [showForm, setShowForm] = useState(false);
+  const [name, setName] = useState("");
+  const [message, setMessage] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  const reviewReplies = replies.filter((r) => r.review_id === reviewId);
+
+  const handleSubmit = async () => {
+    if (!name.trim() || !message.trim()) {
+      toast.error("Vul je naam en bericht in");
+      return;
+    }
+    setSubmitting(true);
+    const { data, error } = await (supabase.from("review_replies" as any) as any)
+      .insert({ review_id: reviewId, display_name: name.trim(), message: message.trim() })
+      .select()
+      .single();
+    setSubmitting(false);
+    if (error) {
+      toast.error("Kon reactie niet plaatsen");
+      return;
+    }
+    onReplyAdded(data);
+    setName("");
+    setMessage("");
+    setShowForm(false);
+    toast.success("Reactie geplaatst!");
+  };
+
+  return (
+    <div className="pt-1 space-y-2">
+      <div className="flex items-center gap-2">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-7 text-xs gap-1 text-muted-foreground px-2"
+          onClick={() => setShowForm(!showForm)}
+        >
+          <Reply className="h-3 w-3" /> Reageer
+        </Button>
+        {reviewReplies.length > 0 && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 text-xs gap-1 text-muted-foreground px-2"
+            onClick={() => setExpanded(!expanded)}
+          >
+            {expanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+            {reviewReplies.length} reactie{reviewReplies.length !== 1 ? "s" : ""}
+          </Button>
+        )}
+      </div>
+
+      {showForm && (
+        <div className="ml-3 border-l-2 border-primary/20 pl-3 space-y-2">
+          <Input
+            placeholder="Je naam"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            maxLength={50}
+            className="h-8 text-sm"
+          />
+          <Textarea
+            placeholder="Je reactie..."
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            maxLength={500}
+            className="text-sm min-h-[60px] resize-none"
+          />
+          <div className="flex gap-2">
+            <Button size="sm" className="h-7 text-xs gap-1" onClick={handleSubmit} disabled={submitting}>
+              <Send className="h-3 w-3" /> {submitting ? "Bezig..." : "Verstuur"}
+            </Button>
+            <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => setShowForm(false)}>
+              Annuleer
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {expanded && reviewReplies.length > 0 && (
+        <div className="ml-3 border-l-2 border-muted pl-3 space-y-2">
+          {reviewReplies.map((reply) => (
+            <div key={reply.id} className="space-y-0.5">
+              <div className="flex items-center justify-between">
+                <span className="font-medium text-xs">{reply.display_name}</span>
+                <div className="flex items-center gap-1">
+                  <span className="text-[10px] text-muted-foreground">{timeAgo(reply.created_at)}</span>
+                  {isOperator && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-5 w-5 text-destructive hover:text-destructive"
+                      onClick={() => onDeleteReply(reply.id)}
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  )}
+                </div>
+              </div>
+              <p className="text-xs text-foreground/70">{reply.message}</p>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function Reviews() {
   const navigate = useNavigate();
   const [reviews, setReviews] = useState<Review[]>([]);
+  const [replies, setReplies] = useState<ReviewReply[]>([]);
   const [loading, setLoading] = useState(true);
   const [isOperator, setIsOperator] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [deleteReplyId, setDeleteReplyId] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<"newest" | "rating">("newest");
 
   useEffect(() => {
-    const fetchReviews = async () => {
-      const { data } = await supabase
-        .from("reviews" as any)
-        .select("*")
-        .order("created_at", { ascending: false }) as any;
-      if (data) setReviews(data);
+    const fetchData = async () => {
+      const [reviewsRes, repliesRes] = await Promise.all([
+        supabase.from("reviews" as any).select("*").order("created_at", { ascending: false }) as any,
+        supabase.from("review_replies" as any).select("*").order("created_at", { ascending: true }) as any,
+      ]);
+      if (reviewsRes.data) setReviews(reviewsRes.data);
+      if (repliesRes.data) setReplies(repliesRes.data);
       setLoading(false);
     };
-    fetchReviews();
+    fetchData();
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       setIsOperator(session?.user?.email === OPERATOR_EMAIL);
@@ -86,9 +222,22 @@ export default function Reviews() {
       toast.error("Kon review niet verwijderen");
     } else {
       setReviews((prev) => prev.filter((r) => r.id !== deleteId));
+      setReplies((prev) => prev.filter((r) => r.review_id !== deleteId));
       toast.success("Review verwijderd");
     }
     setDeleteId(null);
+  };
+
+  const handleDeleteReply = async () => {
+    if (!deleteReplyId) return;
+    const { error } = await (supabase.from("review_replies" as any) as any).delete().eq("id", deleteReplyId);
+    if (error) {
+      toast.error("Kon reactie niet verwijderen");
+    } else {
+      setReplies((prev) => prev.filter((r) => r.id !== deleteReplyId));
+      toast.success("Reactie verwijderd");
+    }
+    setDeleteReplyId(null);
   };
 
   const sortedReviews = [...reviews].sort((a, b) => {
@@ -185,6 +334,13 @@ export default function Reviews() {
                   </div>
                   <Stars rating={review.rating} />
                   <p className="text-sm text-foreground/80">{review.message}</p>
+                  <ReplySection
+                    reviewId={review.id}
+                    replies={replies}
+                    isOperator={isOperator}
+                    onReplyAdded={(reply) => setReplies((prev) => [...prev, reply])}
+                    onDeleteReply={(id) => setDeleteReplyId(id)}
+                  />
                 </CardContent>
               </Card>
             ))}
@@ -203,6 +359,23 @@ export default function Reviews() {
           <AlertDialogFooter>
             <AlertDialogCancel>Annuleren</AlertDialogCancel>
             <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Verwijderen
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={!!deleteReplyId} onOpenChange={(open) => !open && setDeleteReplyId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Reactie verwijderen?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Weet je zeker dat je deze reactie wilt verwijderen?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuleren</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteReply} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
               Verwijderen
             </AlertDialogAction>
           </AlertDialogFooter>

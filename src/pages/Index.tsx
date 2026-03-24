@@ -106,11 +106,16 @@ const Index = () => {
   return (
     <main className="min-h-screen flex flex-col items-center px-3 py-6 md:px-4 md:py-12">
       <div className="max-w-2xl w-full flex flex-col items-center gap-5 md:gap-8">
-        <div className="text-center space-y-2 md:space-y-3 relative w-full">
-          <div className="absolute right-0 top-0 flex items-center gap-1">
+        <div className="flex items-center justify-between w-full mb-1">
+          <div className="w-10" />
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium tracking-wide uppercase">
+            <FlagNL className="w-5 h-3.5 rounded-sm" /> Nederlands ↔ Français <FlagFR className="w-5 h-3.5 rounded-sm" />
+          </div>
+          <div className="flex items-center gap-0.5">
             <Button
               variant="ghost"
               size="icon"
+              className="h-9 w-9"
               onClick={() => navigate("/reviews")}
               aria-label="Reviews"
             >
@@ -119,15 +124,15 @@ const Index = () => {
             <Button
               variant="ghost"
               size="icon"
+              className="h-9 w-9"
               onClick={handleSettingsClick}
               aria-label="Instellingen"
             >
               <Settings className="h-5 w-5" />
             </Button>
           </div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium tracking-wide uppercase">
-            <FlagNL className="w-5 h-3.5 rounded-sm" /> Nederlands ↔ Français <FlagFR className="w-5 h-3.5 rounded-sm" />
-          </div>
+        </div>
+        <div className="text-center space-y-2 md:space-y-3 w-full">
           <h1 className="text-3xl md:text-5xl font-bold tracking-tight">
             Woordjes Leren
           </h1>
