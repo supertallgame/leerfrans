@@ -234,7 +234,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
     if (!room?.id) return;
     const interval = setInterval(() => {
       fetchPlayers(room.id);
-    }, 3000);
+    }, 1500);
     return () => clearInterval(interval);
   }, [room?.id]);
 
