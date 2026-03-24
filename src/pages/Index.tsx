@@ -44,6 +44,7 @@ const Index = () => {
   const { chapterId, setChapterId, activeVocabulary } = useChapter();
   const [activeGame, setActiveGame] = useState<Game>("menu");
   const [showSettings, setShowSettings] = useState(false);
+  const [showChapterPicker, setShowChapterPicker] = useState(false);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   const [soundOn, setSoundOn] = useState(isSoundEnabled());
   const [user, setUser] = useState<any>(null);
@@ -71,7 +72,11 @@ const Index = () => {
   }, []);
 
   const handleSettingsClick = () => {
-    setShowSettings(true);
+    if (!user) {
+      setShowLoginPrompt(true);
+    } else {
+      setShowSettings(true);
+    }
   };
 
   const handleLogout = async () => {
