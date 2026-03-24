@@ -437,6 +437,23 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
     fetchPlayers(room.id);
   };
 
+  // Get team display name
+  const getTeamName = (teamNum: number): string => {
+    const names = room?.team_names || teamNames;
+    return names[teamNum - 1] || TEAM_COLORS[teamNum - 1]?.name || `Team ${teamNum}`;
+  };
+
+  const updateTeamName = async (index: number, name: string) => {
+    const newNames = [...teamNames];
+    newNames[index] = name;
+    setTeamNames(newNames);
+    if (room && myPlayerId && myPlayerToken) {
+      await supabase.functions.invoke("game-action", {
+        body: { action: "update-team-names", roomId: room.id, playerId: myPlayerId, playerToken: myPlayerToken, teamNames: newNames },
+      });
+    }
+  };
+
   // Team scores helper
   const getTeamScores = () => {
     const teams: Record<number, { total: number; players: Player[] }> = {};
