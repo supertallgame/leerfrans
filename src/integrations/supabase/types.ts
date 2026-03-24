@@ -116,6 +116,7 @@ export type Database = {
           id: string
           num_teams: number
           status: string
+          team_emojis: Json
           team_mode: string
           team_names: Json
           total_questions: number
@@ -131,6 +132,7 @@ export type Database = {
           id?: string
           num_teams?: number
           status?: string
+          team_emojis?: Json
           team_mode?: string
           team_names?: Json
           total_questions?: number
@@ -146,6 +148,7 @@ export type Database = {
           id?: string
           num_teams?: number
           status?: string
+          team_emojis?: Json
           team_mode?: string
           team_names?: Json
           total_questions?: number
@@ -230,6 +233,7 @@ export type Database = {
           id: string | null
           num_teams: number | null
           status: string | null
+          team_emojis: Json | null
           team_mode: string | null
           team_names: Json | null
           total_questions: number | null
@@ -245,6 +249,7 @@ export type Database = {
           id?: string | null
           num_teams?: number | null
           status?: string | null
+          team_emojis?: Json | null
           team_mode?: string | null
           team_names?: Json | null
           total_questions?: number | null
@@ -260,6 +265,7 @@ export type Database = {
           id?: string | null
           num_teams?: number | null
           status?: string | null
+          team_emojis?: Json | null
           team_mode?: string | null
           team_names?: Json | null
           total_questions?: number | null

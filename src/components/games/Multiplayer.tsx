@@ -40,6 +40,7 @@ interface Room {
   team_mode: TeamMode;
   num_teams: number;
   team_names: string[];
+  team_emojis: string[];
 }
 
 interface Player {
@@ -58,6 +59,8 @@ const TEAM_COLORS = [
   { name: "Team 4", bg: "bg-yellow-100 dark:bg-yellow-900/30", border: "border-yellow-400", text: "text-yellow-700 dark:text-yellow-300", emoji: "🟡" },
 ];
 
+const EMOJI_OPTIONS = ["🔵", "🔴", "🟢", "🟡", "🟣", "🟠", "⚫", "⚪", "🦁", "🐺", "🦊", "🐻", "🦅", "🐉", "🔥", "⚡", "💎", "🌟", "🎯", "🚀", "👑", "🛡️", "⚔️", "🏆"];
+
 function generateCode(): string {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   let code = "";
@@ -73,6 +76,8 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
   const [teamMode, setTeamMode] = useState<TeamMode>("solo");
   const [numTeams, setNumTeams] = useState(2);
   const [teamNames, setTeamNames] = useState<string[]>(["Team 1", "Team 2", "Team 3", "Team 4"]);
+  const [teamEmojis, setTeamEmojis] = useState<string[]>(["🔵", "🔴", "🟢", "🟡"]);
+  const [showEmojiPicker, setShowEmojiPicker] = useState<number | null>(null);
   const [isHost, setIsHost] = useState(false);
   const [room, setRoom] = useState<Room | null>(null);
   const [players, setPlayers] = useState<Player[]>([]);
@@ -122,9 +127,11 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
             team_mode: newRoom.team_mode || "solo",
             num_teams: newRoom.num_teams || 2,
             team_names: newRoom.team_names || [],
+            team_emojis: newRoom.team_emojis || ["🔵", "🔴", "🟢", "🟡"],
           };
           setRoom(updatedRoom);
           if (updatedRoom.team_names?.length > 0) setTeamNames(updatedRoom.team_names);
+          if (updatedRoom.team_emojis?.length > 0) setTeamEmojis(updatedRoom.team_emojis);
           if (newRoom.status === "playing") {
             setPhase("playing");
             setSelectedAnswer(null);
@@ -257,7 +264,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
 
     const { data: roomData, error: roomError } = await supabase
       .from("game_rooms")
-      .insert({ code, host_name: playerName, total_questions: 20, game_mode: gameMode, team_mode: tm, num_teams: teams, team_names: teamNames.slice(0, teams) } as any)
+      .insert({ code, host_name: playerName, total_questions: 20, game_mode: gameMode, team_mode: tm, num_teams: teams, team_names: teamNames.slice(0, teams), team_emojis: teamEmojis.slice(0, teams) } as any)
       .select()
       .single();
 
@@ -282,6 +289,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
       team_mode: tm,
       num_teams: teams,
       team_names: teamNames.slice(0, teams),
+      team_emojis: teamEmojis.slice(0, teams),
     });
     setMyPlayerId(pid);
     setMyPlayerToken(ptoken);
@@ -305,7 +313,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
 
     const { data: roomData, error } = await (supabase
       .from("game_rooms_public" as any)
-      .select("id, code, host_name, host_player_id, status, current_question_index, total_questions, direction, game_mode, team_mode, num_teams")
+      .select("id, code, host_name, host_player_id, status, current_question_index, total_questions, direction, game_mode, team_mode, num_teams, team_names, team_emojis")
       .eq("code", roomCode.toUpperCase().trim())
       .single() as any);
 
@@ -321,7 +329,9 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
       team_mode: roomData.team_mode || "solo",
       num_teams: roomData.num_teams || 2,
       team_names: roomData.team_names || [],
+      team_emojis: roomData.team_emojis || ["🔵", "🔴", "🟢", "🟡"],
     } as Room);
+    if (roomData.team_emojis?.length > 0) setTeamEmojis(roomData.team_emojis);
     setMyPlayerId(playerData?.id ?? null);
     setMyPlayerToken((playerData as any)?.player_token ?? null);
     setIsHost(false);
@@ -444,13 +454,30 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
     return names[teamNum - 1] || TEAM_COLORS[teamNum - 1]?.name || `Team ${teamNum}`;
   };
 
+  const getTeamEmoji = (teamNum: number): string => {
+    const emojis = room?.team_emojis || teamEmojis;
+    return emojis[teamNum - 1] || TEAM_COLORS[teamNum - 1]?.emoji || "🔵";
+  };
+
   const updateTeamName = async (index: number, name: string) => {
     const newNames = [...teamNames];
     newNames[index] = name;
     setTeamNames(newNames);
     if (room && myPlayerId && myPlayerToken) {
       await supabase.functions.invoke("game-action", {
-        body: { action: "update-team-names", roomId: room.id, playerId: myPlayerId, playerToken: myPlayerToken, teamNames: newNames },
+        body: { action: "update-team-names", roomId: room.id, playerId: myPlayerId, playerToken: myPlayerToken, teamNames: newNames, teamEmojis },
+      });
+    }
+  };
+
+  const updateTeamEmoji = async (index: number, emoji: string) => {
+    const newEmojis = [...teamEmojis];
+    newEmojis[index] = emoji;
+    setTeamEmojis(newEmojis);
+    setShowEmojiPicker(null);
+    if (room && myPlayerId && myPlayerToken) {
+      await supabase.functions.invoke("game-action", {
+        body: { action: "update-team-names", roomId: room.id, playerId: myPlayerId, playerToken: myPlayerToken, teamNames, teamEmojis: newEmojis },
       });
     }
   };
@@ -595,10 +622,37 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <span className="text-sm text-muted-foreground">Teamnamen:</span>
+                  <span className="text-sm text-muted-foreground">Teams:</span>
                   {Array.from({ length: numTeams }, (_, i) => (
                     <div key={i} className="flex items-center gap-2">
-                      <span className="text-lg">{TEAM_COLORS[i]?.emoji}</span>
+                      <div className="relative">
+                        <button
+                          className="text-lg w-9 h-9 flex items-center justify-center rounded-md border border-input hover:bg-accent transition-colors"
+                          onClick={(e) => { e.stopPropagation(); setShowEmojiPicker(showEmojiPicker === i ? null : i); }}
+                          title="Kies emoji"
+                        >
+                          {teamEmojis[i] || TEAM_COLORS[i]?.emoji}
+                        </button>
+                        {showEmojiPicker === i && (
+                          <div className="absolute z-50 top-10 left-0 bg-popover border border-border rounded-lg shadow-lg p-2 grid grid-cols-6 gap-1 w-56" onClick={(e) => e.stopPropagation()}>
+                            {EMOJI_OPTIONS.map((em) => (
+                              <button
+                                key={em}
+                                className={`text-lg w-8 h-8 flex items-center justify-center rounded hover:bg-accent transition-colors ${teamEmojis[i] === em ? "bg-primary/20 ring-2 ring-primary" : ""}`}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  const newEmojis = [...teamEmojis];
+                                  newEmojis[i] = em;
+                                  setTeamEmojis(newEmojis);
+                                  setShowEmojiPicker(null);
+                                }}
+                              >
+                                {em}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                       <Input
                         value={teamNames[i] || ""}
                         onChange={(e) => {
@@ -696,7 +750,31 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
                   <Card key={teamNum} className={`border-2 ${tc?.border}`}>
                     <CardContent className="p-4">
                       <div className={`font-semibold mb-2 flex items-center gap-2 ${tc?.text}`}>
-                        {tc?.emoji}
+                        {isHost ? (
+                          <div className="relative">
+                            <button
+                              className="text-lg w-8 h-8 flex items-center justify-center rounded hover:bg-accent transition-colors"
+                              onClick={() => setShowEmojiPicker(showEmojiPicker === (teamNum - 1) ? null : (teamNum - 1))}
+                            >
+                              {getTeamEmoji(teamNum)}
+                            </button>
+                            {showEmojiPicker === (teamNum - 1) && (
+                              <div className="absolute z-50 top-9 left-0 bg-popover border border-border rounded-lg shadow-lg p-2 grid grid-cols-6 gap-1 w-56">
+                                {EMOJI_OPTIONS.map((em) => (
+                                  <button
+                                    key={em}
+                                    className={`text-lg w-8 h-8 flex items-center justify-center rounded hover:bg-accent transition-colors ${getTeamEmoji(teamNum) === em ? "bg-primary/20 ring-2 ring-primary" : ""}`}
+                                    onClick={() => updateTeamEmoji(teamNum - 1, em)}
+                                  >
+                                    {em}
+                                  </button>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-lg">{getTeamEmoji(teamNum)}</span>
+                        )}
                         {isHost ? (
                           <Input
                             value={getTeamName(teamNum)}
@@ -883,7 +961,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
                         <div key={team.teamNumber} className={`p-3 rounded-lg animate-fade-in ${tc?.bg} border ${tc?.border}`} style={{ animationDelay: `${i * 150}ms`, animationFillMode: "backwards" }}>
                           <div className="flex items-center justify-between mb-1">
                             <span className={`font-bold ${tc?.text}`}>
-                              {i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `${i + 1}.`} {tc?.emoji} {getTeamName(team.teamNumber)}
+                              {i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `${i + 1}.`} {getTeamEmoji(team.teamNumber)} {getTeamName(team.teamNumber)}
                             </span>
                             <span className="font-mono font-bold text-lg">{team.total}</span>
                           </div>
@@ -928,7 +1006,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
                     return (
                       <div key={team.teamNumber} className="space-y-1">
                         <div className={`flex justify-between items-center text-sm font-bold ${tc?.text}`}>
-                          <span>{i === 0 && "🥇 "}{i === 1 && "🥈 "}{i === 2 && "🥉 "}{tc?.emoji} {getTeamName(team.teamNumber)}</span>
+                          <span>{i === 0 && "🥇 "}{i === 1 && "🥈 "}{i === 2 && "🥉 "}{getTeamEmoji(team.teamNumber)} {getTeamName(team.teamNumber)}</span>
                           <span className="font-mono">{team.total}</span>
                         </div>
                         {team.players.map((p) => (
@@ -987,7 +1065,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
                         <div className="flex items-center gap-3">
                           <span className="text-2xl">{i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `${i + 1}.`}</span>
                           <div>
-                            <span className={`font-semibold ${tc?.text}`}>{tc?.emoji} {getTeamName(team.teamNumber)}</span>
+                            <span className={`font-semibold ${tc?.text}`}>{getTeamEmoji(team.teamNumber)} {getTeamName(team.teamNumber)}</span>
                             <p className="text-xs text-muted-foreground">{team.players.map((p) => p.player_name).join(", ")}</p>
                           </div>
                         </div>
