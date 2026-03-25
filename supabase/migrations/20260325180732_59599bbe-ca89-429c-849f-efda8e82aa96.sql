@@ -1,0 +1,1 @@
+ALTER VIEW public.game_rooms_public SET (security_invoker = true);
