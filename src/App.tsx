@@ -1,16 +1,17 @@
-import { lazy, Suspense } from "react";
+import { Suspense } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ChapterProvider } from "@/contexts/ChapterContext";
+import { lazyRetry } from "@/lib/lazyRetry";
 
-const Index = lazy(() => import("./pages/Index.tsx"));
-const ResetPassword = lazy(() => import("./pages/ResetPassword.tsx"));
-const Feedback = lazy(() => import("./pages/Feedback.tsx"));
-const Reviews = lazy(() => import("./pages/Reviews.tsx"));
-const NotFound = lazy(() => import("./pages/NotFound.tsx"));
+const Index = lazyRetry(() => import("./pages/Index.tsx"));
+const ResetPassword = lazyRetry(() => import("./pages/ResetPassword.tsx"));
+const Feedback = lazyRetry(() => import("./pages/Feedback.tsx"));
+const Reviews = lazyRetry(() => import("./pages/Reviews.tsx"));
+const NotFound = lazyRetry(() => import("./pages/NotFound.tsx"));
 
 const queryClient = new QueryClient();
 
