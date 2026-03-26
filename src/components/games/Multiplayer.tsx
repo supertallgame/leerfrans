@@ -120,7 +120,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
             id: newRoom.id,
             code: newRoom.code,
             host_name: newRoom.host_name,
-            host_player_id: newRoom.host_player_id,
+            
             status: newRoom.status,
             current_question_index: newRoom.current_question_index,
             total_questions: newRoom.total_questions,
