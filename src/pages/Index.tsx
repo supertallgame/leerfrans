@@ -84,6 +84,7 @@ const Index = () => {
   const [soundOn, setSoundOn] = useState(isSoundEnabled());
   const [user, setUser] = useState<any>(null);
   const [authLoading, setAuthLoading] = useState(true);
+  const [disabledSubjects, setDisabledSubjects] = useState<string[]>([]);
   const [darkMode, setDarkMode] = useState(() => {
     const saved = localStorage.getItem("theme");
     if (saved) return saved === "dark";
@@ -97,6 +98,31 @@ const Index = () => {
   useEffect(() => {
     document.documentElement.classList.toggle("dark", darkMode);
   }, []);
+
+  // Fetch disabled subjects
+  useEffect(() => {
+    supabase
+      .from("admin_settings")
+      .select("value")
+      .eq("key", "disabled_subjects")
+      .single()
+      .then(({ data }) => {
+        if (data?.value && Array.isArray(data.value)) {
+          setDisabledSubjects(data.value as string[]);
+          // If current language is disabled, redirect to french
+          if ((data.value as string[]).includes(language)) {
+            setLanguage("french");
+          }
+        }
+      });
+  }, []);
+
+  // If language becomes disabled, redirect to french
+  useEffect(() => {
+    if (disabledSubjects.includes(language)) {
+      setLanguage("french");
+    }
+  }, [disabledSubjects, language]);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -317,7 +343,7 @@ const Index = () => {
               { id: "english" as Language, label: "Engels", desc: "Nederlands ↔ English", flag: <FlagEN className="w-5 h-3.5 rounded-sm" /> },
               { id: "nask" as Language, label: "NASK", desc: "Begrippen & omschrijvingen", flag: <FlaskConical className="w-4 h-4" /> },
               { id: "biology" as Language, label: "Biologie", desc: "Begrippen & omschrijvingen", flag: <Microscope className="w-4 h-4" /> },
-            ]).map((lang) => {
+            ]).filter((lang) => !disabledSubjects.includes(lang.id)).map((lang) => {
               const isActive = language === lang.id;
               return (
                 <button
