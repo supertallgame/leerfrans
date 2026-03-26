@@ -418,6 +418,27 @@ const englishChapter3Words: VocabItem[] = [
   { french: "to wait", dutch: "wachten" },
 ];
 
+const englishChapter4Words: VocabItem[] = [
+  { french: "athlete", dutch: "atleet / sporter" },
+  { french: "to beat", dutch: "verslaan" },
+  { french: "champion", dutch: "kampioen" },
+  { french: "court", dutch: "speelveld (afgesloten ruimte)" },
+  { french: "field", dutch: "speelveld (open ruimte)" },
+  { french: "goalie", dutch: "doelman / doelvrouw" },
+  { french: "gymnastics", dutch: "turnen" },
+  { french: "ice rink", dutch: "ijsbaan" },
+  { french: "(to be) in shape", dutch: "fit; in vorm zijn" },
+  { french: "martial arts", dutch: "vechtsport" },
+  { french: "match (UK)", dutch: "wedstrijd" },
+  { french: "game (US)", dutch: "wedstrijd" },
+  { french: "player", dutch: "speler" },
+  { french: "referee", dutch: "scheidsrechter" },
+  { french: "rule", dutch: "(spel)regel" },
+  { french: "to skate", dutch: "schaatsen" },
+  { french: "to work out", dutch: "sporten / fitnessen" },
+  { french: "goal", dutch: "doel / doelpunt" },
+];
+
 export const englishChapters: Chapter[] = [
   {
     id: "en_chapter1",
@@ -438,6 +459,13 @@ export const englishChapters: Chapter[] = [
     title: "Chapter 3",
     description: "Vervoer & reizen",
     words: englishChapter3Words,
+    requiresLogin: false,
+  },
+  {
+    id: "en_chapter4",
+    title: "Chapter 4",
+    description: "Sport & bewegen",
+    words: englishChapter4Words,
     requiresLogin: false,
   },
 ];
