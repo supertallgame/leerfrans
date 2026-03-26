@@ -284,6 +284,7 @@ const Index = () => {
             {([
               { id: "french" as Language, label: "Frans", desc: "Nederlands ↔ Français", flag: <FlagFR className="w-5 h-3.5 rounded-sm" /> },
               { id: "english" as Language, label: "Engels", desc: "Nederlands ↔ English", flag: <FlagEN className="w-5 h-3.5 rounded-sm" /> },
+              { id: "nask" as Language, label: "NASK", desc: "Begrippen & omschrijvingen", flag: <FlaskConical className="w-4 h-4" /> },
             ]).map((lang) => {
               const isActive = language === lang.id;
               return (
