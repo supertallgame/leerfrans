@@ -99,6 +99,8 @@ const Index = () => {
     document.documentElement.classList.toggle("dark", darkMode);
   }, []);
 
+  const ALL_SUBJECT_IDS: Language[] = ["french", "english", "nask", "biology"];
+
   // Fetch disabled subjects
   useEffect(() => {
     supabase
@@ -108,19 +110,25 @@ const Index = () => {
       .single()
       .then(({ data }) => {
         if (data?.value && Array.isArray(data.value)) {
-          setDisabledSubjects(data.value as string[]);
-          // If current language is disabled, redirect to french
-          if ((data.value as string[]).includes(language)) {
-            setLanguage("french");
+          const disabled = data.value as string[];
+          setDisabledSubjects(disabled);
+          if (disabled.includes(language)) {
+            const available = ALL_SUBJECT_IDS.filter((id) => !disabled.includes(id));
+            if (available.length > 0) {
+              setLanguage(available[0]);
+            }
           }
         }
       });
   }, []);
 
-  // If language becomes disabled, redirect to french
+  // If language becomes disabled, redirect to first available
   useEffect(() => {
     if (disabledSubjects.includes(language)) {
-      setLanguage("french");
+      const available = ALL_SUBJECT_IDS.filter((id) => !disabledSubjects.includes(id));
+      if (available.length > 0) {
+        setLanguage(available[0]);
+      }
     }
   }, [disabledSubjects, language]);
 
