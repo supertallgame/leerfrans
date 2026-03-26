@@ -149,7 +149,7 @@ const Index = () => {
   if (activeGame === "memory") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6"><MemoryGame onBack={() => setActiveGame("menu")} /></div></Suspense>;
   if (activeGame === "skeleton") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6"><SkeletonLabel onBack={() => setActiveGame("menu")} /></div></Suspense>;
 
-  const games = (language === "nask" || language === "biology") ? naskGames : languageGames;
+  const games = language === "biology" ? biologyGames : (language === "nask") ? naskGames : languageGames;
 
   return (
     <main className="min-h-screen flex flex-col items-center px-3 py-6 md:px-4 md:py-12">
