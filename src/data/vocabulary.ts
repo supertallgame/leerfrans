@@ -3,7 +3,7 @@ export interface VocabItem {
   dutch: string;
 }
 
-export type Language = "french" | "english" | "nask";
+export type Language = "french" | "english" | "nask" | "biology";
 
 export interface Chapter {
   id: string;
@@ -639,6 +639,35 @@ const naskChapter4Words: VocabItem[] = [
   { dutch: "Vertraagde beweging", french: "Een beweging waarbij de snelheid steeds kleiner wordt" },
 ];
 
+// ─── Biology chapters ───
+
+const biologyChapter4Words: VocabItem[] = [
+  { dutch: "Dubbele-S-vorm", french: "De vorm van de wervelkolom" },
+  { dutch: "Tussenwervelschijf", french: "Geleiachtige kern omgeven door kraakbeen" },
+  { dutch: "Lichaamshouding", french: "De manier waarop je staat en zit" },
+  { dutch: "Bochel", french: "Kromme rug, kan ontstaan door veel omlaag kijken op beeldschermen" },
+  { dutch: "Blessure", french: "Beschadiging aan spieren, botten of gewrichten" },
+  { dutch: "Spierscheuring", french: "Een beschadiging van een spier, oorzaak: te sterke inspanning of een plotselinge beweging" },
+  { dutch: "Botbreuk", french: "Een bot breekt in twee (of meer) delen" },
+  { dutch: "Zetten van een bot", french: "De delen van het bot in de goede stand brengen, de delen groeien weer aan elkaar" },
+  { dutch: "Voetbalknie", french: "In het kniegewricht is een meniscus beschadigd, bijv. door een draaibeweging terwijl het onderbeen blijft staan" },
+  { dutch: "Kneuzing", french: "Beschadiging van weefsel door een val, duw, stomp of trap" },
+  { dutch: "Blauwe plek", french: "Inwendige bloeding als gevolg van een kneuzing" },
+  { dutch: "Zwelling", french: "Ophoping van vocht" },
+  { dutch: "Verzwikking", french: "Kneuzing van het gewricht; beschadiging van het gewrichtskapsel en de kapselbanden" },
+  { dutch: "Ontwrichting", french: "De gewrichtskogel is uit de gewrichtskom geraakt" },
+];
+
+const biologyChapters: Chapter[] = [
+  {
+    id: "bio_chapter4",
+    title: "Hoofdstuk 4",
+    description: "Stevigheid & beweging",
+    words: biologyChapter4Words,
+    requiresLogin: false,
+  },
+];
+
 const naskChapters: Chapter[] = [
   {
     id: "nask_chapter1",
@@ -673,12 +702,14 @@ const naskChapters: Chapter[] = [
 export function getChaptersForLanguage(lang: Language): Chapter[] {
   if (lang === "french") return frenchChapters;
   if (lang === "english") return englishChapters;
+  if (lang === "biology") return biologyChapters;
   return naskChapters;
 }
 
 export function getDefaultChapterId(lang: Language): string {
   if (lang === "french") return "chapitre3";
   if (lang === "english") return "en_chapter1";
+  if (lang === "biology") return "bio_chapter4";
   return "nask_chapter1";
 }
 
@@ -688,7 +719,7 @@ export const chapters = frenchChapters;
 export const DEFAULT_CHAPTER_ID = "chapitre3";
 
 export function getChapter(id: string): Chapter | undefined {
-  return [...frenchChapters, ...englishChapters, ...naskChapters].find((c) => c.id === id);
+  return [...frenchChapters, ...englishChapters, ...naskChapters, ...biologyChapters].find((c) => c.id === id);
 }
 
 export function getActiveVocabulary(chapterId: string): VocabItem[] {
@@ -738,7 +769,7 @@ export function getForeignLabelNative(lang: Language): string {
 }
 
 export function getNlLabel(lang: Language): string {
-  if (lang === "nask") return "Begrip";
+  if (lang === "nask" || lang === "biology") return "Begrip";
   return "Nederlands";
 }
 
@@ -749,7 +780,7 @@ export function getForeignShort(lang: Language): string {
 }
 
 export function getNlShort(lang: Language): string {
-  if (lang === "nask") return "Begrip";
+  if (lang === "nask" || lang === "biology") return "Begrip";
   return "NL";
 }
 
