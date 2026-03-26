@@ -489,6 +489,13 @@ export const englishChapters: Chapter[] = [
     words: englishChapter4Words,
     requiresLogin: false,
   },
+  {
+    id: "en_chapter5",
+    title: "Chapter 5",
+    description: "Natuur & omgeving",
+    words: englishChapter5Words,
+    requiresLogin: false,
+  },
 ];
 
 export function getChaptersForLanguage(lang: Language): Chapter[] {
