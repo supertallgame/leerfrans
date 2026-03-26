@@ -99,6 +99,8 @@ const Index = () => {
     document.documentElement.classList.toggle("dark", darkMode);
   }, []);
 
+  const ALL_SUBJECT_IDS: Language[] = ["french", "english", "nask", "biology"];
+
   // Fetch disabled subjects
   useEffect(() => {
     supabase
@@ -108,19 +110,25 @@ const Index = () => {
       .single()
       .then(({ data }) => {
         if (data?.value && Array.isArray(data.value)) {
-          setDisabledSubjects(data.value as string[]);
-          // If current language is disabled, redirect to french
-          if ((data.value as string[]).includes(language)) {
-            setLanguage("french");
+          const disabled = data.value as string[];
+          setDisabledSubjects(disabled);
+          if (disabled.includes(language)) {
+            const available = ALL_SUBJECT_IDS.filter((id) => !disabled.includes(id));
+            if (available.length > 0) {
+              setLanguage(available[0]);
+            }
           }
         }
       });
   }, []);
 
-  // If language becomes disabled, redirect to french
+  // If language becomes disabled, redirect to first available
   useEffect(() => {
     if (disabledSubjects.includes(language)) {
-      setLanguage("french");
+      const available = ALL_SUBJECT_IDS.filter((id) => !disabledSubjects.includes(id));
+      if (available.length > 0) {
+        setLanguage(available[0]);
+      }
     }
   }, [disabledSubjects, language]);
 
@@ -176,6 +184,22 @@ const Index = () => {
   if (activeGame === "skeleton") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6"><SkeletonLabel onBack={() => setActiveGame("menu")} /></div></Suspense>;
 
   const games = language === "biology" ? biologyGames : (language === "nask") ? naskGames : languageGames;
+
+  const allSubjectsDisabled = ALL_SUBJECT_IDS.every((id) => disabledSubjects.includes(id));
+
+  if (allSubjectsDisabled) {
+    return (
+      <main className="min-h-screen flex flex-col items-center justify-center px-4 py-12">
+        <div className="text-center space-y-4 max-w-md">
+          <p className="text-5xl">🚧</p>
+          <h1 className="text-2xl font-bold text-foreground">Tijdelijk niet beschikbaar</h1>
+          <p className="text-muted-foreground">
+            Alle vakken zijn momenteel uitgeschakeld. Probeer het later opnieuw.
+          </p>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen flex flex-col items-center px-3 py-6 md:px-4 md:py-12">
