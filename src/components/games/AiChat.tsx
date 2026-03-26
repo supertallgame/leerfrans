@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ArrowLeft, Send, Bot, User } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useChapter } from "@/contexts/ChapterContext";
 
 interface Props {
   onBack: () => void;
@@ -15,12 +16,21 @@ interface Message {
   content: string;
 }
 
+const AI_TITLES: Record<string, string> = {
+  french: "AI Frans Leraar",
+  english: "AI Engels Leraar",
+  nask: "AI NASK Leraar",
+};
+
 export default function AiChat({ onBack }: Props) {
+  const { language, activeVocabulary } = useChapter();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [started, setStarted] = useState(false);
+
+  const title = AI_TITLES[language] || "AI Leraar";
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -30,17 +40,23 @@ export default function AiChat({ onBack }: Props) {
     setStarted(true);
     setIsLoading(true);
 
+    // Send vocabulary context to the edge function
+    const vocabSample = activeVocabulary.slice(0, 30).map((v) => ({
+      dutch: v.dutch,
+      french: v.french,
+    }));
+
     try {
       const { data, error } = await supabase.functions.invoke("ai-chat", {
-        body: { messages: [] },
+        body: { messages: [], language, vocabulary: vocabSample },
       });
 
       if (error) throw error;
-      const reply = data?.reply || "Hallo! Laten we beginnen met oefenen! 🇫🇷";
+      const reply = data?.reply || "Hallo! Laten we beginnen met oefenen!";
       setMessages([{ role: "assistant", content: reply }]);
     } catch (e) {
       console.error(e);
-      setMessages([{ role: "assistant", content: "Hallo! Laten we beginnen met oefenen! Vertaal: 'facile' naar het Nederlands. 🇫🇷" }]);
+      setMessages([{ role: "assistant", content: "Hallo! Laten we beginnen met oefenen!" }]);
     }
     setIsLoading(false);
   };
@@ -53,12 +69,16 @@ export default function AiChat({ onBack }: Props) {
     setInput("");
     setIsLoading(true);
 
+    const vocabSample = activeVocabulary.slice(0, 30).map((v) => ({
+      dutch: v.dutch,
+      french: v.french,
+    }));
+
     try {
       const { data, error } = await supabase.functions.invoke("ai-chat", {
-        body: { messages: newMessages },
+        body: { messages: newMessages, language, vocabulary: vocabSample },
       });
 
-      console.log("ai-chat response:", { data, error });
       if (error) throw error;
       const reply = data?.reply || "Sorry, er ging iets mis. Probeer het opnieuw!";
       setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
@@ -82,9 +102,11 @@ export default function AiChat({ onBack }: Props) {
           <div className="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto">
             <Bot className="h-10 w-10 text-primary" />
           </div>
-          <h2 className="text-3xl font-bold">AI Leraar</h2>
+          <h2 className="text-3xl font-bold">{title}</h2>
           <p className="text-muted-foreground max-w-sm mx-auto">
-            Chat met een AI-leraar die je woordjes overhoort. De AI stelt vragen en geeft feedback op je antwoorden!
+            {language === "nask"
+              ? "Chat met een AI-leraar die je NASK begrippen overhoort en uitlegt!"
+              : "Chat met een AI-leraar die je woordjes overhoort. De AI stelt vragen en geeft feedback op je antwoorden!"}
           </p>
           <Button onClick={startChat} size="lg" className="text-lg h-12">
             🤖 Start de chat
@@ -105,7 +127,7 @@ export default function AiChat({ onBack }: Props) {
             <Bot className="h-4 w-4 text-primary" />
           </div>
           <div>
-            <h3 className="font-semibold text-sm">AI Frans Leraar</h3>
+            <h3 className="font-semibold text-sm">{title}</h3>
             <p className="text-xs text-muted-foreground">Online</p>
           </div>
         </div>
