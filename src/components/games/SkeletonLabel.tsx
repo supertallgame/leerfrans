@@ -62,6 +62,7 @@ export default function SkeletonLabel({ onBack }: Props) {
   const score = Object.values(results).filter(Boolean).length;
   const total = BONES.length;
   const answered = Object.keys(results).length;
+  const skipped = Object.entries(answers).filter(([, v]) => v === "—").length;
 
   const currentBone = currentIndex < total ? BONES[currentIndex] : null;
 
@@ -166,7 +167,7 @@ export default function SkeletonLabel({ onBack }: Props) {
           <ArrowLeft className="h-4 w-4" /> Terug
         </Button>
         <p className="text-sm text-muted-foreground">
-          {answered} / {total} beantwoord — Score: {score}
+          {answered} / {total} beantwoord — Score: {score} — Overgeslagen: {skipped}
         </p>
       </div>
 
