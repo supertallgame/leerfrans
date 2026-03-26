@@ -4,7 +4,14 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Shield, Home, FlaskConical, Microscope, Trash2, Star, MessageSquare, Search } from "lucide-react";
+import { Shield, Home, FlaskConical, Microscope, Trash2, Star, MessageSquare, Search, Filter } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -56,6 +63,7 @@ export default function Admin() {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [starFilter, setStarFilter] = useState<string>("all");
 
   useEffect(() => {
     checkAdmin();
@@ -143,7 +151,9 @@ export default function Admin() {
 
   const filteredReviews = reviews.filter((r) => {
     const q = searchQuery.toLowerCase();
-    return !q || r.display_name.toLowerCase().includes(q) || r.message.toLowerCase().includes(q);
+    const matchesSearch = !q || r.display_name.toLowerCase().includes(q) || r.message.toLowerCase().includes(q);
+    const matchesStars = starFilter === "all" || r.rating === Number(starFilter);
+    return matchesSearch && matchesStars;
   });
 
   return (
@@ -188,14 +198,32 @@ export default function Admin() {
             </h2>
             <span className="text-sm text-muted-foreground">{reviews.length} review{reviews.length !== 1 ? "s" : ""}</span>
           </div>
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Zoek op naam of bericht..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9"
-            />
+          <div className="flex gap-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Zoek op naam of bericht..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+            <Select value={starFilter} onValueChange={setStarFilter}>
+              <SelectTrigger className="w-[140px]">
+                <Filter className="h-4 w-4 mr-2 text-muted-foreground" />
+                <SelectValue placeholder="Sterren" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Alle sterren</SelectItem>
+                {[5, 4, 3, 2, 1].map((n) => (
+                  <SelectItem key={n} value={String(n)}>
+                    <span className="flex items-center gap-1">
+                      {n} <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                    </span>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           {filteredReviews.length === 0 ? (
             <p className="text-sm text-muted-foreground">Geen reviews gevonden.</p>
