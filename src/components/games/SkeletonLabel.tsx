@@ -29,9 +29,9 @@ const BONES: BoneMarker[] = [
   { id: 7, name: "borstbeen", x: 50, y: 19 },
   { id: 8, name: "rib", x: 39, y: 22 },
   // Linkerarm (viewer's left)
-  { id: 10, name: "opperarmbeen", x: 32, y: 25 },
-  { id: 16, name: "ellepijp", x: 29, y: 33 },
-  { id: 12, name: "spaakbeen", x: 25, y: 37 },
+  { id: 10, name: "opperarmbeen", x: 28, y: 22 },
+  { id: 16, name: "ellepijp", x: 23, y: 31 },
+  { id: 12, name: "spaakbeen", x: 20, y: 35 },
   // Wervelkolom
   { id: 9, name: "borstwervel", x: 50, y: 26 },
   { id: 11, name: "lendenwervel", x: 50, y: 32 },
