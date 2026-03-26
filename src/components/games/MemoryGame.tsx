@@ -171,6 +171,21 @@ export default function MemoryGame({ onBack }: Props) {
         })}
       </div>
 
+      {lastResult && (
+        <Card className={lastResult.isMatch 
+          ? "w-full border-[hsl(var(--success))] bg-[hsl(var(--success))]/5" 
+          : "w-full border-destructive bg-destructive/5"}>
+          <CardContent className="p-3 flex items-center justify-between">
+            <p className={`text-sm font-medium ${lastResult.isMatch ? "text-[hsl(var(--success))]" : "text-destructive"}`}>
+              {lastResult.isMatch ? "✅ Match gevonden! Lees de kaarten goed." : "❌ Geen match. Probeer te onthouden!"}
+            </p>
+            <Button size="sm" onClick={handleDismiss}>
+              Volgende
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
       {roundComplete && !allComplete && (
         <Button onClick={nextRound} className="w-full gap-2">
           Volgende ronde <span>→</span>
