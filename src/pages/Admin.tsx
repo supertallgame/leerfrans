@@ -2,11 +2,30 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { Shield, Home, FlaskConical, Microscope } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Shield, Home, FlaskConical, Microscope, Trash2, Star, MessageSquare } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { FlagFR } from "@/components/Flags";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Language } from "@/data/vocabulary";
+
+interface Review {
+  id: string;
+  display_name: string;
+  rating: number;
+  message: string;
+  created_at: string;
+}
 
 const ADMIN_EMAILS = ["brankovantland@gmail.com", "branko18vantland@gmail.com"];
 
