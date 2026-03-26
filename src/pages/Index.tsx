@@ -26,8 +26,10 @@ const Multiplayer = lazy(() => import("@/components/games/Multiplayer"));
 const FillLetters = lazy(() => import("@/components/games/FillLetters"));
 const SentenceFill = lazy(() => import("@/components/games/SentenceFill"));
 const AiChat = lazy(() => import("@/components/games/AiChat"));
+const TrueOrFalse = lazy(() => import("@/components/games/TrueOrFalse"));
+const MemoryGame = lazy(() => import("@/components/games/MemoryGame"));
 
-type Game = "menu" | "flashcards" | "quiz" | "match" | "type" | "multiplayer" | "fill" | "sentence" | "ai";
+type Game = "menu" | "flashcards" | "quiz" | "match" | "type" | "multiplayer" | "fill" | "sentence" | "ai" | "truefalse" | "memory";
 
 const games = [
   { id: "flashcards" as Game, title: "Flashcards", description: "Draai kaarten om en leer de woorden", icon: BookOpen, color: "bg-primary/10 text-primary" },
