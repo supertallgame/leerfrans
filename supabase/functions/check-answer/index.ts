@@ -14,18 +14,9 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    const systemPrompt = `Je bent een NASK-docent die antwoorden van leerlingen beoordeelt. 
-Je krijgt een begrip, het correcte antwoord (de officiële omschrijving), en het antwoord van de leerling.
+    const systemPrompt = `NASK-docent. Beoordeel of leerling-antwoord inhoudelijk klopt. Hoeft niet exact. Kern goed = correct. Antwoord JSON: {"correct":true/false,"feedback":"max 10 woorden"}`;
 
-Beoordeel of het antwoord van de leerling inhoudelijk klopt. Het hoeft NIET exact hetzelfde te zijn als het correcte antwoord. 
-Als de leerling de kern van het begrip goed heeft, is het goed. Kleine taalfouten of andere bewoordingen zijn prima zolang de betekenis klopt.
-
-Antwoord ALLEEN met een JSON object in dit formaat:
-{"correct": true/false, "feedback": "korte uitleg waarom het goed of fout is"}`;
-
-    const userPrompt = `Begrip: "${term}"
-Correcte omschrijving: "${correctAnswer}"
-Antwoord leerling: "${userAnswer}"`;
+    const userPrompt = `${term}: "${correctAnswer}" → leerling: "${userAnswer}"`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -39,6 +30,8 @@ Antwoord leerling: "${userAnswer}"`;
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt },
         ],
+        max_tokens: 60,
+        temperature: 0,
       }),
     });
 
