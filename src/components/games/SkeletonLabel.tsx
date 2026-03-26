@@ -95,6 +95,8 @@ export default function SkeletonLabel({ onBack }: Props) {
 
     setInputValue("");
     setActiveMarker(null);
+    // Zoom out after a brief pause so user sees the result color
+    setTimeout(() => setZoomTarget(null), 600);
 
     if (answered + 1 >= total) {
       setTimeout(() => setFinished(true), 300);
