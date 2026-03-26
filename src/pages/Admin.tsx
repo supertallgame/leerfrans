@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Shield, Home, FlaskConical, Microscope, Trash2, Star, MessageSquare, Search, Filter } from "lucide-react";
+import { Shield, Home, FlaskConical, Microscope, Trash2, Star, MessageSquare, Search, Filter, Download } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -103,7 +103,25 @@ export default function Admin() {
     setDeleteId(null);
   };
 
-  const toggleSubject = async (subjectId: string) => {
+  const exportReviewsCsv = () => {
+    if (reviews.length === 0) return;
+    const header = "Naam,Sterren,Bericht,Datum";
+    const rows = reviews.map((r) => {
+      const escape = (s: string) => `"${s.replace(/"/g, '""')}"`;
+      return `${escape(r.display_name)},${r.rating},${escape(r.message)},${new Date(r.created_at).toLocaleDateString("nl-NL")}`;
+    });
+    const csv = [header, ...rows].join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "reviews.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success("Reviews geëxporteerd");
+  };
+
+
     const newDisabled = disabledSubjects.includes(subjectId)
       ? disabledSubjects.filter((s) => s !== subjectId)
       : [...disabledSubjects, subjectId];
@@ -196,7 +214,12 @@ export default function Admin() {
             <h2 className="text-lg font-semibold flex items-center gap-2">
               <MessageSquare className="h-5 w-5" /> Reviews beheren
             </h2>
-            <span className="text-sm text-muted-foreground">{reviews.length} review{reviews.length !== 1 ? "s" : ""}</span>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">{reviews.length} review{reviews.length !== 1 ? "s" : ""}</span>
+              <Button variant="outline" size="sm" onClick={exportReviewsCsv} className="gap-1.5">
+                <Download className="h-3.5 w-3.5" /> CSV
+              </Button>
+            </div>
           </div>
           <div className="flex gap-2">
             <div className="relative flex-1">
