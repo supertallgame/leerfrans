@@ -2,7 +2,7 @@ import { useState, useEffect, lazy, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { BookOpen, Brain, Puzzle, Keyboard, Users, PenTool, MessageSquare, Bot, Settings, Volume2, VolumeX, LogOut, Sun, Moon, Star, Lock, BookMarked, FlaskConical } from "lucide-react";
+import { BookOpen, Brain, Puzzle, Keyboard, Users, PenTool, MessageSquare, Bot, Settings, Volume2, VolumeX, LogOut, Sun, Moon, Star, Lock, BookMarked, FlaskConical, CheckCircle, Layers } from "lucide-react";
 import { FlagNL, FlagFR } from "@/components/Flags";
 import { getChaptersForLanguage, getChapter, getForeignLabel, getForeignLabelNative, Language } from "@/data/vocabulary";
 import { useChapter } from "@/contexts/ChapterContext";
@@ -26,16 +26,29 @@ const Multiplayer = lazy(() => import("@/components/games/Multiplayer"));
 const FillLetters = lazy(() => import("@/components/games/FillLetters"));
 const SentenceFill = lazy(() => import("@/components/games/SentenceFill"));
 const AiChat = lazy(() => import("@/components/games/AiChat"));
+const TrueOrFalse = lazy(() => import("@/components/games/TrueOrFalse"));
+const MemoryGame = lazy(() => import("@/components/games/MemoryGame"));
 
-type Game = "menu" | "flashcards" | "quiz" | "match" | "type" | "multiplayer" | "fill" | "sentence" | "ai";
+type Game = "menu" | "flashcards" | "quiz" | "match" | "type" | "multiplayer" | "fill" | "sentence" | "ai" | "truefalse" | "memory";
 
-const games = [
+const languageGames = [
   { id: "flashcards" as Game, title: "Flashcards", description: "Draai kaarten om en leer de woorden", icon: BookOpen, color: "bg-primary/10 text-primary" },
   { id: "quiz" as Game, title: "Meerkeuze Quiz", description: "Kies het juiste antwoord uit 4 opties", icon: Brain, color: "bg-secondary/20 dark:bg-secondary/30 text-secondary-foreground" },
   { id: "match" as Game, title: "Koppel Paren", description: "Verbind de Nederlandse en vreemde woorden", icon: Puzzle, color: "bg-accent/10 text-accent" },
   { id: "type" as Game, title: "Typ het Antwoord", description: "Typ de vertaling zelf in", icon: Keyboard, color: "bg-destructive/10 text-destructive" },
   { id: "fill" as Game, title: "Ontbrekende Letters", description: "Vul de ontbrekende letters in het woord aan", icon: PenTool, color: "bg-primary/10 text-primary" },
   { id: "sentence" as Game, title: "Zin Aanvullen", description: "Kies het ontbrekende woord in de zin", icon: MessageSquare, color: "bg-accent/10 text-accent" },
+  { id: "ai" as Game, title: "AI Leraar", description: "Chat met een AI die je overhoort", icon: Bot, color: "bg-secondary/20 dark:bg-secondary/30 text-secondary-foreground" },
+];
+
+const naskGames = [
+  { id: "flashcards" as Game, title: "Flashcards", description: "Draai kaarten om en leer begrippen", icon: BookOpen, color: "bg-primary/10 text-primary" },
+  { id: "quiz" as Game, title: "Meerkeuze Quiz", description: "Kies de juiste omschrijving", icon: Brain, color: "bg-secondary/20 dark:bg-secondary/30 text-secondary-foreground" },
+  { id: "truefalse" as Game, title: "Waar of Onwaar", description: "Klopt de omschrijving bij het begrip?", icon: CheckCircle, color: "bg-[hsl(var(--success))]/10 text-[hsl(var(--success))]" },
+  { id: "memory" as Game, title: "Memory", description: "Vind de paren van begrip en omschrijving", icon: Layers, color: "bg-accent/10 text-accent" },
+  { id: "match" as Game, title: "Koppel Paren", description: "Verbind begrippen met omschrijvingen", icon: Puzzle, color: "bg-destructive/10 text-destructive" },
+  { id: "type" as Game, title: "Typ het Begrip", description: "Lees de omschrijving en typ het begrip", icon: Keyboard, color: "bg-primary/10 text-primary" },
+  { id: "fill" as Game, title: "Ontbrekende Letters", description: "Vul de ontbrekende letters aan", icon: PenTool, color: "bg-accent/10 text-accent" },
   { id: "ai" as Game, title: "AI Leraar", description: "Chat met een AI die je overhoort", icon: Bot, color: "bg-secondary/20 dark:bg-secondary/30 text-secondary-foreground" },
 ];
 
@@ -121,6 +134,10 @@ const Index = () => {
   if (activeGame === "fill") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6"><FillLetters onBack={() => setActiveGame("menu")} /></div></Suspense>;
   if (activeGame === "sentence") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6"><SentenceFill onBack={() => setActiveGame("menu")} /></div></Suspense>;
   if (activeGame === "ai") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6"><AiChat onBack={() => setActiveGame("menu")} /></div></Suspense>;
+  if (activeGame === "truefalse") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6"><TrueOrFalse onBack={() => setActiveGame("menu")} /></div></Suspense>;
+  if (activeGame === "memory") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6"><MemoryGame onBack={() => setActiveGame("menu")} /></div></Suspense>;
+
+  const games = language === "nask" ? naskGames : languageGames;
 
   return (
     <main className="min-h-screen flex flex-col items-center px-3 py-6 md:px-4 md:py-12">
@@ -157,10 +174,10 @@ const Index = () => {
         </div>
         <div className="text-center space-y-2 md:space-y-3 w-full">
           <h1 className="text-3xl md:text-5xl font-bold tracking-tight">
-            Woordjes Leren
+            {language === "nask" ? "NASK Leren" : "Woordjes Leren"}
           </h1>
           <p className="text-muted-foreground text-sm md:text-lg max-w-md mx-auto">
-            Kies een spel en oefen je woordenschat
+            {language === "nask" ? "Kies een spel en oefen je begrippen" : "Kies een spel en oefen je woordenschat"}
           </p>
 
           {/* Language & chapter badges */}
@@ -202,28 +219,30 @@ const Index = () => {
           ))}
         </div>
 
-        <Card
-          className="w-full cursor-pointer transition-all duration-200 hover:shadow-lg hover:-translate-y-1 active:scale-[0.98] border-2 border-primary/20 bg-gradient-to-r from-primary/5 to-accent/5"
-          onClick={() => setActiveGame("multiplayer")}
-        >
-          <CardContent className="p-4 md:p-6 flex items-center gap-3 md:gap-4">
-            <div className="w-11 h-11 md:w-14 md:h-14 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
-              <Users className="h-6 w-6 md:h-7 md:w-7 text-primary" />
-            </div>
-            <div>
-              <h2 className="text-base md:text-xl font-bold">🎮 Multiplayer Quiz</h2>
-              <p className="text-xs md:text-sm text-muted-foreground">
-                Speel tegen je vrienden met een deelcode!
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+        {language !== "nask" && (
+          <Card
+            className="w-full cursor-pointer transition-all duration-200 hover:shadow-lg hover:-translate-y-1 active:scale-[0.98] border-2 border-primary/20 bg-gradient-to-r from-primary/5 to-accent/5"
+            onClick={() => setActiveGame("multiplayer")}
+          >
+            <CardContent className="p-4 md:p-6 flex items-center gap-3 md:gap-4">
+              <div className="w-11 h-11 md:w-14 md:h-14 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
+                <Users className="h-6 w-6 md:h-7 md:w-7 text-primary" />
+              </div>
+              <div>
+                <h2 className="text-base md:text-xl font-bold">🎮 Multiplayer Quiz</h2>
+                <p className="text-xs md:text-sm text-muted-foreground">
+                  Speel tegen je vrienden met een deelcode!
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         <div className="flex gap-2 w-full">
           <Card className="flex-1 bg-muted/50">
             <CardContent className="p-3 md:p-4 text-center">
               <p className="text-xs md:text-sm text-muted-foreground">
-                📚 <span className="font-medium">{activeVocabulary.length} woorden & zinnen</span>
+                📚 <span className="font-medium">{activeVocabulary.length} {language === "nask" ? "begrippen" : "woorden & zinnen"}</span>
               </p>
             </CardContent>
           </Card>
