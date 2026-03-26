@@ -2,7 +2,7 @@ import { useState, useEffect, lazy, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { BookOpen, Brain, Puzzle, Keyboard, Users, PenTool, MessageSquare, Bot, Settings, Volume2, VolumeX, LogOut, Sun, Moon, Star, Lock, BookMarked, FlaskConical, CheckCircle, Layers, Microscope } from "lucide-react";
+import { BookOpen, Brain, Puzzle, Keyboard, Users, PenTool, MessageSquare, Bot, Settings, Volume2, VolumeX, LogOut, Sun, Moon, Star, Lock, BookMarked, FlaskConical, CheckCircle, Layers, Microscope, Bone } from "lucide-react";
 import { FlagNL, FlagFR } from "@/components/Flags";
 import { getChaptersForLanguage, getChapter, getForeignLabel, getForeignLabelNative, Language } from "@/data/vocabulary";
 import { useChapter } from "@/contexts/ChapterContext";
@@ -28,8 +28,9 @@ const SentenceFill = lazy(() => import("@/components/games/SentenceFill"));
 const AiChat = lazy(() => import("@/components/games/AiChat"));
 const TrueOrFalse = lazy(() => import("@/components/games/TrueOrFalse"));
 const MemoryGame = lazy(() => import("@/components/games/MemoryGame"));
+const SkeletonLabel = lazy(() => import("@/components/games/SkeletonLabel"));
 
-type Game = "menu" | "flashcards" | "quiz" | "match" | "type" | "multiplayer" | "fill" | "sentence" | "ai" | "truefalse" | "memory";
+type Game = "menu" | "flashcards" | "quiz" | "match" | "type" | "multiplayer" | "fill" | "sentence" | "ai" | "truefalse" | "memory" | "skeleton";
 
 const languageGames = [
   { id: "flashcards" as Game, title: "Flashcards", description: "Draai kaarten om en leer de woorden", icon: BookOpen, color: "bg-primary/10 text-primary" },
@@ -48,7 +49,17 @@ const naskGames = [
   { id: "memory" as Game, title: "Memory", description: "Vind de paren van begrip en omschrijving", icon: Layers, color: "bg-accent/10 text-accent" },
   { id: "match" as Game, title: "Koppel Paren", description: "Verbind begrippen met omschrijvingen", icon: Puzzle, color: "bg-destructive/10 text-destructive" },
   { id: "type" as Game, title: "Typ het Begrip", description: "Lees de omschrijving en typ het begrip", icon: Keyboard, color: "bg-primary/10 text-primary" },
-  
+  { id: "ai" as Game, title: "AI Leraar", description: "Chat met een AI die je overhoort", icon: Bot, color: "bg-secondary/20 dark:bg-secondary/30 text-secondary-foreground" },
+];
+
+const biologyGames = [
+  { id: "skeleton" as Game, title: "Skelet Benoemen", description: "Benoem alle botten van het skelet", icon: Bone, color: "bg-primary/10 text-primary" },
+  { id: "flashcards" as Game, title: "Flashcards", description: "Draai kaarten om en leer begrippen", icon: BookOpen, color: "bg-secondary/20 dark:bg-secondary/30 text-secondary-foreground" },
+  { id: "quiz" as Game, title: "Meerkeuze Quiz", description: "Kies de juiste omschrijving", icon: Brain, color: "bg-accent/10 text-accent" },
+  { id: "truefalse" as Game, title: "Waar of Onwaar", description: "Klopt de omschrijving bij het begrip?", icon: CheckCircle, color: "bg-[hsl(var(--success))]/10 text-[hsl(var(--success))]" },
+  { id: "memory" as Game, title: "Memory", description: "Vind de paren van begrip en omschrijving", icon: Layers, color: "bg-destructive/10 text-destructive" },
+  { id: "match" as Game, title: "Koppel Paren", description: "Verbind begrippen met omschrijvingen", icon: Puzzle, color: "bg-primary/10 text-primary" },
+  { id: "type" as Game, title: "Typ het Begrip", description: "Lees de omschrijving en typ het begrip", icon: Keyboard, color: "bg-accent/10 text-accent" },
   { id: "ai" as Game, title: "AI Leraar", description: "Chat met een AI die je overhoort", icon: Bot, color: "bg-secondary/20 dark:bg-secondary/30 text-secondary-foreground" },
 ];
 
@@ -136,8 +147,9 @@ const Index = () => {
   if (activeGame === "ai") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6"><AiChat onBack={() => setActiveGame("menu")} /></div></Suspense>;
   if (activeGame === "truefalse") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6"><TrueOrFalse onBack={() => setActiveGame("menu")} /></div></Suspense>;
   if (activeGame === "memory") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6"><MemoryGame onBack={() => setActiveGame("menu")} /></div></Suspense>;
+  if (activeGame === "skeleton") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6"><SkeletonLabel onBack={() => setActiveGame("menu")} /></div></Suspense>;
 
-  const games = (language === "nask" || language === "biology") ? naskGames : languageGames;
+  const games = language === "biology" ? biologyGames : (language === "nask") ? naskGames : languageGames;
 
   return (
     <main className="min-h-screen flex flex-col items-center px-3 py-6 md:px-4 md:py-12">
