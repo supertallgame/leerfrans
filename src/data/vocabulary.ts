@@ -439,7 +439,7 @@ const englishChapter4Words: VocabItem[] = [
   { french: "goal", dutch: "doel / doelpunt" },
 ];
 
-
+export const englishChapters: Chapter[] = [
   {
     id: "en_chapter1",
     title: "Chapter 1",
