@@ -193,7 +193,7 @@ export default function SkeletonLabel({ onBack }: Props) {
           <Button onClick={handleSubmit} disabled={!inputValue.trim()} size="icon">
             <Check className="h-4 w-4" />
           </Button>
-          <Button variant="ghost" size="icon" onClick={() => setActiveMarker(null)}>
+          <Button variant="ghost" size="icon" onClick={handleZoomOut}>
             <X className="h-4 w-4" />
           </Button>
         </div>
