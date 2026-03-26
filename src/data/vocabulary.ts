@@ -3,7 +3,7 @@ export interface VocabItem {
   dutch: string;
 }
 
-export type Language = "french" | "english";
+export type Language = "french" | "english" | "nask";
 
 export interface Chapter {
   id: string;
