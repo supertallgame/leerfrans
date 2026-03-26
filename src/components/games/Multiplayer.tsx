@@ -70,7 +70,7 @@ function generateCode(): string {
 }
 
 export default function Multiplayer({ onBack }: MultiplayerProps) {
-  const { activeVocabulary } = useChapter();
+  const { activeVocabulary, language } = useChapter();
   const [phase, setPhase] = useState<Phase>("setup");
   const [playerName, setPlayerName] = useState("");
   const [roomCode, setRoomCode] = useState("");
@@ -908,7 +908,9 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
           <Card className="border-2">
             <CardContent className="p-8 text-center">
               <p className="text-sm text-muted-foreground mb-2">
-                {room.direction === "nl_to_fr" ? "NL Nederlands → Vertaling" : "Vertaling → Nederlands NL"}
+                {language === "nask"
+                  ? (room.direction === "nl_to_fr" ? "Begrip → Omschrijving" : "Omschrijving → Begrip")
+                  : (room.direction === "nl_to_fr" ? "NL Nederlands → Vertaling" : "Vertaling → Nederlands NL")}
               </p>
               <h2 className="text-2xl md:text-3xl font-bold">{currentQuestion}</h2>
             </CardContent>
