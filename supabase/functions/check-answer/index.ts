@@ -14,7 +14,7 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    const systemPrompt = `NASK-docent. Beoordeel of leerling-antwoord inhoudelijk klopt. Hoeft niet exact. Kern goed = correct. Antwoord JSON: {"correct":true/false,"feedback":"max 10 woorden"}`;
+    const systemPrompt = `Docent. Beoordeel of leerling-antwoord inhoudelijk klopt. Hoeft niet exact. Kern goed = correct. Antwoord JSON: {"correct":true/false,"feedback":"max 10 woorden"}`;
 
     const userPrompt = `${term}: "${correctAnswer}" → leerling: "${userAnswer}"`;
 
