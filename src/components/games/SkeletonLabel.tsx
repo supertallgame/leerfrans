@@ -240,7 +240,7 @@ export default function SkeletonLabel({ onBack }: Props) {
                   e.stopPropagation();
                   handleMarkerClick(bone.id);
                 }}
-                className={`absolute w-5 h-5 md:w-6 md:h-6 rounded-full flex items-center justify-center transition-all ${
+                className={`absolute w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center transition-all z-10 ${
                   isAnswered
                     ? isCorrect
                       ? "bg-[hsl(var(--success))]/20 border-2 border-[hsl(var(--success))]"
