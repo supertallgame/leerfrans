@@ -19,39 +19,39 @@ interface BoneMarker {
 
 const BONES: BoneMarker[] = [
   // Hoofd
-  { id: 1, name: "schedel", x: 48, y: 3 },
-  { id: 2, name: "bovenkaak", x: 50, y: 6.5 },
-  { id: 3, name: "onderkaak", x: 50, y: 8.5 },
-  { id: 4, name: "halswervel", x: 50, y: 11.5 },
+  { id: 1, name: "schedel", x: 49, y: 2.5 },
+  { id: 2, name: "bovenkaak", x: 49, y: 5.5 },
+  { id: 3, name: "onderkaak", x: 49, y: 7.5 },
+  { id: 4, name: "halswervel", x: 49, y: 10 },
   // Schouders & borst
-  { id: 5, name: "sleutelbeen", x: 43, y: 14.5 },
-  { id: 6, name: "schouderblad", x: 57, y: 16 },
-  { id: 7, name: "borstbeen", x: 50, y: 18.5 },
-  { id: 8, name: "rib", x: 40, y: 21 },
+  { id: 5, name: "sleutelbeen", x: 42, y: 14 },
+  { id: 6, name: "schouderblad", x: 58, y: 15 },
+  { id: 7, name: "borstbeen", x: 49, y: 17.5 },
+  { id: 8, name: "rib", x: 41, y: 20.5 },
   // Linkerarm (viewer's left)
-  { id: 10, name: "opperarmbeen", x: 34, y: 24 },
+  { id: 10, name: "opperarmbeen", x: 33, y: 23 },
   // Wervelkolom
-  { id: 9, name: "borstwervel", x: 50, y: 27 },
-  { id: 11, name: "lendenwervel", x: 50, y: 33 },
-  // Bekken
-  { id: 13, name: "heupbeen", x: 43, y: 37 },
-  { id: 12, name: "spaakbeen", x: 37, y: 38 },
-  { id: 14, name: "heiligbeen", x: 50, y: 40 },
-  { id: 15, name: "staartbeen", x: 50, y: 43 },
-  { id: 16, name: "ellepijp", x: 33, y: 44 },
+  { id: 9, name: "borstwervel", x: 49, y: 27 },
+  { id: 11, name: "lendenwervel", x: 49, y: 33 },
+  // Bekken & onderarm
+  { id: 13, name: "heupbeen", x: 42, y: 36.5 },
+  { id: 12, name: "spaakbeen", x: 35, y: 37.5 },
+  { id: 14, name: "heiligbeen", x: 49, y: 39.5 },
+  { id: 15, name: "staartbeen", x: 49, y: 42 },
+  { id: 16, name: "ellepijp", x: 30, y: 44 },
   // Rechterhand (viewer's right)
-  { id: 17, name: "handwortelbeentjes", x: 68, y: 46 },
-  { id: 18, name: "middenhandsbeentjes", x: 70, y: 49 },
-  { id: 19, name: "vingerkootjes", x: 72, y: 53 },
+  { id: 17, name: "handwortelbeentjes", x: 67, y: 46 },
+  { id: 18, name: "middenhandsbeentjes", x: 69, y: 49 },
+  { id: 19, name: "vingerkootjes", x: 71, y: 53 },
   // Benen
   { id: 20, name: "dijbeen", x: 44, y: 56 },
   { id: 21, name: "knieschijf", x: 46, y: 66 },
-  { id: 22, name: "scheenbeen", x: 48, y: 77 },
-  { id: 23, name: "kuitbeen", x: 53, y: 74 },
+  { id: 22, name: "scheenbeen", x: 49, y: 77 },
+  { id: 23, name: "kuitbeen", x: 54, y: 74 },
   // Voeten
-  { id: 24, name: "voetwortelbeentjes", x: 46, y: 88 },
+  { id: 24, name: "voetwortelbeentjes", x: 46, y: 87 },
   { id: 25, name: "middenvoetsbeentjes", x: 44, y: 92 },
-  { id: 26, name: "hielbeen", x: 49, y: 90 },
+  { id: 26, name: "hielbeen", x: 50, y: 89 },
   { id: 27, name: "teenkootjes", x: 43, y: 95 },
 ];
 
