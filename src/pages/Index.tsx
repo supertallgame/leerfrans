@@ -185,6 +185,22 @@ const Index = () => {
 
   const games = language === "biology" ? biologyGames : (language === "nask") ? naskGames : languageGames;
 
+  const allSubjectsDisabled = ALL_SUBJECT_IDS.every((id) => disabledSubjects.includes(id));
+
+  if (allSubjectsDisabled) {
+    return (
+      <main className="min-h-screen flex flex-col items-center justify-center px-4 py-12">
+        <div className="text-center space-y-4 max-w-md">
+          <p className="text-5xl">🚧</p>
+          <h1 className="text-2xl font-bold text-foreground">Tijdelijk niet beschikbaar</h1>
+          <p className="text-muted-foreground">
+            Alle vakken zijn momenteel uitgeschakeld. Probeer het later opnieuw.
+          </p>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className="min-h-screen flex flex-col items-center px-3 py-6 md:px-4 md:py-12">
       <div className="max-w-2xl w-full flex flex-col items-center gap-5 md:gap-8">
