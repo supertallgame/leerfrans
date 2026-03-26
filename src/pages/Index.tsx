@@ -339,7 +339,7 @@ const Index = () => {
                 onClick={() => { setShowSettings(false); setShowLanguagePicker(true); }}
                 className="text-sm font-medium px-3 py-1 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
               >
-                <span className="inline-flex items-center gap-1.5">{language === "french" ? <FlagFR className="w-4 h-3 rounded-sm" /> : <FlagEN className="w-4 h-3 rounded-sm" />} {language === "french" ? "Frans" : "Engels"}</span>
+                <span className="inline-flex items-center gap-1.5">{language === "nask" ? <FlaskConical className="h-3.5 w-3.5" /> : language === "french" ? <FlagFR className="w-4 h-3 rounded-sm" /> : <FlagEN className="w-4 h-3 rounded-sm" />} {language === "nask" ? "NASK" : language === "french" ? "Frans" : "Engels"}</span>
               </button>
             </div>
             <div className="flex items-center justify-between">
