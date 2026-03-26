@@ -151,7 +151,9 @@ export default function Admin() {
 
   const filteredReviews = reviews.filter((r) => {
     const q = searchQuery.toLowerCase();
-    return !q || r.display_name.toLowerCase().includes(q) || r.message.toLowerCase().includes(q);
+    const matchesSearch = !q || r.display_name.toLowerCase().includes(q) || r.message.toLowerCase().includes(q);
+    const matchesStars = starFilter === "all" || r.rating === Number(starFilter);
+    return matchesSearch && matchesStars;
   });
 
   return (
