@@ -159,7 +159,7 @@ export default function MemoryGame({ onBack }: Props) {
                   <p className={`text-[10px] uppercase tracking-widest mb-1 ${
                     card.type === "term" ? "text-primary" : "text-accent"
                   }`}>
-                    {card.type === "term" ? "Begrip" : "Omschr."}
+                    {card.type === "term" ? "Begrip" : "Omschrijving"}
                   </p>
                   <p className="text-xs md:text-sm font-medium leading-tight">{card.text}</p>
                 </div>
