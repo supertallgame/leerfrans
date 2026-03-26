@@ -174,6 +174,27 @@ export default function Admin() {
     return matchesSearch && matchesStars;
   });
 
+  const avgRating = reviews.length > 0
+    ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
+    : "—";
+
+  const ratingDistribution = [5, 4, 3, 2, 1].map((star) => ({
+    star,
+    count: reviews.filter((r) => r.rating === star).length,
+  }));
+
+  const reviewsByMonth = reviews.reduce<Record<string, number>>((acc, r) => {
+    const d = new Date(r.created_at);
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+    acc[key] = (acc[key] || 0) + 1;
+    return acc;
+  }, {});
+
+  const sortedMonths = Object.entries(reviewsByMonth)
+    .sort(([a], [b]) => b.localeCompare(a))
+    .slice(0, 6)
+    .reverse();
+
   return (
     <div className="min-h-screen bg-background p-6">
       <div className="max-w-4xl mx-auto space-y-6">
