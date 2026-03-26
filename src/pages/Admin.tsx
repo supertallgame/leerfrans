@@ -63,6 +63,7 @@ export default function Admin() {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [starFilter, setStarFilter] = useState<string>("all");
 
   useEffect(() => {
     checkAdmin();
