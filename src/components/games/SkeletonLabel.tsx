@@ -236,6 +236,8 @@ export default function SkeletonLabel({ onBack }: Props) {
             const isCorrect = results[bone.id];
             const isActive = activeMarker === bone.id;
 
+            const counterScale = zoomTarget ? 1 / ZOOM_SCALE : 1;
+
             return (
               <button
                 key={bone.id}
@@ -243,16 +245,23 @@ export default function SkeletonLabel({ onBack }: Props) {
                   e.stopPropagation();
                   handleMarkerClick(bone.id);
                 }}
-                className={`absolute w-5 h-5 md:w-6 md:h-6 -translate-x-1/2 -translate-y-1/2 rounded-full flex items-center justify-center text-[8px] md:text-[10px] font-bold transition-all border-2 ${
+                className={`absolute -translate-x-1/2 -translate-y-1/2 rounded-full flex items-center justify-center font-bold transition-all border-2 ${
                   isAnswered
                     ? isCorrect
                       ? "bg-[hsl(var(--success))] border-[hsl(var(--success))] text-white"
                       : "bg-destructive border-destructive text-destructive-foreground"
                     : isActive
-                    ? "bg-primary border-primary text-primary-foreground scale-125 ring-2 ring-primary/40"
+                    ? "bg-primary border-primary text-primary-foreground ring-2 ring-primary/40"
                     : "bg-background border-primary text-primary hover:scale-110 cursor-pointer shadow-sm"
                 }`}
-                style={{ left: `${bone.x}%`, top: `${bone.y}%` }}
+                style={{
+                  left: `${bone.x}%`,
+                  top: `${bone.y}%`,
+                  width: 24 * counterScale,
+                  height: 24 * counterScale,
+                  fontSize: 10 * counterScale,
+                  borderWidth: 2 * counterScale,
+                }}
                 disabled={isAnswered}
                 title={isAnswered ? (isCorrect ? bone.name : `${answers[bone.id]} → ${bone.name}`) : `Bot ${bone.id}`}
               >
