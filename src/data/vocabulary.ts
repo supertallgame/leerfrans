@@ -3,6 +3,8 @@ export interface VocabItem {
   dutch: string;
 }
 
+export type Language = "french" | "english";
+
 export interface Chapter {
   id: string;
   title: string;
@@ -10,6 +12,8 @@ export interface Chapter {
   words: VocabItem[];
   requiresLogin: boolean;
 }
+
+// ─── French chapters ───
 
 const chapitre1Words: VocabItem[] = [
   { french: "la France", dutch: "Frankrijk" },
@@ -315,7 +319,33 @@ const chapitre5Words: VocabItem[] = [
   { french: "Oui, il aime le foot.", dutch: "Ja, hij houdt van voetbal." },
 ];
 
-export const chapters: Chapter[] = [
+// ─── English chapters (uses `french` field for English words) ───
+
+const englishChapter1Words: VocabItem[] = [
+  { french: "to study", dutch: "studeren; leren" },
+  { french: "art", dutch: "kunst" },
+  { french: "to check", dutch: "nakijken" },
+  { french: "difficult", dutch: "moeilijk" },
+  { french: "French", dutch: "Frans" },
+  { french: "geography", dutch: "aardrijkskunde" },
+  { french: "history", dutch: "geschiedenis" },
+  { french: "to listen (to)", dutch: "luisteren (naar)" },
+  { french: "maths", dutch: "wiskunde" },
+  { french: "music", dutch: "muziek" },
+  { french: "PE", dutch: "gym" },
+  { french: "science", dutch: "natuurkunde / scheikunde" },
+  { french: "secondary school", dutch: "middelbare school" },
+  { french: "high school", dutch: "middelbare school" },
+  { french: "subject", dutch: "vak" },
+  { french: "to take (out)", dutch: "(erbij) pakken" },
+  { french: "timetable", dutch: "rooster" },
+  { french: "to understand", dutch: "begrijpen" },
+  { french: "year 7", dutch: "brugklas" },
+];
+
+// ─── Chapter lists per language ───
+
+export const frenchChapters: Chapter[] = [
   {
     id: "chapitre1",
     title: "Chapitre 1",
@@ -346,10 +376,31 @@ export const chapters: Chapter[] = [
   },
 ];
 
+export const englishChapters: Chapter[] = [
+  {
+    id: "en_chapter1",
+    title: "Chapter 1",
+    description: "School & vakken",
+    words: englishChapter1Words,
+    requiresLogin: false,
+  },
+];
+
+export function getChaptersForLanguage(lang: Language): Chapter[] {
+  return lang === "french" ? frenchChapters : englishChapters;
+}
+
+export function getDefaultChapterId(lang: Language): string {
+  return lang === "french" ? "chapitre3" : "en_chapter1";
+}
+
+// Keep `chapters` as backward compat (french)
+export const chapters = frenchChapters;
+
 export const DEFAULT_CHAPTER_ID = "chapitre3";
 
 export function getChapter(id: string): Chapter | undefined {
-  return chapters.find((c) => c.id === id);
+  return [...frenchChapters, ...englishChapters].find((c) => c.id === id);
 }
 
 export function getActiveVocabulary(chapterId: string): VocabItem[] {
@@ -383,4 +434,18 @@ export function shuffle<T>(array: T[]): T[] {
     [arr[i], arr[j]] = [arr[j], arr[i]];
   }
   return arr;
+}
+
+// ─── Language labels helper ───
+export function getForeignLabel(lang: Language): string {
+  return lang === "french" ? "Frans" : "Engels";
+}
+
+export function getForeignLabelNative(lang: Language): string {
+  return lang === "french" ? "Français" : "English";
+}
+
+export function getDirectionLabel(lang: Language, direction: "nl_to_foreign" | "foreign_to_nl"): string {
+  const foreignShort = lang === "french" ? "FR" : "EN";
+  return direction === "nl_to_foreign" ? `NL → ${foreignShort}` : `${foreignShort} → NL`;
 }
