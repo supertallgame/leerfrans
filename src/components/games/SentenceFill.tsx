@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { ArrowLeft, RotateCcw } from "lucide-react";
-import { shuffle } from "@/data/vocabulary";
+import { shuffle, getForeignLabel } from "@/data/vocabulary";
 import { useChapter } from "@/contexts/ChapterContext";
 
 interface Props {
@@ -33,7 +33,7 @@ function pickMissingWord(sentence: string): { display: string; correctWord: stri
 
 
 export default function SentenceFill({ onBack }: Props) {
-  const { activeVocabulary } = useChapter();
+  const { activeVocabulary, language } = useChapter();
   const sentences = useMemo(() => {
     const frOnly = activeVocabulary.map((v) => ({
       sentence: v.french,
@@ -104,7 +104,8 @@ export default function SentenceFill({ onBack }: Props) {
   }
 
   const progress = ((index + 1) / total) * 100;
-  const langLabel = current.lang === "fr" ? "FR Frans" : "NL Nederlands";
+  const foreignShort = language === "french" ? "FR" : "EN";
+  const langLabel = current.lang === "fr" ? `${foreignShort} ${getForeignLabel(language)}` : "NL Nederlands";
   const translationLabel = current.lang === "fr" ? current.item.dutch : current.item.french;
 
   return (

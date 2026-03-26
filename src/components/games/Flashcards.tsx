@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { shuffle, VocabItem } from "@/data/vocabulary";
+import { shuffle, VocabItem, getForeignLabel, getForeignLabelNative } from "@/data/vocabulary";
 import { useChapter } from "@/contexts/ChapterContext";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,7 @@ interface Props {
 }
 
 export default function Flashcards({ onBack }: Props) {
-  const { activeVocabulary } = useChapter();
+  const { activeVocabulary, language } = useChapter();
   const [cards] = useState(() => shuffle(activeVocabulary));
   const [index, setIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
@@ -41,7 +41,7 @@ export default function Flashcards({ onBack }: Props) {
           className="text-xs md:text-sm"
         >
           <Eye className="h-4 w-4 mr-1 md:mr-2" />
-          {showDutch ? "NL → FR" : "FR → NL"}
+          {showDutch ? `NL → ${language === "french" ? "FR" : "EN"}` : `${language === "french" ? "FR" : "EN"} → NL`}
         </Button>
       </div>
 
@@ -55,7 +55,7 @@ export default function Flashcards({ onBack }: Props) {
       >
         <CardContent className="flex flex-col items-center justify-center p-6 md:p-8 text-center">
           <p className="text-xs uppercase tracking-widest text-muted-foreground mb-2 md:mb-3">
-            {!flipped ? (showDutch ? "Nederlands" : "Français") : (showDutch ? "Français" : "Nederlands")}
+            {!flipped ? (showDutch ? "Nederlands" : getForeignLabelNative(language)) : (showDutch ? getForeignLabelNative(language) : "Nederlands")}
           </p>
           <p className="text-xl md:text-2xl font-semibold">
             {!flipped
