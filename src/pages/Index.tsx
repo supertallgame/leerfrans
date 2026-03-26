@@ -174,10 +174,10 @@ const Index = () => {
         </div>
         <div className="text-center space-y-2 md:space-y-3 w-full">
           <h1 className="text-3xl md:text-5xl font-bold tracking-tight">
-            Woordjes Leren
+            {language === "nask" ? "NASK Leren" : "Woordjes Leren"}
           </h1>
           <p className="text-muted-foreground text-sm md:text-lg max-w-md mx-auto">
-            Kies een spel en oefen je woordenschat
+            {language === "nask" ? "Kies een spel en oefen je begrippen" : "Kies een spel en oefen je woordenschat"}
           </p>
 
           {/* Language & chapter badges */}
