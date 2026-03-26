@@ -267,7 +267,6 @@ export default function SkeletonLabel({ onBack }: Props) {
               >
                 {bone.id}
               </button>
-              </button>
             );
           })}
         </div>
