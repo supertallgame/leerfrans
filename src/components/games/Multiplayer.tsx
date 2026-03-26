@@ -265,10 +265,16 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
     const questions = shuffle(activeVocabulary).slice(0, 20).map((v: any) => ({ french: v.french, dutch: v.dutch }));
 
     const { data: roomData, error: roomError } = await supabase
-      .from("game_rooms")
-      .insert({ code, host_name: playerName, total_questions: 20, game_mode: gameMode, team_mode: tm, num_teams: teams, team_names: teamNames.slice(0, teams), team_emojis: teamEmojis.slice(0, teams) } as any)
-      .select()
-      .single();
+      .rpc("create_game_room" as any, {
+        p_code: code,
+        p_host_name: playerName,
+        p_total_questions: 20,
+        p_game_mode: gameMode,
+        p_team_mode: tm,
+        p_num_teams: teams,
+        p_team_names: teamNames.slice(0, teams),
+        p_team_emojis: teamEmojis.slice(0, teams),
+      });
 
     if (roomError || !roomData) return toast.error("Kon geen room aanmaken");
 
