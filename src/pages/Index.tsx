@@ -2,7 +2,7 @@ import { useState, useEffect, lazy, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { BookOpen, Brain, Puzzle, Keyboard, Users, PenTool, MessageSquare, Bot, Settings, Volume2, VolumeX, LogOut, Sun, Moon, Star, Lock, BookMarked, FlaskConical, CheckCircle, Layers } from "lucide-react";
+import { BookOpen, Brain, Puzzle, Keyboard, Users, PenTool, MessageSquare, Bot, Settings, Volume2, VolumeX, LogOut, Sun, Moon, Star, Lock, BookMarked, FlaskConical, CheckCircle, Layers, Microscope } from "lucide-react";
 import { FlagNL, FlagFR } from "@/components/Flags";
 import { getChaptersForLanguage, getChapter, getForeignLabel, getForeignLabelNative, Language } from "@/data/vocabulary";
 import { useChapter } from "@/contexts/ChapterContext";
@@ -137,7 +137,7 @@ const Index = () => {
   if (activeGame === "truefalse") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6"><TrueOrFalse onBack={() => setActiveGame("menu")} /></div></Suspense>;
   if (activeGame === "memory") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6"><MemoryGame onBack={() => setActiveGame("menu")} /></div></Suspense>;
 
-  const games = language === "nask" ? naskGames : languageGames;
+  const games = (language === "nask" || language === "biology") ? naskGames : languageGames;
 
   return (
     <main className="min-h-screen flex flex-col items-center px-3 py-6 md:px-4 md:py-12">
@@ -147,6 +147,8 @@ const Index = () => {
           <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 text-primary text-[10px] md:text-xs font-medium tracking-wide uppercase whitespace-nowrap">
             {language === "nask" ? (
               <><FlaskConical className="w-4 h-4 md:w-5 md:h-4 shrink-0" /> NASK</>
+            ) : language === "biology" ? (
+              <><Microscope className="w-4 h-4 md:w-5 md:h-4 shrink-0" /> Biologie</>
             ) : (
               <><FlagNL className="w-4 h-3 md:w-5 md:h-3.5 rounded-sm shrink-0" /> Nederlands ↔ {foreignLabelNative} {language === "french" ? <FlagFR className="w-4 h-3 md:w-5 md:h-3.5 rounded-sm shrink-0" /> : <FlagEN className="w-4 h-3 md:w-5 md:h-3.5 rounded-sm shrink-0" />}</>
             )}
@@ -174,10 +176,10 @@ const Index = () => {
         </div>
         <div className="text-center space-y-2 md:space-y-3 w-full">
           <h1 className="text-3xl md:text-5xl font-bold tracking-tight">
-            {language === "nask" ? "NASK Leren" : "Woordjes Leren"}
+            {(language === "nask" || language === "biology") ? (language === "biology" ? "Biologie Leren" : "NASK Leren") : "Woordjes Leren"}
           </h1>
           <p className="text-muted-foreground text-sm md:text-lg max-w-md mx-auto">
-            {language === "nask" ? "Kies een spel en oefen je begrippen" : "Kies een spel en oefen je woordenschat"}
+            {(language === "nask" || language === "biology") ? "Kies een spel en oefen je begrippen" : "Kies een spel en oefen je woordenschat"}
           </p>
 
           {/* Language & chapter badges */}
@@ -186,8 +188,8 @@ const Index = () => {
               onClick={() => setShowLanguagePicker(true)}
               className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors cursor-pointer"
             >
-              {language === "nask" ? <FlaskConical className="h-3.5 w-3.5" /> : language === "french" ? <FlagFR className="w-4 h-3 rounded-sm" /> : <FlagEN className="w-4 h-3 rounded-sm" />}
-              {language === "nask" ? "NASK" : language === "french" ? "Frans" : "Engels"}
+              {language === "nask" ? <FlaskConical className="h-3.5 w-3.5" /> : language === "biology" ? <Microscope className="h-3.5 w-3.5" /> : language === "french" ? <FlagFR className="w-4 h-3 rounded-sm" /> : <FlagEN className="w-4 h-3 rounded-sm" />}
+              {language === "nask" ? "NASK" : language === "biology" ? "Biologie" : language === "french" ? "Frans" : "Engels"}
             </button>
             <button
               onClick={() => setShowChapterPicker(true)}
@@ -240,7 +242,7 @@ const Index = () => {
           <Card className="flex-1 bg-muted/50">
             <CardContent className="p-3 md:p-4 text-center">
               <p className="text-xs md:text-sm text-muted-foreground">
-                📚 <span className="font-medium">{activeVocabulary.length} {language === "nask" ? "begrippen" : "woorden & zinnen"}</span>
+                📚 <span className="font-medium">{activeVocabulary.length} {(language === "nask" || language === "biology") ? "begrippen" : "woorden & zinnen"}</span>
               </p>
             </CardContent>
           </Card>
@@ -302,6 +304,7 @@ const Index = () => {
               { id: "french" as Language, label: "Frans", desc: "Nederlands ↔ Français", flag: <FlagFR className="w-5 h-3.5 rounded-sm" /> },
               { id: "english" as Language, label: "Engels", desc: "Nederlands ↔ English", flag: <FlagEN className="w-5 h-3.5 rounded-sm" /> },
               { id: "nask" as Language, label: "NASK", desc: "Begrippen & omschrijvingen", flag: <FlaskConical className="w-4 h-4" /> },
+              { id: "biology" as Language, label: "Biologie", desc: "Begrippen & omschrijvingen", flag: <Microscope className="w-4 h-4" /> },
             ]).map((lang) => {
               const isActive = language === lang.id;
               return (
@@ -356,7 +359,7 @@ const Index = () => {
                 onClick={() => { setShowSettings(false); setShowLanguagePicker(true); }}
                 className="text-sm font-medium px-3 py-1 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
               >
-                <span className="inline-flex items-center gap-1.5">{language === "nask" ? <FlaskConical className="h-3.5 w-3.5" /> : language === "french" ? <FlagFR className="w-4 h-3 rounded-sm" /> : <FlagEN className="w-4 h-3 rounded-sm" />} {language === "nask" ? "NASK" : language === "french" ? "Frans" : "Engels"}</span>
+                <span className="inline-flex items-center gap-1.5">{language === "nask" ? <FlaskConical className="h-3.5 w-3.5" /> : language === "biology" ? <Microscope className="h-3.5 w-3.5" /> : language === "french" ? <FlagFR className="w-4 h-3 rounded-sm" /> : <FlagEN className="w-4 h-3 rounded-sm" />} {language === "nask" ? "NASK" : language === "biology" ? "Biologie" : language === "french" ? "Frans" : "Engels"}</span>
               </button>
             </div>
             <div className="flex items-center justify-between">
