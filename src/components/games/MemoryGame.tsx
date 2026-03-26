@@ -42,6 +42,7 @@ export default function MemoryGame({ onBack }: Props) {
   const [flipped, setFlipped] = useState<string[]>([]);
   const [matched, setMatched] = useState<Set<number>>(new Set());
   const [checking, setChecking] = useState(false);
+  const [lastResult, setLastResult] = useState<{ isMatch: boolean; pairId: number } | null>(null);
   const [moves, setMoves] = useState(0);
   const totalMatched = roundIndex * CARDS_PER_ROUND + matched.size;
 
@@ -57,22 +58,23 @@ export default function MemoryGame({ onBack }: Props) {
       const [first, second] = newFlipped.map((id) => cards.find((c) => c.id === id)!);
 
       if (first.pairId === second.pairId && first.type !== second.type) {
-        // Match!
         playCorrect();
-        setTimeout(() => {
-          setMatched((prev) => new Set([...prev, first.pairId]));
-          setFlipped([]);
-          setChecking(false);
-        }, 600);
+        setLastResult({ isMatch: true, pairId: first.pairId });
       } else {
-        // No match
         playWrong();
-        setTimeout(() => {
-          setFlipped([]);
-          setChecking(false);
-        }, 1000);
+        setLastResult({ isMatch: false, pairId: -1 });
       }
     }
+  };
+
+  const handleDismiss = () => {
+    if (!lastResult) return;
+    if (lastResult.isMatch) {
+      setMatched((prev) => new Set([...prev, lastResult.pairId]));
+    }
+    setFlipped([]);
+    setChecking(false);
+    setLastResult(null);
   };
 
   const roundPairsCount = Math.min(CARDS_PER_ROUND, allPairs.length - roundIndex * CARDS_PER_ROUND);
@@ -168,6 +170,21 @@ export default function MemoryGame({ onBack }: Props) {
           );
         })}
       </div>
+
+      {lastResult && (
+        <Card className={lastResult.isMatch 
+          ? "w-full border-[hsl(var(--success))] bg-[hsl(var(--success))]/5" 
+          : "w-full border-destructive bg-destructive/5"}>
+          <CardContent className="p-3 flex items-center justify-between">
+            <p className={`text-sm font-medium ${lastResult.isMatch ? "text-[hsl(var(--success))]" : "text-destructive"}`}>
+              {lastResult.isMatch ? "✅ Match gevonden! Lees de kaarten goed." : "❌ Geen match. Probeer te onthouden!"}
+            </p>
+            <Button size="sm" onClick={handleDismiss}>
+              Volgende
+            </Button>
+          </CardContent>
+        </Card>
+      )}
 
       {roundComplete && !allComplete && (
         <Button onClick={nextRound} className="w-full gap-2">
