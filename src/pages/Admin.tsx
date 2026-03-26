@@ -2,11 +2,30 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { Shield, Home, FlaskConical, Microscope } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Shield, Home, FlaskConical, Microscope, Trash2, Star, MessageSquare } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { FlagFR } from "@/components/Flags";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Language } from "@/data/vocabulary";
+
+interface Review {
+  id: string;
+  display_name: string;
+  rating: number;
+  message: string;
+  created_at: string;
+}
 
 const ADMIN_EMAILS = ["brankovantland@gmail.com", "branko18vantland@gmail.com"];
 
@@ -33,6 +52,9 @@ export default function Admin() {
   const [disabledSubjects, setDisabledSubjects] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+
   useEffect(() => {
     checkAdmin();
   }, []);
@@ -45,16 +67,30 @@ export default function Admin() {
       return;
     }
     setIsAdmin(true);
-    // Load disabled subjects
-    const { data } = await supabase
-      .from("admin_settings")
-      .select("value")
-      .eq("key", "disabled_subjects")
-      .single();
-    if (data?.value) {
-      setDisabledSubjects(data.value as string[]);
+    // Load disabled subjects + reviews in parallel
+    const [settingsRes, reviewsRes] = await Promise.all([
+      supabase.from("admin_settings").select("value").eq("key", "disabled_subjects").single(),
+      supabase.from("reviews").select("*").order("created_at", { ascending: false }),
+    ]);
+    if (settingsRes.data?.value) {
+      setDisabledSubjects(settingsRes.data.value as string[]);
+    }
+    if (reviewsRes.data) {
+      setReviews(reviewsRes.data);
     }
     setLoading(false);
+  };
+
+  const handleDeleteReview = async () => {
+    if (!deleteId) return;
+    const { error } = await supabase.from("reviews").delete().eq("id", deleteId);
+    if (error) {
+      toast.error("Kon review niet verwijderen");
+    } else {
+      setReviews((prev) => prev.filter((r) => r.id !== deleteId));
+      toast.success("Review verwijderd");
+    }
+    setDeleteId(null);
   };
 
   const toggleSubject = async (subjectId: string) => {
@@ -137,7 +173,63 @@ export default function Admin() {
             })}
           </div>
         </div>
+
+        <div className="rounded-2xl border border-border bg-card p-6 space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold flex items-center gap-2">
+              <MessageSquare className="h-5 w-5" /> Reviews beheren
+            </h2>
+            <span className="text-sm text-muted-foreground">{reviews.length} review{reviews.length !== 1 ? "s" : ""}</span>
+          </div>
+          {reviews.length === 0 ? (
+            <p className="text-sm text-muted-foreground">Geen reviews gevonden.</p>
+          ) : (
+            <div className="space-y-2">
+              {reviews.map((review) => (
+                <div key={review.id} className="flex items-start justify-between gap-3 px-4 py-3 rounded-lg border border-border">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium text-sm">{review.display_name}</span>
+                      <div className="flex gap-0.5">
+                        {[1, 2, 3, 4, 5].map((s) => (
+                          <Star key={s} className={`h-3 w-3 ${s <= review.rating ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground/20"}`} />
+                        ))}
+                      </div>
+                      <span className="text-xs text-muted-foreground">{new Date(review.created_at).toLocaleDateString("nl-NL")}</span>
+                    </div>
+                    <p className="text-sm text-muted-foreground mt-1 truncate">{review.message}</p>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-destructive hover:text-destructive shrink-0"
+                    onClick={() => setDeleteId(review.id)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
+
+      <AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Review verwijderen?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Weet je zeker dat je deze review wilt verwijderen? Dit kan niet ongedaan worden gemaakt.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuleren</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteReview} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Verwijderen
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
