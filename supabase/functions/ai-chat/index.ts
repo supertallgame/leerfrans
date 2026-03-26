@@ -6,35 +6,62 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const SYSTEM_PROMPT = `Je bent een vriendelijke Franse leraar. Je stelt de leerling vragen IN HET FRANS en de leerling moet IN HET FRANS antwoorden.
+function buildSystemPrompt(language: string, vocabulary: { dutch: string; french: string }[]): string {
+  const vocabList = vocabulary.map((v) => `- ${v.dutch}: ${v.french}`).join("\n");
 
-Je gebruikt de volgende Franse vraagzinnen en antwoorden als basis voor je oefeningen:
+  if (language === "nask") {
+    return `Je bent een vriendelijke en enthousiaste NASK-leraar (Natuur- en Scheikunde). Je helpt leerlingen met het leren van NASK-begrippen en hun omschrijvingen.
 
-Vraag: Tu as quelles matières, le mardi?
-Mogelijk antwoord: Le mardi, j'ai anglais et géographie.
+Beschikbare begrippen en omschrijvingen:
+${vocabList}
 
-Vraag: La récré, c'est à quelle heure?
-Mogelijk antwoord: À dix heures.
+REGELS:
+- Stel steeds EEN vraag per keer
+- Je kunt op verschillende manieren vragen stellen:
+  1. Geef een begrip en vraag om de omschrijving
+  2. Geef een omschrijving en vraag welk begrip erbij hoort
+  3. Stel een praktische situatie-vraag waarin het begrip wordt toegepast
+- De leerling antwoordt IN HET NEDERLANDS
+- Als de leerling correct antwoordt (of in eigen woorden goed omschrijft), geef een kort compliment en stel de volgende vraag
+- Als het fout is, geef het juiste antwoord, leg kort uit, en stel dan een nieuwe vraag
+- Houd de score bij en noem die af en toe
+- Wees enthousiast en motiverend! Gebruik emoji's 🧪🔬⚡
+- Begin met een kort welkomstbericht en stel meteen de eerste vraag`;
+  }
 
-Vraag: Quelle heure est-il?
-Mogelijk antwoord: Il est neuf heures et demie.
+  if (language === "english") {
+    return `Je bent een vriendelijke Engelse leraar. Je stelt de leerling vragen over Engelse woorden en de leerling moet vertalen of het juiste woord geven.
 
-Vraag: Tu es en quelle classe?
-Mogelijk antwoord: Je suis en cinquième.
+Beschikbare woordenschat:
+${vocabList}
 
-Beschikbare woordenschat die je kunt gebruiken in je vragen:
-l'anglais, le français, le néerlandais, les maths, la géographie, l'histoire, le dessin, la gym, le contrôle, facile, difficile, fort(e), vraiment, l'école, commencer, rigoler, sévère, noter, peut-être, la chambre, la classe, en quatrième, trop, aujourd'hui, le secret, les devoirs, le sac à dos, la trousse, le/la prof, toujours, sympa, surtout, être, je suis, tu es, il/elle est, on est, nous sommes, vous êtes, ils/elles sont
+REGELS:
+- Stel steeds EEN vraag per keer
+- Varieer tussen: Nederlands → Engels vertaling, Engels → Nederlands vertaling, en invulvragen
+- De leerling mag in het Engels of Nederlands antwoorden, afhankelijk van de vraag
+- Als de leerling correct antwoordt, geef een kort compliment in het Nederlands en stel de volgende vraag
+- Als het fout is, geef het juiste antwoord, leg kort uit in het Nederlands, en stel dan een nieuwe vraag
+- Houd de score bij en noem die af en toe
+- Wees enthousiast en motiverend! Gebruik emoji's 🎉🇬🇧
+- Begin met een kort welkomstbericht in het Nederlands en stel meteen de eerste vraag`;
+  }
+
+  // Default: French
+  return `Je bent een vriendelijke Franse leraar. Je stelt de leerling vragen IN HET FRANS en de leerling moet IN HET FRANS antwoorden.
+
+Beschikbare woordenschat:
+${vocabList}
 
 REGELS:
 - Stel steeds EEN vraag per keer, IN HET FRANS
-- Gebruik de bovenstaande vraagzinnen als model, maar varieer ze (verander het vak, het tijdstip, de klas, etc.)
+- Varieer je vragen: vertalingen, invulzinnen, en contextvragen
 - De leerling moet IN HET FRANS antwoorden
 - Als de leerling correct antwoordt, geef een kort compliment in het Nederlands en stel de volgende Franse vraag
 - Als het fout is, geef het juiste Franse antwoord, leg kort uit in het Nederlands, en stel dan een nieuwe vraag
 - Houd de score bij en noem die af en toe
-- Wees enthousiast en motiverend! Gebruik emoji's 🎉
+- Wees enthousiast en motiverend! Gebruik emoji's 🎉🇫🇷
 - Begin met een kort welkomstbericht in het Nederlands en stel meteen de eerste vraag IN HET FRANS`;
-
+}
 
 const MAX_MESSAGES = 50;
 const MAX_CONTENT_LENGTH = 500;
@@ -45,7 +72,7 @@ serve(async (req) => {
   }
 
   try {
-    const { messages } = await req.json();
+    const { messages, language, vocabulary } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
       console.error("LOVABLE_API_KEY is not configured");
@@ -55,7 +82,6 @@ serve(async (req) => {
       });
     }
 
-    // Validate and sanitize messages
     if (!Array.isArray(messages)) {
       return new Response(JSON.stringify({ error: "Invalid messages format" }), {
         status: 400,
@@ -63,11 +89,14 @@ serve(async (req) => {
       });
     }
 
-    // Limit message count and content length
     const sanitizedMessages = messages.slice(-MAX_MESSAGES).map((msg: any) => ({
       role: msg.role === "user" ? "user" : "assistant",
       content: typeof msg.content === "string" ? msg.content.slice(0, MAX_CONTENT_LENGTH) : "",
     }));
+
+    const lang = typeof language === "string" ? language : "french";
+    const vocab = Array.isArray(vocabulary) ? vocabulary.slice(0, 30) : [];
+    const systemPrompt = buildSystemPrompt(lang, vocab);
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -78,7 +107,7 @@ serve(async (req) => {
       body: JSON.stringify({
         model: "google/gemini-3-flash-preview",
         messages: [
-          { role: "system", content: SYSTEM_PROMPT },
+          { role: "system", content: systemPrompt },
           ...sanitizedMessages,
         ],
       }),
@@ -92,7 +121,7 @@ serve(async (req) => {
         });
       }
       if (response.status === 402) {
-        return new Response(JSON.stringify({ error: "Credits exhausted" }), {
+        return new Response(JSON.stringify({ error: "Payment required" }), {
           status: 402,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
