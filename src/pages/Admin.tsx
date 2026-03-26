@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Shield, Home, FlaskConical, Microscope, Trash2, Star, MessageSquare, Search, Filter, Download } from "lucide-react";
+import { Shield, Home, FlaskConical, Microscope, Trash2, Star, MessageSquare, Search, Filter, Download, BarChart3, TrendingUp, Users } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -174,6 +174,27 @@ export default function Admin() {
     return matchesSearch && matchesStars;
   });
 
+  const avgRating = reviews.length > 0
+    ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
+    : "—";
+
+  const ratingDistribution = [5, 4, 3, 2, 1].map((star) => ({
+    star,
+    count: reviews.filter((r) => r.rating === star).length,
+  }));
+
+  const reviewsByMonth = reviews.reduce<Record<string, number>>((acc, r) => {
+    const d = new Date(r.created_at);
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+    acc[key] = (acc[key] || 0) + 1;
+    return acc;
+  }, {});
+
+  const sortedMonths = Object.entries(reviewsByMonth)
+    .sort(([a], [b]) => b.localeCompare(a))
+    .slice(0, 6)
+    .reverse();
+
   return (
     <div className="min-h-screen bg-background p-6">
       <div className="max-w-4xl mx-auto space-y-6">
@@ -207,6 +228,76 @@ export default function Admin() {
               );
             })}
           </div>
+        </div>
+
+        {/* Statistieken */}
+        <div className="rounded-2xl border border-border bg-card p-6 space-y-4">
+          <h2 className="text-lg font-semibold flex items-center gap-2">
+            <BarChart3 className="h-5 w-5" /> Review statistieken
+          </h2>
+
+          <div className="grid grid-cols-3 gap-3">
+            <div className="rounded-xl border border-border p-4 text-center">
+              <p className="text-2xl font-bold text-primary">{avgRating}</p>
+              <p className="text-xs text-muted-foreground mt-1 flex items-center justify-center gap-1">
+                <Star className="h-3 w-3" /> Gemiddeld
+              </p>
+            </div>
+            <div className="rounded-xl border border-border p-4 text-center">
+              <p className="text-2xl font-bold text-primary">{reviews.length}</p>
+              <p className="text-xs text-muted-foreground mt-1 flex items-center justify-center gap-1">
+                <MessageSquare className="h-3 w-3" /> Totaal
+              </p>
+            </div>
+            <div className="rounded-xl border border-border p-4 text-center">
+              <p className="text-2xl font-bold text-primary">
+                {sortedMonths.length > 0 ? sortedMonths[sortedMonths.length - 1][1] : 0}
+              </p>
+              <p className="text-xs text-muted-foreground mt-1 flex items-center justify-center gap-1">
+                <TrendingUp className="h-3 w-3" /> Deze maand
+              </p>
+            </div>
+          </div>
+
+          {/* Rating verdeling */}
+          <div className="space-y-2">
+            <p className="text-sm font-medium text-muted-foreground">Verdeling</p>
+            {ratingDistribution.map(({ star, count }) => {
+              const pct = reviews.length > 0 ? (count / reviews.length) * 100 : 0;
+              return (
+                <div key={star} className="flex items-center gap-2 text-sm">
+                  <span className="w-4 text-right font-medium">{star}</span>
+                  <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                  <div className="flex-1 h-2 rounded-full bg-muted overflow-hidden">
+                    <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${pct}%` }} />
+                  </div>
+                  <span className="w-8 text-right text-muted-foreground text-xs">{count}</span>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Reviews per maand */}
+          {sortedMonths.length > 0 && (
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-muted-foreground">Per maand</p>
+              <div className="flex items-end gap-1 h-20">
+                {sortedMonths.map(([month, count]) => {
+                  const maxCount = Math.max(...sortedMonths.map(([, c]) => c));
+                  const height = maxCount > 0 ? (count / maxCount) * 100 : 0;
+                  const [y, m] = month.split("-");
+                  const label = new Date(Number(y), Number(m) - 1).toLocaleDateString("nl-NL", { month: "short" });
+                  return (
+                    <div key={month} className="flex-1 flex flex-col items-center gap-1">
+                      <span className="text-[10px] text-muted-foreground font-medium">{count}</span>
+                      <div className="w-full rounded-t bg-primary/80 transition-all" style={{ height: `${height}%`, minHeight: count > 0 ? 4 : 0 }} />
+                      <span className="text-[10px] text-muted-foreground">{label}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="rounded-2xl border border-border bg-card p-6 space-y-4">
