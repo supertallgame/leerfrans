@@ -52,6 +52,9 @@ export default function Admin() {
   const [disabledSubjects, setDisabledSubjects] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+
   useEffect(() => {
     checkAdmin();
   }, []);
