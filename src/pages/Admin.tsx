@@ -11,7 +11,7 @@ export default function Admin() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === "5254") {
+    if (password === "5952") {
       setAuthenticated(true);
       setError(false);
     } else {
