@@ -67,16 +67,30 @@ export default function Admin() {
       return;
     }
     setIsAdmin(true);
-    // Load disabled subjects
-    const { data } = await supabase
-      .from("admin_settings")
-      .select("value")
-      .eq("key", "disabled_subjects")
-      .single();
-    if (data?.value) {
-      setDisabledSubjects(data.value as string[]);
+    // Load disabled subjects + reviews in parallel
+    const [settingsRes, reviewsRes] = await Promise.all([
+      supabase.from("admin_settings").select("value").eq("key", "disabled_subjects").single(),
+      supabase.from("reviews").select("*").order("created_at", { ascending: false }),
+    ]);
+    if (settingsRes.data?.value) {
+      setDisabledSubjects(settingsRes.data.value as string[]);
+    }
+    if (reviewsRes.data) {
+      setReviews(reviewsRes.data);
     }
     setLoading(false);
+  };
+
+  const handleDeleteReview = async () => {
+    if (!deleteId) return;
+    const { error } = await supabase.from("reviews").delete().eq("id", deleteId);
+    if (error) {
+      toast.error("Kon review niet verwijderen");
+    } else {
+      setReviews((prev) => prev.filter((r) => r.id !== deleteId));
+      toast.success("Review verwijderd");
+    }
+    setDeleteId(null);
   };
 
   const toggleSubject = async (subjectId: string) => {
