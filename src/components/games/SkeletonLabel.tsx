@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, Check, X, RotateCcw, ZoomOut } from "lucide-react";
 import { playCorrect, playWrong } from "@/lib/sounds";
-import skeletonImg from "@/assets/skeleton.png";
+import skeletonImg from "@/assets/skeleton-reference.jpeg";
 
 interface Props {
   onBack: () => void;
@@ -240,14 +240,14 @@ export default function SkeletonLabel({ onBack }: Props) {
                   e.stopPropagation();
                   handleMarkerClick(bone.id);
                 }}
-                className={`absolute w-5 h-5 md:w-6 md:h-6 rounded-full flex items-center justify-center text-[8px] md:text-[10px] font-bold transition-all border-2 ${
+                className={`absolute w-5 h-5 md:w-6 md:h-6 rounded-full flex items-center justify-center transition-all ${
                   isAnswered
                     ? isCorrect
-                      ? "bg-[hsl(var(--success))] border-[hsl(var(--success))] text-white"
-                      : "bg-destructive border-destructive text-destructive-foreground"
+                      ? "bg-[hsl(var(--success))]/20 border-2 border-[hsl(var(--success))]"
+                      : "bg-destructive/20 border-2 border-destructive"
                     : isActive
-                    ? "bg-primary border-primary text-primary-foreground ring-2 ring-primary/40"
-                    : "bg-background border-primary text-primary hover:scale-110 cursor-pointer shadow-sm"
+                    ? "bg-primary/15 border-2 border-primary ring-2 ring-primary/40"
+                    : "bg-transparent border-2 border-transparent hover:border-primary/50 cursor-pointer"
                 }`}
                 style={{
                   left: `${bone.x}%`,
@@ -257,7 +257,7 @@ export default function SkeletonLabel({ onBack }: Props) {
                 disabled={isAnswered}
                 title={isAnswered ? (isCorrect ? bone.name : `${answers[bone.id]} → ${bone.name}`) : `Bot ${bone.id}`}
               >
-                {bone.id}
+                <span className="sr-only">Bot {bone.id}</span>
               </button>
             );
           })}
