@@ -197,8 +197,8 @@ export default function SkeletonLabel({ onBack }: Props) {
 
       <div
         ref={containerRef}
-        className="relative w-full mx-auto overflow-auto rounded-lg touch-pan-x touch-pan-y"
-        style={{ maxHeight: "70vh" }}
+        className="relative w-full mx-auto overflow-auto rounded-lg"
+        style={{ maxHeight: "calc(100vh - 160px)" }}
       >
         <div
           className="relative"
@@ -206,7 +206,8 @@ export default function SkeletonLabel({ onBack }: Props) {
           <img
             src={skeletonImg}
             alt="Menselijk skelet"
-            className="w-full h-auto select-none pointer-events-none"
+            className="w-full h-auto select-none"
+            style={{ minWidth: "100%", touchAction: "pinch-zoom" }}
             draggable={false}
           />
           {BONES.map((bone) => {
