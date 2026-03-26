@@ -229,7 +229,7 @@ export default function Admin() {
             );
           })()}
         </div>
-        </div>
+      </div>
       </div>
 
       <AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
