@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { shuffle, getForeignLabelNative } from "@/data/vocabulary";
+import { shuffle, getForeignLabelNative, getNlLabel } from "@/data/vocabulary";
 import { useChapter } from "@/contexts/ChapterContext";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, RotateCcw } from "lucide-react";
@@ -108,7 +108,7 @@ export default function MatchPairs({ onBack }: Props) {
 
       <div className="grid grid-cols-2 gap-2 md:gap-4 w-full">
         <div className="flex flex-col gap-1.5 md:gap-2">
-          <p className="text-xs uppercase tracking-widest text-muted-foreground text-center mb-0.5 md:mb-1">Nederlands</p>
+          <p className="text-xs uppercase tracking-widest text-muted-foreground text-center mb-0.5 md:mb-1">{getNlLabel(language)}</p>
           {leftItems.map((item) => (
             <Button
               key={item.id}
