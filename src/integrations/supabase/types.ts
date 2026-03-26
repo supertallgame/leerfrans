@@ -271,6 +271,19 @@ export type Database = {
       }
     }
     Functions: {
+      create_game_room: {
+        Args: {
+          p_code: string
+          p_game_mode?: string
+          p_host_name: string
+          p_num_teams?: number
+          p_team_emojis?: Json
+          p_team_mode?: string
+          p_team_names?: Json
+          p_total_questions?: number
+        }
+        Returns: Json
+      }
       get_room_players: {
         Args: { p_room_id: string }
         Returns: {
