@@ -439,6 +439,27 @@ const englishChapter4Words: VocabItem[] = [
   { french: "goal", dutch: "doel / doelpunt" },
 ];
 
+const englishChapter5Words: VocabItem[] = [
+  { french: "air", dutch: "lucht" },
+  { french: "coast(line)", dutch: "kust(lijn)" },
+  { french: "countryside", dutch: "platteland" },
+  { french: "to cover", dutch: "bedekken" },
+  { french: "to discover", dutch: "ontdekken" },
+  { french: "earth", dutch: "aarde" },
+  { french: "environment", dutch: "milieu" },
+  { french: "to explore", dutch: "verkennen" },
+  { french: "fire", dutch: "vuur" },
+  { french: "landscape", dutch: "landschap" },
+  { french: "leaf", dutch: "blad" },
+  { french: "path", dutch: "pad" },
+  { french: "to protect", dutch: "beschermen" },
+  { french: "rocky", dutch: "rotsachtig" },
+  { french: "village", dutch: "dorp" },
+  { french: "wave", dutch: "golf" },
+  { french: "wildlife", dutch: "dieren in het wild" },
+  { french: "wood", dutch: "hout" },
+];
+
 export const englishChapters: Chapter[] = [
   {
     id: "en_chapter1",
