@@ -270,7 +270,38 @@ const Index = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Login dialog */}
+      {/* Language picker dialog */}
+      <Dialog open={showLanguagePicker} onOpenChange={setShowLanguagePicker}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Kies een taal</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-1.5">
+            {([
+              { id: "french" as Language, label: "🇫🇷 Frans", desc: "Nederlands ↔ Français" },
+              { id: "english" as Language, label: "🇬🇧 Engels", desc: "Nederlands ↔ English" },
+            ]).map((lang) => {
+              const isActive = language === lang.id;
+              return (
+                <button
+                  key={lang.id}
+                  onClick={() => { setLanguage(lang.id); setShowLanguagePicker(false); }}
+                  className={`w-full text-left px-3 py-2 rounded-lg border text-sm transition-all ${
+                    isActive
+                      ? "border-primary bg-primary/10 font-medium"
+                      : "border-border hover:border-primary/50 hover:bg-primary/5 cursor-pointer"
+                  }`}
+                >
+                  <span>{lang.label}</span>
+                  <br />
+                  <span className="text-xs text-muted-foreground">{lang.desc}</span>
+                </button>
+              );
+            })}
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <AuthDialog open={showLoginPrompt} onOpenChange={setShowLoginPrompt} />
 
       {/* Settings dialog */}
@@ -299,24 +330,12 @@ const Index = () => {
                 <BookMarked className="h-4 w-4" />
                 <span className="text-sm font-medium">Taal</span>
               </div>
-              <div className="flex gap-1">
-                <button
-                  onClick={() => setLanguage("french")}
-                  className={`text-xs px-2 py-1 rounded-full transition-colors ${
-                    language === "french" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
-                  }`}
-                >
-                  🇫🇷 Frans
-                </button>
-                <button
-                  onClick={() => setLanguage("english")}
-                  className={`text-xs px-2 py-1 rounded-full transition-colors ${
-                    language === "english" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
-                  }`}
-                >
-                  🇬🇧 Engels
-                </button>
-              </div>
+              <button
+                onClick={() => { setShowSettings(false); setShowLanguagePicker(true); }}
+                className="text-sm font-medium px-3 py-1 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+              >
+                {language === "french" ? "🇫🇷 Frans" : "🇬🇧 Engels"}
+              </button>
             </div>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
