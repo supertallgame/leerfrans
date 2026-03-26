@@ -103,7 +103,25 @@ export default function Admin() {
     setDeleteId(null);
   };
 
-  const toggleSubject = async (subjectId: string) => {
+  const exportReviewsCsv = () => {
+    if (reviews.length === 0) return;
+    const header = "Naam,Sterren,Bericht,Datum";
+    const rows = reviews.map((r) => {
+      const escape = (s: string) => `"${s.replace(/"/g, '""')}"`;
+      return `${escape(r.display_name)},${r.rating},${escape(r.message)},${new Date(r.created_at).toLocaleDateString("nl-NL")}`;
+    });
+    const csv = [header, ...rows].join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "reviews.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success("Reviews geëxporteerd");
+  };
+
+
     const newDisabled = disabledSubjects.includes(subjectId)
       ? disabledSubjects.filter((s) => s !== subjectId)
       : [...disabledSubjects, subjectId];
