@@ -418,7 +418,7 @@ const englishChapter3Words: VocabItem[] = [
   { french: "to wait", dutch: "wachten" },
 ];
 
-
+export const englishChapters: Chapter[] = [
   {
     id: "en_chapter1",
     title: "Chapter 1",
