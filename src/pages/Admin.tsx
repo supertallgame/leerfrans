@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent } from "@/components/ui/card";
-import { Shield, Home, FlaskConical, Microscope, Trash2, Star, MessageSquare } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Shield, Home, FlaskConical, Microscope, Trash2, Star, MessageSquare, Search } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -54,6 +55,7 @@ export default function Admin() {
 
   const [reviews, setReviews] = useState<Review[]>([]);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     checkAdmin();
@@ -139,10 +141,15 @@ export default function Admin() {
     );
   }
 
+  const filteredReviews = reviews.filter((r) => {
+    const q = searchQuery.toLowerCase();
+    return !q || r.display_name.toLowerCase().includes(q) || r.message.toLowerCase().includes(q);
+  });
+
   return (
     <div className="min-h-screen bg-background p-6">
-      <div className="max-w-4xl mx-auto">
-        <div className="flex items-center gap-3 mb-8">
+      <div className="max-w-4xl mx-auto space-y-6">
+        <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
             <Shield className="h-5 w-5 text-primary" />
           </div>
@@ -181,11 +188,20 @@ export default function Admin() {
             </h2>
             <span className="text-sm text-muted-foreground">{reviews.length} review{reviews.length !== 1 ? "s" : ""}</span>
           </div>
-          {reviews.length === 0 ? (
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Zoek op naam of bericht..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9"
+            />
+          </div>
+          {filteredReviews.length === 0 ? (
             <p className="text-sm text-muted-foreground">Geen reviews gevonden.</p>
           ) : (
             <div className="space-y-2">
-              {reviews.map((review) => (
+              {filteredReviews.map((review) => (
                 <div key={review.id} className="flex items-start justify-between gap-3 px-4 py-3 rounded-lg border border-border">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
