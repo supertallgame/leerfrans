@@ -99,6 +99,31 @@ const Index = () => {
     document.documentElement.classList.toggle("dark", darkMode);
   }, []);
 
+  // Fetch disabled subjects
+  useEffect(() => {
+    supabase
+      .from("admin_settings")
+      .select("value")
+      .eq("key", "disabled_subjects")
+      .single()
+      .then(({ data }) => {
+        if (data?.value && Array.isArray(data.value)) {
+          setDisabledSubjects(data.value as string[]);
+          // If current language is disabled, redirect to french
+          if ((data.value as string[]).includes(language)) {
+            setLanguage("french");
+          }
+        }
+      });
+  }, []);
+
+  // If language becomes disabled, redirect to french
+  useEffect(() => {
+    if (disabledSubjects.includes(language)) {
+      setLanguage("french");
+    }
+  }, [disabledSubjects, language]);
+
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
