@@ -262,7 +262,7 @@ const Index = () => {
       <Dialog open={showChapterPicker} onOpenChange={setShowChapterPicker}>
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
-            <DialogTitle>Kies een {language === "french" ? "Chapitre" : "Chapter"}</DialogTitle>
+            <DialogTitle>Kies een {(language === "nask" || language === "biology") ? "Hoofdstuk" : language === "french" ? "Chapitre" : "Chapter"}</DialogTitle>
           </DialogHeader>
           <div className="space-y-1.5">
             {chaptersForLanguage.map((ch) => {
@@ -353,7 +353,7 @@ const Index = () => {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <BookMarked className="h-4 w-4" />
-                <span className="text-sm font-medium">Taal</span>
+                <span className="text-sm font-medium">Vak</span>
               </div>
               <button
                 onClick={() => { setShowSettings(false); setShowLanguagePicker(true); }}
@@ -365,7 +365,7 @@ const Index = () => {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <BookMarked className="h-4 w-4" />
-                <span className="text-sm font-medium">{language === "french" ? "Chapitre" : "Chapter"}</span>
+                <span className="text-sm font-medium">{(language === "nask" || language === "biology") ? "Hoofdstuk" : language === "french" ? "Chapitre" : "Chapter"}</span>
               </div>
               <button
                 onClick={() => { setShowSettings(false); setShowChapterPicker(true); }}
