@@ -745,7 +745,7 @@ export function getNlLabel(lang: Language): string {
 export function getForeignShort(lang: Language): string {
   if (lang === "french") return "FR";
   if (lang === "english") return "EN";
-  return "Omschr.";
+  return "Omschrijving";
 }
 
 export function getNlShort(lang: Language): string {
