@@ -243,16 +243,32 @@ export default function SkeletonLabel({ onBack }: Props) {
                   e.stopPropagation();
                   handleMarkerClick(bone.id);
                 }}
-                className={`absolute w-5 h-5 md:w-6 md:h-6 -translate-x-1/2 -translate-y-1/2 rounded-full flex items-center justify-center text-[8px] md:text-[10px] font-bold transition-all border-2 ${
+                className={`absolute -translate-x-1/2 -translate-y-1/2 rounded-full flex items-center justify-center font-bold transition-all border-2 ${
                   isAnswered
                     ? isCorrect
                       ? "bg-[hsl(var(--success))] border-[hsl(var(--success))] text-white"
                       : "bg-destructive border-destructive text-destructive-foreground"
                     : isActive
-                    ? "bg-primary border-primary text-primary-foreground scale-125 ring-2 ring-primary/40"
+                    ? "bg-primary border-primary text-primary-foreground ring-2 ring-primary/40"
                     : "bg-background border-primary text-primary hover:scale-110 cursor-pointer shadow-sm"
                 }`}
-                style={{ left: `${bone.x}%`, top: `${bone.y}%` }}
+                style={{
+                  left: `${bone.x}%`,
+                  top: `${bone.y}%`,
+                  width: zoomTarget ? `${24 / ZOOM_SCALE}px` : undefined,
+                  height: zoomTarget ? `${24 / ZOOM_SCALE}px` : undefined,
+                  fontSize: zoomTarget ? `${10 / ZOOM_SCALE}px` : undefined,
+                  borderWidth: zoomTarget ? `${2 / ZOOM_SCALE}px` : undefined,
+                }}
+                {...(!zoomTarget ? { className: `absolute w-5 h-5 md:w-6 md:h-6 -translate-x-1/2 -translate-y-1/2 rounded-full flex items-center justify-center text-[8px] md:text-[10px] font-bold transition-all border-2 ${
+                  isAnswered
+                    ? isCorrect
+                      ? "bg-[hsl(var(--success))] border-[hsl(var(--success))] text-white"
+                      : "bg-destructive border-destructive text-destructive-foreground"
+                    : isActive
+                    ? "bg-primary border-primary text-primary-foreground ring-2 ring-primary/40"
+                    : "bg-background border-primary text-primary hover:scale-110 cursor-pointer shadow-sm"
+                }` } : {})}
                 disabled={isAnswered}
                 title={isAnswered ? (isCorrect ? bone.name : `${answers[bone.id]} → ${bone.name}`) : `Bot ${bone.id}`}
               >
