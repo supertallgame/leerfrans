@@ -128,7 +128,7 @@ const Index = () => {
         <div className="flex items-center justify-between w-full mb-1">
           <div className="w-10" />
           <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 text-primary text-[10px] md:text-xs font-medium tracking-wide uppercase whitespace-nowrap">
-            <FlagNL className="w-4 h-3 md:w-5 md:h-3.5 rounded-sm" /> NL ↔ {language === "french" ? "FR" : "EN"} {language === "french" ? <FlagFR className="w-4 h-3 md:w-5 md:h-3.5 rounded-sm" /> : <FlagEN className="w-4 h-3 md:w-5 md:h-3.5 rounded-sm" />}
+            <FlagNL className="w-4 h-3 md:w-5 md:h-3.5 rounded-sm shrink-0" /> Nederlands ↔ {foreignLabelNative} {language === "french" ? <FlagFR className="w-4 h-3 md:w-5 md:h-3.5 rounded-sm shrink-0" /> : <FlagEN className="w-4 h-3 md:w-5 md:h-3.5 rounded-sm shrink-0" />}
           </div>
           <div className="flex items-center gap-0.5">
             <Button
