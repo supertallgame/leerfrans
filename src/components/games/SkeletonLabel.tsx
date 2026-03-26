@@ -210,31 +210,6 @@ export default function SkeletonLabel({ onBack }: Props) {
             style={{ minWidth: "100%", touchAction: "pinch-zoom" }}
             draggable={false}
           />
-          {BONES.map((bone) => {
-            const isAnswered = results[bone.id] !== undefined;
-            const isCorrect = results[bone.id];
-            return (
-              <div
-                key={bone.id}
-                className={`absolute w-6 h-6 md:w-7 md:h-7 rounded-full flex items-center justify-center transition-all z-10 pointer-events-none ${
-                  isAnswered
-                    ? isCorrect
-                      ? "bg-[hsl(var(--success))]/20 border-2 border-[hsl(var(--success))]"
-                      : "bg-destructive/20 border-2 border-destructive"
-                    : currentBone?.id === bone.id
-                    ? "bg-primary/20 border-2 border-primary ring-2 ring-primary/40 animate-pulse"
-                    : "bg-transparent border-0"
-                }`}
-                style={{
-                  left: `${bone.x}%`,
-                  top: `${bone.y}%`,
-                  transform: `translate(-50%, -50%)`,
-                }}
-              >
-                <span className="sr-only">Bot {bone.id}</span>
-              </div>
-            );
-          })}
         </div>
       </div>
 
