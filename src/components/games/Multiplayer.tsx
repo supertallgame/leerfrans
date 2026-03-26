@@ -32,7 +32,7 @@ interface Room {
   id: string;
   code: string;
   host_name: string;
-  host_player_id: string | null;
+  
   status: string;
   current_question_index: number;
   total_questions: number;
@@ -120,7 +120,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
             id: newRoom.id,
             code: newRoom.code,
             host_name: newRoom.host_name,
-            host_player_id: newRoom.host_player_id,
+            
             status: newRoom.status,
             current_question_index: newRoom.current_question_index,
             total_questions: newRoom.total_questions,
@@ -282,7 +282,6 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
       id: roomData.id,
       code: roomData.code,
       host_name: roomData.host_name,
-      host_player_id: null,
       status: roomData.status,
       current_question_index: roomData.current_question_index,
       total_questions: roomData.total_questions,
@@ -315,7 +314,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
 
     const { data: roomData, error } = await (supabase
       .from("game_rooms_public" as any)
-      .select("id, code, host_name, host_player_id, status, current_question_index, total_questions, direction, game_mode, team_mode, num_teams, team_names, team_emojis")
+      .select("id, code, host_name, status, current_question_index, total_questions, direction, game_mode, team_mode, num_teams, team_names, team_emojis")
       .eq("code", roomCode.toUpperCase().trim())
       .single() as any);
 

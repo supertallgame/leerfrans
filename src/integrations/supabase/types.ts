@@ -229,7 +229,6 @@ export type Database = {
           direction: string | null
           game_mode: string | null
           host_name: string | null
-          host_player_id: string | null
           id: string | null
           num_teams: number | null
           status: string | null
@@ -245,7 +244,6 @@ export type Database = {
           direction?: string | null
           game_mode?: string | null
           host_name?: string | null
-          host_player_id?: string | null
           id?: string | null
           num_teams?: number | null
           status?: string | null
@@ -261,7 +259,6 @@ export type Database = {
           direction?: string | null
           game_mode?: string | null
           host_name?: string | null
-          host_player_id?: string | null
           id?: string | null
           num_teams?: number | null
           status?: string | null
@@ -270,15 +267,7 @@ export type Database = {
           team_names?: Json | null
           total_questions?: number | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "game_rooms_host_player_id_fkey"
-            columns: ["host_player_id"]
-            isOneToOne: false
-            referencedRelation: "game_players"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
     }
     Functions: {
