@@ -589,6 +589,43 @@ const naskChapter2Words: VocabItem[] = [
   { dutch: "Zichtlijn", french: "De lijn waarlangs je naar een voorwerp kijkt" },
 ];
 
+const naskChapter3Words: VocabItem[] = [
+  { dutch: "Condenseren", french: "De faseovergang van gas naar vloeistof" },
+  { dutch: "Dichtheid", french: "De massa van één kubieke centimeter (1 cm³) van een stof" },
+  { dutch: "Dosis", french: "De hoeveelheid van een stof die je binnenkrijgt" },
+  { dutch: "Fase", french: "De toestand waarin een stof kan voorkomen: vaste stof, vloeistof en gas" },
+  { dutch: "Faseovergang", french: "Overgang van de ene fase naar de andere fase" },
+  { dutch: "Filtraat", french: "De vloeistof die door een filter is gegaan" },
+  { dutch: "Filtreren", french: "Een scheidingsmethode om een vaste stof uit een suspensie te halen" },
+  { dutch: "Graden Celsius", french: "De eenheid van temperatuur: gebaseerd op het smeltpunt en kookpunt van water" },
+  { dutch: "Gas", french: "Een stof zonder eigen vorm en zonder eigen volume, bijvoorbeeld lucht" },
+  { dutch: "Giftig", french: "Een stof die dodelijk of schadelijk is voor je gezondheid" },
+  { dutch: "Hergebruik", french: "Het opnieuw gebruiken van een voorwerp" },
+  { dutch: "Indampen", french: "Een scheidingsmethode om een vaste stof uit een suspensie te halen" },
+  { dutch: "Kookpunt", french: "De temperatuur waarbij de vloeistof verdampt met dampbellen in de vloeistof" },
+  { dutch: "Mengsel", french: "Materie die bestaat uit twee of meer stoffen" },
+  { dutch: "Oplossing", french: "Een helder mengsel van een stof in een vloeistof" },
+  { dutch: "Recyclen", french: "Afval gebruiken om nieuwe producten te maken" },
+  { dutch: "Residu", french: "De stof die bij filtreren of indampen op het filter of in het indampschaaltje achterblijft" },
+  { dutch: "Smelten", french: "De faseovergang van vaste stof naar vloeistof" },
+  { dutch: "Smeltpunt", french: "De temperatuur waarbij een stof van de vaste naar de vloeibare fase overgaat" },
+  { dutch: "Stofeigenschap", french: "Een eigenschap van een stof zoals de dichtheid" },
+  { dutch: "Stoffen", french: "De materie waaruit alles om je heen bestaat" },
+  { dutch: "Stollen", french: "De faseovergang van vloeistof naar vaste stof" },
+  { dutch: "Suspensie", french: "Een troebel mengsel van een vaste stof in een vloeistof" },
+  { dutch: "Temperatuurlijn", french: "De lijn waaruit je kunt aflezen wat de fase van een stof is" },
+  { dutch: "Vaste stof", french: "Een stof met een eigen vorm en een eigen volume, bijvoorbeeld steen" },
+  { dutch: "Veiligheidspictogram", french: "Een afbeelding waar je aan kunt zien waarom een stof gevaarlijk is" },
+  { dutch: "Verdampen", french: "De faseovergang van vloeistof naar gas" },
+  { dutch: "Voorwerpseigenschap", french: "Een eigenschap van een voorwerp zoals de vorm" },
+  { dutch: "Vloeistof", french: "Een stof zonder eigen vorm, maar met eigen volume, bijvoorbeeld water" },
+  { dutch: "Zuivere stof", french: "Materie die bestaat uit één stof" },
+  { dutch: "Afschenken", french: "Het afgieten van de vloeistof (bij suspensies) of de vloeistof met de kleinste dichtheid (bij emulsies)" },
+  { dutch: "Bezinken", french: "De scheiding van twee stoffen waarbij de stof met de grootste dichtheid naar beneden zakt" },
+  { dutch: "Emulgator", french: "Een stof die ervoor zorgt dat een emulsie gemengd blijft" },
+  { dutch: "Emulsie", french: "Een troebel mengsel van een vloeistof in een andere vloeistof" },
+];
+
 const naskChapters: Chapter[] = [
   {
     id: "nask_chapter1",
