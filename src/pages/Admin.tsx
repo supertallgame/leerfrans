@@ -121,7 +121,7 @@ export default function Admin() {
     toast.success("Reviews geëxporteerd");
   };
 
-
+  const toggleSubject = async (subjectId: string) => {
     const newDisabled = disabledSubjects.includes(subjectId)
       ? disabledSubjects.filter((s) => s !== subjectId)
       : [...disabledSubjects, subjectId];
