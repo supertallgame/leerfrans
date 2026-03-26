@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { isAnswerCorrect } from "@/lib/utils";
 import { playCorrect, playWrong } from "@/lib/sounds";
-import { shuffle } from "@/data/vocabulary";
+import { shuffle, getForeignLabel } from "@/data/vocabulary";
 import { useChapter } from "@/contexts/ChapterContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,7 +14,7 @@ interface Props {
 }
 
 export default function TypeAnswer({ onBack }: Props) {
-  const { activeVocabulary } = useChapter();
+  const { activeVocabulary, language } = useChapter();
   const [questions] = useState(() => shuffle(activeVocabulary));
   const [qIndex, setQIndex] = useState(0);
   const [input, setInput] = useState("");
@@ -72,7 +72,7 @@ export default function TypeAnswer({ onBack }: Props) {
           <ArrowLeft className="h-4 w-4" /> Terug
         </Button>
         <Button variant="outline" size="sm" onClick={() => setShowDutch(!showDutch)} className="text-xs md:text-sm">
-          {showDutch ? "NL → FR" : "FR → NL"}
+          {showDutch ? `NL → ${language === "french" ? "FR" : "EN"}` : `${language === "french" ? "FR" : "EN"} → NL`}
         </Button>
       </div>
 
@@ -81,7 +81,7 @@ export default function TypeAnswer({ onBack }: Props) {
       <Card className="w-full">
         <CardContent className="p-4 md:p-6 text-center">
           <p className="text-xs uppercase tracking-widest text-muted-foreground mb-1 md:mb-2">
-            Vertaal naar {showDutch ? "Frans" : "Nederlands"}
+            Vertaal naar {showDutch ? getForeignLabel(language) : "Nederlands"}
           </p>
           <p className="text-lg md:text-xl font-semibold">
             {showDutch ? current.dutch : current.french}

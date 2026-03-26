@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { BookOpen, Brain, Puzzle, Keyboard, Users, PenTool, MessageSquare, Bot, Settings, Volume2, VolumeX, LogOut, Sun, Moon, Star, Lock, BookMarked } from "lucide-react";
 import { FlagNL, FlagFR } from "@/components/Flags";
-import { chapters, getChapter } from "@/data/vocabulary";
+import { getChaptersForLanguage, getChapter, getForeignLabel, getForeignLabelNative, Language } from "@/data/vocabulary";
 import { useChapter } from "@/contexts/ChapterContext";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -32,16 +32,26 @@ type Game = "menu" | "flashcards" | "quiz" | "match" | "type" | "multiplayer" | 
 const games = [
   { id: "flashcards" as Game, title: "Flashcards", description: "Draai kaarten om en leer de woorden", icon: BookOpen, color: "bg-primary/10 text-primary" },
   { id: "quiz" as Game, title: "Meerkeuze Quiz", description: "Kies het juiste antwoord uit 4 opties", icon: Brain, color: "bg-secondary/20 dark:bg-secondary/30 text-secondary-foreground" },
-  { id: "match" as Game, title: "Koppel Paren", description: "Verbind de Nederlandse en Franse woorden", icon: Puzzle, color: "bg-accent/10 text-accent" },
+  { id: "match" as Game, title: "Koppel Paren", description: "Verbind de Nederlandse en vreemde woorden", icon: Puzzle, color: "bg-accent/10 text-accent" },
   { id: "type" as Game, title: "Typ het Antwoord", description: "Typ de vertaling zelf in", icon: Keyboard, color: "bg-destructive/10 text-destructive" },
   { id: "fill" as Game, title: "Ontbrekende Letters", description: "Vul de ontbrekende letters in het woord aan", icon: PenTool, color: "bg-primary/10 text-primary" },
   { id: "sentence" as Game, title: "Zin Aanvullen", description: "Kies het ontbrekende woord in de zin", icon: MessageSquare, color: "bg-accent/10 text-accent" },
   { id: "ai" as Game, title: "AI Leraar", description: "Chat met een AI die je overhoort", icon: Bot, color: "bg-secondary/20 dark:bg-secondary/30 text-secondary-foreground" },
 ];
 
+const FlagEN = ({ className = "w-5 h-3.5" }: { className?: string }) => (
+  <svg viewBox="0 0 640 480" className={className} aria-label="English">
+    <rect width="640" height="480" fill="#012169" />
+    <path d="M75 0l244 181L562 0h78v62L400 241l240 178v61h-80L320 301 81 480H0v-60l239-178L0 64V0h75z" fill="#FFF" />
+    <path d="M424 281l216 159v40L369 281h55zm-184 20l6 35L54 480H0l240-179zM640 0v3L391 191l2-44L590 0h50zM0 0l239 176h-60L0 42V0z" fill="#C8102E" />
+    <path d="M241 0v480h160V0H241zM0 160v160h640V160H0z" fill="#FFF" />
+    <path d="M0 193v96h640v-96H0zM273 0v480h96V0h-96z" fill="#C8102E" />
+  </svg>
+);
+
 const Index = () => {
   const navigate = useNavigate();
-  const { chapterId, setChapterId, activeVocabulary } = useChapter();
+  const { chapterId, setChapterId, activeVocabulary, language, setLanguage } = useChapter();
   const [activeGame, setActiveGame] = useState<Game>("menu");
   const [showSettings, setShowSettings] = useState(false);
   const [showChapterPicker, setShowChapterPicker] = useState(false);
@@ -54,6 +64,10 @@ const Index = () => {
     if (saved) return saved === "dark";
     return window.matchMedia("(prefers-color-scheme: dark)").matches;
   });
+
+  const chaptersForLanguage = getChaptersForLanguage(language);
+  const foreignLabel = getForeignLabel(language);
+  const foreignLabelNative = getForeignLabelNative(language);
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", darkMode);
@@ -113,7 +127,7 @@ const Index = () => {
         <div className="flex items-center justify-between w-full mb-1">
           <div className="w-10" />
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium tracking-wide uppercase">
-            <FlagNL className="w-5 h-3.5 rounded-sm" /> Nederlands ↔ Français <FlagFR className="w-5 h-3.5 rounded-sm" />
+            <FlagNL className="w-5 h-3.5 rounded-sm" /> Nederlands ↔ {foreignLabelNative} {language === "french" ? <FlagFR className="w-5 h-3.5 rounded-sm" /> : <FlagEN className="w-5 h-3.5 rounded-sm" />}
           </div>
           <div className="flex items-center gap-0.5">
             <Button
@@ -141,8 +155,35 @@ const Index = () => {
             Woordjes Leren
           </h1>
           <p className="text-muted-foreground text-sm md:text-lg max-w-md mx-auto">
-            Kies een spel en oefen je Frans-Nederlandse woordenschat
+            Kies een spel en oefen je woordenschat
           </p>
+
+          {/* Language toggle */}
+          <div className="flex items-center justify-center gap-2">
+            <button
+              onClick={() => setLanguage("french")}
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+                language === "french"
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted text-muted-foreground hover:bg-muted/80"
+              }`}
+            >
+              <FlagFR className="w-4 h-3 rounded-sm" />
+              Frans
+            </button>
+            <button
+              onClick={() => setLanguage("english")}
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+                language === "english"
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted text-muted-foreground hover:bg-muted/80"
+              }`}
+            >
+              <FlagEN className="w-4 h-3 rounded-sm" />
+              Engels
+            </button>
+          </div>
+
           <button
             onClick={() => setShowChapterPicker(true)}
             className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors cursor-pointer mx-auto"
@@ -213,10 +254,10 @@ const Index = () => {
       <Dialog open={showChapterPicker} onOpenChange={setShowChapterPicker}>
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
-            <DialogTitle>Kies een Chapitre</DialogTitle>
+            <DialogTitle>Kies een {language === "french" ? "Chapitre" : "Chapter"}</DialogTitle>
           </DialogHeader>
           <div className="space-y-1.5">
-            {chapters.map((ch) => {
+            {chaptersForLanguage.map((ch) => {
               const locked = ch.requiresLogin && !user;
               const isActive = chapterId === ch.id;
               return (
@@ -271,7 +312,31 @@ const Index = () => {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <BookMarked className="h-4 w-4" />
-                <span className="text-sm font-medium">Chapitre</span>
+                <span className="text-sm font-medium">Taal</span>
+              </div>
+              <div className="flex gap-1">
+                <button
+                  onClick={() => setLanguage("french")}
+                  className={`text-xs px-2 py-1 rounded-full transition-colors ${
+                    language === "french" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+                  }`}
+                >
+                  🇫🇷 Frans
+                </button>
+                <button
+                  onClick={() => setLanguage("english")}
+                  className={`text-xs px-2 py-1 rounded-full transition-colors ${
+                    language === "english" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+                  }`}
+                >
+                  🇬🇧 Engels
+                </button>
+              </div>
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <BookMarked className="h-4 w-4" />
+                <span className="text-sm font-medium">{language === "french" ? "Chapitre" : "Chapter"}</span>
               </div>
               <button
                 onClick={() => { setShowSettings(false); setShowChapterPicker(true); }}

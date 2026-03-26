@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { ArrowLeft, RotateCcw } from "lucide-react";
-import { shuffle, VocabItem } from "@/data/vocabulary";
+import { shuffle, VocabItem, getForeignLabel } from "@/data/vocabulary";
 import { useChapter } from "@/contexts/ChapterContext";
 
 interface Props {
@@ -47,7 +47,8 @@ function removeSomeLetters(word: string): { display: string; removed: { index: n
 }
 
 export default function FillLetters({ onBack }: Props) {
-  const { activeVocabulary } = useChapter();
+  const { activeVocabulary, language } = useChapter();
+  const foreignShort = language === "french" ? "FR" : "EN";
   const words = useMemo(() => {
     const singles = activeVocabulary.filter((v) => isSingleWord(v.french));
     return shuffle(singles);
@@ -126,7 +127,7 @@ export default function FillLetters({ onBack }: Props) {
             onClick={() => { setDirection("nl_to_fr"); restart(); }}
             className="text-xs md:text-sm px-2 md:px-3"
           >
-            NL→FR
+            NL→{foreignShort}
           </Button>
           <Button
             size="sm"
@@ -134,7 +135,7 @@ export default function FillLetters({ onBack }: Props) {
             onClick={() => { setDirection("fr_to_nl"); restart(); }}
             className="text-xs md:text-sm px-2 md:px-3"
           >
-            FR→NL
+            {foreignShort}→NL
           </Button>
         </div>
       </div>

@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { shuffle } from "@/data/vocabulary";
+import { shuffle, getForeignLabelNative } from "@/data/vocabulary";
 import { useChapter } from "@/contexts/ChapterContext";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, RotateCcw } from "lucide-react";
@@ -13,7 +13,7 @@ interface Props {
 const PAIRS_PER_ROUND = 5;
 
 export default function MatchPairs({ onBack }: Props) {
-  const { activeVocabulary } = useChapter();
+  const { activeVocabulary, language } = useChapter();
   const [allWords] = useState(() => shuffle(activeVocabulary));
   const totalRounds = Math.ceil(allWords.length / PAIRS_PER_ROUND);
   const [roundIndex, setRoundIndex] = useState(0);
@@ -123,7 +123,7 @@ export default function MatchPairs({ onBack }: Props) {
           ))}
         </div>
         <div className="flex flex-col gap-1.5 md:gap-2">
-          <p className="text-xs uppercase tracking-widest text-muted-foreground text-center mb-0.5 md:mb-1">Français</p>
+          <p className="text-xs uppercase tracking-widest text-muted-foreground text-center mb-0.5 md:mb-1">{getForeignLabelNative(language)}</p>
           {rightItems.map((item) => (
             <Button
               key={item.id}
