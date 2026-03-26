@@ -214,7 +214,12 @@ export default function Admin() {
             <h2 className="text-lg font-semibold flex items-center gap-2">
               <MessageSquare className="h-5 w-5" /> Reviews beheren
             </h2>
-            <span className="text-sm text-muted-foreground">{reviews.length} review{reviews.length !== 1 ? "s" : ""}</span>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">{reviews.length} review{reviews.length !== 1 ? "s" : ""}</span>
+              <Button variant="outline" size="sm" onClick={exportReviewsCsv} className="gap-1.5">
+                <Download className="h-3.5 w-3.5" /> CSV
+              </Button>
+            </div>
           </div>
           <div className="flex gap-2">
             <div className="relative flex-1">
