@@ -207,7 +207,7 @@ export default function SkeletonLabel({ onBack }: Props) {
             src={skeletonImg}
             alt="Menselijk skelet"
             className="w-full h-auto select-none"
-            style={{ minWidth: "100%", touchAction: "pinch-zoom" }}
+            style={{ minWidth: "100%", touchAction: "pinch-zoom", imageRendering: "crisp-edges" }}
             draggable={false}
           />
         </div>
