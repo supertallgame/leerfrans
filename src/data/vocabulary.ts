@@ -398,6 +398,26 @@ export const frenchChapters: Chapter[] = [
   },
 ];
 
+const englishChapter3Words: VocabItem[] = [
+  { french: "car", dutch: "auto" },
+  { french: "to drive", dutch: "besturen" },
+  { french: "bicycle; bike", dutch: "fiets" },
+  { french: "dangerous", dutch: "gevaarlijk" },
+  { french: "ticket", dutch: "kaartje" },
+  { french: "slow", dutch: "langzaam" },
+  { french: "underground (UK) / subway (US)", dutch: "metro" },
+  { french: "passenger", dutch: "passagier" },
+  { french: "journey", dutch: "reis" },
+  { french: "to ride", dutch: "rijden" },
+  { french: "fast", dutch: "snel" },
+  { french: "taxi(cab)", dutch: "taxi" },
+  { french: "train", dutch: "trein" },
+  { french: "safe", dutch: "veilig" },
+  { french: "traffic", dutch: "verkeer" },
+  { french: "plane", dutch: "vliegtuig" },
+  { french: "to wait", dutch: "wachten" },
+];
+
 export const englishChapters: Chapter[] = [
   {
     id: "en_chapter1",
@@ -411,6 +431,13 @@ export const englishChapters: Chapter[] = [
     title: "Chapter 2",
     description: "Kleding & winkelen",
     words: englishChapter2Words,
+    requiresLogin: false,
+  },
+  {
+    id: "en_chapter3",
+    title: "Chapter 3",
+    description: "Vervoer & reizen",
+    words: englishChapter3Words,
     requiresLogin: false,
   },
 ];
