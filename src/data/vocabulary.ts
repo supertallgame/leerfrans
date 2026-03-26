@@ -661,6 +661,13 @@ const naskChapters: Chapter[] = [
     words: naskChapter3Words,
     requiresLogin: false,
   },
+  {
+    id: "nask_chapter4",
+    title: "Hoofdstuk 4",
+    description: "Snelheid & beweging",
+    words: naskChapter4Words,
+    requiresLogin: false,
+  },
 ];
 
 export function getChaptersForLanguage(lang: Language): Chapter[] {
