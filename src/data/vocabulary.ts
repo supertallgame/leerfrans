@@ -343,6 +343,28 @@ const englishChapter1Words: VocabItem[] = [
   { french: "year 7", dutch: "brugklas" },
 ];
 
+const englishChapter2Words: VocabItem[] = [
+  { french: "bag", dutch: "tas" },
+  { french: "belt", dutch: "riem" },
+  { french: "boot", dutch: "laars" },
+  { french: "brand", dutch: "merk" },
+  { french: "cheap", dutch: "goedkoop" },
+  { french: "expensive", dutch: "duur" },
+  { french: "jewellery", dutch: "sieraden" },
+  { french: "to match", dutch: "passen (bij)" },
+  { french: "(to be) on sale", dutch: "in de uitverkoop (zijn)" },
+  { french: "outerwear", dutch: "bovenkleding" },
+  { french: "second-hand", dutch: "tweedehands" },
+  { french: "shorts", dutch: "korte broek" },
+  { french: "size", dutch: "maat" },
+  { french: "suit", dutch: "pak" },
+  { french: "to take off", dutch: "uittrekken" },
+  { french: "tie", dutch: "stropdas" },
+  { french: "tights", dutch: "panty" },
+  { french: "to try on", dutch: "passen" },
+  { french: "umbrella", dutch: "paraplu" },
+];
+
 // ─── Chapter lists per language ───
 
 export const frenchChapters: Chapter[] = [
@@ -382,6 +404,13 @@ export const englishChapters: Chapter[] = [
     title: "Chapter 1",
     description: "School & vakken",
     words: englishChapter1Words,
+    requiresLogin: false,
+  },
+  {
+    id: "en_chapter2",
+    title: "Chapter 2",
+    description: "Kleding & winkelen",
+    words: englishChapter2Words,
     requiresLogin: false,
   },
 ];
