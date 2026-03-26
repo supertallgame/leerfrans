@@ -561,12 +561,47 @@ const naskChapter1Words: VocabItem[] = [
   { dutch: "Werkplan", french: "Het overzicht van hoe je een experiment wilt gaan uitvoeren" },
 ];
 
+const naskChapter2Words: VocabItem[] = [
+  { dutch: "Absorberen van licht", french: "Het opnemen van licht" },
+  { dutch: "Bolle lens", french: "Een lens die in het midden dikker is dan aan de rand" },
+  { dutch: "Convergerende werking", french: "Lichtstralen naar elkaar toe laten knikken" },
+  { dutch: "Convergente lichtbundel", french: "Een lichtbundel die steeds smaller wordt" },
+  { dutch: "Divergerende werking", french: "Lichtstralen van elkaar af laten knikken" },
+  { dutch: "Divergente lichtbundel", french: "Een lichtbundel die steeds breder wordt" },
+  { dutch: "Evenwijdige lichtbundel", french: "Een lichtbundel die overal even breed is" },
+  { dutch: "Gezichtsveld", french: "Het gebied dat je kunt zien" },
+  { dutch: "Holle lens", french: "Een lens die in het midden dunner is dan aan de rand" },
+  { dutch: "Indirect licht", french: "Licht dat niet rechtstreeks van een lichtbron komt, maar via een voorwerp" },
+  { dutch: "Kleurenspectrum", french: "De kleurenband die je ziet als wit licht op een prisma valt" },
+  { dutch: "Kleurfilter", french: "Glas of kunststof dat alleen één kleur uit het kleurenspectrum doorlaat" },
+  { dutch: "Kunstmatige lichtbron", french: "Een lichtbron die door de mens is gemaakt" },
+  { dutch: "Lens", french: "Een stukje geslepen glas of doorzichtig kunststof waarmee je lichtbundels kunt veranderen" },
+  { dutch: "Lichtbron", french: "De plaats waar licht ontstaat" },
+  { dutch: "Lichtbundel", french: "De verzameling lichtstralen van één lichtbron" },
+  { dutch: "Lichtstraal", french: "Een rechte lijn die laat zien hoe licht vanaf de lichtbron naar de omgeving gaat" },
+  { dutch: "Primaire kleuren", french: "De basiskleuren waarmee je alle andere kleuren kunt maken" },
+  { dutch: "Prisma", french: "Een driehoekig stuk glas of doorzichtig kunststof" },
+  { dutch: "Natuurlijke lichtbron", french: "Een lichtbron die in de natuur is ontstaan zonder invloed van mensen" },
+  { dutch: "Randstralen", french: "De lichtstralen die vanuit de lichtbron vlak langs een voorwerp lopen" },
+  { dutch: "Schaduw", french: "Het gebied achter een verlicht voorwerp waar veel minder licht komt" },
+  { dutch: "Spiegelbeeld", french: "Het beeld dat je ziet als je in een spiegel kijkt" },
+  { dutch: "Spiegelende weerkaatsing", french: "De weerkaatsing van licht in één richting, zoals bij een spiegel gebeurt" },
+  { dutch: "Zichtlijn", french: "De lijn waarlangs je naar een voorwerp kijkt" },
+];
+
 const naskChapters: Chapter[] = [
   {
     id: "nask_chapter1",
     title: "Hoofdstuk 1",
     description: "Onderzoeken & veiligheid",
     words: naskChapter1Words,
+    requiresLogin: false,
+  },
+  {
+    id: "nask_chapter2",
+    title: "Hoofdstuk 2",
+    description: "Licht",
+    words: naskChapter2Words,
     requiresLogin: false,
   },
 ];
