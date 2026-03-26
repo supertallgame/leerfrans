@@ -229,8 +229,6 @@ export default function SkeletonLabel({ onBack }: Props) {
           {BONES.map((bone) => {
             const isAnswered = results[bone.id] !== undefined;
             const isCorrect = results[bone.id];
-            const isActive = activeMarker === bone.id;
-
             const counterScale = zoomTarget ? 1 / ZOOM_SCALE : 1;
 
             return (
