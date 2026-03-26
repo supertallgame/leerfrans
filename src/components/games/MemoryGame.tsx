@@ -42,6 +42,7 @@ export default function MemoryGame({ onBack }: Props) {
   const [flipped, setFlipped] = useState<string[]>([]);
   const [matched, setMatched] = useState<Set<number>>(new Set());
   const [checking, setChecking] = useState(false);
+  const [lastResult, setLastResult] = useState<{ isMatch: boolean; pairId: number } | null>(null);
   const [moves, setMoves] = useState(0);
   const totalMatched = roundIndex * CARDS_PER_ROUND + matched.size;
 
