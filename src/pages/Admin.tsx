@@ -1,66 +1,104 @@
-import { useState } from "react";
-import { Input } from "@/components/ui/input";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Shield, Lock, ArrowRight } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Shield, Home, FlaskConical, Microscope } from "lucide-react";
+import { FlagFR } from "@/components/Flags";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import { Language } from "@/data/vocabulary";
+
+const ADMIN_EMAILS = ["brankovantland@gmail.com", "branko18vantland@gmail.com"];
+
+const FlagEN = ({ className = "w-5 h-3.5" }: { className?: string }) => (
+  <svg viewBox="0 0 640 480" className={className} aria-label="English">
+    <rect width="640" height="480" fill="#012169" />
+    <path d="M75 0l244 181L562 0h78v62L400 241l240 178v61h-80L320 301 81 480H0v-60l239-178L0 64V0h75z" fill="#FFF" />
+    <path d="M424 281l216 159v40L369 281h55zm-184 20l6 35L54 480H0l240-179zM640 0v3L391 191l2-44L590 0h50zM0 0l239 176h-60L0 42V0z" fill="#C8102E" />
+    <path d="M241 0v480h160V0H241zM0 160v160h640V160H0z" fill="#FFF" />
+    <path d="M0 193v96h640v-96H0zM273 0v480h96V0h-96z" fill="#C8102E" />
+  </svg>
+);
+
+const ALL_SUBJECTS: { id: Language; label: string; icon: React.ReactNode }[] = [
+  { id: "french", label: "Frans", icon: <FlagFR className="w-5 h-3.5 rounded-sm" /> },
+  { id: "english", label: "Engels", icon: <FlagEN className="w-5 h-3.5 rounded-sm" /> },
+  { id: "nask", label: "NASK", icon: <FlaskConical className="w-4 h-4" /> },
+  { id: "biology", label: "Biologie", icon: <Microscope className="w-4 h-4" /> },
+];
 
 export default function Admin() {
-  const [password, setPassword] = useState("");
-  const [authenticated, setAuthenticated] = useState(false);
-  const [error, setError] = useState(false);
-  const [shake, setShake] = useState(false);
+  const navigate = useNavigate();
+  const [isAdmin, setIsAdmin] = useState<boolean | null>(null); // null = loading
+  const [disabledSubjects, setDisabledSubjects] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (password === "5952") {
-      setAuthenticated(true);
-      setError(false);
+  useEffect(() => {
+    checkAdmin();
+  }, []);
+
+  const checkAdmin = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user?.email || !ADMIN_EMAILS.includes(session.user.email)) {
+      setIsAdmin(false);
+      setLoading(false);
+      return;
+    }
+    setIsAdmin(true);
+    // Load disabled subjects
+    const { data } = await supabase
+      .from("admin_settings")
+      .select("value")
+      .eq("key", "disabled_subjects")
+      .single();
+    if (data?.value) {
+      setDisabledSubjects(data.value as string[]);
+    }
+    setLoading(false);
+  };
+
+  const toggleSubject = async (subjectId: string) => {
+    const newDisabled = disabledSubjects.includes(subjectId)
+      ? disabledSubjects.filter((s) => s !== subjectId)
+      : [...disabledSubjects, subjectId];
+
+    const { error } = await supabase
+      .from("admin_settings")
+      .update({ value: newDisabled as any, updated_at: new Date().toISOString() })
+      .eq("key", "disabled_subjects");
+
+    if (error) {
+      toast.error("Kon instelling niet opslaan");
+      return;
+    }
+
+    setDisabledSubjects(newDisabled);
+    const subject = ALL_SUBJECTS.find((s) => s.id === subjectId);
+    if (newDisabled.includes(subjectId)) {
+      toast.success(`${subject?.label} is uitgeschakeld`);
     } else {
-      setError(true);
-      setShake(true);
-      setTimeout(() => setShake(false), 500);
+      toast.success(`${subject?.label} is ingeschakeld`);
     }
   };
 
-  if (!authenticated) {
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+      </div>
+    );
+  }
+
+  if (!isAdmin) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background p-4">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-accent/5" />
-        <form
-          onSubmit={handleSubmit}
-          className={`relative w-full max-w-sm space-y-6 rounded-2xl border border-border bg-card p-8 shadow-xl transition-transform ${shake ? "animate-[shake_0.4s_ease-in-out]" : ""}`}
-        >
-          <div className="flex flex-col items-center gap-3">
-            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
-              <Shield className="h-7 w-7 text-primary" />
-            </div>
-            <h1 className="text-xl font-bold text-foreground">Admin Login</h1>
-            <p className="text-sm text-muted-foreground text-center">Voer het wachtwoord in om toegang te krijgen</p>
-          </div>
-          <div className="relative">
-            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="password"
-              placeholder="Wachtwoord"
-              value={password}
-              onChange={(e) => { setPassword(e.target.value); setError(false); }}
-              className="pl-10"
-              autoFocus
-            />
-          </div>
-          {error && <p className="text-sm text-destructive text-center">Onjuist wachtwoord</p>}
-          <Button type="submit" className="w-full gap-2">
-            Inloggen <ArrowRight className="h-4 w-4" />
+        <div className="text-center space-y-4">
+          <h1 className="text-4xl font-bold text-foreground">404</h1>
+          <p className="text-muted-foreground">Pagina niet gevonden</p>
+          <Button onClick={() => navigate("/")} className="gap-2">
+            <Home className="h-4 w-4" /> Naar homepagina
           </Button>
-        </form>
-        <style>{`
-          @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            20% { transform: translateX(-8px); }
-            40% { transform: translateX(8px); }
-            60% { transform: translateX(-4px); }
-            80% { transform: translateX(4px); }
-          }
-        `}</style>
+        </div>
       </div>
     );
   }
@@ -74,8 +112,30 @@ export default function Admin() {
           </div>
           <h1 className="text-2xl font-bold text-foreground">Admin Dashboard</h1>
         </div>
-        <div className="rounded-2xl border border-border bg-card p-8 text-center">
-          <p className="text-muted-foreground">Welkom! Het dashboard is nog leeg.</p>
+
+        <div className="rounded-2xl border border-border bg-card p-6 space-y-4">
+          <h2 className="text-lg font-semibold">Vakken beheren</h2>
+          <p className="text-sm text-muted-foreground">Schakel vakken in of uit. Uitgeschakelde vakken zijn niet zichtbaar voor gebruikers.</p>
+          <div className="space-y-3">
+            {ALL_SUBJECTS.map((subject) => {
+              const enabled = !disabledSubjects.includes(subject.id);
+              return (
+                <div
+                  key={subject.id}
+                  className="flex items-center justify-between px-4 py-3 rounded-lg border border-border"
+                >
+                  <div className="flex items-center gap-3">
+                    {subject.icon}
+                    <span className="font-medium">{subject.label}</span>
+                  </div>
+                  <Switch
+                    checked={enabled}
+                    onCheckedChange={() => toggleSubject(subject.id)}
+                  />
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
     </div>
