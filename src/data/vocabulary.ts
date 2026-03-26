@@ -627,16 +627,16 @@ const naskChapter3Words: VocabItem[] = [
 ];
 
 const naskChapter4Words: VocabItem[] = [
+  { dutch: "Afstand,tijd-diagram", french: "Diagram dat laat zien welke afstand op elk tijdstip is afgelegd" },
   { dutch: "Beweging met constante snelheid", french: "Een beweging waarbij de snelheid op elk moment even groot is" },
-  { dutch: "Formule", french: "Een korte manier om op te schrijven hoe je iets uitrekent" },
   { dutch: "Gemiddelde snelheid", french: "Grootheid die je berekent met de formule gemiddelde snelheid = afstand ÷ tijdsduur (als de snelheid varieert)" },
+  { dutch: "Formule", french: "Een korte manier om op te schrijven hoe je iets uitrekent" },
   { dutch: "Reactieafstand", french: "De afstand die je aflegt tijdens de reactietijd" },
   { dutch: "Reactietijd", french: "De tijd tussen zien dat je moet reageren en zelf reageren" },
   { dutch: "Snelheid", french: "Grootheid die je berekent met de formule snelheid = afstand ÷ tijdsduur (als de snelheid constant is)" },
   { dutch: "Snelheid,tijd-diagram", french: "Diagram dat laat zien hoe groot de snelheid is op elk tijdstip" },
   { dutch: "Versnelde beweging", french: "Een beweging waarbij de snelheid steeds groter wordt" },
   { dutch: "Vertraagde beweging", french: "Een beweging waarbij de snelheid steeds kleiner wordt" },
-  { dutch: "Afstand,tijd-diagram", french: "Diagram dat laat zien welke afstand op elk tijdstip is afgelegd" },
 ];
 
 const naskChapters: Chapter[] = [
