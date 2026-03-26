@@ -48,7 +48,7 @@ const naskGames = [
   { id: "memory" as Game, title: "Memory", description: "Vind de paren van begrip en omschrijving", icon: Layers, color: "bg-accent/10 text-accent" },
   { id: "match" as Game, title: "Koppel Paren", description: "Verbind begrippen met omschrijvingen", icon: Puzzle, color: "bg-destructive/10 text-destructive" },
   { id: "type" as Game, title: "Typ het Begrip", description: "Lees de omschrijving en typ het begrip", icon: Keyboard, color: "bg-primary/10 text-primary" },
-  { id: "fill" as Game, title: "Ontbrekende Letters", description: "Vul de ontbrekende letters aan", icon: PenTool, color: "bg-accent/10 text-accent" },
+  
   { id: "ai" as Game, title: "AI Leraar", description: "Chat met een AI die je overhoort", icon: Bot, color: "bg-secondary/20 dark:bg-secondary/30 text-secondary-foreground" },
 ];
 
