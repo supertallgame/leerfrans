@@ -295,7 +295,7 @@ const Index = () => {
       <Dialog open={showLanguagePicker} onOpenChange={setShowLanguagePicker}>
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
-            <DialogTitle>Kies een taal</DialogTitle>
+            <DialogTitle>Kies een vak</DialogTitle>
           </DialogHeader>
           <div className="space-y-1.5">
             {([
