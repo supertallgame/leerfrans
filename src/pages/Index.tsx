@@ -278,8 +278,8 @@ const Index = () => {
           </DialogHeader>
           <div className="space-y-1.5">
             {([
-              { id: "french" as Language, label: "🇫🇷 Frans", desc: "Nederlands ↔ Français" },
-              { id: "english" as Language, label: "🇬🇧 Engels", desc: "Nederlands ↔ English" },
+              { id: "french" as Language, label: "Frans", desc: "Nederlands ↔ Français", flag: <FlagFR className="w-5 h-3.5 rounded-sm" /> },
+              { id: "english" as Language, label: "Engels", desc: "Nederlands ↔ English", flag: <FlagEN className="w-5 h-3.5 rounded-sm" /> },
             ]).map((lang) => {
               const isActive = language === lang.id;
               return (
@@ -292,7 +292,7 @@ const Index = () => {
                       : "border-border hover:border-primary/50 hover:bg-primary/5 cursor-pointer"
                   }`}
                 >
-                  <span>{lang.label}</span>
+                  <span className="inline-flex items-center gap-1.5">{lang.flag} {lang.label}</span>
                   <br />
                   <span className="text-xs text-muted-foreground">{lang.desc}</span>
                 </button>
@@ -334,7 +334,7 @@ const Index = () => {
                 onClick={() => { setShowSettings(false); setShowLanguagePicker(true); }}
                 className="text-sm font-medium px-3 py-1 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
               >
-                {language === "french" ? "🇫🇷 Frans" : "🇬🇧 Engels"}
+                <span className="inline-flex items-center gap-1.5">{language === "french" ? <FlagFR className="w-4 h-3 rounded-sm" /> : <FlagEN className="w-4 h-3 rounded-sm" />} {language === "french" ? "Frans" : "Engels"}</span>
               </button>
             </div>
             <div className="flex items-center justify-between">
