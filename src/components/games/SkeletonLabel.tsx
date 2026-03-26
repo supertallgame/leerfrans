@@ -1,8 +1,8 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowLeft, Check, X, RotateCcw } from "lucide-react";
+import { ArrowLeft, Check, X, RotateCcw, ZoomOut } from "lucide-react";
 import { playCorrect, playWrong } from "@/lib/sounds";
 import skeletonImg from "@/assets/skeleton.png";
 
@@ -61,8 +61,12 @@ export default function SkeletonLabel({ onBack }: Props) {
   const [activeMarker, setActiveMarker] = useState<number | null>(null);
   const [inputValue, setInputValue] = useState("");
   const [finished, setFinished] = useState(false);
+  const [zoomTarget, setZoomTarget] = useState<{ x: number; y: number } | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const imageWrapperRef = useRef<HTMLDivElement>(null);
+
+  const ZOOM_SCALE = 2.5;
 
   const score = Object.values(results).filter(Boolean).length;
   const total = BONES.length;
@@ -98,9 +102,18 @@ export default function SkeletonLabel({ onBack }: Props) {
   };
 
   const handleMarkerClick = (id: number) => {
-    if (results[id] !== undefined) return; // already answered
+    if (results[id] !== undefined) return;
+    const bone = BONES.find((b) => b.id === id);
+    if (bone) {
+      setZoomTarget({ x: bone.x, y: bone.y });
+    }
     setActiveMarker(id);
     setInputValue("");
+  };
+
+  const handleZoomOut = () => {
+    setZoomTarget(null);
+    setActiveMarker(null);
   };
 
   const reset = () => {
@@ -190,40 +203,69 @@ export default function SkeletonLabel({ onBack }: Props) {
         </p>
       )}
 
-      <div ref={containerRef} className="relative w-full max-w-xs md:max-w-sm mx-auto">
-        <img
-          src={skeletonImg}
-          alt="Menselijk skelet"
-          className="w-full h-auto select-none pointer-events-none"
-          draggable={false}
-        />
-        {BONES.map((bone) => {
-          const isAnswered = results[bone.id] !== undefined;
-          const isCorrect = results[bone.id];
-          const isActive = activeMarker === bone.id;
+      <div
+        ref={containerRef}
+        className="relative w-full max-w-xs md:max-w-sm mx-auto overflow-hidden rounded-lg"
+        style={{ cursor: zoomTarget ? "zoom-out" : undefined }}
+        onClick={(e) => {
+          if (zoomTarget && e.target === containerRef.current) handleZoomOut();
+        }}
+      >
+        <div
+          ref={imageWrapperRef}
+          className="relative transition-transform duration-500 ease-out origin-center"
+          style={
+            zoomTarget
+              ? {
+                  transform: `scale(${ZOOM_SCALE})`,
+                  transformOrigin: `${zoomTarget.x}% ${zoomTarget.y}%`,
+                }
+              : { transform: "scale(1)", transformOrigin: "center center" }
+          }
+        >
+          <img
+            src={skeletonImg}
+            alt="Menselijk skelet"
+            className="w-full h-auto select-none pointer-events-none"
+            draggable={false}
+          />
+          {BONES.map((bone) => {
+            const isAnswered = results[bone.id] !== undefined;
+            const isCorrect = results[bone.id];
+            const isActive = activeMarker === bone.id;
 
-          return (
-            <button
-              key={bone.id}
-              onClick={() => handleMarkerClick(bone.id)}
-              className={`absolute w-5 h-5 md:w-6 md:h-6 -translate-x-1/2 -translate-y-1/2 rounded-full flex items-center justify-center text-[8px] md:text-[10px] font-bold transition-all border-2 ${
-                isAnswered
-                  ? isCorrect
-                    ? "bg-[hsl(var(--success))] border-[hsl(var(--success))] text-white"
-                    : "bg-destructive border-destructive text-destructive-foreground"
-                  : isActive
-                  ? "bg-primary border-primary text-primary-foreground scale-125 ring-2 ring-primary/40"
-                  : "bg-background border-primary text-primary hover:scale-110 cursor-pointer shadow-sm"
-              }`}
-              style={{ left: `${bone.x}%`, top: `${bone.y}%` }}
-              disabled={isAnswered}
-              title={isAnswered ? (isCorrect ? bone.name : `${answers[bone.id]} → ${bone.name}`) : `Bot ${bone.id}`}
-            >
-              {bone.id}
-            </button>
-          );
-        })}
+            return (
+              <button
+                key={bone.id}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleMarkerClick(bone.id);
+                }}
+                className={`absolute w-5 h-5 md:w-6 md:h-6 -translate-x-1/2 -translate-y-1/2 rounded-full flex items-center justify-center text-[8px] md:text-[10px] font-bold transition-all border-2 ${
+                  isAnswered
+                    ? isCorrect
+                      ? "bg-[hsl(var(--success))] border-[hsl(var(--success))] text-white"
+                      : "bg-destructive border-destructive text-destructive-foreground"
+                    : isActive
+                    ? "bg-primary border-primary text-primary-foreground scale-125 ring-2 ring-primary/40"
+                    : "bg-background border-primary text-primary hover:scale-110 cursor-pointer shadow-sm"
+                }`}
+                style={{ left: `${bone.x}%`, top: `${bone.y}%` }}
+                disabled={isAnswered}
+                title={isAnswered ? (isCorrect ? bone.name : `${answers[bone.id]} → ${bone.name}`) : `Bot ${bone.id}`}
+              >
+                {bone.id}
+              </button>
+            );
+          })}
+        </div>
       </div>
+
+      {zoomTarget && (
+        <Button variant="outline" size="sm" onClick={handleZoomOut} className="gap-2">
+          <ZoomOut className="h-4 w-4" /> Uitzoomen
+        </Button>
+      )}
     </div>
   );
 }
