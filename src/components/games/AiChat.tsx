@@ -20,6 +20,7 @@ const AI_TITLES: Record<string, string> = {
   french: "AI Frans Leraar",
   english: "AI Engels Leraar",
   nask: "AI NASK Leraar",
+  biology: "AI Biologie Leraar",
 };
 
 export default function AiChat({ onBack }: Props) {
@@ -104,9 +105,11 @@ export default function AiChat({ onBack }: Props) {
           </div>
           <h2 className="text-3xl font-bold">{title}</h2>
           <p className="text-muted-foreground max-w-sm mx-auto">
-            {language === "nask"
-              ? "Chat met een AI-leraar die je NASK begrippen overhoort en uitlegt!"
-              : "Chat met een AI-leraar die je woordjes overhoort. De AI stelt vragen en geeft feedback op je antwoorden!"}
+          {language === "nask"
+            ? "Chat met een AI-leraar die je NASK begrippen overhoort en uitlegt!"
+            : language === "biology"
+            ? "Chat met een AI-leraar die je biologie begrippen overhoort en uitlegt!"
+            : "Chat met een AI-leraar die je woordjes overhoort. De AI stelt vragen en geeft feedback op je antwoorden!"}
           </p>
           <Button onClick={startChat} size="lg" className="text-lg h-12">
             🤖 Start de chat
