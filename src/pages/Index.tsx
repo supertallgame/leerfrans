@@ -55,6 +55,7 @@ const Index = () => {
   const [activeGame, setActiveGame] = useState<Game>("menu");
   const [showSettings, setShowSettings] = useState(false);
   const [showChapterPicker, setShowChapterPicker] = useState(false);
+  const [showLanguagePicker, setShowLanguagePicker] = useState(false);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   const [soundOn, setSoundOn] = useState(isSoundEnabled());
   const [user, setUser] = useState<any>(null);
@@ -158,39 +159,23 @@ const Index = () => {
             Kies een spel en oefen je woordenschat
           </p>
 
-          {/* Language toggle */}
+          {/* Language & chapter badges */}
           <div className="flex items-center justify-center gap-2">
             <button
-              onClick={() => setLanguage("french")}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
-                language === "french"
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted text-muted-foreground hover:bg-muted/80"
-              }`}
+              onClick={() => setShowLanguagePicker(true)}
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors cursor-pointer"
             >
-              <FlagFR className="w-4 h-3 rounded-sm" />
-              Frans
+              {language === "french" ? <FlagFR className="w-4 h-3 rounded-sm" /> : <FlagEN className="w-4 h-3 rounded-sm" />}
+              {language === "french" ? "Frans" : "Engels"}
             </button>
             <button
-              onClick={() => setLanguage("english")}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
-                language === "english"
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted text-muted-foreground hover:bg-muted/80"
-              }`}
+              onClick={() => setShowChapterPicker(true)}
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors cursor-pointer"
             >
-              <FlagEN className="w-4 h-3 rounded-sm" />
-              Engels
+              <BookMarked className="h-3.5 w-3.5" />
+              {getChapter(chapterId)?.title ?? "Chapitre 3"}
             </button>
           </div>
-
-          <button
-            onClick={() => setShowChapterPicker(true)}
-            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors cursor-pointer mx-auto"
-          >
-            <BookMarked className="h-3.5 w-3.5" />
-            {getChapter(chapterId)?.title ?? "Chapitre 3"}
-          </button>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-2 gap-2.5 md:gap-4 w-full">
@@ -285,7 +270,38 @@ const Index = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Login dialog */}
+      {/* Language picker dialog */}
+      <Dialog open={showLanguagePicker} onOpenChange={setShowLanguagePicker}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Kies een taal</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-1.5">
+            {([
+              { id: "french" as Language, label: "🇫🇷 Frans", desc: "Nederlands ↔ Français" },
+              { id: "english" as Language, label: "🇬🇧 Engels", desc: "Nederlands ↔ English" },
+            ]).map((lang) => {
+              const isActive = language === lang.id;
+              return (
+                <button
+                  key={lang.id}
+                  onClick={() => { setLanguage(lang.id); setShowLanguagePicker(false); }}
+                  className={`w-full text-left px-3 py-2 rounded-lg border text-sm transition-all ${
+                    isActive
+                      ? "border-primary bg-primary/10 font-medium"
+                      : "border-border hover:border-primary/50 hover:bg-primary/5 cursor-pointer"
+                  }`}
+                >
+                  <span>{lang.label}</span>
+                  <br />
+                  <span className="text-xs text-muted-foreground">{lang.desc}</span>
+                </button>
+              );
+            })}
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <AuthDialog open={showLoginPrompt} onOpenChange={setShowLoginPrompt} />
 
       {/* Settings dialog */}
@@ -314,24 +330,12 @@ const Index = () => {
                 <BookMarked className="h-4 w-4" />
                 <span className="text-sm font-medium">Taal</span>
               </div>
-              <div className="flex gap-1">
-                <button
-                  onClick={() => setLanguage("french")}
-                  className={`text-xs px-2 py-1 rounded-full transition-colors ${
-                    language === "french" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
-                  }`}
-                >
-                  🇫🇷 Frans
-                </button>
-                <button
-                  onClick={() => setLanguage("english")}
-                  className={`text-xs px-2 py-1 rounded-full transition-colors ${
-                    language === "english" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
-                  }`}
-                >
-                  🇬🇧 Engels
-                </button>
-              </div>
+              <button
+                onClick={() => { setShowSettings(false); setShowLanguagePicker(true); }}
+                className="text-sm font-medium px-3 py-1 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+              >
+                {language === "french" ? "🇫🇷 Frans" : "🇬🇧 Engels"}
+              </button>
             </div>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
