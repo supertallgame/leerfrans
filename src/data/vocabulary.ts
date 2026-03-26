@@ -460,6 +460,27 @@ const englishChapter5Words: VocabItem[] = [
   { french: "wood", dutch: "hout" },
 ];
 
+const englishChapter6Words: VocabItem[] = [
+  { french: "band", dutch: "band, muziekgroep" },
+  { french: "famous", dutch: "beroemd" },
+  { french: "concert", dutch: "concert" },
+  { french: "flute", dutch: "fluit" },
+  { french: "guitar", dutch: "gitaar" },
+  { french: "classical", dutch: "klassiek(e)" },
+  { french: "song", dutch: "liedje" },
+  { french: "melody", dutch: "melodie" },
+  { french: "microphone", dutch: "microfoon" },
+  { french: "piano", dutch: "piano" },
+  { french: "stage", dutch: "podium" },
+  { french: "boring", dutch: "saai" },
+  { french: "saxophone", dutch: "saxofoon" },
+  { french: "drums", dutch: "slagwerk" },
+  { french: "trumpet", dutch: "trompet" },
+  { french: "violin", dutch: "viool" },
+  { french: "singer", dutch: "zanger(es)" },
+  { french: "to sing", dutch: "zingen" },
+];
+
 export const englishChapters: Chapter[] = [
   {
     id: "en_chapter1",
@@ -494,6 +515,13 @@ export const englishChapters: Chapter[] = [
     title: "Chapter 5",
     description: "Natuur & omgeving",
     words: englishChapter5Words,
+    requiresLogin: false,
+  },
+  {
+    id: "en_chapter6",
+    title: "Chapter 6",
+    description: "Muziek & instrumenten",
+    words: englishChapter6Words,
     requiresLogin: false,
   },
 ];
