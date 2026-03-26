@@ -58,22 +58,23 @@ export default function MemoryGame({ onBack }: Props) {
       const [first, second] = newFlipped.map((id) => cards.find((c) => c.id === id)!);
 
       if (first.pairId === second.pairId && first.type !== second.type) {
-        // Match!
         playCorrect();
-        setTimeout(() => {
-          setMatched((prev) => new Set([...prev, first.pairId]));
-          setFlipped([]);
-          setChecking(false);
-        }, 600);
+        setLastResult({ isMatch: true, pairId: first.pairId });
       } else {
-        // No match
         playWrong();
-        setTimeout(() => {
-          setFlipped([]);
-          setChecking(false);
-        }, 1000);
+        setLastResult({ isMatch: false, pairId: -1 });
       }
     }
+  };
+
+  const handleDismiss = () => {
+    if (!lastResult) return;
+    if (lastResult.isMatch) {
+      setMatched((prev) => new Set([...prev, lastResult.pairId]));
+    }
+    setFlipped([]);
+    setChecking(false);
+    setLastResult(null);
   };
 
   const roundPairsCount = Math.min(CARDS_PER_ROUND, allPairs.length - roundIndex * CARDS_PER_ROUND);
