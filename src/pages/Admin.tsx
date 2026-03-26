@@ -230,6 +230,76 @@ export default function Admin() {
           </div>
         </div>
 
+        {/* Statistieken */}
+        <div className="rounded-2xl border border-border bg-card p-6 space-y-4">
+          <h2 className="text-lg font-semibold flex items-center gap-2">
+            <BarChart3 className="h-5 w-5" /> Review statistieken
+          </h2>
+
+          <div className="grid grid-cols-3 gap-3">
+            <div className="rounded-xl border border-border p-4 text-center">
+              <p className="text-2xl font-bold text-primary">{avgRating}</p>
+              <p className="text-xs text-muted-foreground mt-1 flex items-center justify-center gap-1">
+                <Star className="h-3 w-3" /> Gemiddeld
+              </p>
+            </div>
+            <div className="rounded-xl border border-border p-4 text-center">
+              <p className="text-2xl font-bold text-primary">{reviews.length}</p>
+              <p className="text-xs text-muted-foreground mt-1 flex items-center justify-center gap-1">
+                <MessageSquare className="h-3 w-3" /> Totaal
+              </p>
+            </div>
+            <div className="rounded-xl border border-border p-4 text-center">
+              <p className="text-2xl font-bold text-primary">
+                {sortedMonths.length > 0 ? sortedMonths[sortedMonths.length - 1][1] : 0}
+              </p>
+              <p className="text-xs text-muted-foreground mt-1 flex items-center justify-center gap-1">
+                <TrendingUp className="h-3 w-3" /> Deze maand
+              </p>
+            </div>
+          </div>
+
+          {/* Rating verdeling */}
+          <div className="space-y-2">
+            <p className="text-sm font-medium text-muted-foreground">Verdeling</p>
+            {ratingDistribution.map(({ star, count }) => {
+              const pct = reviews.length > 0 ? (count / reviews.length) * 100 : 0;
+              return (
+                <div key={star} className="flex items-center gap-2 text-sm">
+                  <span className="w-4 text-right font-medium">{star}</span>
+                  <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                  <div className="flex-1 h-2 rounded-full bg-muted overflow-hidden">
+                    <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${pct}%` }} />
+                  </div>
+                  <span className="w-8 text-right text-muted-foreground text-xs">{count}</span>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Reviews per maand */}
+          {sortedMonths.length > 0 && (
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-muted-foreground">Per maand</p>
+              <div className="flex items-end gap-1 h-20">
+                {sortedMonths.map(([month, count]) => {
+                  const maxCount = Math.max(...sortedMonths.map(([, c]) => c));
+                  const height = maxCount > 0 ? (count / maxCount) * 100 : 0;
+                  const [y, m] = month.split("-");
+                  const label = new Date(Number(y), Number(m) - 1).toLocaleDateString("nl-NL", { month: "short" });
+                  return (
+                    <div key={month} className="flex-1 flex flex-col items-center gap-1">
+                      <span className="text-[10px] text-muted-foreground font-medium">{count}</span>
+                      <div className="w-full rounded-t bg-primary/80 transition-all" style={{ height: `${height}%`, minHeight: count > 0 ? 4 : 0 }} />
+                      <span className="text-[10px] text-muted-foreground">{label}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+
         <div className="rounded-2xl border border-border bg-card p-6 space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold flex items-center gap-2">
