@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, Check, X, RotateCcw, ZoomOut } from "lucide-react";
 import { playCorrect, playWrong } from "@/lib/sounds";
-import skeletonImg from "@/assets/skeleton-reference.jpeg";
+import skeletonImg from "@/assets/skeleton.png";
 
 interface Props {
   onBack: () => void;
