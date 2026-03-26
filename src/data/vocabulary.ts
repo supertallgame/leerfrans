@@ -525,12 +525,62 @@ export const englishChapters: Chapter[] = [
   },
 ];
 
+// ─── NASK chapters ───
+
+const naskChapter1Words: VocabItem[] = [
+  { dutch: "Blusdeken", french: "Een deken die je gebruikt om een kleine brand of brandende kleding te blussen" },
+  { dutch: "Brandblusser", french: "Een blusapparaat om een groter brandje te blussen" },
+  { dutch: "Brander", french: "Een apparaat dat aardgas verbrandt om warmte te produceren" },
+  { dutch: "Diagram", french: "Een assenstelsel waarin een grafiek is getekend" },
+  { dutch: "Eenheid", french: "De maat waarin je grootheden meet" },
+  { dutch: "Experimenteren", french: "Proeven doen om de vragen uit het onderzoek te beantwoorden" },
+  { dutch: "Grafiek", french: "Een vloeiende lijn door de meetpunten in een diagram" },
+  { dutch: "Grootheid", french: "Een eigenschap die je kunt meten" },
+  { dutch: "Kwaliteitscontrole", french: "Het onderzoek of een product voldoet aan alle eisen" },
+  { dutch: "Labjas", french: "Een jas die je over je kleren aantrekt als bescherming voor je kleren" },
+  { dutch: "Massa", french: "De hoeveelheid die je met een weegschaal meet" },
+  { dutch: "Meetbereik", french: "De waarden die je met een meetinstrument kan meten" },
+  { dutch: "Nooddouche", french: "Een douche die je gebruikt om bijtende stof van je huid of uit je kleren te spoelen" },
+  { dutch: "Noodstop", french: "De knop die de toevoer van aardgas, water en elektriciteit stopt als je hem indrukt" },
+  { dutch: "Onderdompelmethode", french: "De manier om het volume van een voorwerp te bepalen door onderdompelen" },
+  { dutch: "Onderzoek doen", french: "Een manier van werken om antwoord te vinden op vragen" },
+  { dutch: "Onderzoeksvraag", french: "Een vraag die aangeeft wat je wilt onderzoeken" },
+  { dutch: "Oogdouche", french: "Een fontijntje dat je gebruikt om een bijtende stof uit je oog te spoelen" },
+  { dutch: "Practicum", french: "Het uitvoeren van een experiment in de les" },
+  { dutch: "Schaaldeel", french: "De waarde tussen twee streepjes op de schaalverdeling van een meetinstrument" },
+  { dutch: "Veiligheidsbril", french: "Een bril die je opzet om je ogen te beschermen" },
+  { dutch: "Veiligheidspictogram", french: "Een plaatje waaraan je kunt zien waarom een stof gevaarlijk is" },
+  { dutch: "Veiligheidsregels", french: "De regels om ervoor te zorgen dat iedereen in het lokaal veilig kan werken" },
+  { dutch: "Verband", french: "De invloed die de ene grootheid heeft op een andere grootheid" },
+  { dutch: "Volume", french: "De hoeveelheid die aangeeft hoeveel ruimte een stof inneemt" },
+  { dutch: "Waarnemen", french: "Opmerken wat er gebeurt door zien, horen, voelen, ruiken of proeven" },
+  { dutch: "Conclusie", french: "Antwoord op de onderzoeksvraag" },
+  { dutch: "Eerlijk vergelijken", french: "Je verandert alleen de grootheid waarvan je het effect onderzoekt" },
+  { dutch: "Verslag", french: "Een schriftelijke uitwerking van een experiment" },
+  { dutch: "Voorspelling", french: "Je eigen verwachting van de uitkomst van het experiment" },
+  { dutch: "Werkplan", french: "Het overzicht van hoe je een experiment wilt gaan uitvoeren" },
+];
+
+const naskChapters: Chapter[] = [
+  {
+    id: "nask_chapter1",
+    title: "Hoofdstuk 1",
+    description: "Onderzoeken & veiligheid",
+    words: naskChapter1Words,
+    requiresLogin: false,
+  },
+];
+
 export function getChaptersForLanguage(lang: Language): Chapter[] {
-  return lang === "french" ? frenchChapters : englishChapters;
+  if (lang === "french") return frenchChapters;
+  if (lang === "english") return englishChapters;
+  return naskChapters;
 }
 
 export function getDefaultChapterId(lang: Language): string {
-  return lang === "french" ? "chapitre3" : "en_chapter1";
+  if (lang === "french") return "chapitre3";
+  if (lang === "english") return "en_chapter1";
+  return "nask_chapter1";
 }
 
 // Keep `chapters` as backward compat (french)
@@ -539,7 +589,7 @@ export const chapters = frenchChapters;
 export const DEFAULT_CHAPTER_ID = "chapitre3";
 
 export function getChapter(id: string): Chapter | undefined {
-  return [...frenchChapters, ...englishChapters].find((c) => c.id === id);
+  return [...frenchChapters, ...englishChapters, ...naskChapters].find((c) => c.id === id);
 }
 
 export function getActiveVocabulary(chapterId: string): VocabItem[] {
@@ -577,14 +627,35 @@ export function shuffle<T>(array: T[]): T[] {
 
 // ─── Language labels helper ───
 export function getForeignLabel(lang: Language): string {
-  return lang === "french" ? "Frans" : "Engels";
+  if (lang === "french") return "Frans";
+  if (lang === "english") return "Engels";
+  return "Omschrijving";
 }
 
 export function getForeignLabelNative(lang: Language): string {
-  return lang === "french" ? "Français" : "English";
+  if (lang === "french") return "Français";
+  if (lang === "english") return "English";
+  return "Omschrijving";
+}
+
+export function getNlLabel(lang: Language): string {
+  if (lang === "nask") return "Begrip";
+  return "Nederlands";
+}
+
+export function getForeignShort(lang: Language): string {
+  if (lang === "french") return "FR";
+  if (lang === "english") return "EN";
+  return "Omschr.";
+}
+
+export function getNlShort(lang: Language): string {
+  if (lang === "nask") return "Begrip";
+  return "NL";
 }
 
 export function getDirectionLabel(lang: Language, direction: "nl_to_foreign" | "foreign_to_nl"): string {
-  const foreignShort = lang === "french" ? "FR" : "EN";
-  return direction === "nl_to_foreign" ? `NL → ${foreignShort}` : `${foreignShort} → NL`;
+  const nlShort = getNlShort(lang);
+  const foreignShort = getForeignShort(lang);
+  return direction === "nl_to_foreign" ? `${nlShort} → ${foreignShort}` : `${foreignShort} → ${nlShort}`;
 }
