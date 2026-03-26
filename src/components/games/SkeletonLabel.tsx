@@ -56,12 +56,8 @@ export default function SkeletonLabel({ onBack }: Props) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [inputValue, setInputValue] = useState("");
   const [finished, setFinished] = useState(false);
-  const [zoomTarget, setZoomTarget] = useState<{ x: number; y: number } | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const imageWrapperRef = useRef<HTMLDivElement>(null);
-
-  const ZOOM_SCALE = 2.5;
 
   const score = Object.values(results).filter(Boolean).length;
   const total = BONES.length;
@@ -69,11 +65,9 @@ export default function SkeletonLabel({ onBack }: Props) {
 
   const currentBone = currentIndex < total ? BONES[currentIndex] : null;
 
-  // Auto-zoom to current bone
   useEffect(() => {
-    if (currentBone && !finished) {
-      setZoomTarget({ x: currentBone.x, y: currentBone.y });
-      setTimeout(() => inputRef.current?.focus(), 100);
+    if (!finished) {
+      setTimeout(() => inputRef.current?.focus(), 50);
     }
   }, [currentIndex, finished]);
 
@@ -94,7 +88,6 @@ export default function SkeletonLabel({ onBack }: Props) {
 
     if (currentIndex + 1 >= total) {
       setTimeout(() => {
-        setZoomTarget(null);
         setFinished(true);
       }, 600);
     } else {
@@ -109,10 +102,7 @@ export default function SkeletonLabel({ onBack }: Props) {
     playWrong();
     setInputValue("");
     if (currentIndex + 1 >= total) {
-      setTimeout(() => {
-        setZoomTarget(null);
-        setFinished(true);
-      }, 600);
+      setTimeout(() => setFinished(true), 600);
     } else {
       setTimeout(() => setCurrentIndex((i) => i + 1), 600);
     }
@@ -206,19 +196,11 @@ export default function SkeletonLabel({ onBack }: Props) {
 
       <div
         ref={containerRef}
-        className="relative w-full max-w-xs md:max-w-sm mx-auto overflow-hidden rounded-lg"
+        className="relative w-full mx-auto overflow-auto rounded-lg touch-pan-x touch-pan-y"
+        style={{ maxHeight: "70vh" }}
       >
         <div
-          ref={imageWrapperRef}
-          className="relative transition-transform duration-500 ease-out origin-center"
-          style={
-            zoomTarget
-              ? {
-                  transform: `scale(${ZOOM_SCALE})`,
-                  transformOrigin: `${zoomTarget.x}% ${zoomTarget.y}%`,
-                }
-              : { transform: "scale(1)", transformOrigin: "center center" }
-          }
+          className="relative"
         >
           <img
             src={skeletonImg}
@@ -229,10 +211,8 @@ export default function SkeletonLabel({ onBack }: Props) {
           {BONES.map((bone) => {
             const isAnswered = results[bone.id] !== undefined;
             const isCorrect = results[bone.id];
-            const counterScale = zoomTarget ? 1 / ZOOM_SCALE : 1;
-
             return (
-              <button
+              <div
                 key={bone.id}
                 className={`absolute w-6 h-6 md:w-7 md:h-7 rounded-full flex items-center justify-center transition-all z-10 pointer-events-none ${
                   isAnswered
@@ -246,11 +226,11 @@ export default function SkeletonLabel({ onBack }: Props) {
                 style={{
                   left: `${bone.x}%`,
                   top: `${bone.y}%`,
-                  transform: `translate(-50%, -50%) scale(${counterScale})`,
+                  transform: `translate(-50%, -50%)`,
                 }}
               >
                 <span className="sr-only">Bot {bone.id}</span>
-              </button>
+              </div>
             );
           })}
         </div>
