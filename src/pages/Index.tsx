@@ -55,6 +55,7 @@ const Index = () => {
   const [activeGame, setActiveGame] = useState<Game>("menu");
   const [showSettings, setShowSettings] = useState(false);
   const [showChapterPicker, setShowChapterPicker] = useState(false);
+  const [showLanguagePicker, setShowLanguagePicker] = useState(false);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   const [soundOn, setSoundOn] = useState(isSoundEnabled());
   const [user, setUser] = useState<any>(null);
