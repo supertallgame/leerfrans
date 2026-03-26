@@ -53,7 +53,7 @@ const BONES: BoneMarker[] = [
 export default function SkeletonLabel({ onBack }: Props) {
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [results, setResults] = useState<Record<number, boolean>>({});
-  const [activeMarker, setActiveMarker] = useState<number | null>(null);
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [inputValue, setInputValue] = useState("");
   const [finished, setFinished] = useState(false);
   const [zoomTarget, setZoomTarget] = useState<{ x: number; y: number } | null>(null);
@@ -67,56 +67,61 @@ export default function SkeletonLabel({ onBack }: Props) {
   const total = BONES.length;
   const answered = Object.keys(results).length;
 
+  const currentBone = currentIndex < total ? BONES[currentIndex] : null;
+
+  // Auto-zoom to current bone
   useEffect(() => {
-    if (activeMarker !== null) {
-      inputRef.current?.focus();
+    if (currentBone && !finished) {
+      setZoomTarget({ x: currentBone.x, y: currentBone.y });
+      setTimeout(() => inputRef.current?.focus(), 100);
     }
-  }, [activeMarker]);
+  }, [currentIndex, finished]);
 
   const normalize = (s: string) =>
     s.toLowerCase().trim().replace(/[- ]/g, "").replace(/ë/g, "e").replace(/ï/g, "i");
 
   const handleSubmit = () => {
-    if (activeMarker === null || !inputValue.trim()) return;
-    const bone = BONES.find((b) => b.id === activeMarker);
-    if (!bone) return;
+    if (!currentBone || !inputValue.trim()) return;
 
-    const isCorrect = normalize(inputValue) === normalize(bone.name);
-    setAnswers((prev) => ({ ...prev, [activeMarker]: inputValue.trim() }));
-    setResults((prev) => ({ ...prev, [activeMarker]: isCorrect }));
+    const isCorrect = normalize(inputValue) === normalize(currentBone.name);
+    setAnswers((prev) => ({ ...prev, [currentBone.id]: inputValue.trim() }));
+    setResults((prev) => ({ ...prev, [currentBone.id]: isCorrect }));
 
     if (isCorrect) playCorrect();
     else playWrong();
 
     setInputValue("");
-    setActiveMarker(null);
-    // Zoom out after a brief pause so user sees the result color
-    setTimeout(() => setZoomTarget(null), 600);
 
-    if (answered + 1 >= total) {
-      setTimeout(() => setFinished(true), 300);
+    if (currentIndex + 1 >= total) {
+      setTimeout(() => {
+        setZoomTarget(null);
+        setFinished(true);
+      }, 600);
+    } else {
+      setTimeout(() => setCurrentIndex((i) => i + 1), 600);
     }
   };
 
-  const handleMarkerClick = (id: number) => {
-    if (results[id] !== undefined) return;
-    const bone = BONES.find((b) => b.id === id);
-    if (bone) {
-      setZoomTarget({ x: bone.x, y: bone.y });
-    }
-    setActiveMarker(id);
+  const handleSkip = () => {
+    if (!currentBone) return;
+    setAnswers((prev) => ({ ...prev, [currentBone.id]: "—" }));
+    setResults((prev) => ({ ...prev, [currentBone.id]: false }));
+    playWrong();
     setInputValue("");
-  };
-
-  const handleZoomOut = () => {
-    setZoomTarget(null);
-    setActiveMarker(null);
+    if (currentIndex + 1 >= total) {
+      setTimeout(() => {
+        setZoomTarget(null);
+        setFinished(true);
+      }, 600);
+    } else {
+      setTimeout(() => setCurrentIndex((i) => i + 1), 600);
+    }
   };
 
   const reset = () => {
     setAnswers({});
     setResults({});
-    setActiveMarker(null);
+    setCurrentIndex(0);
     setInputValue("");
     setFinished(false);
   };
@@ -175,38 +180,33 @@ export default function SkeletonLabel({ onBack }: Props) {
         </p>
       </div>
 
-      {activeMarker !== null && (
-        <div className="flex gap-2 w-full max-w-sm">
+      {currentBone && !finished && (
+        <div className="flex flex-col gap-2 w-full max-w-sm items-center">
+          <p className="text-sm font-medium">
+            Vraag {currentIndex + 1}/{total}: Welk bot is nummer <span className="text-primary font-bold">{currentBone.id}</span>?
+          </p>
+          <div className="flex gap-2 w-full">
           <Input
             ref={inputRef}
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-            placeholder={`Bot ${activeMarker} — typ de naam...`}
+              placeholder="Typ de naam van het bot..."
             autoFocus
           />
           <Button onClick={handleSubmit} disabled={!inputValue.trim()} size="icon">
             <Check className="h-4 w-4" />
           </Button>
-          <Button variant="ghost" size="icon" onClick={handleZoomOut}>
+            <Button variant="ghost" size="icon" onClick={handleSkip} title="Overslaan">
             <X className="h-4 w-4" />
           </Button>
+          </div>
         </div>
-      )}
-
-      {!activeMarker && !finished && (
-        <p className="text-sm text-muted-foreground">
-          Klik op een nummer om het bot te benoemen
-        </p>
       )}
 
       <div
         ref={containerRef}
         className="relative w-full max-w-xs md:max-w-sm mx-auto overflow-hidden rounded-lg"
-        style={{ cursor: zoomTarget ? "zoom-out" : undefined }}
-        onClick={(e) => {
-          if (zoomTarget && e.target === containerRef.current) handleZoomOut();
-        }}
       >
         <div
           ref={imageWrapperRef}
@@ -229,33 +229,25 @@ export default function SkeletonLabel({ onBack }: Props) {
           {BONES.map((bone) => {
             const isAnswered = results[bone.id] !== undefined;
             const isCorrect = results[bone.id];
-            const isActive = activeMarker === bone.id;
-
             const counterScale = zoomTarget ? 1 / ZOOM_SCALE : 1;
 
             return (
               <button
                 key={bone.id}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleMarkerClick(bone.id);
-                }}
-                className={`absolute w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center transition-all z-10 ${
+                className={`absolute w-6 h-6 md:w-7 md:h-7 rounded-full flex items-center justify-center transition-all z-10 pointer-events-none ${
                   isAnswered
                     ? isCorrect
                       ? "bg-[hsl(var(--success))]/20 border-2 border-[hsl(var(--success))]"
                       : "bg-destructive/20 border-2 border-destructive"
-                    : isActive
-                    ? "bg-primary/15 border-2 border-primary ring-2 ring-primary/40"
-                    : "bg-transparent border-2 border-transparent hover:border-primary/50 cursor-pointer"
+                    : currentBone?.id === bone.id
+                    ? "bg-primary/20 border-2 border-primary ring-2 ring-primary/40 animate-pulse"
+                    : "bg-transparent border-0"
                 }`}
                 style={{
                   left: `${bone.x}%`,
                   top: `${bone.y}%`,
                   transform: `translate(-50%, -50%) scale(${counterScale})`,
                 }}
-                disabled={isAnswered}
-                title={isAnswered ? (isCorrect ? bone.name : `${answers[bone.id]} → ${bone.name}`) : `Bot ${bone.id}`}
               >
                 <span className="sr-only">Bot {bone.id}</span>
               </button>
@@ -264,11 +256,6 @@ export default function SkeletonLabel({ onBack }: Props) {
         </div>
       </div>
 
-      {zoomTarget && (
-        <Button variant="outline" size="sm" onClick={handleZoomOut} className="gap-2">
-          <ZoomOut className="h-4 w-4" /> Uitzoomen
-        </Button>
-      )}
     </div>
   );
 }
