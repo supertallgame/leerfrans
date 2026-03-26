@@ -159,39 +159,23 @@ const Index = () => {
             Kies een spel en oefen je woordenschat
           </p>
 
-          {/* Language toggle */}
+          {/* Language & chapter badges */}
           <div className="flex items-center justify-center gap-2">
             <button
-              onClick={() => setLanguage("french")}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
-                language === "french"
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted text-muted-foreground hover:bg-muted/80"
-              }`}
+              onClick={() => setShowLanguagePicker(true)}
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors cursor-pointer"
             >
-              <FlagFR className="w-4 h-3 rounded-sm" />
-              Frans
+              {language === "french" ? <FlagFR className="w-4 h-3 rounded-sm" /> : <FlagEN className="w-4 h-3 rounded-sm" />}
+              {language === "french" ? "Frans" : "Engels"}
             </button>
             <button
-              onClick={() => setLanguage("english")}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
-                language === "english"
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted text-muted-foreground hover:bg-muted/80"
-              }`}
+              onClick={() => setShowChapterPicker(true)}
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors cursor-pointer"
             >
-              <FlagEN className="w-4 h-3 rounded-sm" />
-              Engels
+              <BookMarked className="h-3.5 w-3.5" />
+              {getChapter(chapterId)?.title ?? "Chapitre 3"}
             </button>
           </div>
-
-          <button
-            onClick={() => setShowChapterPicker(true)}
-            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors cursor-pointer mx-auto"
-          >
-            <BookMarked className="h-3.5 w-3.5" />
-            {getChapter(chapterId)?.title ?? "Chapitre 3"}
-          </button>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-2 gap-2.5 md:gap-4 w-full">
