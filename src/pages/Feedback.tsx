@@ -37,13 +37,9 @@ export default function Feedback() {
 
       // Check if user is muted
       if (session?.user?.email) {
-        const { data: muteData } = await (supabase.from("muted_users" as any) as any)
-          .select("muted_until")
-          .eq("user_email", session.user.email)
-          .gt("muted_until", new Date().toISOString())
-          .limit(1);
-        if (muteData && muteData.length > 0) {
-          setMutedUntil(new Date(muteData[0].muted_until).toLocaleString("nl-NL"));
+        const { data: muteData } = await supabase.rpc("get_my_mute_status" as any);
+        if (muteData && (muteData as any[]).length > 0) {
+          setMutedUntil(new Date((muteData as any[])[0].muted_until).toLocaleString("nl-NL"));
         }
       }
     };
@@ -85,14 +81,10 @@ export default function Feedback() {
 
     // Check if user is muted
     if (session?.user?.email) {
-      const { data: muteData } = await (supabase.from("muted_users" as any) as any)
-        .select("muted_until")
-        .eq("user_email", session.user.email)
-        .gt("muted_until", new Date().toISOString())
-        .limit(1);
-      if (muteData && muteData.length > 0) {
+      const { data: muteData } = await supabase.rpc("get_my_mute_status" as any);
+      if (muteData && (muteData as any[]).length > 0) {
         setSubmitting(false);
-        const until = new Date(muteData[0].muted_until).toLocaleString("nl-NL");
+        const until = new Date((muteData as any[])[0].muted_until).toLocaleString("nl-NL");
         return toast.error(`Je account is gemute tot ${until}`);
       }
     }
