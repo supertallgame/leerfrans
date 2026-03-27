@@ -759,6 +759,22 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
             <h1 className="text-2xl md:text-3xl font-bold">Solo of Teams?</h1>
             <p className="text-sm md:text-base text-muted-foreground">Kies hoe je wilt spelen</p>
           </div>
+          {/* Public/Private toggle */}
+          <Card>
+            <CardContent className="p-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                {isPublic ? <Globe className="h-5 w-5 text-primary" /> : <Lock className="h-5 w-5 text-muted-foreground" />}
+                <div>
+                  <p className="font-medium text-sm">{isPublic ? "Openbare kamer" : "Privékamer"}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {isPublic ? "Iedereen kan joinen of zoeken" : "Alleen toegankelijk met code"}
+                  </p>
+                </div>
+              </div>
+              <Switch checked={isPublic} onCheckedChange={setIsPublic} />
+            </CardContent>
+          </Card>
+
           <div className="grid gap-3">
             <Card className="cursor-pointer transition-all hover:shadow-lg hover:-translate-y-1 active:scale-[0.98] border-2 hover:border-primary/50" onClick={() => startWithSettings("solo")}>
               <CardContent className="p-4 md:p-6 flex items-center gap-4">
