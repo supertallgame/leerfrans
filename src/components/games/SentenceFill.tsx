@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { ArrowLeft, RotateCcw } from "lucide-react";
-import { shuffle, getForeignLabel, getForeignShort } from "@/data/vocabulary";
+import { shuffle } from "@/data/vocabulary";
 import { useChapter } from "@/contexts/ChapterContext";
 import { useLocale } from "@/contexts/LocaleContext";
 import { t } from "@/lib/i18n";
@@ -106,8 +106,8 @@ export default function SentenceFill({ onBack }: Props) {
   }
 
   const progress = ((index + 1) / total) * 100;
-  const foreignShort = getForeignShort(language);
-  const langLabel = current.lang === "fr" ? `${foreignShort} ${getForeignLabel(language)}` : "NL Nederlands";
+  const foreignShort = (i.foreignShort as any)[language];
+  const langLabel = current.lang === "fr" ? `${foreignShort} ${(i.foreignLabel as any)[language]}` : "NL Nederlands";
   const translationLabel = current.lang === "fr" ? current.item.dutch : current.item.french;
 
   return (
