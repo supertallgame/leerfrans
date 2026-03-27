@@ -311,6 +311,17 @@ export type Database = {
         }
         Returns: Json
       }
+      get_reviews_admin: {
+        Args: never
+        Returns: {
+          created_at: string
+          display_name: string
+          id: string
+          message: string
+          rating: number
+          user_email: string
+        }[]
+      }
       get_room_players: {
         Args: { p_room_id: string }
         Returns: {
