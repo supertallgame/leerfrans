@@ -106,14 +106,14 @@ export default function MatchPairs({ onBack }: Props) {
 
       <Progress value={(totalMatched / allWords.length) * 100} className="w-full h-2" />
 
-      <div className="grid grid-cols-2 gap-2 md:gap-4 w-full">
+      <div className="grid grid-cols-[2fr_3fr] gap-2 md:gap-4 w-full items-start">
         <div className="flex flex-col gap-1.5 md:gap-2">
-          <p className="text-xs uppercase tracking-widest text-muted-foreground text-center mb-0.5 md:mb-1">{getNlLabel(language)}</p>
+          <p className="text-[10px] md:text-xs uppercase tracking-widest text-muted-foreground text-center mb-0.5 md:mb-1">{getNlLabel(language)}</p>
           {leftItems.map((item) => (
             <Button
               key={item.id}
               variant={matched.has(item.pairId) ? "default" : selectedLeft === item.pairId ? "secondary" : "outline"}
-              className={`h-auto py-2 md:py-3 whitespace-normal text-xs md:text-sm ${
+              className={`h-auto py-2 md:py-3 whitespace-normal text-[11px] md:text-sm leading-snug ${
                 matched.has(item.pairId) ? "opacity-50 pointer-events-none bg-[hsl(var(--success))] text-[hsl(var(--success-foreground))]" : ""
               }`}
               onClick={() => handleLeftClick(item.pairId)}
@@ -123,12 +123,12 @@ export default function MatchPairs({ onBack }: Props) {
           ))}
         </div>
         <div className="flex flex-col gap-1.5 md:gap-2">
-          <p className="text-xs uppercase tracking-widest text-muted-foreground text-center mb-0.5 md:mb-1">{getForeignLabelNative(language)}</p>
+          <p className="text-[10px] md:text-xs uppercase tracking-widest text-muted-foreground text-center mb-0.5 md:mb-1">{getForeignLabelNative(language)}</p>
           {rightItems.map((item) => (
             <Button
               key={item.id}
               variant={matched.has(item.pairId) ? "default" : wrong === item.id ? "destructive" : "outline"}
-              className={`h-auto py-2 md:py-3 whitespace-normal text-xs md:text-sm ${
+              className={`h-auto py-2 md:py-3 whitespace-normal text-[11px] md:text-sm leading-snug text-left ${
                 matched.has(item.pairId) ? "opacity-50 pointer-events-none bg-[hsl(var(--success))] text-[hsl(var(--success-foreground))]" : ""
               }`}
               onClick={() => handleRightClick(item.pairId, item.id)}
