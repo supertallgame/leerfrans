@@ -84,6 +84,28 @@ function ReplySection({
   const [name, setName] = useState("");
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [mutedUntil, setMutedUntil] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!showForm) return;
+    const checkMute = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user?.email) {
+        const { data } = await supabase
+          .from("muted_users")
+          .select("muted_until")
+          .eq("user_email", session.user.email)
+          .gt("muted_until", new Date().toISOString())
+          .limit(1);
+        if (data && data.length > 0) {
+          setMutedUntil(new Date(data[0].muted_until).toLocaleString("nl-NL"));
+        } else {
+          setMutedUntil(null);
+        }
+      }
+    };
+    checkMute();
+  }, [showForm]);
 
   const reviewReplies = replies.filter((r) => r.review_id === reviewId);
 
