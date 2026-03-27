@@ -26,11 +26,8 @@ export default function Feedback() {
       // Check if anonymous reviews are blocked and user is not logged in
       if (!session?.user) {
         const { data: anonSetting } = await supabase
-          .from("admin_settings")
-          .select("value")
-          .eq("key", "block_anonymous_reviews")
-          .maybeSingle();
-        if (anonSetting?.value === true) {
+          .rpc("get_public_setting", { p_key: "block_anonymous_reviews" });
+        if (anonSetting === true) {
           setBlocked(true);
         }
       }
@@ -69,11 +66,8 @@ export default function Feedback() {
     // Check if anonymous reviews are blocked
     if (!session?.user) {
       const { data: anonSetting } = await supabase
-        .from("admin_settings")
-        .select("value")
-        .eq("key", "block_anonymous_reviews")
-        .maybeSingle();
-      if (anonSetting?.value === true) {
+        .rpc("get_public_setting", { p_key: "block_anonymous_reviews" });
+      if (anonSetting === true) {
         setSubmitting(false);
         return toast.error("Reviews plaatsen is tijdelijk uitgeschakeld. Probeer het later opnieuw.");
       }
