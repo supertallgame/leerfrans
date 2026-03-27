@@ -83,6 +83,19 @@ export default function Admin() {
 
   useEffect(() => {
     checkAdmin();
+
+    const reviewChannel = supabase
+      .channel('admin-reviews-realtime')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'reviews' }, async () => {
+        const { data } = await supabase.rpc("get_reviews_admin" as any) as any;
+        if (data) setReviews(data);
+      })
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'reviews' }, (payload) => {
+        setReviews((prev) => prev.filter((r) => r.id !== (payload.old as any).id));
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(reviewChannel); };
   }, []);
 
   const checkAdmin = async () => {
