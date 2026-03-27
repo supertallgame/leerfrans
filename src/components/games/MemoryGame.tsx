@@ -122,7 +122,7 @@ export default function MemoryGame({ onBack }: Props) {
   }
 
   return (
-    <div className="flex flex-col items-center gap-3 md:gap-5 w-full max-w-2xl mx-auto fixed inset-0 z-50 bg-background p-3 md:static md:relative md:inset-auto md:z-auto md:bg-transparent md:p-0 overflow-y-auto">
+    <div className="flex h-[100dvh] max-h-[100dvh] flex-col items-center gap-2 overflow-hidden overscroll-none w-full max-w-2xl mx-auto fixed inset-0 z-50 bg-background p-3 md:h-auto md:max-h-none md:gap-5 md:static md:relative md:inset-auto md:z-auto md:bg-transparent md:p-0 md:overflow-visible">
       <div className="flex items-center justify-between w-full">
         <Button variant="ghost" onClick={onBack} className="gap-2 text-sm">
           <ArrowLeft className="h-4 w-4" /> Terug
@@ -135,7 +135,7 @@ export default function MemoryGame({ onBack }: Props) {
 
       <Progress value={(totalMatched / allPairs.length) * 100} className="w-full h-2" />
 
-      <div className="grid grid-cols-3 gap-2 md:grid-cols-4 md:gap-3 w-full auto-rows-fr">
+      <div className="grid flex-1 min-h-0 grid-cols-3 gap-2 md:grid-cols-4 md:gap-3 w-full auto-rows-fr content-center">
         {cards.map((card) => {
           const isFlipped = flipped.includes(card.id);
           const isMatched = matched.has(card.pairId);
