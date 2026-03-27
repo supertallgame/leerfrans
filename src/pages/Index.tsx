@@ -1,4 +1,5 @@
 import { useState, useEffect, lazy, Suspense } from "react";
+import { useThemeSync } from "@/hooks/use-theme-sync";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -95,9 +96,7 @@ const Index = () => {
   const foreignLabel = getForeignLabel(language);
   const foreignLabelNative = getForeignLabelNative(language);
 
-  useEffect(() => {
-    document.documentElement.classList.toggle("dark", darkMode);
-  }, []);
+  useThemeSync();
 
   const ALL_SUBJECT_IDS: Language[] = ["french", "english", "nask", "biology"];
 
