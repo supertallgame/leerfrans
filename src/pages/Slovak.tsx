@@ -3,6 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { BookOpen, Brain, Puzzle, Keyboard, PenTool, MessageSquare, Bot, Settings, Volume2, VolumeX, Sun, Moon, BookMarked, FlaskConical, CheckCircle, Layers, Microscope, Bone, ArrowLeft } from "lucide-react";
 import { getChaptersForLanguage, getChapter, getDefaultChapterId, getActiveVocabulary, Language } from "@/data/vocabulary";
+import { toSlovak } from "@/data/vocabulary-sk";
 import { Switch } from "@/components/ui/switch";
 import {
   Dialog,
@@ -274,8 +275,8 @@ function SlovakContent() {
           </DialogHeader>
           <div className="space-y-1.5">
             {([
-              { id: "french" as Language, label: "Francúzština", desc: "Holandčina ↔ Français", flag: <FlagFR className="w-5 h-3.5 rounded-sm" /> },
-              { id: "english" as Language, label: "Angličtina", desc: "Holandčina ↔ English", flag: <FlagEN className="w-5 h-3.5 rounded-sm" /> },
+              { id: "french" as Language, label: "Francúzština", desc: "Slovenčina ↔ Français", flag: <FlagFR className="w-5 h-3.5 rounded-sm" /> },
+              { id: "english" as Language, label: "Angličtina", desc: "Slovenčina ↔ English", flag: <FlagEN className="w-5 h-3.5 rounded-sm" /> },
               { id: "nask" as Language, label: "NASK", desc: "Pojmy a popisy", flag: <FlaskConical className="w-4 h-4" /> },
               { id: "biology" as Language, label: "Biológia", desc: "Pojmy a popisy", flag: <Microscope className="w-4 h-4" /> },
             ]).map((lang) => {
@@ -354,7 +355,7 @@ function SlovakContent() {
 
 const Slovak = () => (
   <LocaleProvider value="sk">
-    <ChapterProvider>
+    <ChapterProvider vocabTransform={toSlovak}>
       <SlovakContent />
     </ChapterProvider>
   </LocaleProvider>
