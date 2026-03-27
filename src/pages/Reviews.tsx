@@ -271,6 +271,25 @@ export default function Reviews() {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setIsOperator(OPERATOR_EMAILS.includes(session?.user?.email ?? ""));
     });
+
+    const reviewChannel = supabase
+      .channel('reviews-realtime')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'reviews' }, (payload) => {
+        setReviews((prev) => [payload.new as Review, ...prev]);
+      })
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'reviews' }, (payload) => {
+        setReviews((prev) => prev.filter((r) => r.id !== (payload.old as any).id));
+        setReplies((prev) => prev.filter((r) => r.review_id !== (payload.old as any).id));
+      })
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'review_replies' }, (payload) => {
+        setReplies((prev) => [...prev, payload.new as ReviewReply]);
+      })
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'review_replies' }, (payload) => {
+        setReplies((prev) => prev.filter((r) => r.id !== (payload.old as any).id));
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(reviewChannel); };
   }, []);
 
   const handleDelete = async () => {
