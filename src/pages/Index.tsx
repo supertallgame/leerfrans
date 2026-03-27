@@ -119,12 +119,16 @@ const Index = () => {
       });
   }, []);
 
-  // If language becomes disabled, redirect to first available
+  // If language becomes disabled, redirect to first available and kick back to menu
   useEffect(() => {
     if (disabledSubjects.includes(language)) {
       const available = ALL_SUBJECT_IDS.filter((id) => !disabledSubjects.includes(id));
       if (available.length > 0) {
         setLanguage(available[0]);
+      }
+      if (activeGame !== "menu") {
+        setActiveGame("menu");
+        toast.info("Dit vak is momenteel uitgeschakeld door de beheerder.");
       }
     }
   }, [disabledSubjects, language]);
