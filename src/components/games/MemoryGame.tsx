@@ -144,7 +144,7 @@ export default function MemoryGame({ onBack }: Props) {
             <div
               key={card.id}
               onClick={() => handleCardClick(card)}
-                className={`relative cursor-pointer transition-all duration-300 rounded-xl border-2 aspect-[4/5] md:aspect-[3/4] flex items-center justify-center p-2 text-center overflow-hidden ${
+                className={`relative cursor-pointer transition-all duration-300 rounded-xl border-2 aspect-square sm:aspect-[4/5] md:aspect-[3/4] flex items-center justify-center p-1.5 text-center overflow-hidden ${
                 isMatched
                   ? "bg-[hsl(var(--success))]/10 border-[hsl(var(--success))] opacity-60 pointer-events-none"
                   : isFlipped
@@ -156,15 +156,15 @@ export default function MemoryGame({ onBack }: Props) {
             >
               {isFlipped || isMatched ? (
                 <div className="flex flex-col items-center justify-center w-full">
-                  <p className={`text-[9px] md:text-[10px] uppercase tracking-widest mb-0.5 ${
+                  <p className={`text-[8px] md:text-[10px] uppercase tracking-widest mb-0.5 ${
                     card.type === "term" ? "text-primary" : "text-accent"
                   }`}>
                     {card.type === "term" ? "Begrip" : "Omschrijving"}
                   </p>
-              <p className="text-[10px] md:text-sm font-medium leading-tight line-clamp-3">{card.text}</p>
+               <p className="text-[9px] md:text-sm font-medium leading-tight line-clamp-2">{card.text}</p>
                 </div>
               ) : (
-                <p className="text-2xl md:text-3xl">❓</p>
+                 <p className="text-xl md:text-3xl">❓</p>
               )}
             </div>
           );
