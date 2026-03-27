@@ -97,6 +97,23 @@ function ReplySection({
       return;
     }
     setSubmitting(true);
+
+    // Check if user is muted
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session?.user?.email) {
+      const { data: muteData } = await (supabase.from("muted_users" as any) as any)
+        .select("muted_until")
+        .eq("user_email", session.user.email)
+        .gt("muted_until", new Date().toISOString())
+        .limit(1);
+      if (muteData && muteData.length > 0) {
+        setSubmitting(false);
+        const until = new Date(muteData[0].muted_until).toLocaleString("nl-NL");
+        toast.error(`Je account is gemute tot ${until}`);
+        return;
+      }
+    }
+
     const { data, error } = await (supabase.from("review_replies" as any) as any)
       .insert({ review_id: reviewId, display_name: name.trim(), message: message.trim() })
       .select()

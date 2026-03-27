@@ -36,7 +36,20 @@ export default function Feedback() {
 
     // Get current user session if logged in
     const { data: { session } } = await supabase.auth.getSession();
-    console.log("SESSION DEBUG:", session?.user?.id, session?.user?.email);
+
+    // Check if user is muted
+    if (session?.user?.email) {
+      const { data: muteData } = await (supabase.from("muted_users" as any) as any)
+        .select("muted_until")
+        .eq("user_email", session.user.email)
+        .gt("muted_until", new Date().toISOString())
+        .limit(1);
+      if (muteData && muteData.length > 0) {
+        setSubmitting(false);
+        const until = new Date(muteData[0].muted_until).toLocaleString("nl-NL");
+        return toast.error(`Je account is gemute tot ${until}`);
+      }
+    }
 
     const insertData: any = {
       display_name: trimmedName,
@@ -47,10 +60,8 @@ export default function Feedback() {
       insertData.user_id = session.user.id;
       insertData.user_email = session.user.email;
     }
-    console.log("INSERT DATA:", JSON.stringify(insertData));
 
-    const { error, data: insertedData } = await supabase.from("reviews" as any).insert(insertData as any).select() as any;
-    console.log("INSERT RESULT:", JSON.stringify(insertedData), error);
+    const { error } = await supabase.from("reviews" as any).insert(insertData as any);
 
     setSubmitting(false);
     if (error) {

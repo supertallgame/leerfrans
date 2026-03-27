@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Shield, Home, FlaskConical, Microscope, Trash2, Star, MessageSquare, Search, Filter, Download, BarChart3, TrendingUp, Users, Mail } from "lucide-react";
+import { Shield, Home, FlaskConical, Microscope, Trash2, Star, MessageSquare, Search, Filter, Download, BarChart3, TrendingUp, Users, Mail, VolumeX, Clock } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -34,6 +34,14 @@ interface Review {
   message: string;
   created_at: string;
   user_email: string | null;
+}
+
+interface MutedUser {
+  id: string;
+  user_email: string;
+  muted_until: string;
+  reason: string;
+  created_at: string;
 }
 
 const ADMIN_EMAILS = ["brankovantland@gmail.com", "branko18vantland@gmail.com", "tamoopdam@gmail.com", "jack.ouwerkerk@vsodaafgeluk.nl"];
@@ -66,6 +74,12 @@ export default function Admin() {
   const [searchQuery, setSearchQuery] = useState("");
   const [starFilter, setStarFilter] = useState<string>("all");
 
+  // Mute state
+  const [mutedUsers, setMutedUsers] = useState<MutedUser[]>([]);
+  const [muteEmail, setMuteEmail] = useState("");
+  const [muteDuration, setMuteDuration] = useState("1h");
+  const [muteReason, setMuteReason] = useState("");
+
   useEffect(() => {
     checkAdmin();
   }, []);
@@ -79,9 +93,10 @@ export default function Admin() {
     }
     setIsAdmin(true);
     // Load disabled subjects + reviews in parallel
-    const [settingsRes, reviewsRes] = await Promise.all([
+    const [settingsRes, reviewsRes, mutesRes] = await Promise.all([
       supabase.from("admin_settings").select("value").eq("key", "disabled_subjects").single(),
       supabase.rpc("get_reviews_admin" as any),
+      supabase.from("muted_users" as any).select("*").order("created_at", { ascending: false }) as any,
     ]);
     if (settingsRes.data?.value) {
       setDisabledSubjects(settingsRes.data.value as string[]);
@@ -89,7 +104,50 @@ export default function Admin() {
     if (reviewsRes.data) {
       setReviews(reviewsRes.data);
     }
+    if (mutesRes.data) {
+      setMutedUsers(mutesRes.data);
+    }
     setLoading(false);
+  };
+
+  const handleMuteUser = async () => {
+    if (!muteEmail.trim()) return toast.error("Vul een e-mailadres in");
+    
+    const durationMap: Record<string, number> = {
+      "1h": 60 * 60 * 1000,
+      "6h": 6 * 60 * 60 * 1000,
+      "24h": 24 * 60 * 60 * 1000,
+      "7d": 7 * 24 * 60 * 60 * 1000,
+      "30d": 30 * 24 * 60 * 60 * 1000,
+      "perm": 100 * 365 * 24 * 60 * 60 * 1000,
+    };
+    
+    const ms = durationMap[muteDuration] || durationMap["1h"];
+    const mutedUntil = new Date(Date.now() + ms).toISOString();
+    
+    const { data, error } = await (supabase.from("muted_users" as any) as any)
+      .insert({ user_email: muteEmail.trim(), muted_until: mutedUntil, reason: muteReason.trim() })
+      .select()
+      .single();
+    
+    if (error) {
+      toast.error("Kon gebruiker niet muten");
+      return;
+    }
+    setMutedUsers((prev) => [data, ...prev]);
+    setMuteEmail("");
+    setMuteReason("");
+    toast.success(`${muteEmail.trim()} is gemute`);
+  };
+
+  const handleUnmute = async (id: string) => {
+    const { error } = await (supabase.from("muted_users" as any) as any).delete().eq("id", id);
+    if (error) {
+      toast.error("Kon mute niet verwijderen");
+      return;
+    }
+    setMutedUsers((prev) => prev.filter((m) => m.id !== id));
+    toast.success("Gebruiker is unmuted");
   };
 
   const handleDeleteReview = async () => {
@@ -365,16 +423,90 @@ export default function Admin() {
                     )}
                     <p className="text-sm text-muted-foreground mt-1 truncate">{review.message}</p>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-destructive hover:text-destructive shrink-0"
-                    onClick={() => setDeleteId(review.id)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  <div className="flex items-center gap-1 shrink-0">
+                    {review.user_email && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                        title="Mute gebruiker"
+                        onClick={() => { setMuteEmail(review.user_email!); }}
+                      >
+                        <VolumeX className="h-4 w-4" />
+                      </Button>
+                    )}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-destructive hover:text-destructive"
+                      onClick={() => setDeleteId(review.id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               ))}
+            </div>
+          )}
+        </div>
+
+        {/* Mute beheer */}
+        <div className="rounded-2xl border border-border bg-card p-6 space-y-4">
+          <h2 className="text-lg font-semibold flex items-center gap-2">
+            <VolumeX className="h-5 w-5" /> Gebruikers muten
+          </h2>
+          <div className="flex flex-col sm:flex-row gap-2">
+            <Input
+              placeholder="E-mailadres"
+              value={muteEmail}
+              onChange={(e) => setMuteEmail(e.target.value)}
+              className="flex-1"
+            />
+            <Select value={muteDuration} onValueChange={setMuteDuration}>
+              <SelectTrigger className="w-[130px]">
+                <Clock className="h-4 w-4 mr-2 text-muted-foreground" />
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="1h">1 uur</SelectItem>
+                <SelectItem value="6h">6 uur</SelectItem>
+                <SelectItem value="24h">24 uur</SelectItem>
+                <SelectItem value="7d">7 dagen</SelectItem>
+                <SelectItem value="30d">30 dagen</SelectItem>
+                <SelectItem value="perm">Permanent</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button onClick={handleMuteUser} className="gap-1.5">
+              <VolumeX className="h-4 w-4" /> Mute
+            </Button>
+          </div>
+          <Input
+            placeholder="Reden (optioneel)"
+            value={muteReason}
+            onChange={(e) => setMuteReason(e.target.value)}
+          />
+
+          {mutedUsers.length > 0 && (
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-muted-foreground">Gemute gebruikers</p>
+              {mutedUsers.map((mute) => {
+                const isActive = new Date(mute.muted_until) > new Date();
+                return (
+                  <div key={mute.id} className={`flex items-center justify-between px-4 py-2.5 rounded-lg border ${isActive ? "border-destructive/30 bg-destructive/5" : "border-border opacity-50"}`}>
+                    <div>
+                      <p className="text-sm font-medium">{mute.user_email}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {isActive ? "Gemute tot " : "Verlopen: "}
+                        {new Date(mute.muted_until).toLocaleString("nl-NL")}
+                        {mute.reason && ` — ${mute.reason}`}
+                      </p>
+                    </div>
+                    <Button variant="ghost" size="sm" className="text-xs" onClick={() => handleUnmute(mute.id)}>
+                      Unmute
+                    </Button>
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>
