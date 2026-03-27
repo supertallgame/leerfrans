@@ -188,21 +188,24 @@ export default function SkeletonLabel({ onBack }: Props) {
             Vraag {currentIndex + 1}/{total}: Welk bot is nummer <span className="text-primary font-bold">{currentBone.id}</span>?
           </p>
           <div className="flex gap-2 w-full">
-          <Input
-            ref={inputRef}
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
+            <Input
+              ref={inputRef}
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
               placeholder="Typ de naam van het bot..."
-            autoFocus
-          />
-          <Button onClick={handleSubmit} disabled={!inputValue.trim()} size="icon">
-            <Check className="h-4 w-4" />
-          </Button>
-            <Button variant="outline" size="sm" onClick={handleSkip} className="text-muted-foreground gap-1">
+              autoFocus
+              className="text-base"
+            />
+            <Button onClick={handleSubmit} disabled={!inputValue.trim()} className="px-5">
+              <Check className="h-5 w-5" />
+            </Button>
+          </div>
+          <div className="flex gap-2 w-full">
+            <Button variant="outline" onClick={handleSkip} className="flex-1 text-muted-foreground gap-1">
               <X className="h-4 w-4" /> Skip
             </Button>
-            <Button variant="outline" size="sm" onClick={handleHint} className="text-muted-foreground gap-1">
+            <Button variant="outline" onClick={handleHint} className="flex-1 text-muted-foreground gap-1">
               <Lightbulb className="h-4 w-4" /> Hint
             </Button>
           </div>
