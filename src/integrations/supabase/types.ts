@@ -238,6 +238,13 @@ export type Database = {
             referencedRelation: "reviews"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "review_replies_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       reviews: {
@@ -317,6 +324,33 @@ export type Database = {
           team_mode?: string | null
           team_names?: Json | null
           total_questions?: number | null
+        }
+        Relationships: []
+      }
+      reviews_public: {
+        Row: {
+          created_at: string | null
+          display_name: string | null
+          id: string | null
+          message: string | null
+          rating: number | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          display_name?: string | null
+          id?: string | null
+          message?: string | null
+          rating?: number | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          display_name?: string | null
+          id?: string | null
+          message?: string | null
+          rating?: number | null
+          user_id?: string | null
         }
         Relationships: []
       }
