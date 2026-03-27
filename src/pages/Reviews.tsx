@@ -142,7 +142,11 @@ function ReplySection({
       .single();
     setSubmitting(false);
     if (error) {
-      toast.error("Kon reactie niet plaatsen");
+      if (error.message?.includes("Too many replies")) {
+        toast.error("Je plaatst te snel reacties. Wacht even en probeer het opnieuw.");
+      } else {
+        toast.error("Kon reactie niet plaatsen");
+      }
       return;
     }
     onReplyAdded(data);
