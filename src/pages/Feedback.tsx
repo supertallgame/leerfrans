@@ -111,7 +111,11 @@ export default function Feedback() {
 
     setSubmitting(false);
     if (error) {
-      toast.error("Kon review niet versturen");
+      if (error.message?.includes("Too many reviews")) {
+        toast.error("Je plaatst te snel reviews. Wacht 5 minuten en probeer het opnieuw.");
+      } else {
+        toast.error("Kon review niet versturen");
+      }
       return;
     }
 
