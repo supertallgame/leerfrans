@@ -109,7 +109,7 @@ export default function MatchPairs({ onBack }: Props) {
 
       <Progress value={(totalMatched / allWords.length) * 100} className="w-full h-2" />
 
-      <div className="w-full">
+      <div className={`w-full transition-all duration-300 ${advancing ? "opacity-0 scale-95" : "opacity-100 scale-100"}`}>
         <div className="grid grid-cols-[2fr_3fr] gap-2 md:gap-4 mb-2">
           <p className="text-[10px] md:text-xs uppercase tracking-widest text-muted-foreground text-center">{getNlLabel(language)}</p>
           <p className="text-[10px] md:text-xs uppercase tracking-widest text-muted-foreground text-center">{getForeignLabelNative(language)}</p>
@@ -121,8 +121,8 @@ export default function MatchPairs({ onBack }: Props) {
               <div key={i} className="grid grid-cols-[2fr_3fr] gap-2 md:gap-4">
                 <Button
                   variant={matched.has(leftItem.pairId) ? "default" : selectedLeft === leftItem.pairId ? "secondary" : "outline"}
-                  className={`h-full py-2 md:py-3 whitespace-normal text-[11px] md:text-sm leading-snug ${
-                    matched.has(leftItem.pairId) ? "opacity-50 pointer-events-none bg-[hsl(var(--success))] text-[hsl(var(--success-foreground))]" : ""
+                  className={`h-full py-2 md:py-3 whitespace-normal text-[11px] md:text-sm leading-snug transition-all duration-300 ${
+                    matched.has(leftItem.pairId) ? "opacity-50 pointer-events-none bg-[hsl(var(--success))] text-[hsl(var(--success-foreground))] scale-95" : ""
                   }`}
                   onClick={() => handleLeftClick(leftItem.pairId)}
                 >
@@ -130,8 +130,8 @@ export default function MatchPairs({ onBack }: Props) {
                 </Button>
                 <Button
                   variant={matched.has(rightItem.pairId) ? "default" : wrong === rightItem.id ? "destructive" : "outline"}
-                  className={`h-full py-2 md:py-3 whitespace-normal text-[11px] md:text-sm leading-snug text-left justify-start ${
-                    matched.has(rightItem.pairId) ? "opacity-50 pointer-events-none bg-[hsl(var(--success))] text-[hsl(var(--success-foreground))]" : ""
+                  className={`h-full py-2 md:py-3 whitespace-normal text-[11px] md:text-sm leading-snug text-left justify-start transition-all duration-300 ${
+                    matched.has(rightItem.pairId) ? "opacity-50 pointer-events-none bg-[hsl(var(--success))] text-[hsl(var(--success-foreground))] scale-95" : ""
                   }`}
                   onClick={() => handleRightClick(rightItem.pairId, rightItem.id)}
                 >
