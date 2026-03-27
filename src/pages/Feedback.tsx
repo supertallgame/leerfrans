@@ -132,8 +132,28 @@ export default function Feedback() {
             Laat anoniem je mening achter over de app
           </p>
         </div>
+        {mutedUntil && (
+          <Card className="border-destructive/30 bg-destructive/5">
+            <CardContent className="p-4 flex items-center gap-3">
+              <VolumeX className="h-5 w-5 text-destructive shrink-0" />
+              <div>
+                <p className="text-sm font-medium text-destructive">Je account is gemute</p>
+                <p className="text-xs text-muted-foreground">Je kunt geen reviews plaatsen tot {mutedUntil}</p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
-        <Card>
+        {blocked && !mutedUntil && (
+          <Card className="border-muted-foreground/20 bg-muted/50">
+            <CardContent className="p-4 text-center">
+              <p className="text-sm font-medium">Reviews plaatsen is tijdelijk uitgeschakeld</p>
+              <p className="text-xs text-muted-foreground mt-1">Probeer het later opnieuw.</p>
+            </CardContent>
+          </Card>
+        )}
+
+        <Card className={mutedUntil || blocked ? "opacity-50 pointer-events-none" : ""}>
           <CardContent className="p-4 md:p-6 space-y-4">
             <div>
               <label className="text-sm font-medium mb-1.5 block">Naam</label>
