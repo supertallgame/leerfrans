@@ -106,9 +106,8 @@ const Index = () => {
     supabase
       .rpc("get_public_setting", { p_key: "disabled_subjects" })
       .then(({ data }) => {
-        const value = data;
-        if (data?.value && Array.isArray(data.value)) {
-          const disabled = data.value as string[];
+        if (data && Array.isArray(data)) {
+          const disabled = data as string[];
           setDisabledSubjects(disabled);
           if (disabled.includes(language)) {
             const available = ALL_SUBJECT_IDS.filter((id) => !disabled.includes(id));
