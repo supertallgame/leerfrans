@@ -84,6 +84,28 @@ function ReplySection({
   const [name, setName] = useState("");
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [mutedUntil, setMutedUntil] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!showForm) return;
+    const checkMute = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user?.email) {
+        const { data } = await supabase
+          .from("muted_users")
+          .select("muted_until")
+          .eq("user_email", session.user.email)
+          .gt("muted_until", new Date().toISOString())
+          .limit(1);
+        if (data && data.length > 0) {
+          setMutedUntil(new Date(data[0].muted_until).toLocaleString("nl-NL"));
+        } else {
+          setMutedUntil(null);
+        }
+      }
+    };
+    checkMute();
+  }, [showForm]);
 
   const reviewReplies = replies.filter((r) => r.review_id === reviewId);
 
@@ -156,28 +178,37 @@ function ReplySection({
 
       {showForm && (
         <div className="ml-3 border-l-2 border-primary/20 pl-3 space-y-2">
-          <Input
-            placeholder="Je naam"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            maxLength={50}
-            className="h-8 text-sm"
-          />
-          <Textarea
-            placeholder="Je reactie..."
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            maxLength={500}
-            className="text-sm min-h-[60px] resize-none"
-          />
-          <div className="flex gap-2">
-            <Button size="sm" className="h-7 text-xs gap-1" onClick={handleSubmit} disabled={submitting}>
-              <Send className="h-3 w-3" /> {submitting ? "Bezig..." : "Verstuur"}
-            </Button>
-            <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => setShowForm(false)}>
-              Annuleer
-            </Button>
-          </div>
+          {mutedUntil ? (
+            <div className="bg-destructive/10 border border-destructive/30 rounded-md p-2 text-xs text-destructive flex items-center gap-1.5">
+              <span>🔇</span>
+              <span>Je account is gemute tot {mutedUntil}. Je kunt geen reacties plaatsen.</span>
+            </div>
+          ) : (
+            <>
+              <Input
+                placeholder="Je naam"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                maxLength={50}
+                className="h-8 text-sm"
+              />
+              <Textarea
+                placeholder="Je reactie..."
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                maxLength={500}
+                className="text-sm min-h-[60px] resize-none"
+              />
+              <div className="flex gap-2">
+                <Button size="sm" className="h-7 text-xs gap-1" onClick={handleSubmit} disabled={submitting}>
+                  <Send className="h-3 w-3" /> {submitting ? "Bezig..." : "Verstuur"}
+                </Button>
+                <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => setShowForm(false)}>
+                  Annuleer
+                </Button>
+              </div>
+            </>
+          )}
         </div>
       )}
 
