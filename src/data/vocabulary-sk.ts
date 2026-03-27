@@ -495,15 +495,145 @@ const dutchToSlovak: Record<string, string> = {
   "Ontwrichting": "Vykĺbenie",
 };
 
+/**
+ * Dutch → Slovak translation map for the "french" field (used for NASK/Bio descriptions).
+ */
+const descriptionToSlovak: Record<string, string> = {
+  // ─── NASK Chapter 1 ───
+  "Een deken die je gebruikt om een kleine brand of brandende kleding te blussen": "Deka, ktorú používaš na uhasenie malého požiaru alebo horiaceho oblečenia",
+  "Een blusapparaat om een groter brandje te blussen": "Hasiaci prístroj na uhasenie väčšieho požiaru",
+  "Een apparaat dat aardgas verbrandt om warmte te produceren": "Zariadenie, ktoré spaľuje zemný plyn na výrobu tepla",
+  "Een assenstelsel waarin een grafiek is getekend": "Sústava osí, v ktorej je nakreslený graf",
+  "De maat waarin je grootheden meet": "Miera, v ktorej sa merajú veličiny",
+  "Proeven doen om de vragen uit het onderzoek te beantwoorden": "Robiť pokusy na zodpovedanie výskumných otázok",
+  "Een vloeiende lijn door de meetpunten in een diagram": "Plynulá čiara cez meracie body v diagrame",
+  "Een eigenschap die je kunt meten": "Vlastnosť, ktorú môžeš merať",
+  "Het onderzoek of een product voldoet aan alle eisen": "Skúmanie, či produkt spĺňa všetky požiadavky",
+  "Een jas die je over je kleren aantrekt als bescherming voor je kleren": "Plášť, ktorý si oblečieš cez oblečenie na jeho ochranu",
+  "De hoeveelheid die je met een weegschaal meet": "Množstvo, ktoré meriaš na váhe",
+  "De waarden die je met een meetinstrument kan meten": "Hodnoty, ktoré môžeš merať meracím prístrojom",
+  "Een douche die je gebruikt om bijtende stof van je huid of uit je kleren te spoelen": "Sprcha, ktorú používaš na opláchnutie leptavej látky z kože alebo oblečenia",
+  "De knop die de toevoer van aardgas, water en elektriciteit stopt als je hem indrukt": "Tlačidlo, ktoré zastaví prívod zemného plynu, vody a elektriny po jeho stlačení",
+  "De manier om het volume van een voorwerp te bepalen door onderdompelen": "Spôsob určenia objemu predmetu ponorením",
+  "Een manier van werken om antwoord te vinden op vragen": "Spôsob práce na nájdenie odpovedí na otázky",
+  "Een vraag die aangeeft wat je wilt onderzoeken": "Otázka, ktorá určuje, čo chceš skúmať",
+  "Een fontijntje dat je gebruikt om een bijtende stof uit je oog te spoelen": "Fontánka, ktorú používaš na vypláchnutie leptavej látky z oka",
+  "Het uitvoeren van een experiment in de les": "Vykonávanie experimentu na hodine",
+  "De waarde tussen twee streepjes op de schaalverdeling van een meetinstrument": "Hodnota medzi dvoma čiarkami na stupnici meracieho prístroja",
+  "Een bril die je opzet om je ogen te beschermen": "Okuliare, ktoré si nasadíš na ochranu očí",
+  "Een plaatje waaraan je kunt zien waarom een stof gevaarlijk is": "Obrázok, z ktorého zistíš, prečo je látka nebezpečná",
+  "De regels om ervoor te zorgen dat iedereen in het lokaal veilig kan werken": "Pravidlá na zaistenie bezpečnej práce pre všetkých v miestnosti",
+  "De invloed die de ene grootheid heeft op een andere grootheid": "Vplyv jednej veličiny na druhú veličinu",
+  "De hoeveelheid die aangeeft hoeveel ruimte een stof inneemt": "Množstvo, ktoré udáva, koľko priestoru látka zaberá",
+  "Opmerken wat er gebeurt door zien, horen, voelen, ruiken of proeven": "Všímať si, čo sa deje, zrakom, sluchom, hmatom, čuchom alebo chuťou",
+  "Antwoord op de onderzoeksvraag": "Odpoveď na výskumnú otázku",
+  "Je verandert alleen de grootheid waarvan je het effect onderzoekt": "Meníš len tú veličinu, ktorej účinok skúmaš",
+  "Een schriftelijke uitwerking van een experiment": "Písomné spracovanie experimentu",
+  "Je eigen verwachting van de uitkomst van het experiment": "Tvoje vlastné očakávanie výsledku experimentu",
+  "Het overzicht van hoe je een experiment wilt gaan uitvoeren": "Prehľad toho, ako chceš experiment vykonať",
+
+  // ─── NASK Chapter 2 ───
+  "Het opnemen van licht": "Pohlcovanie svetla",
+  "Een lens die in het midden dikker is dan aan de rand": "Šošovka, ktorá je v strede hrubšia ako na okraji",
+  "Lichtstralen naar elkaar toe laten knikken": "Ohýbanie svetelných lúčov smerom k sebe",
+  "Een lichtbundel die steeds smaller wordt": "Svetelný zväzok, ktorý sa stáva stále užším",
+  "Lichtstralen van elkaar af laten knikken": "Ohýbanie svetelných lúčov od seba",
+  "Een lichtbundel die steeds breder wordt": "Svetelný zväzok, ktorý sa stáva stále širším",
+  "Een lichtbundel die overal even breed is": "Svetelný zväzok, ktorý je všade rovnako široký",
+  "Het gebied dat je kunt zien": "Oblasť, ktorú môžeš vidieť",
+  "Een lens die in het midden dunner is dan aan de rand": "Šošovka, ktorá je v strede tenšia ako na okraji",
+  "Licht dat niet rechtstreeks van een lichtbron komt, maar via een voorwerp": "Svetlo, ktoré neprichádza priamo zo zdroja svetla, ale cez predmet",
+  "De kleurenband die je ziet als wit licht op een prisma valt": "Farebný pás, ktorý vidíš, keď biele svetlo dopadá na prizmu",
+  "Glas of kunststof dat alleen één kleur uit het kleurenspectrum doorlaat": "Sklo alebo plast, ktorý prepúšťa len jednu farbu z farebného spektra",
+  "Een lichtbron die door de mens is gemaakt": "Zdroj svetla vyrobený človekom",
+  "Een stukje geslepen glas of doorzichtig kunststof waarmee je lichtbundels kunt veranderen": "Kúsok brúseného skla alebo priehľadného plastu, ktorým môžeš meniť svetelné zväzky",
+  "De plaats waar licht ontstaat": "Miesto, kde vzniká svetlo",
+  "De verzameling lichtstralen van één lichtbron": "Súbor svetelných lúčov z jedného zdroja svetla",
+  "Een rechte lijn die laat zien hoe licht vanaf de lichtbron naar de omgeving gaat": "Priamka, ktorá ukazuje, ako svetlo putuje zo zdroja do okolia",
+  "De basiskleuren waarmee je alle andere kleuren kunt maken": "Základné farby, z ktorých môžeš vytvoriť všetky ostatné farby",
+  "Een driehoekig stuk glas of doorzichtig kunststof": "Trojuholníkový kus skla alebo priehľadného plastu",
+  "Een lichtbron die in de natuur is ontstaan zonder invloed van mensen": "Zdroj svetla, ktorý vznikol v prírode bez vplyvu ľudí",
+  "De lichtstralen die vanuit de lichtbron vlak langs een voorwerp lopen": "Svetelné lúče, ktoré idú zo zdroja svetla tesne pozdĺž predmetu",
+  "Het gebied achter een verlicht voorwerp waar veel minder licht komt": "Oblasť za osvetleným predmetom, kam prichádza oveľa menej svetla",
+  "Het beeld dat je ziet als je in een spiegel kijkt": "Obraz, ktorý vidíš, keď sa pozrieš do zrkadla",
+  "De weerkaatsing van licht in één richting, zoals bij een spiegel gebeurt": "Odraz svetla jedným smerom, ako sa to deje pri zrkadle",
+  "De lijn waarlangs je naar een voorwerp kijkt": "Čiara, pozdĺž ktorej sa pozeráš na predmet",
+
+  // ─── NASK Chapter 3 ───
+  "De faseovergang van gas naar vloeistof": "Fázový prechod z plynu na kvapalinu",
+  "De massa van één kubieke centimeter (1 cm³) van een stof": "Hmotnosť jedného kubického centimetra (1 cm³) látky",
+  "De hoeveelheid van een stof die je binnenkrijgt": "Množstvo látky, ktoré prijmeš",
+  "De toestand waarin een stof kan voorkomen: vaste stof, vloeistof en gas": "Stav, v ktorom sa látka môže vyskytovať: pevná látka, kvapalina a plyn",
+  "Overgang van de ene fase naar de andere fase": "Prechod z jednej fázy do druhej",
+  "De vloeistof die door een filter is gegaan": "Kvapalina, ktorá prešla cez filter",
+  "Een scheidingsmethode om een vaste stof uit een suspensie te halen": "Separačná metóda na oddelenie pevnej látky zo suspenzie",
+  "De eenheid van temperatuur: gebaseerd op het smeltpunt en kookpunt van water": "Jednotka teploty: založená na bode topenia a bode varu vody",
+  "Een stof zonder eigen vorm en zonder eigen volume, bijvoorbeeld lucht": "Látka bez vlastného tvaru a bez vlastného objemu, napríklad vzduch",
+  "Een stof die dodelijk of schadelijk is voor je gezondheid": "Látka, ktorá je smrteľná alebo škodlivá pre zdravie",
+  "Het opnieuw gebruiken van een voorwerp": "Opätovné použitie predmetu",
+  "Een scheidingsmethode om een vaste stof uit een suspensie te halen": "Separačná metóda na oddelenie pevnej látky zo suspenzie",
+  "De temperatuur waarbij de vloeistof verdampt met dampbellen in de vloeistof": "Teplota, pri ktorej sa kvapalina odparuje s parními bublinami v kvapaline",
+  "Materie die bestaat uit twee of meer stoffen": "Hmota, ktorá sa skladá z dvoch alebo viacerých látok",
+  "Een helder mengsel van een stof in een vloeistof": "Priehľadná zmes látky v kvapaline",
+  "Afval gebruiken om nieuwe producten te maken": "Použitie odpadu na výrobu nových produktov",
+  "De stof die bij filtreren of indampen op het filter of in het indampschaaltje achterblijft": "Látka, ktorá zostane na filtri alebo v odparovacej miske pri filtrovaní alebo odparovaní",
+  "De faseovergang van vaste stof naar vloeistof": "Fázový prechod z pevnej látky na kvapalinu",
+  "De temperatuur waarbij een stof van de vaste naar de vloeibare fase overgaat": "Teplota, pri ktorej látka prechádza z pevnej do kvapalnej fázy",
+  "Een eigenschap van een stof zoals de dichtheid": "Vlastnosť látky, ako napríklad hustota",
+  "De materie waaruit alles om je heen bestaat": "Hmota, z ktorej sa skladá všetko okolo teba",
+  "De faseovergang van vloeistof naar vaste stof": "Fázový prechod z kvapaliny na pevnú látku",
+  "Een troebel mengsel van een vaste stof in een vloeistof": "Zakalená zmes pevnej látky v kvapaline",
+  "De lijn waaruit je kunt aflezen wat de fase van een stof is": "Čiara, z ktorej môžeš odčítať fázu látky",
+  "Een stof met een eigen vorm en een eigen volume, bijvoorbeeld steen": "Látka s vlastným tvarom a vlastným objemom, napríklad kameň",
+  "Een afbeelding waar je aan kunt zien waarom een stof gevaarlijk is": "Obrázok, z ktorého môžeš zistiť, prečo je látka nebezpečná",
+  "De faseovergang van vloeistof naar gas": "Fázový prechod z kvapaliny na plyn",
+  "Een eigenschap van een voorwerp zoals de vorm": "Vlastnosť predmetu, ako napríklad tvar",
+  "Een stof zonder eigen vorm, maar met eigen volume, bijvoorbeeld water": "Látka bez vlastného tvaru, ale s vlastným objemom, napríklad voda",
+  "Materie die bestaat uit één stof": "Hmota, ktorá sa skladá z jednej látky",
+  "Het afgieten van de vloeistof (bij suspensies) of de vloeistof met de kleinste dichtheid (bij emulsies)": "Zliatie kvapaliny (pri suspenziách) alebo kvapaliny s najmenšou hustotou (pri emulziách)",
+  "De scheiding van twee stoffen waarbij de stof met de grootste dichtheid naar beneden zakt": "Oddelenie dvoch látok, pri ktorom látka s najväčšou hustotou klesá nadol",
+  "Een stof die ervoor zorgt dat een emulsie gemengd blijft": "Látka, ktorá zabezpečuje, že emulzia zostane zmiešaná",
+  "Een troebel mengsel van een vloeistof in een andere vloeistof": "Zakalená zmes kvapaliny v inej kvapaline",
+
+  // ─── NASK Chapter 4 ───
+  "Diagram dat laat zien welke afstand op elk tijdstip is afgelegd": "Diagram, ktorý ukazuje, aká vzdialenosť bola prejdená v každom čase",
+  "Een beweging waarbij de snelheid op elk moment even groot is": "Pohyb, pri ktorom je rýchlosť v každom okamihu rovnaká",
+  "Grootheid die je berekent met de formule gemiddelde snelheid = afstand ÷ tijdsduur (als de snelheid varieert)": "Veličina, ktorú vypočítaš vzorcom priemerná rýchlosť = dráha ÷ čas (keď sa rýchlosť mení)",
+  "Een korte manier om op te schrijven hoe je iets uitrekent": "Krátky spôsob zápisu výpočtu",
+  "De afstand die je aflegt tijdens de reactietijd": "Vzdialenosť, ktorú prejdeš počas reakčného času",
+  "De tijd tussen zien dat je moet reageren en zelf reageren": "Čas medzi tým, ako uvidíš, že musíš reagovať, a samotnou reakciou",
+  "Grootheid die je berekent met de formule snelheid = afstand ÷ tijdsduur (als de snelheid constant is)": "Veličina, ktorú vypočítaš vzorcom rýchlosť = dráha ÷ čas (keď je rýchlosť konštantná)",
+  "Diagram dat laat zien hoe groot de snelheid is op elk tijdstip": "Diagram, ktorý ukazuje, aká veľká je rýchlosť v každom čase",
+  "Een beweging waarbij de snelheid steeds groter wordt": "Pohyb, pri ktorom sa rýchlosť stále zväčšuje",
+  "Een beweging waarbij de snelheid steeds kleiner wordt": "Pohyb, pri ktorom sa rýchlosť stále zmenšuje",
+
+  // ─── Biology Chapter 4 ───
+  "De vorm van de wervelkolom": "Tvar chrbtice",
+  "Geleiachtige kern omgeven door kraakbeen": "Gélové jadro obklopené chrupavkou",
+  "De manier waarop je staat en zit": "Spôsob, akým stojíš a sedíš",
+  "Kromme rug, kan ontstaan door veel omlaag kijken op beeldschermen": "Ohnutý chrbát, môže vzniknúť častým pozeraním dolu na obrazovky",
+  "Beschadiging aan spieren, botten of gewrichten": "Poškodenie svalov, kostí alebo kĺbov",
+  "Een beschadiging van een spier, oorzaak: te sterke inspanning of een plotselinge beweging": "Poškodenie svalu, príčina: príliš veľká námaha alebo náhly pohyb",
+  "Een bot breekt in twee (of meer) delen": "Kosť sa zlomí na dve (alebo viac) častí",
+  "De delen van het bot in de goede stand brengen, de delen groeien weer aan elkaar": "Dať časti kosti do správnej polohy, časti opäť zrastú",
+  "In het kniegewricht is een meniscus beschadigd, bijv. door een draaibeweging terwijl het onderbeen blijft staan": "V kolennom kĺbe je poškodený meniskus, napr. otáčavým pohybom, keď predkolenie zostáva na mieste",
+  "Beschadiging van weefsel door een val, duw, stomp of trap": "Poškodenie tkaniva pádom, tlačením, úderom alebo kopnutím",
+  "Inwendige bloeding als gevolg van een kneuzing": "Vnútorné krvácanie v dôsledku pomliaždenia",
+  "Ophoping van vocht": "Nahromadenie tekutiny",
+  "Kneuzing van het gewricht; beschadiging van het gewrichtskapsel en de kapselbanden": "Pomliaždenie kĺbu; poškodenie kĺbového puzdra a väzov",
+  "De gewrichtskogel is uit de gewrichtskom geraakt": "Kĺbová hlavica vyskočila z kĺbovej jamky",
+};
+
 import type { VocabItem } from "./vocabulary";
 
 /**
  * Transforms vocabulary items by replacing Dutch words with Slovak translations.
- * Falls back to the original Dutch word if no translation is found.
+ * Also translates NASK/Bio descriptions (french field) when a translation exists.
  */
 export function toSlovak(items: VocabItem[]): VocabItem[] {
   return items.map((item) => ({
     ...item,
     dutch: dutchToSlovak[item.dutch] ?? item.dutch,
+    french: descriptionToSlovak[item.french] ?? item.french,
   }));
 }
