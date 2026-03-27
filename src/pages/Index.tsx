@@ -101,7 +101,7 @@ const Index = () => {
 
   const ALL_SUBJECT_IDS: Language[] = ["french", "english", "nask", "biology"];
 
-  // Fetch disabled subjects (and poll every 30s to catch live changes)
+  // Fetch disabled subjects + realtime subscription for instant updates
   useEffect(() => {
     const fetchDisabled = () => {
       supabase
@@ -113,8 +113,17 @@ const Index = () => {
         });
     };
     fetchDisabled();
-    const interval = setInterval(fetchDisabled, 30000);
-    return () => clearInterval(interval);
+
+    const channel = supabase
+      .channel("admin_settings_changes")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "admin_settings", filter: "key=eq.disabled_subjects" },
+        () => fetchDisabled()
+      )
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
   }, []);
 
   // If language becomes disabled, redirect to first available and kick back to menu
