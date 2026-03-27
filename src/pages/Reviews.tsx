@@ -266,20 +266,22 @@ export default function Reviews() {
       setIsOperator(OPERATOR_EMAILS.includes(session?.user?.email ?? ""));
     });
 
+    const refetchAll = async () => {
+      const [reviewsRes, repliesRes] = await Promise.all([
+        supabase.from("reviews_public" as any).select("id, display_name, rating, message, created_at").order("created_at", { ascending: false }) as any,
+        supabase.from("review_replies" as any).select("*").order("created_at", { ascending: true }) as any,
+      ]);
+      if (reviewsRes.data) setReviews(reviewsRes.data);
+      if (repliesRes.data) setReplies(repliesRes.data);
+    };
+
     const reviewChannel = supabase
       .channel('reviews-realtime')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'reviews' }, (payload) => {
-        setReviews((prev) => [payload.new as Review, ...prev]);
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'reviews' }, () => {
+        refetchAll();
       })
-      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'reviews' }, (payload) => {
-        setReviews((prev) => prev.filter((r) => r.id !== (payload.old as any).id));
-        setReplies((prev) => prev.filter((r) => r.review_id !== (payload.old as any).id));
-      })
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'review_replies' }, (payload) => {
-        setReplies((prev) => [...prev, payload.new as ReviewReply]);
-      })
-      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'review_replies' }, (payload) => {
-        setReplies((prev) => prev.filter((r) => r.id !== (payload.old as any).id));
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'review_replies' }, () => {
+        refetchAll();
       })
       .subscribe();
 
