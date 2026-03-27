@@ -36,14 +36,21 @@ export default function Feedback() {
 
     // Get current user session if logged in
     const { data: { session } } = await supabase.auth.getSession();
+    console.log("SESSION DEBUG:", session?.user?.id, session?.user?.email);
 
-    const { error } = await supabase.from("reviews" as any).insert({
+    const insertData: any = {
       display_name: trimmedName,
       rating,
       message: trimmedMessage,
-      user_id: session?.user?.id ?? null,
-      user_email: session?.user?.email ?? null,
-    } as any);
+    };
+    if (session?.user?.id) {
+      insertData.user_id = session.user.id;
+      insertData.user_email = session.user.email;
+    }
+    console.log("INSERT DATA:", JSON.stringify(insertData));
+
+    const { error, data: insertedData } = await supabase.from("reviews" as any).insert(insertData as any).select() as any;
+    console.log("INSERT RESULT:", JSON.stringify(insertedData), error);
 
     setSubmitting(false);
     if (error) {
