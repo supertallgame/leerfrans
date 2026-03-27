@@ -135,6 +135,8 @@ export type Database = {
           host_name: string
           host_player_id: string | null
           id: string
+          is_public: boolean
+          max_players: number
           num_teams: number
           status: string
           team_emojis: Json
@@ -151,6 +153,8 @@ export type Database = {
           host_name: string
           host_player_id?: string | null
           id?: string
+          is_public?: boolean
+          max_players?: number
           num_teams?: number
           status?: string
           team_emojis?: Json
@@ -167,6 +171,8 @@ export type Database = {
           host_name?: string
           host_player_id?: string | null
           id?: string
+          is_public?: boolean
+          max_players?: number
           num_teams?: number
           status?: string
           team_emojis?: Json
@@ -288,6 +294,7 @@ export type Database = {
           game_mode: string | null
           host_name: string | null
           id: string | null
+          is_public: boolean | null
           num_teams: number | null
           status: string | null
           team_emojis: Json | null
@@ -303,6 +310,7 @@ export type Database = {
           game_mode?: string | null
           host_name?: string | null
           id?: string | null
+          is_public?: boolean | null
           num_teams?: number | null
           status?: string | null
           team_emojis?: Json | null
@@ -318,6 +326,7 @@ export type Database = {
           game_mode?: string | null
           host_name?: string | null
           id?: string | null
+          is_public?: boolean | null
           num_teams?: number | null
           status?: string | null
           team_emojis?: Json | null
@@ -356,23 +365,53 @@ export type Database = {
       }
     }
     Functions: {
-      create_game_room: {
-        Args: {
-          p_code: string
-          p_game_mode?: string
-          p_host_name: string
-          p_num_teams?: number
-          p_team_emojis?: Json
-          p_team_mode?: string
-          p_team_names?: Json
-          p_total_questions?: number
-        }
-        Returns: Json
-      }
+      create_game_room:
+        | {
+            Args: {
+              p_code: string
+              p_game_mode?: string
+              p_host_name: string
+              p_num_teams?: number
+              p_team_emojis?: Json
+              p_team_mode?: string
+              p_team_names?: Json
+              p_total_questions?: number
+            }
+            Returns: Json
+          }
+        | {
+            Args: {
+              p_code: string
+              p_game_mode?: string
+              p_host_name: string
+              p_is_public?: boolean
+              p_max_players?: number
+              p_num_teams?: number
+              p_team_emojis?: Json
+              p_team_mode?: string
+              p_team_names?: Json
+              p_total_questions?: number
+            }
+            Returns: Json
+          }
       get_my_mute_status: {
         Args: never
         Returns: {
           muted_until: string
+        }[]
+      }
+      get_public_rooms: {
+        Args: never
+        Returns: {
+          code: string
+          created_at: string
+          game_mode: string
+          host_name: string
+          id: string
+          max_players: number
+          num_teams: number
+          player_count: number
+          team_mode: string
         }[]
       }
       get_public_setting: { Args: { p_key: string }; Returns: Json }

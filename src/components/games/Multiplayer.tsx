@@ -3,7 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, Users, Copy, Check, Trophy, LogOut, Zap, Clock, Shuffle, UserPlus } from "lucide-react";
+import { ArrowLeft, Users, Copy, Check, Trophy, LogOut, Zap, Clock, Shuffle, UserPlus, Globe, Lock, Search, Dice5 } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -32,7 +34,6 @@ interface Room {
   id: string;
   code: string;
   host_name: string;
-  
   status: string;
   current_question_index: number;
   total_questions: number;
@@ -42,6 +43,19 @@ interface Room {
   num_teams: number;
   team_names: string[];
   team_emojis: string[];
+  is_public?: boolean;
+}
+
+interface PublicRoom {
+  id: string;
+  code: string;
+  host_name: string;
+  game_mode: string;
+  team_mode: string;
+  num_teams: number;
+  player_count: number;
+  max_players: number;
+  created_at: string;
 }
 
 interface Player {
@@ -96,6 +110,11 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
   const [kahootCountdown, setKahootCountdown] = useState<number | null>(null);
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
   const [pendingCorrect, setPendingCorrect] = useState<boolean | null>(null);
+  const [isPublic, setIsPublic] = useState(false);
+  const [publicRooms, setPublicRooms] = useState<PublicRoom[]>([]);
+  const [showPublicRooms, setShowPublicRooms] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [loadingRandom, setLoadingRandom] = useState(false);
 
   const fetchQuestion = useCallback(async (roomId: string, playerId: string, playerToken: string) => {
     const { data } = await supabase.functions.invoke("game-action", {
@@ -274,6 +293,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
         p_num_teams: teams,
         p_team_names: teamNames.slice(0, teams),
         p_team_emojis: teamEmojis.slice(0, teams),
+        p_is_public: isPublic,
       });
 
     if (roomError || !roomData) return toast.error("Kon geen room aanmaken");
@@ -504,6 +524,93 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
       .sort((a, b) => b.total - a.total);
   };
 
+  const fetchPublicRooms = async () => {
+    const { data } = await supabase.rpc("get_public_rooms" as any);
+    if (data) setPublicRooms(data as PublicRoom[]);
+  };
+
+  const randomJoin = async () => {
+    if (!playerName.trim()) return toast.error("Vul eerst je naam in!");
+    setLoadingRandom(true);
+    try {
+      const { data: rooms } = await supabase.rpc("get_public_rooms" as any);
+      const available = (rooms as PublicRoom[] | null)?.filter(r => r.player_count < r.max_players);
+      if (!available || available.length === 0) {
+        return toast.error("Geen openbare kamers beschikbaar!");
+      }
+      const randomRoom = available[Math.floor(Math.random() * available.length)];
+      const { data: playerData } = await supabase
+        .rpc("join_game_room", { p_room_id: randomRoom.id, p_player_name: playerName }) as any;
+
+      // Fetch full room data
+      const { data: roomData } = await (supabase
+        .from("game_rooms_public" as any)
+        .select("*")
+        .eq("id", randomRoom.id)
+        .maybeSingle() as any);
+
+      if (!roomData) return toast.error("Kamer niet meer beschikbaar!");
+
+      setRoom({
+        ...roomData,
+        game_mode: roomData.game_mode || "normal",
+        team_mode: roomData.team_mode || "solo",
+        num_teams: roomData.num_teams || 2,
+        team_names: roomData.team_names || [],
+        team_emojis: roomData.team_emojis || ["🔵", "🔴", "🟢", "🟡"],
+      } as Room);
+      if (roomData.team_emojis?.length > 0) setTeamEmojis(roomData.team_emojis);
+      setMyPlayerId(playerData?.id ?? null);
+      setMyPlayerToken((playerData as any)?.player_token ?? null);
+      setIsHost(false);
+      setPhase("lobby");
+      fetchPlayers(roomData.id);
+      toast.success(`Je bent toegevoegd aan de kamer van ${randomRoom.host_name}!`);
+    } catch {
+      toast.error("Er ging iets mis bij het joinen.");
+    } finally {
+      setLoadingRandom(false);
+    }
+  };
+
+  const joinPublicRoom = async (publicRoom: PublicRoom) => {
+    if (!playerName.trim()) return toast.error("Vul eerst je naam in!");
+    try {
+      const { data: playerData } = await supabase
+        .rpc("join_game_room", { p_room_id: publicRoom.id, p_player_name: playerName }) as any;
+
+      const { data: roomData } = await (supabase
+        .from("game_rooms_public" as any)
+        .select("*")
+        .eq("id", publicRoom.id)
+        .maybeSingle() as any);
+
+      if (!roomData) return toast.error("Kamer niet meer beschikbaar!");
+
+      setRoom({
+        ...roomData,
+        game_mode: roomData.game_mode || "normal",
+        team_mode: roomData.team_mode || "solo",
+        num_teams: roomData.num_teams || 2,
+        team_names: roomData.team_names || [],
+        team_emojis: roomData.team_emojis || ["🔵", "🔴", "🟢", "🟡"],
+      } as Room);
+      if (roomData.team_emojis?.length > 0) setTeamEmojis(roomData.team_emojis);
+      setMyPlayerId(playerData?.id ?? null);
+      setMyPlayerToken((playerData as any)?.player_token ?? null);
+      setIsHost(false);
+      setPhase("lobby");
+      fetchPlayers(roomData.id);
+    } catch {
+      toast.error("Kon niet joinen.");
+    }
+  };
+
+  const filteredPublicRooms = publicRooms.filter(r =>
+    r.host_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    r.code.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   // SETUP PHASE
   if (phase === "setup") {
     return (
@@ -529,8 +636,71 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
               </div>
               <Input placeholder="Code invoeren (bv. ABC12)" value={roomCode} onChange={(e) => setRoomCode(e.target.value.toUpperCase())} className="text-center text-base md:text-lg tracking-widest font-mono" maxLength={5} />
               <Button onClick={joinRoom} variant="outline" className="w-full text-base md:text-lg h-11 md:h-12" size="lg">🚀 Deelnemen</Button>
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div>
+                <div className="relative flex justify-center text-xs uppercase"><span className="bg-card px-2 text-muted-foreground">of</span></div>
+              </div>
+              <Button
+                onClick={randomJoin}
+                variant="secondary"
+                className="w-full text-base md:text-lg h-11 md:h-12 gap-2"
+                size="lg"
+                disabled={loadingRandom}
+              >
+                <Dice5 className="h-5 w-5" />
+                {loadingRandom ? "Zoeken..." : "🎲 Ga willekeurige kamer in"}
+              </Button>
+              <Button
+                onClick={() => { setShowPublicRooms(!showPublicRooms); if (!showPublicRooms) fetchPublicRooms(); }}
+                variant="ghost"
+                className="w-full gap-2 text-muted-foreground"
+              >
+                <Search className="h-4 w-4" /> Openbare kamers zoeken
+              </Button>
             </CardContent>
           </Card>
+
+          {/* Public rooms browser */}
+          {showPublicRooms && (
+            <Card>
+              <CardContent className="p-4 md:p-6 space-y-3">
+                <div className="flex items-center gap-2">
+                  <Search className="h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Zoek op host of code..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="text-sm"
+                  />
+                </div>
+                <Button variant="ghost" size="sm" onClick={fetchPublicRooms} className="w-full text-xs text-muted-foreground">
+                  🔄 Vernieuwen
+                </Button>
+                {filteredPublicRooms.length === 0 ? (
+                  <p className="text-center text-sm text-muted-foreground py-4">Geen openbare kamers gevonden</p>
+                ) : (
+                  <div className="space-y-2 max-h-64 overflow-y-auto">
+                    {filteredPublicRooms.map((r) => (
+                      <div
+                        key={r.id}
+                        className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
+                      >
+                        <div className="min-w-0">
+                          <p className="font-medium text-sm truncate">{r.host_name}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {r.game_mode === "kahoot" ? "🎯 Kahoot" : "⚡ Normaal"} · {r.team_mode === "teams" ? `👥 ${r.num_teams} teams` : "👤 Solo"} · {r.player_count}/{r.max_players} spelers
+                          </p>
+                        </div>
+                        <Button size="sm" onClick={() => joinPublicRoom(r)} className="shrink-0 ml-2">
+                          <UserPlus className="h-4 w-4 mr-1" /> Join
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
     );
@@ -589,6 +759,22 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
             <h1 className="text-2xl md:text-3xl font-bold">Solo of Teams?</h1>
             <p className="text-sm md:text-base text-muted-foreground">Kies hoe je wilt spelen</p>
           </div>
+          {/* Public/Private toggle */}
+          <Card>
+            <CardContent className="p-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                {isPublic ? <Globe className="h-5 w-5 text-primary" /> : <Lock className="h-5 w-5 text-muted-foreground" />}
+                <div>
+                  <p className="font-medium text-sm">{isPublic ? "Openbare kamer" : "Privékamer"}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {isPublic ? "Iedereen kan joinen of zoeken" : "Alleen toegankelijk met code"}
+                  </p>
+                </div>
+              </div>
+              <Switch checked={isPublic} onCheckedChange={setIsPublic} />
+            </CardContent>
+          </Card>
+
           <div className="grid gap-3">
             <Card className="cursor-pointer transition-all hover:shadow-lg hover:-translate-y-1 active:scale-[0.98] border-2 hover:border-primary/50" onClick={() => startWithSettings("solo")}>
               <CardContent className="p-4 md:p-6 flex items-center gap-4">
