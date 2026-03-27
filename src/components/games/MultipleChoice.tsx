@@ -79,7 +79,7 @@ export default function MultipleChoice({ onBack }: Props) {
         <Button variant="ghost" onClick={onBack} className="gap-2 text-sm">
           <ArrowLeft className="h-4 w-4" /> {i.back}
         </Button>
-        <Button variant="outline" size="sm" onClick={() => setShowDutch(!showDutch)} className="text-xs md:text-sm">
+        <Button variant="outline" size="sm" onClick={() => { setShowDutch(!showDutch); setSelected(null); }} className="text-xs md:text-sm">
           {showDutch ? `${(i.nlShort as any)[language]} → ${(i.foreignShort as any)[language]}` : `${(i.foreignShort as any)[language]} → ${(i.nlShort as any)[language]}`}
         </Button>
       </div>
