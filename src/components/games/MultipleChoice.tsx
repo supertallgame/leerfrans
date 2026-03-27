@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { playCorrect, playWrong } from "@/lib/sounds";
-import { shuffle, getForeignLabelNative, getForeignShort, getNlShort, getNlLabel } from "@/data/vocabulary";
+import { shuffle } from "@/data/vocabulary";
 import { useChapter } from "@/contexts/ChapterContext";
 import { useLocale } from "@/contexts/LocaleContext";
 import { t } from "@/lib/i18n";
@@ -80,7 +80,7 @@ export default function MultipleChoice({ onBack }: Props) {
           <ArrowLeft className="h-4 w-4" /> {i.back}
         </Button>
         <Button variant="outline" size="sm" onClick={() => setShowDutch(!showDutch)} className="text-xs md:text-sm">
-          {showDutch ? `${getNlShort(language)} → ${getForeignShort(language)}` : `${getForeignShort(language)} → ${getNlShort(language)}`}
+          {showDutch ? `${(i.nlShort as any)[language]} → ${(i.foreignShort as any)[language]}` : `${(i.foreignShort as any)[language]} → ${(i.nlShort as any)[language]}`}
         </Button>
       </div>
 
@@ -89,7 +89,7 @@ export default function MultipleChoice({ onBack }: Props) {
       <Card className="w-full">
         <CardContent className="p-4 md:p-6 text-center">
           <p className="text-xs uppercase tracking-widest text-muted-foreground mb-1 md:mb-2">
-            {showDutch ? getNlLabel(language) : getForeignLabelNative(language)}
+            {showDutch ? (i.nlLabel as any)[language] : (i.foreignLabelNative as any)[language]}
           </p>
           <p className="text-lg md:text-xl font-semibold">
             {showDutch ? current.dutch : current.french}
