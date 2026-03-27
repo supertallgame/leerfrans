@@ -206,8 +206,8 @@ export default function Reviews() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const [reviewsRes, repliesRes] = await Promise.all([
-        supabase.from("reviews" as any).select("*").order("created_at", { ascending: false }) as any,
+    const [reviewsRes, repliesRes] = await Promise.all([
+        supabase.from("reviews" as any).select("id, display_name, rating, message, created_at").order("created_at", { ascending: false }) as any,
         supabase.from("review_replies" as any).select("*").order("created_at", { ascending: true }) as any,
       ]);
       if (reviewsRes.data) setReviews(reviewsRes.data);
