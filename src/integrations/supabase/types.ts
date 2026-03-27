@@ -184,6 +184,30 @@ export type Database = {
           },
         ]
       }
+      muted_users: {
+        Row: {
+          created_at: string
+          id: string
+          muted_until: string
+          reason: string | null
+          user_email: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          muted_until: string
+          reason?: string | null
+          user_email: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          muted_until?: string
+          reason?: string | null
+          user_email?: string
+        }
+        Relationships: []
+      }
       review_replies: {
         Row: {
           created_at: string
