@@ -29,7 +29,7 @@ export default function Feedback() {
           .from("admin_settings")
           .select("value")
           .eq("key", "block_anonymous_reviews")
-          .single();
+          .maybeSingle();
         if (anonSetting?.value === true) {
           setBlocked(true);
         }
@@ -76,7 +76,7 @@ export default function Feedback() {
         .from("admin_settings")
         .select("value")
         .eq("key", "block_anonymous_reviews")
-        .single();
+        .maybeSingle();
       if (anonSetting?.value === true) {
         setSubmitting(false);
         return toast.error("Reviews plaatsen is tijdelijk uitgeschakeld. Probeer het later opnieuw.");
