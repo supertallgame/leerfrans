@@ -11,6 +11,14 @@ import { containsBannedWord } from "@/lib/censor";
 
 export default function Feedback() {
   const navigate = useNavigate();
+
+  // Sync dark mode from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem("theme");
+    const prefersDark = saved ? saved === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
+    document.documentElement.classList.toggle("dark", prefersDark);
+  }, []);
+
   const [name, setName] = useState("");
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);

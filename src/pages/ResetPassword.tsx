@@ -18,6 +18,13 @@ export default function ResetPassword() {
   const [valid, setValid] = useState<boolean | null>(null);
   const navigate = useNavigate();
 
+  // Sync dark mode from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem("theme");
+    const prefersDark = saved ? saved === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
+    document.documentElement.classList.toggle("dark", prefersDark);
+  }, []);
+
   useEffect(() => {
     // Check if we have a recovery token in the URL hash
     const hash = window.location.hash;
