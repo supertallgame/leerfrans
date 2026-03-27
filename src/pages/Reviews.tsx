@@ -241,6 +241,13 @@ export default function Reviews() {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [replies, setReplies] = useState<ReviewReply[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Sync dark mode from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem("theme");
+    const prefersDark = saved ? saved === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
+    document.documentElement.classList.toggle("dark", prefersDark);
+  }, []);
   const [isOperator, setIsOperator] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleteReplyId, setDeleteReplyId] = useState<string | null>(null);
