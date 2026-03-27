@@ -33,10 +33,16 @@ export default function Feedback() {
     if (bannedInMsg) return toast.error("Je bericht bevat ongepast taalgebruik");
 
     setSubmitting(true);
+
+    // Get current user session if logged in
+    const { data: { session } } = await supabase.auth.getSession();
+
     const { error } = await supabase.from("reviews" as any).insert({
       display_name: trimmedName,
       rating,
       message: trimmedMessage,
+      user_id: session?.user?.id ?? null,
+      user_email: session?.user?.email ?? null,
     } as any);
 
     setSubmitting(false);
