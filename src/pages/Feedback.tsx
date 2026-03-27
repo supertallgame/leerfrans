@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Star, Send } from "lucide-react";
+import { ArrowLeft, Star, Send, VolumeX } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { containsBannedWord } from "@/lib/censor";
@@ -16,6 +16,39 @@ export default function Feedback() {
   const [hoverRating, setHoverRating] = useState(0);
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [mutedUntil, setMutedUntil] = useState<string | null>(null);
+  const [blocked, setBlocked] = useState(false);
+
+  useEffect(() => {
+    const checkStatus = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      // Check if anonymous reviews are blocked and user is not logged in
+      if (!session?.user) {
+        const { data: anonSetting } = await supabase
+          .from("admin_settings")
+          .select("value")
+          .eq("key", "block_anonymous_reviews")
+          .single();
+        if (anonSetting?.value === true) {
+          setBlocked(true);
+        }
+      }
+
+      // Check if user is muted
+      if (session?.user?.email) {
+        const { data: muteData } = await (supabase.from("muted_users" as any) as any)
+          .select("muted_until")
+          .eq("user_email", session.user.email)
+          .gt("muted_until", new Date().toISOString())
+          .limit(1);
+        if (muteData && muteData.length > 0) {
+          setMutedUntil(new Date(muteData[0].muted_until).toLocaleString("nl-NL"));
+        }
+      }
+    };
+    checkStatus();
+  }, []);
 
   const handleSubmit = async () => {
     const trimmedName = name.trim();
@@ -99,8 +132,28 @@ export default function Feedback() {
             Laat anoniem je mening achter over de app
           </p>
         </div>
+        {mutedUntil && (
+          <Card className="border-destructive/30 bg-destructive/5">
+            <CardContent className="p-4 flex items-center gap-3">
+              <VolumeX className="h-5 w-5 text-destructive shrink-0" />
+              <div>
+                <p className="text-sm font-medium text-destructive">Je account is gemute</p>
+                <p className="text-xs text-muted-foreground">Je kunt geen reviews plaatsen tot {mutedUntil}</p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
-        <Card>
+        {blocked && !mutedUntil && (
+          <Card className="border-muted-foreground/20 bg-muted/50">
+            <CardContent className="p-4 text-center">
+              <p className="text-sm font-medium">Reviews plaatsen is tijdelijk uitgeschakeld</p>
+              <p className="text-xs text-muted-foreground mt-1">Probeer het later opnieuw.</p>
+            </CardContent>
+          </Card>
+        )}
+
+        <Card className={mutedUntil || blocked ? "opacity-50 pointer-events-none" : ""}>
           <CardContent className="p-4 md:p-6 space-y-4">
             <div>
               <label className="text-sm font-medium mb-1.5 block">Naam</label>
