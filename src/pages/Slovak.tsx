@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { isSoundEnabled, setSoundEnabled } from "@/lib/sounds";
 import { ChapterProvider, useChapter } from "@/contexts/ChapterContext";
+import { LocaleProvider } from "@/contexts/LocaleContext";
 import { useThemeSync } from "@/hooks/use-theme-sync";
 
 const Flashcards = lazy(() => import("@/components/games/Flashcards"));
@@ -352,9 +353,11 @@ function SlovakContent() {
 }
 
 const Slovak = () => (
-  <ChapterProvider>
-    <SlovakContent />
-  </ChapterProvider>
+  <LocaleProvider value="sk">
+    <ChapterProvider>
+      <SlovakContent />
+    </ChapterProvider>
+  </LocaleProvider>
 );
 
 export default Slovak;
