@@ -275,8 +275,8 @@ function SlovakContent() {
           </DialogHeader>
           <div className="space-y-1.5">
             {([
-              { id: "french" as Language, label: "Francúzština", desc: "Holandčina ↔ Français", flag: <FlagFR className="w-5 h-3.5 rounded-sm" /> },
-              { id: "english" as Language, label: "Angličtina", desc: "Holandčina ↔ English", flag: <FlagEN className="w-5 h-3.5 rounded-sm" /> },
+              { id: "french" as Language, label: "Francúzština", desc: "Slovenčina ↔ Français", flag: <FlagFR className="w-5 h-3.5 rounded-sm" /> },
+              { id: "english" as Language, label: "Angličtina", desc: "Slovenčina ↔ English", flag: <FlagEN className="w-5 h-3.5 rounded-sm" /> },
               { id: "nask" as Language, label: "NASK", desc: "Pojmy a popisy", flag: <FlaskConical className="w-4 h-4" /> },
               { id: "biology" as Language, label: "Biológia", desc: "Pojmy a popisy", flag: <Microscope className="w-4 h-4" /> },
             ]).map((lang) => {
