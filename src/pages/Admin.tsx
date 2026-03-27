@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Shield, Home, FlaskConical, Microscope, Trash2, Star, MessageSquare, Search, Filter, Download, BarChart3, TrendingUp, Users } from "lucide-react";
+import { Shield, Home, FlaskConical, Microscope, Trash2, Star, MessageSquare, Search, Filter, Download, BarChart3, TrendingUp, Users, Mail } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -347,7 +347,7 @@ export default function Admin() {
               {filteredReviews.map((review) => (
                 <div key={review.id} className="flex items-start justify-between gap-3 px-4 py-3 rounded-lg border border-border">
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-medium text-sm">{review.display_name}</span>
                       <div className="flex gap-0.5">
                         {[1, 2, 3, 4, 5].map((s) => (
@@ -356,6 +356,13 @@ export default function Admin() {
                       </div>
                       <span className="text-xs text-muted-foreground">{new Date(review.created_at).toLocaleDateString("nl-NL")}</span>
                     </div>
+                    {review.user_email ? (
+                      <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1">
+                        <Mail className="h-3 w-3" /> {review.user_email}
+                      </p>
+                    ) : (
+                      <p className="text-xs text-muted-foreground/50 mt-0.5 italic">Anoniem (niet ingelogd)</p>
+                    )}
                     <p className="text-sm text-muted-foreground mt-1 truncate">{review.message}</p>
                   </div>
                   <Button
