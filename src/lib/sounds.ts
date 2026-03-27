@@ -53,3 +53,14 @@ export function playHint() {
   beep(880, 0.05, "sine", 0.1);
   setTimeout(() => beep(880, 0.05, "sine", 0.1), 120);
 }
+
+export function playCountdownTick() {
+  beep(440, 0.08, "sine", 0.15); // A4 short tick
+}
+
+export function playCountdownGo() {
+  beep(523, 0.1, "sine", 0.2); // C5
+  setTimeout(() => beep(659, 0.1, "sine", 0.2), 80); // E5
+  setTimeout(() => beep(784, 0.15, "sine", 0.25), 160); // G5
+  setTimeout(() => beep(1047, 0.25, "sine", 0.3), 240); // C6
+}
