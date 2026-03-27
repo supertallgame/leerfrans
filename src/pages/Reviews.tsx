@@ -35,7 +35,7 @@ interface Review {
   created_at: string;
 }
 
-const OPERATOR_EMAILS = ["brankovantland@gmail.com", "branko18vantland@gmail.com"];
+const OPERATOR_EMAILS = ["brankovantland@gmail.com", "branko18vantland@gmail.com", "tamoopdam@gmail.com"];
 
 function Stars({ rating }: { rating: number }) {
   return (
