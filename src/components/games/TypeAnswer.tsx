@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { isAnswerCorrect } from "@/lib/utils";
 import { playCorrect, playWrong } from "@/lib/sounds";
-import { shuffle, getForeignLabel, getForeignShort, getNlShort, getNlLabel } from "@/data/vocabulary";
+import { shuffle, getForeignLabel } from "@/data/vocabulary";
 import { useChapter } from "@/contexts/ChapterContext";
 import { useLocale } from "@/contexts/LocaleContext";
 import { t } from "@/lib/i18n";
@@ -129,7 +129,7 @@ export default function TypeAnswer({ onBack }: Props) {
             </span>
           )}
           <Button variant="outline" size="sm" onClick={() => setShowDutch(!showDutch)} className="text-xs md:text-sm">
-            {showDutch ? `${getNlShort(language)} → ${getForeignShort(language)}` : `${getForeignShort(language)} → ${getNlShort(language)}`}
+            {showDutch ? `${(i.nlShort as any)[language]} → ${(i.foreignShort as any)[language]}` : `${(i.foreignShort as any)[language]} → ${(i.nlShort as any)[language]}`}
           </Button>
         </div>
       </div>
@@ -139,7 +139,7 @@ export default function TypeAnswer({ onBack }: Props) {
       <Card className="w-full">
         <CardContent className="p-4 md:p-6 text-center">
           <p className="text-xs uppercase tracking-widest text-muted-foreground mb-1 md:mb-2">
-            {isNask ? (showDutch ? i.giveDescription : i.whichConcept) : `${i.translateTo} ${showDutch ? getForeignLabel(language) : "Nederlands"}`}
+            {isNask ? (showDutch ? i.giveDescription : i.whichConcept) : `${i.translateTo} ${showDutch ? (i.foreignLabel as any)[language] : "Nederlands"}`}
           </p>
           <p className="text-lg md:text-xl font-semibold">
             {showDutch ? current.dutch : current.french}
