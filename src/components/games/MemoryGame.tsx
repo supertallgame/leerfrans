@@ -135,7 +135,7 @@ export default function MemoryGame({ onBack }: Props) {
 
       <Progress value={(totalMatched / allPairs.length) * 100} className="w-full h-2" />
 
-      <div className="grid grid-cols-3 md:grid-cols-4 gap-2 md:gap-3 w-full auto-rows-fr">
+      <div className="grid grid-cols-3 gap-2 md:grid-cols-4 md:gap-3 w-full auto-rows-fr">
         {cards.map((card) => {
           const isFlipped = flipped.includes(card.id);
           const isMatched = matched.has(card.pairId);
@@ -144,7 +144,7 @@ export default function MemoryGame({ onBack }: Props) {
             <div
               key={card.id}
               onClick={() => handleCardClick(card)}
-              className={`relative cursor-pointer transition-all duration-300 rounded-xl border-2 aspect-square flex items-center justify-center p-2 text-center overflow-hidden ${
+              className={`relative cursor-pointer transition-all duration-300 rounded-xl border-2 aspect-[3/4] flex items-center justify-center p-2 text-center overflow-hidden ${
                 isMatched
                   ? "bg-[hsl(var(--success))]/10 border-[hsl(var(--success))] opacity-60 pointer-events-none"
                   : isFlipped
@@ -156,12 +156,12 @@ export default function MemoryGame({ onBack }: Props) {
             >
               {isFlipped || isMatched ? (
                 <div className="flex flex-col items-center justify-center w-full">
-                  <p className={`text-[8px] md:text-[10px] uppercase tracking-widest mb-0.5 ${
+                  <p className={`text-[9px] md:text-[10px] uppercase tracking-widest mb-0.5 ${
                     card.type === "term" ? "text-primary" : "text-accent"
                   }`}>
                     {card.type === "term" ? "Begrip" : "Omschrijving"}
                   </p>
-                  <p className="text-[10px] md:text-xs font-medium leading-tight line-clamp-4">{card.text}</p>
+                  <p className="text-xs md:text-sm font-medium leading-snug line-clamp-5">{card.text}</p>
                 </div>
               ) : (
                 <p className="text-2xl md:text-3xl">❓</p>
