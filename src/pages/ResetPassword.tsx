@@ -7,6 +7,7 @@ import { Eye, EyeOff, ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { useThemeSync } from "@/hooks/use-theme-sync";
 
 export default function ResetPassword() {
   const [password, setPassword] = useState("");
@@ -17,13 +18,7 @@ export default function ResetPassword() {
   const [done, setDone] = useState(false);
   const [valid, setValid] = useState<boolean | null>(null);
   const navigate = useNavigate();
-
-  // Sync dark mode from localStorage
-  useEffect(() => {
-    const saved = localStorage.getItem("theme");
-    const prefersDark = saved ? saved === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
-    document.documentElement.classList.toggle("dark", prefersDark);
-  }, []);
+  useThemeSync();
 
   useEffect(() => {
     // Check if we have a recovery token in the URL hash

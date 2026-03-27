@@ -8,16 +8,11 @@ import { ArrowLeft, Star, Send, VolumeX } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { containsBannedWord } from "@/lib/censor";
+import { useThemeSync } from "@/hooks/use-theme-sync";
 
 export default function Feedback() {
   const navigate = useNavigate();
-
-  // Sync dark mode from localStorage
-  useEffect(() => {
-    const saved = localStorage.getItem("theme");
-    const prefersDark = saved ? saved === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
-    document.documentElement.classList.toggle("dark", prefersDark);
-  }, []);
+  useThemeSync();
 
   const [name, setName] = useState("");
   const [rating, setRating] = useState(0);
