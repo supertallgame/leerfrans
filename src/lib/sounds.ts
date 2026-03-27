@@ -46,6 +46,10 @@ export function playWrong() {
 }
 
 export function playSkip() {
-  beep(440, 0.08, "triangle", 0.15); // A4 soft blip
-  setTimeout(() => beep(370, 0.12, "triangle", 0.15), 80); // F#4 descending
+  beep(600, 0.06, "sine", 0.08); // gentle short boop
+}
+
+export function playHint() {
+  beep(880, 0.05, "sine", 0.1);
+  setTimeout(() => beep(880, 0.05, "sine", 0.1), 120);
 }
