@@ -91,14 +91,9 @@ function ReplySection({
     const checkMute = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user?.email) {
-        const { data } = await supabase
-          .from("muted_users")
-          .select("muted_until")
-          .eq("user_email", session.user.email)
-          .gt("muted_until", new Date().toISOString())
-          .limit(1);
-        if (data && data.length > 0) {
-          setMutedUntil(new Date(data[0].muted_until).toLocaleString("nl-NL"));
+        const { data } = await supabase.rpc("get_my_mute_status" as any);
+        if (data && (data as any[]).length > 0) {
+          setMutedUntil(new Date((data as any[])[0].muted_until).toLocaleString("nl-NL"));
         } else {
           setMutedUntil(null);
         }
@@ -123,14 +118,10 @@ function ReplySection({
     // Check if user is muted
     const { data: { session } } = await supabase.auth.getSession();
     if (session?.user?.email) {
-      const { data: muteData } = await (supabase.from("muted_users" as any) as any)
-        .select("muted_until")
-        .eq("user_email", session.user.email)
-        .gt("muted_until", new Date().toISOString())
-        .limit(1);
-      if (muteData && muteData.length > 0) {
+      const { data: muteData } = await supabase.rpc("get_my_mute_status" as any);
+      if (muteData && (muteData as any[]).length > 0) {
         setSubmitting(false);
-        const until = new Date(muteData[0].muted_until).toLocaleString("nl-NL");
+        const until = new Date((muteData as any[])[0].muted_until).toLocaleString("nl-NL");
         toast.error(`Je account is gemute tot ${until}`);
         return;
       }

@@ -335,6 +335,12 @@ export type Database = {
         }
         Returns: Json
       }
+      get_my_mute_status: {
+        Args: never
+        Returns: {
+          muted_until: string
+        }[]
+      }
       get_reviews_admin: {
         Args: never
         Returns: {
