@@ -104,11 +104,9 @@ const Index = () => {
   // Fetch disabled subjects
   useEffect(() => {
     supabase
-      .from("admin_settings")
-      .select("value")
-      .eq("key", "disabled_subjects")
-      .single()
+      .rpc("get_public_setting", { p_key: "disabled_subjects" })
       .then(({ data }) => {
+        const value = data;
         if (data?.value && Array.isArray(data.value)) {
           const disabled = data.value as string[];
           setDisabledSubjects(disabled);
