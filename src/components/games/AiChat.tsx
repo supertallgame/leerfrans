@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { ArrowLeft, Send, Bot, User } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useChapter } from "@/contexts/ChapterContext";
+import { useLocale } from "@/contexts/LocaleContext";
+import { t } from "@/lib/i18n";
 
 interface Props {
   onBack: () => void;
@@ -16,22 +18,17 @@ interface Message {
   content: string;
 }
 
-const AI_TITLES: Record<string, string> = {
-  french: "AI Frans Leraar",
-  english: "AI Engels Leraar",
-  nask: "AI NASK Leraar",
-  biology: "AI Biologie Leraar",
-};
-
 export default function AiChat({ onBack }: Props) {
   const { language, activeVocabulary } = useChapter();
+  const locale = useLocale();
+  const i = t(locale);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [started, setStarted] = useState(false);
 
-  const title = AI_TITLES[language] || "AI Leraar";
+  const title = (i.aiTeacherTitle as Record<string, string>)[language] || i.aiTeacher;
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -41,7 +38,6 @@ export default function AiChat({ onBack }: Props) {
     setStarted(true);
     setIsLoading(true);
 
-    // Send vocabulary context to the edge function
     const vocabSample = activeVocabulary.slice(0, 30).map((v) => ({
       dutch: v.dutch,
       french: v.french,
@@ -53,11 +49,11 @@ export default function AiChat({ onBack }: Props) {
       });
 
       if (error) throw error;
-      const reply = data?.reply || "Hallo! Laten we beginnen met oefenen!";
+      const reply = data?.reply || i.fallbackGreeting;
       setMessages([{ role: "assistant", content: reply }]);
     } catch (e) {
       console.error(e);
-      setMessages([{ role: "assistant", content: "Hallo! Laten we beginnen met oefenen!" }]);
+      setMessages([{ role: "assistant", content: i.fallbackGreeting }]);
     }
     setIsLoading(false);
   };
@@ -81,23 +77,29 @@ export default function AiChat({ onBack }: Props) {
       });
 
       if (error) throw error;
-      const reply = data?.reply || "Sorry, er ging iets mis. Probeer het opnieuw!";
+      const reply = data?.reply || i.fallbackReply;
       setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
     } catch (e) {
       console.error(e);
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: "⚠️ Er ging iets mis. Probeer het opnieuw!" },
+        { role: "assistant", content: i.errorReply },
       ]);
     }
     setIsLoading(false);
   };
 
+  const chatDesc = language === "nask"
+    ? (i.aiChatDesc as Record<string, string>).nask
+    : language === "biology"
+    ? (i.aiChatDesc as Record<string, string>).biology
+    : (i.aiChatDesc as Record<string, string>).default;
+
   if (!started) {
     return (
       <div className="max-w-lg mx-auto space-y-6">
         <Button variant="ghost" onClick={onBack} className="gap-2">
-          <ArrowLeft className="h-4 w-4" /> Terug
+          <ArrowLeft className="h-4 w-4" /> {i.back}
         </Button>
         <div className="text-center space-y-4 py-12">
           <div className="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto">
@@ -105,14 +107,10 @@ export default function AiChat({ onBack }: Props) {
           </div>
           <h2 className="text-3xl font-bold">{title}</h2>
           <p className="text-muted-foreground max-w-sm mx-auto">
-          {language === "nask"
-            ? "Chat met een AI-leraar die je NASK begrippen overhoort en uitlegt!"
-            : language === "biology"
-            ? "Chat met een AI-leraar die je biologie begrippen overhoort en uitlegt!"
-            : "Chat met een AI-leraar die je woordjes overhoort. De AI stelt vragen en geeft feedback op je antwoorden!"}
+            {chatDesc}
           </p>
           <Button onClick={startChat} size="lg" className="text-lg h-12">
-            🤖 Start de chat
+            {i.startChat}
           </Button>
         </div>
       </div>
@@ -131,15 +129,15 @@ export default function AiChat({ onBack }: Props) {
           </div>
           <div>
             <h3 className="font-semibold text-sm">{title}</h3>
-            <p className="text-xs text-muted-foreground">Online</p>
+            <p className="text-xs text-muted-foreground">{i.online}</p>
           </div>
         </div>
       </div>
 
       <div className="flex-1 overflow-y-auto py-4 space-y-4">
-        {messages.map((msg, i) => (
+        {messages.map((msg, idx) => (
           <div
-            key={i}
+            key={idx}
             className={`flex gap-2 ${msg.role === "user" ? "justify-end" : "justify-start"}`}
           >
             {msg.role === "assistant" && (
@@ -189,7 +187,7 @@ export default function AiChat({ onBack }: Props) {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-          placeholder="Typ je antwoord..."
+          placeholder={i.typeAnswer}
           disabled={isLoading}
           autoFocus
         />

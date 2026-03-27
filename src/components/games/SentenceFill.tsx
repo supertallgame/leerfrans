@@ -8,19 +8,19 @@ import { Progress } from "@/components/ui/progress";
 import { ArrowLeft, RotateCcw } from "lucide-react";
 import { shuffle, getForeignLabel, getForeignShort } from "@/data/vocabulary";
 import { useChapter } from "@/contexts/ChapterContext";
+import { useLocale } from "@/contexts/LocaleContext";
+import { t } from "@/lib/i18n";
 
 interface Props {
   onBack: () => void;
 }
 
-// Filter only sentences (contain spaces and are longer)
 function isSentence(s: string): boolean {
   return s.includes(" ") && s.length > 15;
 }
 
 function pickMissingWord(sentence: string): { display: string; correctWord: string; wordIndex: number } | null {
   const words = sentence.split(" ");
-  // Pick a meaningful word (skip articles, short words)
   const eligible = words
     .map((w, i) => ({ word: w, index: i }))
     .filter(({ word }) => word.replace(/[.,?!]/g, "").length >= 3);
@@ -34,6 +34,8 @@ function pickMissingWord(sentence: string): { display: string; correctWord: stri
 
 export default function SentenceFill({ onBack }: Props) {
   const { activeVocabulary, language } = useChapter();
+  const locale = useLocale();
+  const i = t(locale);
   const sentences = useMemo(() => {
     const frOnly = activeVocabulary.map((v) => ({
       sentence: v.french,
@@ -66,7 +68,7 @@ export default function SentenceFill({ onBack }: Props) {
   };
 
   const next = () => {
-    setIndex((i) => i + 1);
+    setIndex((idx) => idx + 1);
     setUserInput("");
     setShowResult(false);
   };
@@ -83,15 +85,15 @@ export default function SentenceFill({ onBack }: Props) {
       <div className="max-w-lg mx-auto space-y-6">
         <div className="text-center space-y-4">
           <div className="text-6xl">📝</div>
-          <h2 className="text-3xl font-bold">Klaar!</h2>
+          <h2 className="text-3xl font-bold">{i.done}</h2>
           <p className="text-xl text-muted-foreground">
-            Score: <span className="font-bold text-primary">{score}</span> / {total}
+            {i.score}: <span className="font-bold text-primary">{score}</span> / {total}
           </p>
           <div className="flex gap-3 justify-center">
             <Button onClick={restart} variant="outline" className="gap-2">
-              <RotateCcw className="h-4 w-4" /> Opnieuw
+              <RotateCcw className="h-4 w-4" /> {i.restart}
             </Button>
-            <Button onClick={onBack}>Terug naar menu</Button>
+            <Button onClick={onBack}>{i.backToMenu}</Button>
           </div>
         </div>
       </div>
@@ -112,23 +114,23 @@ export default function SentenceFill({ onBack }: Props) {
     <div className="max-w-lg mx-auto space-y-4 md:space-y-6">
       <div className="flex items-center justify-between">
         <Button variant="ghost" onClick={onBack} className="gap-2 text-sm">
-          <ArrowLeft className="h-4 w-4" /> Terug
+          <ArrowLeft className="h-4 w-4" /> {i.back}
         </Button>
-        <span className="text-xs md:text-sm text-muted-foreground">Score: {score}/{total}</span>
+        <span className="text-xs md:text-sm text-muted-foreground">{i.score}: {score}/{total}</span>
       </div>
 
       <div className="flex items-center justify-between text-xs md:text-sm text-muted-foreground">
-        <span>Zin {index + 1} / {total}</span>
+        <span>{i.sentence} {index + 1} / {total}</span>
         <span>{langLabel}</span>
       </div>
       <Progress value={progress} className="h-2" />
 
       <Card className="border-2">
         <CardContent className="p-4 md:p-6 text-center space-y-2 md:space-y-3">
-          <p className="text-xs text-muted-foreground">Vul het ontbrekende woord in:</p>
+          <p className="text-xs text-muted-foreground">{i.fillMissing}</p>
           <h2 className="text-lg md:text-2xl font-bold leading-relaxed">{puzzle.display}</h2>
           <p className="text-xs md:text-sm text-muted-foreground">
-            Vertaling: <span className="italic">{translationLabel}</span>
+            {i.translation}: <span className="italic">{translationLabel}</span>
           </p>
         </CardContent>
       </Card>
@@ -141,16 +143,16 @@ export default function SentenceFill({ onBack }: Props) {
             if (e.key === "Enter" && !showResult) checkAnswer();
             if (e.key === "Enter" && showResult) next();
           }}
-          placeholder="Typ het ontbrekende woord..."
+          placeholder={i.typeMissingWord}
           className="text-center text-lg"
           disabled={showResult}
           autoFocus
         />
         {!showResult ? (
-          <Button onClick={checkAnswer} disabled={!userInput.trim()}>Check</Button>
+          <Button onClick={checkAnswer} disabled={!userInput.trim()}>{i.check}</Button>
         ) : (
           <Button onClick={next}>
-            {index + 1 >= total ? "🏆 Resultaten" : "Volgende"}
+            {index + 1 >= total ? i.results : i.next}
           </Button>
         )}
       </div>
@@ -161,10 +163,10 @@ export default function SentenceFill({ onBack }: Props) {
           : "border-destructive bg-destructive/5"}>
           <CardContent className="p-4 text-center">
             {isAnswerCorrect(userInput, puzzle.correctWord) ? (
-              <p className="font-semibold text-green-700">✅ Correct!</p>
+              <p className="font-semibold text-green-700">✅ {i.correct}</p>
             ) : (
               <p className="font-semibold text-destructive">
-                ❌ Fout! Het juiste woord was: <span className="font-bold">{puzzle.correctWord}</span>
+                ❌ {i.wrongWord}: <span className="font-bold">{puzzle.correctWord}</span>
               </p>
             )}
           </CardContent>

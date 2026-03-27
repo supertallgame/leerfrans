@@ -3,6 +3,8 @@ import { isAnswerCorrect } from "@/lib/utils";
 import { playCorrect, playWrong } from "@/lib/sounds";
 import { shuffle, getForeignLabel, getForeignShort, getNlShort, getNlLabel } from "@/data/vocabulary";
 import { useChapter } from "@/contexts/ChapterContext";
+import { useLocale } from "@/contexts/LocaleContext";
+import { t } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -17,6 +19,8 @@ interface Props {
 
 export default function TypeAnswer({ onBack }: Props) {
   const { activeVocabulary, language } = useChapter();
+  const locale = useLocale();
+  const i = t(locale);
   const [questions] = useState(() => shuffle(activeVocabulary));
   const [qIndex, setQIndex] = useState(0);
   const [input, setInput] = useState("");
@@ -34,9 +38,7 @@ export default function TypeAnswer({ onBack }: Props) {
     if (!input.trim()) return;
     const answer = showDutch ? current.french : current.dutch;
 
-    // For NASK: use AI to check if the answer is semantically correct
     if (isNask) {
-      // First do a quick exact check
       if (isAnswerCorrect(input, answer)) {
         setResult("correct");
         setScore((s) => s + 1);
@@ -45,7 +47,6 @@ export default function TypeAnswer({ onBack }: Props) {
         return;
       }
 
-      // If not exact, ask AI
       setChecking(true);
       try {
         const term = showDutch ? current.dutch : current.french;
@@ -67,8 +68,7 @@ export default function TypeAnswer({ onBack }: Props) {
         }
       } catch (e) {
         console.error("AI check error:", e);
-        toast.error("AI check mislukt, exacte controle gebruikt");
-        // Fallback to exact match
+        toast.error(i.aiCheckFailed);
         setResult("wrong");
         playWrong();
       } finally {
@@ -77,7 +77,6 @@ export default function TypeAnswer({ onBack }: Props) {
       return;
     }
 
-    // Non-NASK: exact match
     if (isAnswerCorrect(input, answer)) {
       setResult("correct");
       setScore((s) => s + 1);
@@ -92,24 +91,24 @@ export default function TypeAnswer({ onBack }: Props) {
     setResult(null);
     setInput("");
     setAiFeedback(null);
-    setQIndex((i) => i + 1);
+    setQIndex((idx) => idx + 1);
   };
 
   if (finished) {
     return (
       <div className="flex flex-col items-center gap-6 max-w-lg mx-auto">
         <Button variant="ghost" onClick={onBack} className="self-start gap-2">
-          <ArrowLeft className="h-4 w-4" /> Terug
+          <ArrowLeft className="h-4 w-4" /> {i.back}
         </Button>
         <Card className="w-full">
           <CardContent className="flex flex-col items-center p-8 gap-4">
             <p className="text-5xl font-bold">✨</p>
-            <h2 className="text-2xl font-bold">Goed gedaan!</h2>
+            <h2 className="text-2xl font-bold">{i.wellDone}</h2>
             <p className="text-lg">
-              Score: <span className="font-bold text-primary">{score}</span> / {questions.length}
+              {i.score}: <span className="font-bold text-primary">{score}</span> / {questions.length}
             </p>
             <Button onClick={() => { setQIndex(0); setScore(0); setInput(""); setResult(null); setAiFeedback(null); }}>
-              Opnieuw spelen
+              {i.playAgain}
             </Button>
           </CardContent>
         </Card>
@@ -121,7 +120,7 @@ export default function TypeAnswer({ onBack }: Props) {
     <div className="flex flex-col items-center gap-4 md:gap-6 w-full max-w-lg mx-auto">
       <div className="flex items-center justify-between w-full">
         <Button variant="ghost" onClick={onBack} className="gap-2 text-sm">
-          <ArrowLeft className="h-4 w-4" /> Terug
+          <ArrowLeft className="h-4 w-4" /> {i.back}
         </Button>
         <div className="flex items-center gap-2">
           {isNask && (
@@ -140,7 +139,7 @@ export default function TypeAnswer({ onBack }: Props) {
       <Card className="w-full">
         <CardContent className="p-4 md:p-6 text-center">
           <p className="text-xs uppercase tracking-widest text-muted-foreground mb-1 md:mb-2">
-            {isNask ? (showDutch ? "Geef de omschrijving" : "Welk begrip hoort hierbij?") : `Vertaal naar ${showDutch ? getForeignLabel(language) : "Nederlands"}`}
+            {isNask ? (showDutch ? i.giveDescription : i.whichConcept) : `${i.translateTo} ${showDutch ? getForeignLabel(language) : "Nederlands"}`}
           </p>
           <p className="text-lg md:text-xl font-semibold">
             {showDutch ? current.dutch : current.french}
@@ -156,21 +155,21 @@ export default function TypeAnswer({ onBack }: Props) {
             if (e.key === "Enter" && !result && !checking) handleCheck();
             if (e.key === "Enter" && result) handleNext();
           }}
-          placeholder={isNask ? "Typ je omschrijving..." : "Typ je antwoord..."}
+          placeholder={isNask ? i.typeYourDescription : i.typeYourAnswer}
           disabled={!!result || checking}
           className="text-base"
         />
 
         {checking && (
           <div className="flex items-center gap-2 text-muted-foreground text-sm">
-            <Loader2 className="h-4 w-4 animate-spin" /> AI controleert je antwoord...
+            <Loader2 className="h-4 w-4 animate-spin" /> {i.aiChecking}
           </div>
         )}
 
         {result === "correct" && (
           <div className="flex flex-col gap-1">
             <div className="flex items-center gap-2 text-[hsl(var(--success))] font-medium">
-              <Check className="h-5 w-5" /> Correct!
+              <Check className="h-5 w-5" /> {i.correct}
             </div>
             {aiFeedback && (
               <p className="text-sm text-muted-foreground flex items-center gap-1">
@@ -182,7 +181,7 @@ export default function TypeAnswer({ onBack }: Props) {
         {result === "wrong" && (
           <div className="flex flex-col gap-1">
             <div className="flex items-center gap-2 text-destructive font-medium">
-              <X className="h-5 w-5" /> Fout!
+              <X className="h-5 w-5" /> {i.wrong}
             </div>
             {aiFeedback && (
               <p className="text-sm text-muted-foreground flex items-center gap-1">
@@ -190,18 +189,18 @@ export default function TypeAnswer({ onBack }: Props) {
               </p>
             )}
             <p className="text-sm text-muted-foreground">
-              Juiste antwoord: <span className="font-medium text-foreground">{showDutch ? current.french : current.dutch}</span>
+              {i.correctAnswer}: <span className="font-medium text-foreground">{showDutch ? current.french : current.dutch}</span>
             </p>
           </div>
         )}
 
         {!result ? (
           <Button onClick={handleCheck} disabled={!input.trim() || checking}>
-            {checking ? <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Controleren...</> : "Controleer"}
+            {checking ? <><Loader2 className="h-4 w-4 animate-spin mr-2" /> {i.checking}</> : i.check}
           </Button>
         ) : (
           <Button onClick={handleNext}>
-            Volgende <ArrowRight className="h-4 w-4 ml-2" />
+            {i.next} <ArrowRight className="h-4 w-4 ml-2" />
           </Button>
         )}
       </div>

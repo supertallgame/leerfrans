@@ -2,6 +2,8 @@ import { useState, useMemo, useEffect } from "react";
 import { playCorrect, playWrong } from "@/lib/sounds";
 import { shuffle } from "@/data/vocabulary";
 import { useChapter } from "@/contexts/ChapterContext";
+import { useLocale } from "@/contexts/LocaleContext";
+import { t } from "@/lib/i18n";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, RotateCcw } from "lucide-react";
@@ -18,10 +20,12 @@ interface MemoryCard {
   type: "term" | "definition";
 }
 
-const CARDS_PER_ROUND = 6; // 6 pairs = 12 cards
+const CARDS_PER_ROUND = 6;
 
 export default function MemoryGame({ onBack }: Props) {
   const { activeVocabulary } = useChapter();
+  const locale = useLocale();
+  const i = t(locale);
 
   const allPairs = useMemo(() => shuffle(activeVocabulary), [activeVocabulary]);
   const totalRounds = Math.ceil(allPairs.length / CARDS_PER_ROUND);
@@ -32,9 +36,9 @@ export default function MemoryGame({ onBack }: Props) {
     const start = roundIndex * CARDS_PER_ROUND;
     const roundPairs = allPairs.slice(start, start + CARDS_PER_ROUND);
     const memCards: MemoryCard[] = [];
-    roundPairs.forEach((item, i) => {
-      memCards.push({ id: `t-${i}`, pairId: i, text: item.dutch, type: "term" });
-      memCards.push({ id: `d-${i}`, pairId: i, text: item.french, type: "definition" });
+    roundPairs.forEach((item, idx) => {
+      memCards.push({ id: `t-${idx}`, pairId: idx, text: item.dutch, type: "term" });
+      memCards.push({ id: `d-${idx}`, pairId: idx, text: item.french, type: "definition" });
     });
     return shuffle(memCards);
   }, [roundIndex, allPairs, resetKey]);
@@ -99,21 +103,20 @@ export default function MemoryGame({ onBack }: Props) {
     return (
       <div className="flex flex-col items-center gap-6 max-w-lg mx-auto">
         <Button variant="ghost" onClick={onBack} className="self-start gap-2">
-          <ArrowLeft className="h-4 w-4" /> Terug
+          <ArrowLeft className="h-4 w-4" /> {i.back}
         </Button>
         <Card className="w-full">
           <CardContent className="flex flex-col items-center p-8 gap-4">
             <p className="text-5xl font-bold">🧠</p>
-            <h2 className="text-2xl font-bold">Geweldig!</h2>
+            <h2 className="text-2xl font-bold">{i.great}</h2>
             <p className="text-lg">
-              Alle <span className="font-bold text-primary">{allPairs.length}</span> paren gevonden in{" "}
-              <span className="font-bold text-primary">{moves}</span> zetten
+              {i.pairsFoundIn.replace("{count}", String(allPairs.length)).replace("{moves}", String(moves))}
             </p>
             <div className="flex gap-3">
               <Button onClick={restart} variant="outline" className="gap-2">
-                <RotateCcw className="h-4 w-4" /> Opnieuw
+                <RotateCcw className="h-4 w-4" /> {i.restart}
               </Button>
-              <Button onClick={onBack}>Terug naar menu</Button>
+              <Button onClick={onBack}>{i.backToMenu}</Button>
             </div>
           </CardContent>
         </Card>
@@ -125,11 +128,11 @@ export default function MemoryGame({ onBack }: Props) {
     <div className="flex h-[100dvh] max-h-[100dvh] flex-col items-center gap-1.5 overflow-hidden overscroll-none w-full max-w-2xl mx-auto fixed inset-0 z-50 bg-background p-2 pb-1 md:h-auto md:max-h-none md:gap-5 md:static md:relative md:inset-auto md:z-auto md:bg-transparent md:p-0 md:overflow-visible">
       <div className="flex items-center justify-between w-full">
         <Button variant="ghost" onClick={onBack} className="gap-2 text-sm">
-          <ArrowLeft className="h-4 w-4" /> Terug
+          <ArrowLeft className="h-4 w-4" /> {i.back}
         </Button>
         <div className="flex items-center gap-3 text-xs md:text-sm text-muted-foreground">
-          <span>Ronde {roundIndex + 1}/{totalRounds}</span>
-          <span>Zetten: {moves}</span>
+          <span>{i.round} {roundIndex + 1}/{totalRounds}</span>
+          <span>{i.moves}: {moves}</span>
         </div>
       </div>
 
@@ -159,7 +162,7 @@ export default function MemoryGame({ onBack }: Props) {
                   <p className={`text-[9px] md:text-[10px] uppercase tracking-widest font-bold mb-0.5 ${
                     card.type === "term" ? "text-primary" : "text-accent"
                   }`}>
-                    {card.type === "term" ? "Begrip" : "Omschrijving"}
+                    {card.type === "term" ? i.concept : i.description}
                   </p>
                <p className="text-[11px] md:text-sm font-medium leading-tight">{card.text}</p>
                 </div>
@@ -177,10 +180,10 @@ export default function MemoryGame({ onBack }: Props) {
           : "w-full border-destructive bg-destructive/5"}>
           <CardContent className="p-3 flex items-center justify-between">
             <p className={`text-sm font-medium ${lastResult.isMatch ? "text-[hsl(var(--success))]" : "text-destructive"}`}>
-              {lastResult.isMatch ? "✅ Match gevonden! Lees de kaarten goed." : "❌ Geen match. Probeer te onthouden!"}
+              {lastResult.isMatch ? i.matchFound : i.noMatch}
             </p>
             <Button size="sm" onClick={handleDismiss}>
-              Volgende
+              {i.next}
             </Button>
           </CardContent>
         </Card>
@@ -188,7 +191,7 @@ export default function MemoryGame({ onBack }: Props) {
 
       {roundComplete && !allComplete && (
         <Button onClick={nextRound} className="w-full gap-2">
-          Volgende ronde <span>→</span>
+          {i.nextRound} <span>→</span>
         </Button>
       )}
     </div>
