@@ -122,7 +122,7 @@ export default function MemoryGame({ onBack }: Props) {
   }
 
   return (
-    <div className="flex flex-col items-center gap-4 md:gap-5 w-full max-w-2xl mx-auto">
+    <div className="flex flex-col items-center gap-3 md:gap-5 w-full max-w-2xl mx-auto fixed inset-0 z-50 bg-background p-3 md:static md:relative md:inset-auto md:z-auto md:bg-transparent md:p-0 overflow-y-auto">
       <div className="flex items-center justify-between w-full">
         <Button variant="ghost" onClick={onBack} className="gap-2 text-sm">
           <ArrowLeft className="h-4 w-4" /> Terug
