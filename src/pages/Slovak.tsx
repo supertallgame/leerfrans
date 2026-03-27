@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { isSoundEnabled, setSoundEnabled } from "@/lib/sounds";
 import { ChapterProvider, useChapter } from "@/contexts/ChapterContext";
+import { useThemeSync } from "@/hooks/use-theme-sync";
 
 const Flashcards = lazy(() => import("@/components/games/Flashcards"));
 const MultipleChoice = lazy(() => import("@/components/games/MultipleChoice"));
