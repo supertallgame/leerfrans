@@ -37,6 +37,19 @@ export default function Feedback() {
     // Get current user session if logged in
     const { data: { session } } = await supabase.auth.getSession();
 
+    // Check if anonymous reviews are blocked
+    if (!session?.user) {
+      const { data: anonSetting } = await supabase
+        .from("admin_settings")
+        .select("value")
+        .eq("key", "block_anonymous_reviews")
+        .single();
+      if (anonSetting?.value === true) {
+        setSubmitting(false);
+        return toast.error("Reviews plaatsen is tijdelijk uitgeschakeld. Probeer het later opnieuw.");
+      }
+    }
+
     // Check if user is muted
     if (session?.user?.email) {
       const { data: muteData } = await (supabase.from("muted_users" as any) as any)
