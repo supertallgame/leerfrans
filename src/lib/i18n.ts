@@ -152,6 +152,12 @@ export const translations = {
     typeBoneName: "Napíš názov kosti...",
     skip: "Preskočiť",
     skeleton: "Ľudská kostra",
+    // Language labels
+    nlLabel: { french: "Holandčina", english: "Holandčina", nask: "Pojem", biology: "Pojem" },
+    foreignLabel: { french: "Francúzština", english: "Angličtina", nask: "Popis", biology: "Popis" },
+    foreignLabelNative: { french: "Français", english: "English", nask: "Popis", biology: "Popis" },
+    nlShort: { french: "NL", english: "NL", nask: "Pojem", biology: "Pojem" },
+    foreignShort: { french: "FR", english: "EN", nask: "Popis", biology: "Popis" },
   },
 } as const;
 
