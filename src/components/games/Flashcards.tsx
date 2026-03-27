@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { shuffle, VocabItem, getForeignLabel, getForeignLabelNative, getNlLabel, getForeignShort, getNlShort } from "@/data/vocabulary";
+import { shuffle, VocabItem } from "@/data/vocabulary";
 import { useChapter } from "@/contexts/ChapterContext";
 import { useLocale } from "@/contexts/LocaleContext";
 import { t } from "@/lib/i18n";
@@ -45,7 +45,7 @@ export default function Flashcards({ onBack }: Props) {
           className="text-xs md:text-sm"
         >
           <Eye className="h-4 w-4 mr-1 md:mr-2" />
-          {showDutch ? `${getNlShort(language)} → ${getForeignShort(language)}` : `${getForeignShort(language)} → ${getNlShort(language)}`}
+          {showDutch ? `${(i.nlShort as any)[language]} → ${(i.foreignShort as any)[language]}` : `${(i.foreignShort as any)[language]} → ${(i.nlShort as any)[language]}`}
         </Button>
       </div>
 
@@ -59,7 +59,7 @@ export default function Flashcards({ onBack }: Props) {
       >
         <CardContent className="flex flex-col items-center justify-center p-6 md:p-8 text-center">
           <p className="text-xs uppercase tracking-widest text-muted-foreground mb-2 md:mb-3">
-            {!flipped ? (showDutch ? getNlLabel(language) : getForeignLabelNative(language)) : (showDutch ? getForeignLabelNative(language) : getNlLabel(language))}
+            {!flipped ? (showDutch ? (i.nlLabel as any)[language] : (i.foreignLabelNative as any)[language]) : (showDutch ? (i.foreignLabelNative as any)[language] : (i.nlLabel as any)[language])}
           </p>
           <p className="text-xl md:text-2xl font-semibold">
             {!flipped

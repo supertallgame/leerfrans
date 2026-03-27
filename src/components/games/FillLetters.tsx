@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { ArrowLeft, RotateCcw } from "lucide-react";
-import { shuffle, VocabItem, getForeignLabel, getForeignShort, getNlShort } from "@/data/vocabulary";
+import { shuffle, VocabItem } from "@/data/vocabulary";
 import { useChapter } from "@/contexts/ChapterContext";
 import { useLocale } from "@/contexts/LocaleContext";
 import { t } from "@/lib/i18n";
@@ -46,8 +46,8 @@ export default function FillLetters({ onBack }: Props) {
   const { activeVocabulary, language } = useChapter();
   const locale = useLocale();
   const i = t(locale);
-  const foreignShort = getForeignShort(language);
-  const nlShort = getNlShort(language);
+  const foreignShort = (i.foreignShort as any)[language];
+  const nlShort = (i.nlShort as any)[language];
   const words = useMemo(() => {
     const singles = activeVocabulary.filter((v) => isSingleWord(v.french));
     return shuffle(singles);

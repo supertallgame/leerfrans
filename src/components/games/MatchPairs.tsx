@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { shuffle, getForeignLabelNative, getNlLabel } from "@/data/vocabulary";
+import { shuffle } from "@/data/vocabulary";
 import { useChapter } from "@/contexts/ChapterContext";
 import { useLocale } from "@/contexts/LocaleContext";
 import { t } from "@/lib/i18n";
@@ -114,8 +114,8 @@ export default function MatchPairs({ onBack }: Props) {
 
       <div className={`w-full transition-all duration-300 ${advancing ? "opacity-0 scale-95" : "opacity-100 scale-100"}`}>
         <div className="grid grid-cols-[2fr_3fr] gap-2 md:gap-4 mb-2">
-          <p className="text-[10px] md:text-xs uppercase tracking-widest text-muted-foreground text-center">{getNlLabel(language)}</p>
-          <p className="text-[10px] md:text-xs uppercase tracking-widest text-muted-foreground text-center">{getForeignLabelNative(language)}</p>
+          <p className="text-[10px] md:text-xs uppercase tracking-widest text-muted-foreground text-center">{(i.nlLabel as any)[language]}</p>
+          <p className="text-[10px] md:text-xs uppercase tracking-widest text-muted-foreground text-center">{(i.foreignLabelNative as any)[language]}</p>
         </div>
         <div className="flex flex-col gap-1.5 md:gap-2">
           {leftItems.map((leftItem, idx) => {
