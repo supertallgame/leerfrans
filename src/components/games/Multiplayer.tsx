@@ -322,10 +322,10 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
       .from("game_rooms_public" as any)
       .select("id, code, host_name, status, current_question_index, total_questions, direction, game_mode, team_mode, num_teams, team_names, team_emojis")
       .eq("code", roomCode.toUpperCase().trim())
-      .single() as any);
+      .eq("status", "waiting")
+      .maybeSingle() as any);
 
-    if (error || !roomData) return toast.error("Room niet gevonden!");
-    if (roomData.status !== "waiting") return toast.error("Dit spel is al begonnen!");
+    if (error || !roomData) return toast.error("Room niet gevonden! Controleer de code en probeer opnieuw.");
 
     const { data: playerData } = await supabase
       .rpc("join_game_room", { p_room_id: roomData.id, p_player_name: playerName }) as any;
