@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { containsBannedWord } from "@/lib/censor";
 
 interface ReviewReply {
   id: string;
@@ -89,6 +90,10 @@ function ReplySection({
   const handleSubmit = async () => {
     if (!name.trim() || !message.trim()) {
       toast.error("Vul je naam en bericht in");
+      return;
+    }
+    if (containsBannedWord(name.trim()) || containsBannedWord(message.trim())) {
+      toast.error("Je bericht bevat ongepast taalgebruik");
       return;
     }
     setSubmitting(true);
