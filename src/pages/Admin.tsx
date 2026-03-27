@@ -308,7 +308,23 @@ export default function Admin() {
           </div>
         </div>
 
-        {/* Statistieken */}
+        {/* Anonieme reviews blokkeren */}
+        <div className="rounded-2xl border border-border bg-card p-6 space-y-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-semibold flex items-center gap-2">
+                <Shield className="h-5 w-5" /> Anonieme reviews
+              </h2>
+              <p className="text-sm text-muted-foreground mt-1">
+                {blockAnonymous
+                  ? "Anonieme reviews zijn momenteel geblokkeerd. Alleen ingelogde gebruikers kunnen reviews plaatsen."
+                  : "Iedereen kan reviews plaatsen, ook zonder account."}
+              </p>
+            </div>
+            <Switch checked={!blockAnonymous} onCheckedChange={toggleBlockAnonymous} />
+          </div>
+        </div>
+
         <div className="rounded-2xl border border-border bg-card p-6 space-y-4">
           <h2 className="text-lg font-semibold flex items-center gap-2">
             <BarChart3 className="h-5 w-5" /> Review statistieken
