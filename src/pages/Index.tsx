@@ -101,30 +101,32 @@ const Index = () => {
 
   const ALL_SUBJECT_IDS: Language[] = ["french", "english", "nask", "biology"];
 
-  // Fetch disabled subjects
+  // Fetch disabled subjects (and poll every 30s to catch live changes)
   useEffect(() => {
-    supabase
-      .rpc("get_public_setting", { p_key: "disabled_subjects" })
-      .then(({ data }) => {
-        if (data && Array.isArray(data)) {
-          const disabled = data as string[];
-          setDisabledSubjects(disabled);
-          if (disabled.includes(language)) {
-            const available = ALL_SUBJECT_IDS.filter((id) => !disabled.includes(id));
-            if (available.length > 0) {
-              setLanguage(available[0]);
-            }
+    const fetchDisabled = () => {
+      supabase
+        .rpc("get_public_setting", { p_key: "disabled_subjects" })
+        .then(({ data }) => {
+          if (data && Array.isArray(data)) {
+            setDisabledSubjects(data as string[]);
           }
-        }
-      });
+        });
+    };
+    fetchDisabled();
+    const interval = setInterval(fetchDisabled, 30000);
+    return () => clearInterval(interval);
   }, []);
 
-  // If language becomes disabled, redirect to first available
+  // If language becomes disabled, redirect to first available and kick back to menu
   useEffect(() => {
     if (disabledSubjects.includes(language)) {
       const available = ALL_SUBJECT_IDS.filter((id) => !disabledSubjects.includes(id));
       if (available.length > 0) {
         setLanguage(available[0]);
+      }
+      if (activeGame !== "menu") {
+        setActiveGame("menu");
+        toast.info("Dit vak is momenteel uitgeschakeld door de beheerder.");
       }
     }
   }, [disabledSubjects, language]);
