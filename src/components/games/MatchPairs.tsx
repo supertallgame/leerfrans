@@ -106,36 +106,37 @@ export default function MatchPairs({ onBack }: Props) {
 
       <Progress value={(totalMatched / allWords.length) * 100} className="w-full h-2" />
 
-      <div className="grid grid-cols-[2fr_3fr] gap-2 md:gap-4 w-full items-start">
-        <div className="flex flex-col gap-1.5 md:gap-2">
-          <p className="text-[10px] md:text-xs uppercase tracking-widest text-muted-foreground text-center mb-0.5 md:mb-1">{getNlLabel(language)}</p>
-          {leftItems.map((item) => (
-            <Button
-              key={item.id}
-              variant={matched.has(item.pairId) ? "default" : selectedLeft === item.pairId ? "secondary" : "outline"}
-              className={`h-auto py-2 md:py-3 whitespace-normal text-[11px] md:text-sm leading-snug ${
-                matched.has(item.pairId) ? "opacity-50 pointer-events-none bg-[hsl(var(--success))] text-[hsl(var(--success-foreground))]" : ""
-              }`}
-              onClick={() => handleLeftClick(item.pairId)}
-            >
-              {item.text}
-            </Button>
-          ))}
+      <div className="w-full">
+        <div className="grid grid-cols-[2fr_3fr] gap-2 md:gap-4 mb-2">
+          <p className="text-[10px] md:text-xs uppercase tracking-widest text-muted-foreground text-center">{getNlLabel(language)}</p>
+          <p className="text-[10px] md:text-xs uppercase tracking-widest text-muted-foreground text-center">{getForeignLabelNative(language)}</p>
         </div>
         <div className="flex flex-col gap-1.5 md:gap-2">
-          <p className="text-[10px] md:text-xs uppercase tracking-widest text-muted-foreground text-center mb-0.5 md:mb-1">{getForeignLabelNative(language)}</p>
-          {rightItems.map((item) => (
-            <Button
-              key={item.id}
-              variant={matched.has(item.pairId) ? "default" : wrong === item.id ? "destructive" : "outline"}
-              className={`h-auto py-2 md:py-3 whitespace-normal text-[11px] md:text-sm leading-snug text-left ${
-                matched.has(item.pairId) ? "opacity-50 pointer-events-none bg-[hsl(var(--success))] text-[hsl(var(--success-foreground))]" : ""
-              }`}
-              onClick={() => handleRightClick(item.pairId, item.id)}
-            >
-              {item.text}
-            </Button>
-          ))}
+          {leftItems.map((leftItem, i) => {
+            const rightItem = rightItems[i];
+            return (
+              <div key={i} className="grid grid-cols-[2fr_3fr] gap-2 md:gap-4">
+                <Button
+                  variant={matched.has(leftItem.pairId) ? "default" : selectedLeft === leftItem.pairId ? "secondary" : "outline"}
+                  className={`h-full py-2 md:py-3 whitespace-normal text-[11px] md:text-sm leading-snug ${
+                    matched.has(leftItem.pairId) ? "opacity-50 pointer-events-none bg-[hsl(var(--success))] text-[hsl(var(--success-foreground))]" : ""
+                  }`}
+                  onClick={() => handleLeftClick(leftItem.pairId)}
+                >
+                  {leftItem.text}
+                </Button>
+                <Button
+                  variant={matched.has(rightItem.pairId) ? "default" : wrong === rightItem.id ? "destructive" : "outline"}
+                  className={`h-full py-2 md:py-3 whitespace-normal text-[11px] md:text-sm leading-snug text-left justify-start ${
+                    matched.has(rightItem.pairId) ? "opacity-50 pointer-events-none bg-[hsl(var(--success))] text-[hsl(var(--success-foreground))]" : ""
+                  }`}
+                  onClick={() => handleRightClick(rightItem.pairId, rightItem.id)}
+                >
+                  {rightItem.text}
+                </Button>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>
