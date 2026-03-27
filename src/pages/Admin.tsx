@@ -79,6 +79,7 @@ export default function Admin() {
   const [muteEmail, setMuteEmail] = useState("");
   const [muteDuration, setMuteDuration] = useState("1h");
   const [muteReason, setMuteReason] = useState("");
+  const [blockAnonymous, setBlockAnonymous] = useState(false);
 
   useEffect(() => {
     checkAdmin();
@@ -93,13 +94,17 @@ export default function Admin() {
     }
     setIsAdmin(true);
     // Load disabled subjects + reviews in parallel
-    const [settingsRes, reviewsRes, mutesRes] = await Promise.all([
+    const [settingsRes, anonRes, reviewsRes, mutesRes] = await Promise.all([
       supabase.from("admin_settings").select("value").eq("key", "disabled_subjects").single(),
+      supabase.from("admin_settings").select("value").eq("key", "block_anonymous_reviews").single(),
       supabase.rpc("get_reviews_admin" as any),
       supabase.from("muted_users" as any).select("*").order("created_at", { ascending: false }) as any,
     ]);
     if (settingsRes.data?.value) {
       setDisabledSubjects(settingsRes.data.value as string[]);
+    }
+    if (anonRes.data?.value) {
+      setBlockAnonymous(anonRes.data.value === true);
     }
     if (reviewsRes.data) {
       setReviews(reviewsRes.data);
@@ -108,6 +113,20 @@ export default function Admin() {
       setMutedUsers(mutesRes.data);
     }
     setLoading(false);
+  };
+
+  const toggleBlockAnonymous = async () => {
+    const newValue = !blockAnonymous;
+    // Upsert the setting
+    const { error } = await supabase
+      .from("admin_settings")
+      .upsert({ key: "block_anonymous_reviews", value: newValue as any, updated_at: new Date().toISOString() } as any, { onConflict: "key" });
+    if (error) {
+      toast.error("Kon instelling niet opslaan");
+      return;
+    }
+    setBlockAnonymous(newValue);
+    toast.success(newValue ? "Anonieme reviews geblokkeerd" : "Anonieme reviews weer toegestaan");
   };
 
   const handleMuteUser = async () => {
