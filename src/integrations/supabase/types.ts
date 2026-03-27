@@ -375,6 +375,7 @@ export type Database = {
           muted_until: string
         }[]
       }
+      get_public_setting: { Args: { p_key: string }; Returns: Json }
       get_reviews_admin: {
         Args: never
         Returns: {
