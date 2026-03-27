@@ -151,6 +151,6 @@ export const translations = {
 
 export type Translations = typeof translations.nl;
 
-export function t(locale: Locale): Translations {
+export function t(locale: Locale): typeof translations[Locale] {
   return translations[locale];
 }
