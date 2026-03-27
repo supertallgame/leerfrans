@@ -133,11 +133,7 @@ function SlovakContent() {
 
   const chaptersForLanguage = getChaptersForLanguage(language);
 
-  useEffect(() => {
-    const saved = localStorage.getItem("theme");
-    const prefersDark = saved ? saved === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
-    document.documentElement.classList.toggle("dark", prefersDark);
-  }, []);
+  useThemeSync();
 
   const toggleSound = (checked: boolean) => {
     setSoundOn(checked);
