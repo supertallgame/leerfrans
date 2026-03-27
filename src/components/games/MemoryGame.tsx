@@ -144,7 +144,7 @@ export default function MemoryGame({ onBack }: Props) {
             <div
               key={card.id}
               onClick={() => handleCardClick(card)}
-              className={`relative cursor-pointer transition-all duration-300 rounded-xl border-2 aspect-[3/4] flex items-center justify-center p-2 text-center overflow-hidden ${
+                className={`relative cursor-pointer transition-all duration-300 rounded-xl border-2 aspect-[4/5] md:aspect-[3/4] flex items-center justify-center p-2 text-center overflow-hidden ${
                 isMatched
                   ? "bg-[hsl(var(--success))]/10 border-[hsl(var(--success))] opacity-60 pointer-events-none"
                   : isFlipped
