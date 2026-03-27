@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, Star, Send } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { containsBannedWord } from "@/lib/censor";
 
 export default function Feedback() {
   const navigate = useNavigate();
@@ -25,6 +26,11 @@ export default function Feedback() {
     if (rating < 1 || rating > 5) return toast.error("Kies een beoordeling (1-5 sterren)");
     if (!trimmedMessage) return toast.error("Schrijf een bericht!");
     if (trimmedMessage.length > 500) return toast.error("Bericht mag maximaal 500 tekens zijn");
+
+    const bannedInName = containsBannedWord(trimmedName);
+    if (bannedInName) return toast.error("Je naam bevat ongepast taalgebruik");
+    const bannedInMsg = containsBannedWord(trimmedMessage);
+    if (bannedInMsg) return toast.error("Je bericht bevat ongepast taalgebruik");
 
     setSubmitting(true);
     const { error } = await supabase.from("reviews" as any).insert({
