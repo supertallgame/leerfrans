@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useThemeSync } from "@/hooks/use-theme-sync";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -242,12 +243,7 @@ export default function Reviews() {
   const [replies, setReplies] = useState<ReviewReply[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Sync dark mode from localStorage
-  useEffect(() => {
-    const saved = localStorage.getItem("theme");
-    const prefersDark = saved ? saved === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
-    document.documentElement.classList.toggle("dark", prefersDark);
-  }, []);
+  useThemeSync();
   const [isOperator, setIsOperator] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleteReplyId, setDeleteReplyId] = useState<string | null>(null);

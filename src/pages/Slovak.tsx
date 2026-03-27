@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { isSoundEnabled, setSoundEnabled } from "@/lib/sounds";
 import { ChapterProvider, useChapter } from "@/contexts/ChapterContext";
+import { useThemeSync } from "@/hooks/use-theme-sync";
 
 const Flashcards = lazy(() => import("@/components/games/Flashcards"));
 const MultipleChoice = lazy(() => import("@/components/games/MultipleChoice"));
@@ -132,11 +133,7 @@ function SlovakContent() {
 
   const chaptersForLanguage = getChaptersForLanguage(language);
 
-  useEffect(() => {
-    const saved = localStorage.getItem("theme");
-    const prefersDark = saved ? saved === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
-    document.documentElement.classList.toggle("dark", prefersDark);
-  }, []);
+  useThemeSync();
 
   const toggleSound = (checked: boolean) => {
     setSoundOn(checked);
