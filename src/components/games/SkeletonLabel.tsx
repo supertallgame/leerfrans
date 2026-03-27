@@ -2,8 +2,8 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowLeft, Check, X, RotateCcw, ZoomOut } from "lucide-react";
-import { playCorrect, playWrong, playSkip } from "@/lib/sounds";
+import { ArrowLeft, Check, X, RotateCcw, ZoomOut, Lightbulb } from "lucide-react";
+import { playCorrect, playWrong, playSkip, playHint } from "@/lib/sounds";
 import skeletonImg from "@/assets/skeleton.png";
 
 interface Props {
@@ -53,6 +53,7 @@ export default function SkeletonLabel({ onBack }: Props) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [inputValue, setInputValue] = useState("");
   const [finished, setFinished] = useState(false);
+  const [hint, setHint] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -83,6 +84,7 @@ export default function SkeletonLabel({ onBack }: Props) {
     else playWrong();
 
     setInputValue("");
+    setHint("");
 
     if (currentIndex + 1 >= total) {
       setTimeout(() => {
@@ -99,10 +101,21 @@ export default function SkeletonLabel({ onBack }: Props) {
     setResults((prev) => ({ ...prev, [currentBone.id]: false }));
     playSkip();
     setInputValue("");
+    setHint("");
     if (currentIndex + 1 >= total) {
       setTimeout(() => setFinished(true), 600);
     } else {
       setTimeout(() => setCurrentIndex((i) => i + 1), 600);
+    }
+  };
+
+  const handleHint = () => {
+    if (!currentBone) return;
+    const name = currentBone.name;
+    const revealed = hint.length + 1;
+    if (revealed <= name.length) {
+      setHint(name.slice(0, revealed));
+      playHint();
     }
   };
 
@@ -111,6 +124,7 @@ export default function SkeletonLabel({ onBack }: Props) {
     setResults({});
     setCurrentIndex(0);
     setInputValue("");
+    setHint("");
     setFinished(false);
   };
 
@@ -186,9 +200,17 @@ export default function SkeletonLabel({ onBack }: Props) {
             <Check className="h-4 w-4" />
           </Button>
             <Button variant="outline" size="sm" onClick={handleSkip} className="text-muted-foreground gap-1">
-              <X className="h-4 w-4" /> Weet ik niet
+              <X className="h-4 w-4" /> Skip
+            </Button>
+            <Button variant="outline" size="sm" onClick={handleHint} className="text-muted-foreground gap-1">
+              <Lightbulb className="h-4 w-4" /> Hint
             </Button>
           </div>
+          {hint && (
+            <p className="text-sm text-muted-foreground">
+              Hint: <span className="font-mono font-bold text-primary">{hint}</span>{"_".repeat(Math.max(0, (currentBone?.name.length ?? 0) - hint.length))}
+            </p>
+          )}
         </div>
       )}
 
