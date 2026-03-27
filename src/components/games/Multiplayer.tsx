@@ -20,7 +20,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { shuffle } from "@/data/vocabulary";
 import { useChapter } from "@/contexts/ChapterContext";
 import { toast } from "sonner";
-import { playCorrect, playWrong } from "@/lib/sounds";
+import { playCorrect, playWrong, playCountdownTick, playCountdownGo } from "@/lib/sounds";
 
 interface MultiplayerProps {
   onBack: () => void;
