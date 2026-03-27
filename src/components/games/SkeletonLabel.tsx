@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, Check, X, RotateCcw, ZoomOut } from "lucide-react";
-import { playCorrect, playWrong } from "@/lib/sounds";
+import { playCorrect, playWrong, playSkip } from "@/lib/sounds";
 import skeletonImg from "@/assets/skeleton.png";
 
 interface Props {
@@ -97,7 +97,7 @@ export default function SkeletonLabel({ onBack }: Props) {
     if (!currentBone) return;
     setAnswers((prev) => ({ ...prev, [currentBone.id]: "—" }));
     setResults((prev) => ({ ...prev, [currentBone.id]: false }));
-    playWrong();
+    playSkip();
     setInputValue("");
     if (currentIndex + 1 >= total) {
       setTimeout(() => setFinished(true), 600);
@@ -185,9 +185,9 @@ export default function SkeletonLabel({ onBack }: Props) {
           <Button onClick={handleSubmit} disabled={!inputValue.trim()} size="icon">
             <Check className="h-4 w-4" />
           </Button>
-            <Button variant="ghost" size="icon" onClick={handleSkip} title="Overslaan">
-            <X className="h-4 w-4" />
-          </Button>
+            <Button variant="outline" size="sm" onClick={handleSkip} className="text-muted-foreground gap-1">
+              <X className="h-4 w-4" /> Weet ik niet
+            </Button>
           </div>
         </div>
       )}

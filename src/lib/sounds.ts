@@ -44,3 +44,8 @@ export function playWrong() {
   beep(311, 0.15, "square", 0.2); // Eb4
   setTimeout(() => beep(233, 0.3, "square", 0.2), 150); // Bb3
 }
+
+export function playSkip() {
+  beep(440, 0.08, "triangle", 0.15); // A4 soft blip
+  setTimeout(() => beep(370, 0.12, "triangle", 0.15), 80); // F#4 descending
+}
