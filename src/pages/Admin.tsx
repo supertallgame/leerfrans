@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Shield, Home, FlaskConical, Microscope, Trash2, Star, MessageSquare, Search, Filter, Download, BarChart3, TrendingUp, Users, Mail } from "lucide-react";
+import { Shield, Home, FlaskConical, Microscope, Trash2, Star, MessageSquare, Search, Filter, Download, BarChart3, TrendingUp, Users, Mail, VolumeX, Clock } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -34,6 +34,14 @@ interface Review {
   message: string;
   created_at: string;
   user_email: string | null;
+}
+
+interface MutedUser {
+  id: string;
+  user_email: string;
+  muted_until: string;
+  reason: string;
+  created_at: string;
 }
 
 const ADMIN_EMAILS = ["brankovantland@gmail.com", "branko18vantland@gmail.com", "tamoopdam@gmail.com", "jack.ouwerkerk@vsodaafgeluk.nl"];
@@ -66,6 +74,12 @@ export default function Admin() {
   const [searchQuery, setSearchQuery] = useState("");
   const [starFilter, setStarFilter] = useState<string>("all");
 
+  // Mute state
+  const [mutedUsers, setMutedUsers] = useState<MutedUser[]>([]);
+  const [muteEmail, setMuteEmail] = useState("");
+  const [muteDuration, setMuteDuration] = useState("1h");
+  const [muteReason, setMuteReason] = useState("");
+
   useEffect(() => {
     checkAdmin();
   }, []);
@@ -79,9 +93,10 @@ export default function Admin() {
     }
     setIsAdmin(true);
     // Load disabled subjects + reviews in parallel
-    const [settingsRes, reviewsRes] = await Promise.all([
+    const [settingsRes, reviewsRes, mutesRes] = await Promise.all([
       supabase.from("admin_settings").select("value").eq("key", "disabled_subjects").single(),
       supabase.rpc("get_reviews_admin" as any),
+      supabase.from("muted_users" as any).select("*").order("created_at", { ascending: false }) as any,
     ]);
     if (settingsRes.data?.value) {
       setDisabledSubjects(settingsRes.data.value as string[]);
@@ -89,7 +104,50 @@ export default function Admin() {
     if (reviewsRes.data) {
       setReviews(reviewsRes.data);
     }
+    if (mutesRes.data) {
+      setMutedUsers(mutesRes.data);
+    }
     setLoading(false);
+  };
+
+  const handleMuteUser = async () => {
+    if (!muteEmail.trim()) return toast.error("Vul een e-mailadres in");
+    
+    const durationMap: Record<string, number> = {
+      "1h": 60 * 60 * 1000,
+      "6h": 6 * 60 * 60 * 1000,
+      "24h": 24 * 60 * 60 * 1000,
+      "7d": 7 * 24 * 60 * 60 * 1000,
+      "30d": 30 * 24 * 60 * 60 * 1000,
+      "perm": 100 * 365 * 24 * 60 * 60 * 1000,
+    };
+    
+    const ms = durationMap[muteDuration] || durationMap["1h"];
+    const mutedUntil = new Date(Date.now() + ms).toISOString();
+    
+    const { data, error } = await (supabase.from("muted_users" as any) as any)
+      .insert({ user_email: muteEmail.trim(), muted_until: mutedUntil, reason: muteReason.trim() })
+      .select()
+      .single();
+    
+    if (error) {
+      toast.error("Kon gebruiker niet muten");
+      return;
+    }
+    setMutedUsers((prev) => [data, ...prev]);
+    setMuteEmail("");
+    setMuteReason("");
+    toast.success(`${muteEmail.trim()} is gemute`);
+  };
+
+  const handleUnmute = async (id: string) => {
+    const { error } = await (supabase.from("muted_users" as any) as any).delete().eq("id", id);
+    if (error) {
+      toast.error("Kon mute niet verwijderen");
+      return;
+    }
+    setMutedUsers((prev) => prev.filter((m) => m.id !== id));
+    toast.success("Gebruiker is unmuted");
   };
 
   const handleDeleteReview = async () => {
