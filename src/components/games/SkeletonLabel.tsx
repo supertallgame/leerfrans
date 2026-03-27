@@ -173,12 +173,12 @@ export default function SkeletonLabel({ onBack }: Props) {
 
   return (
     <div className="flex flex-col items-center gap-3 w-full max-w-4xl mx-auto">
-      <div className="flex items-center justify-between w-full">
-        <Button variant="ghost" onClick={onBack} className="gap-2 text-sm">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between w-full gap-1">
+        <Button variant="ghost" onClick={onBack} className="gap-2 text-sm shrink-0">
           <ArrowLeft className="h-4 w-4" /> Terug
         </Button>
-        <p className="text-sm text-muted-foreground">
-          {answered} / {total} beantwoord — Score: {score} — Overgeslagen: {skipped}
+        <p className="text-xs text-muted-foreground text-right">
+          {answered}/{total} — Score: {score} — Skip: {skipped}
         </p>
       </div>
 
