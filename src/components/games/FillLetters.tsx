@@ -8,29 +8,25 @@ import { Progress } from "@/components/ui/progress";
 import { ArrowLeft, RotateCcw } from "lucide-react";
 import { shuffle, VocabItem, getForeignLabel, getForeignShort, getNlShort } from "@/data/vocabulary";
 import { useChapter } from "@/contexts/ChapterContext";
+import { useLocale } from "@/contexts/LocaleContext";
+import { t } from "@/lib/i18n";
 
 interface Props {
   onBack: () => void;
 }
 
-// Only use single words (no spaces, no sentences)
 function isSingleWord(s: string): boolean {
-  // Remove articles like "l'", "le ", "la ", "les ", "de ", "het ", "een "
   const cleaned = s.replace(/^(l'|le |la |les |de |het |een )/i, "").trim();
   return !cleaned.includes(" ") && !cleaned.includes("-") && cleaned.length >= 4;
 }
 
 function removeSomeLetters(word: string): { display: string; removed: { index: number; letter: string }[] } {
-  // Strip article prefix for processing
   const articleMatch = word.match(/^(l'|le |la |les |de |het |een )/i);
   const prefix = articleMatch ? articleMatch[0] : "";
   let core = word.slice(prefix.length);
-  
-  // Remove parenthetical optional parts for puzzle display, e.g. "fort(e)" → "forte"
   core = core.replace(/[()]/g, "");
 
   const indices = Array.from({ length: core.length }, (_, i) => i);
-  // Don't remove first or last letter
   const eligible = indices.filter((i) => i > 0 && i < core.length - 1);
   const count = Math.min(Math.max(2, Math.floor(core.length * 0.4)), Math.min(4, eligible.length));
   const shuffled = shuffle(eligible).slice(0, count).sort((a, b) => a - b);
@@ -48,6 +44,8 @@ function removeSomeLetters(word: string): { display: string; removed: { index: n
 
 export default function FillLetters({ onBack }: Props) {
   const { activeVocabulary, language } = useChapter();
+  const locale = useLocale();
+  const i = t(locale);
   const foreignShort = getForeignShort(language);
   const nlShort = getNlShort(language);
   const words = useMemo(() => {
@@ -74,16 +72,16 @@ export default function FillLetters({ onBack }: Props) {
   const progress = ((index + 1) / total) * 100;
   const finished = index >= total;
 
-  const isCorrect = (input: string) => isAnswerCorrect(input, targetWord);
+  const isCorrectFn = (input: string) => isAnswerCorrect(input, targetWord);
 
   const checkAnswer = () => {
-    if (isCorrect(userInput)) { setScore((s) => s + 1); playCorrect(); }
+    if (isCorrectFn(userInput)) { setScore((s) => s + 1); playCorrect(); }
     else { playWrong(); }
     setShowResult(true);
   };
 
   const next = () => {
-    setIndex((i) => i + 1);
+    setIndex((idx) => idx + 1);
     setUserInput("");
     setShowResult(false);
   };
@@ -100,15 +98,15 @@ export default function FillLetters({ onBack }: Props) {
       <div className="max-w-lg mx-auto space-y-6">
         <div className="text-center space-y-4">
           <div className="text-6xl">🎯</div>
-          <h2 className="text-3xl font-bold">Klaar!</h2>
+          <h2 className="text-3xl font-bold">{i.done}</h2>
           <p className="text-xl text-muted-foreground">
-            Score: <span className="font-bold text-primary">{score}</span> / {total}
+            {i.score}: <span className="font-bold text-primary">{score}</span> / {total}
           </p>
           <div className="flex gap-3 justify-center">
             <Button onClick={restart} variant="outline" className="gap-2">
-              <RotateCcw className="h-4 w-4" /> Opnieuw
+              <RotateCcw className="h-4 w-4" /> {i.restart}
             </Button>
-            <Button onClick={onBack}>Terug naar menu</Button>
+            <Button onClick={onBack}>{i.backToMenu}</Button>
           </div>
         </div>
       </div>
@@ -119,7 +117,7 @@ export default function FillLetters({ onBack }: Props) {
     <div className="max-w-lg mx-auto space-y-4 md:space-y-6">
       <div className="flex items-center justify-between">
         <Button variant="ghost" onClick={onBack} className="gap-2 text-sm">
-          <ArrowLeft className="h-4 w-4" /> Terug
+          <ArrowLeft className="h-4 w-4" /> {i.back}
         </Button>
         <div className="flex gap-1.5 md:gap-2">
           <Button
@@ -142,16 +140,16 @@ export default function FillLetters({ onBack }: Props) {
       </div>
 
       <div className="flex items-center justify-between text-xs md:text-sm text-muted-foreground">
-        <span>Woord {index + 1} / {total}</span>
-        <span>Score: {score}</span>
+        <span>{i.word} {index + 1} / {total}</span>
+        <span>{i.score}: {score}</span>
       </div>
       <Progress value={progress} className="h-2" />
 
       <Card className="border-2">
         <CardContent className="p-5 md:p-8 text-center space-y-3 md:space-y-4">
-          <p className="text-xs md:text-sm text-muted-foreground">Hint: <span className="font-semibold">{hintWord}</span></p>
+          <p className="text-xs md:text-sm text-muted-foreground">{i.hint}: <span className="font-semibold">{hintWord}</span></p>
           <h2 className="text-2xl md:text-4xl font-bold font-mono tracking-[0.15em] md:tracking-[0.2em]">{puzzle.display}</h2>
-          <p className="text-xs md:text-sm text-muted-foreground">Vul het volledige woord in</p>
+          <p className="text-xs md:text-sm text-muted-foreground">{i.fillComplete}</p>
         </CardContent>
       </Card>
 
@@ -160,28 +158,28 @@ export default function FillLetters({ onBack }: Props) {
           value={userInput}
           onChange={(e) => setUserInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && !showResult && checkAnswer()}
-          placeholder="Typ het volledige woord..."
+          placeholder={i.typeFullWord}
           className="text-center text-lg"
           disabled={showResult}
           autoFocus
         />
         {!showResult ? (
-          <Button onClick={checkAnswer} disabled={!userInput.trim()}>Check</Button>
+          <Button onClick={checkAnswer} disabled={!userInput.trim()}>{i.check}</Button>
         ) : (
-          <Button onClick={next}>Volgende</Button>
+          <Button onClick={next}>{i.next}</Button>
         )}
       </div>
 
       {showResult && (
-        <Card className={isCorrect(userInput)
+        <Card className={isCorrectFn(userInput)
           ? "border-green-500 bg-green-50"
           : "border-destructive bg-destructive/5"}>
           <CardContent className="p-4 text-center">
-            {isCorrect(userInput) ? (
-              <p className="font-semibold text-green-700">✅ Correct!</p>
+            {isCorrectFn(userInput) ? (
+              <p className="font-semibold text-green-700">✅ {i.correct}</p>
             ) : (
               <p className="font-semibold text-destructive">
-                ❌ Fout! Het juiste antwoord: <span className="font-bold">{targetWord}</span>
+                ❌ {i.wrongAnswer}: <span className="font-bold">{targetWord}</span>
               </p>
             )}
           </CardContent>

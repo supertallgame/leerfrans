@@ -2,6 +2,8 @@ import { useState, useMemo } from "react";
 import { playCorrect, playWrong } from "@/lib/sounds";
 import { shuffle, getForeignLabelNative, getForeignShort, getNlShort, getNlLabel } from "@/data/vocabulary";
 import { useChapter } from "@/contexts/ChapterContext";
+import { useLocale } from "@/contexts/LocaleContext";
+import { t } from "@/lib/i18n";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight, Check, X } from "lucide-react";
@@ -13,6 +15,8 @@ interface Props {
 
 export default function MultipleChoice({ onBack }: Props) {
   const { activeVocabulary, language } = useChapter();
+  const locale = useLocale();
+  const i = t(locale);
   const [questions] = useState(() => shuffle(activeVocabulary));
   const [qIndex, setQIndex] = useState(0);
   const [selected, setSelected] = useState<string | null>(null);
@@ -27,11 +31,9 @@ export default function MultipleChoice({ onBack }: Props) {
     const correct = showDutch ? current.french : current.dutch;
     const isSentence = (s: string) => s.includes(" ") && s.length >= 20;
     const correctIsSentence = isSentence(correct);
-    // Pick wrong options of the same type (sentence vs word)
     const sameType = activeVocabulary
       .filter((v) => v !== current && isSentence(showDutch ? v.french : v.dutch) === correctIsSentence)
       .map((v) => (showDutch ? v.french : v.dutch));
-    // Fallback to all if not enough of same type
     const pool = sameType.length >= 3 ? sameType : activeVocabulary.filter((v) => v !== current).map((v) => (showDutch ? v.french : v.dutch));
     const others = shuffle(pool).slice(0, 3);
     return shuffle([correct, ...others]);
@@ -55,16 +57,16 @@ export default function MultipleChoice({ onBack }: Props) {
     return (
       <div className="flex flex-col items-center gap-6 max-w-lg mx-auto">
         <Button variant="ghost" onClick={onBack} className="self-start gap-2">
-          <ArrowLeft className="h-4 w-4" /> Terug
+          <ArrowLeft className="h-4 w-4" /> {i.back}
         </Button>
         <Card className="w-full">
           <CardContent className="flex flex-col items-center p-8 gap-4">
             <p className="text-5xl font-bold">🎉</p>
-            <h2 className="text-2xl font-bold">Klaar!</h2>
+            <h2 className="text-2xl font-bold">{i.done}</h2>
             <p className="text-lg">
-              Score: <span className="font-bold text-primary">{score}</span> / {questions.length}
+              {i.score}: <span className="font-bold text-primary">{score}</span> / {questions.length}
             </p>
-            <Button onClick={() => { setQIndex(0); setScore(0); }}>Opnieuw spelen</Button>
+            <Button onClick={() => { setQIndex(0); setScore(0); }}>{i.playAgain}</Button>
           </CardContent>
         </Card>
       </div>
@@ -75,7 +77,7 @@ export default function MultipleChoice({ onBack }: Props) {
     <div className="flex flex-col items-center gap-4 md:gap-6 w-full max-w-lg mx-auto">
       <div className="flex items-center justify-between w-full">
         <Button variant="ghost" onClick={onBack} className="gap-2 text-sm">
-          <ArrowLeft className="h-4 w-4" /> Terug
+          <ArrowLeft className="h-4 w-4" /> {i.back}
         </Button>
         <Button variant="outline" size="sm" onClick={() => setShowDutch(!showDutch)} className="text-xs md:text-sm">
           {showDutch ? `${getNlShort(language)} → ${getForeignShort(language)}` : `${getForeignShort(language)} → ${getNlShort(language)}`}
@@ -123,7 +125,7 @@ export default function MultipleChoice({ onBack }: Props) {
 
       {selected && (
         <Button onClick={handleNext} className="w-full gap-2">
-          Volgende <ArrowRight className="h-4 w-4" />
+          {i.next} <ArrowRight className="h-4 w-4" />
         </Button>
       )}
     </div>

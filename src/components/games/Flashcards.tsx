@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { shuffle, VocabItem, getForeignLabel, getForeignLabelNative, getNlLabel, getForeignShort, getNlShort } from "@/data/vocabulary";
 import { useChapter } from "@/contexts/ChapterContext";
+import { useLocale } from "@/contexts/LocaleContext";
+import { t } from "@/lib/i18n";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight, RotateCcw, Eye } from "lucide-react";
@@ -11,6 +13,8 @@ interface Props {
 
 export default function Flashcards({ onBack }: Props) {
   const { activeVocabulary, language } = useChapter();
+  const locale = useLocale();
+  const i = t(locale);
   const [cards] = useState(() => shuffle(activeVocabulary));
   const [index, setIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
@@ -32,7 +36,7 @@ export default function Flashcards({ onBack }: Props) {
     <div className="flex flex-col items-center gap-4 md:gap-6 w-full max-w-lg mx-auto">
       <div className="flex items-center justify-between w-full">
         <Button variant="ghost" onClick={onBack} className="gap-2 text-sm">
-          <ArrowLeft className="h-4 w-4" /> Terug
+          <ArrowLeft className="h-4 w-4" /> {i.back}
         </Button>
         <Button
           variant="outline"
@@ -63,7 +67,7 @@ export default function Flashcards({ onBack }: Props) {
               : (showDutch ? current.french : current.dutch)}
           </p>
           {!flipped && (
-            <p className="text-xs text-muted-foreground mt-3 md:mt-4">Klik om te draaien</p>
+            <p className="text-xs text-muted-foreground mt-3 md:mt-4">{i.clickToFlip}</p>
           )}
         </CardContent>
       </Card>

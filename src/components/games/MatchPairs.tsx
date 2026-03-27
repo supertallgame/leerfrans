@@ -1,6 +1,8 @@
 import { useState, useMemo } from "react";
 import { shuffle, getForeignLabelNative, getNlLabel } from "@/data/vocabulary";
 import { useChapter } from "@/contexts/ChapterContext";
+import { useLocale } from "@/contexts/LocaleContext";
+import { t } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, RotateCcw } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -14,6 +16,8 @@ const PAIRS_PER_ROUND = 5;
 
 export default function MatchPairs({ onBack }: Props) {
   const { activeVocabulary, language } = useChapter();
+  const locale = useLocale();
+  const i = t(locale);
   const [allWords] = useState(() => shuffle(activeVocabulary));
   const totalRounds = Math.ceil(allWords.length / PAIRS_PER_ROUND);
   const [roundIndex, setRoundIndex] = useState(0);
@@ -25,8 +29,8 @@ export default function MatchPairs({ onBack }: Props) {
   }, [roundIndex, allWords, resetKey]);
 
   const { leftItems, rightItems } = useMemo(() => {
-    const left = roundWords.map((v, i) => ({ id: `l-${i}`, text: v.dutch, pairId: i }));
-    const right = shuffle(roundWords.map((v, i) => ({ id: `r-${i}`, text: v.french, pairId: i })));
+    const left = roundWords.map((v, idx) => ({ id: `l-${idx}`, text: v.dutch, pairId: idx }));
+    const right = shuffle(roundWords.map((v, idx) => ({ id: `r-${idx}`, text: v.french, pairId: idx })));
     return { leftItems: left, rightItems: right };
   }, [roundWords]);
 
@@ -53,7 +57,6 @@ export default function MatchPairs({ onBack }: Props) {
       setSelectedLeft(null);
       setTotalMatched((t) => t + 1);
 
-      // Auto-advance after short delay when round complete
       if (newMatched.size === roundWords.length && roundIndex < totalRounds - 1) {
         setAdvancing(true);
         setTimeout(() => {
@@ -81,14 +84,14 @@ export default function MatchPairs({ onBack }: Props) {
     return (
       <div className="flex flex-col items-center gap-6 max-w-lg mx-auto">
         <Button variant="ghost" onClick={onBack} className="self-start gap-2">
-          <ArrowLeft className="h-4 w-4" /> Terug
+          <ArrowLeft className="h-4 w-4" /> {i.back}
         </Button>
         <Card className="w-full">
           <CardContent className="flex flex-col items-center p-8 gap-4">
             <p className="text-5xl">🏆</p>
-            <h2 className="text-2xl font-bold">Alle {allWords.length} paren gevonden!</h2>
+            <h2 className="text-2xl font-bold">{i.allPairsFound.replace("{count}", String(allWords.length))}</h2>
             <Button onClick={restart}>
-              <RotateCcw className="h-4 w-4 mr-2" /> Opnieuw
+              <RotateCcw className="h-4 w-4 mr-2" /> {i.restart}
             </Button>
           </CardContent>
         </Card>
@@ -100,10 +103,10 @@ export default function MatchPairs({ onBack }: Props) {
     <div className="flex flex-col items-center gap-4 md:gap-6 w-full max-w-2xl mx-auto">
       <div className="flex items-center justify-between w-full">
         <Button variant="ghost" onClick={onBack} className="gap-2 text-sm">
-          <ArrowLeft className="h-4 w-4" /> Terug
+          <ArrowLeft className="h-4 w-4" /> {i.back}
         </Button>
         <p className="text-xs md:text-sm text-muted-foreground">
-          Ronde {roundIndex + 1}/{totalRounds} • {totalMatched}/{allWords.length}
+          {i.round} {roundIndex + 1}/{totalRounds} • {totalMatched}/{allWords.length}
         </p>
       </div>
 
@@ -115,10 +118,10 @@ export default function MatchPairs({ onBack }: Props) {
           <p className="text-[10px] md:text-xs uppercase tracking-widest text-muted-foreground text-center">{getForeignLabelNative(language)}</p>
         </div>
         <div className="flex flex-col gap-1.5 md:gap-2">
-          {leftItems.map((leftItem, i) => {
-            const rightItem = rightItems[i];
+          {leftItems.map((leftItem, idx) => {
+            const rightItem = rightItems[idx];
             return (
-              <div key={i} className="grid grid-cols-[2fr_3fr] gap-2 md:gap-4">
+              <div key={idx} className="grid grid-cols-[2fr_3fr] gap-2 md:gap-4">
                 <Button
                   variant={matched.has(leftItem.pairId) ? "default" : selectedLeft === leftItem.pairId ? "secondary" : "outline"}
                   className={`h-full py-2 md:py-3 whitespace-normal text-[11px] md:text-sm leading-snug transition-all duration-300 ${
