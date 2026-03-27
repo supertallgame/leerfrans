@@ -571,7 +571,6 @@ const descriptionToSlovak: Record<string, string> = {
   "Een stof zonder eigen vorm en zonder eigen volume, bijvoorbeeld lucht": "Látka bez vlastného tvaru a bez vlastného objemu, napríklad vzduch",
   "Een stof die dodelijk of schadelijk is voor je gezondheid": "Látka, ktorá je smrteľná alebo škodlivá pre zdravie",
   "Het opnieuw gebruiken van een voorwerp": "Opätovné použitie predmetu",
-  "Een scheidingsmethode om een vaste stof uit een suspensie te halen": "Separačná metóda na oddelenie pevnej látky zo suspenzie",
   "De temperatuur waarbij de vloeistof verdampt met dampbellen in de vloeistof": "Teplota, pri ktorej sa kvapalina odparuje s parními bublinami v kvapaline",
   "Materie die bestaat uit twee of meer stoffen": "Hmota, ktorá sa skladá z dvoch alebo viacerých látok",
   "Een helder mengsel van een stof in een vloeistof": "Priehľadná zmes látky v kvapaline",
