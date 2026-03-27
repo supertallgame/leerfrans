@@ -34,18 +34,19 @@ export default function MatchPairs({ onBack }: Props) {
   const [matched, setMatched] = useState<Set<number>>(new Set());
   const [wrong, setWrong] = useState<string | null>(null);
   const [totalMatched, setTotalMatched] = useState(0);
+  const [advancing, setAdvancing] = useState(false);
 
   const allDone = roundIndex >= totalRounds;
   const roundDone = matched.size === roundWords.length && !allDone;
 
   const handleLeftClick = (pairId: number) => {
-    if (matched.has(pairId)) return;
+    if (matched.has(pairId) || advancing) return;
     setSelectedLeft(pairId);
     setWrong(null);
   };
 
   const handleRightClick = (pairId: number, id: string) => {
-    if (selectedLeft === null || matched.has(pairId)) return;
+    if (selectedLeft === null || matched.has(pairId) || advancing) return;
     if (selectedLeft === pairId) {
       const newMatched = new Set([...matched, pairId]);
       setMatched(newMatched);
@@ -54,10 +55,12 @@ export default function MatchPairs({ onBack }: Props) {
 
       // Auto-advance after short delay when round complete
       if (newMatched.size === roundWords.length && roundIndex < totalRounds - 1) {
+        setAdvancing(true);
         setTimeout(() => {
           setRoundIndex((r) => r + 1);
           setMatched(new Set());
           setSelectedLeft(null);
+          setAdvancing(false);
         }, 800);
       }
     } else {
