@@ -156,12 +156,12 @@ export default function MemoryGame({ onBack }: Props) {
             >
               {isFlipped || isMatched ? (
                 <div className="flex flex-col items-center justify-center w-full">
-                  <p className={`text-[9px] md:text-[10px] uppercase tracking-widest mb-0.5 ${
+                  <p className={`text-[9px] md:text-[10px] uppercase tracking-widest font-bold mb-0.5 ${
                     card.type === "term" ? "text-primary" : "text-accent"
                   }`}>
                     {card.type === "term" ? "Begrip" : "Omschrijving"}
                   </p>
-               <p className="text-[11px] md:text-sm font-medium leading-tight line-clamp-2">{card.text}</p>
+               <p className="text-[11px] md:text-sm font-medium leading-tight">{card.text}</p>
                 </div>
               ) : (
                  <p className="text-xl md:text-3xl">❓</p>
