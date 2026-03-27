@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, useState, useMemo, ReactNode } from "react";
 import { DEFAULT_CHAPTER_ID, getActiveVocabulary, getDefaultChapterId, getChaptersForLanguage, VocabItem, Language } from "@/data/vocabulary";
 
 interface ChapterContextType {
@@ -19,14 +19,18 @@ const ChapterContext = createContext<ChapterContextType>({
 
 export const useChapter = () => useContext(ChapterContext);
 
-export const ChapterProvider = ({ children }: { children: ReactNode }) => {
+interface ChapterProviderProps {
+  children: ReactNode;
+  vocabTransform?: (items: VocabItem[]) => VocabItem[];
+}
+
+export const ChapterProvider = ({ children, vocabTransform }: ChapterProviderProps) => {
   const [language, setLanguageState] = useState<Language>(() => {
     return (localStorage.getItem("selectedLanguage") as Language) || "french";
   });
 
   const [chapterId, setChapterIdState] = useState(() => {
     const saved = localStorage.getItem("selectedChapter") || DEFAULT_CHAPTER_ID;
-    // Validate saved chapter belongs to current language
     const validChapters = getChaptersForLanguage(
       (localStorage.getItem("selectedLanguage") as Language) || "french"
     );
@@ -42,18 +46,23 @@ export const ChapterProvider = ({ children }: { children: ReactNode }) => {
   const handleSetLanguage = (lang: Language) => {
     setLanguageState(lang);
     localStorage.setItem("selectedLanguage", lang);
-    // Switch to default chapter for the new language
     const defaultId = getDefaultChapterId(lang);
     setChapterIdState(defaultId);
     localStorage.setItem("selectedChapter", defaultId);
   };
+
+  const rawVocabulary = getActiveVocabulary(chapterId);
+  const activeVocabulary = useMemo(
+    () => (vocabTransform ? vocabTransform(rawVocabulary) : rawVocabulary),
+    [rawVocabulary, vocabTransform]
+  );
 
   return (
     <ChapterContext.Provider
       value={{
         chapterId,
         setChapterId: handleSetChapter,
-        activeVocabulary: getActiveVocabulary(chapterId),
+        activeVocabulary,
         language,
         setLanguage: handleSetLanguage,
       }}
