@@ -81,7 +81,7 @@ export default function Admin() {
     // Load disabled subjects + reviews in parallel
     const [settingsRes, reviewsRes] = await Promise.all([
       supabase.from("admin_settings").select("value").eq("key", "disabled_subjects").single(),
-      supabase.from("reviews").select("*").order("created_at", { ascending: false }),
+      supabase.rpc("get_reviews_admin" as any),
     ]);
     if (settingsRes.data?.value) {
       setDisabledSubjects(settingsRes.data.value as string[]);
