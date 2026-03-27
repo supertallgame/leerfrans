@@ -34,7 +34,6 @@ interface Room {
   id: string;
   code: string;
   host_name: string;
-  
   status: string;
   current_question_index: number;
   total_questions: number;
@@ -44,6 +43,19 @@ interface Room {
   num_teams: number;
   team_names: string[];
   team_emojis: string[];
+  is_public?: boolean;
+}
+
+interface PublicRoom {
+  id: string;
+  code: string;
+  host_name: string;
+  game_mode: string;
+  team_mode: string;
+  num_teams: number;
+  player_count: number;
+  max_players: number;
+  created_at: string;
 }
 
 interface Player {
@@ -98,6 +110,11 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
   const [kahootCountdown, setKahootCountdown] = useState<number | null>(null);
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
   const [pendingCorrect, setPendingCorrect] = useState<boolean | null>(null);
+  const [isPublic, setIsPublic] = useState(false);
+  const [publicRooms, setPublicRooms] = useState<PublicRoom[]>([]);
+  const [showPublicRooms, setShowPublicRooms] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [loadingRandom, setLoadingRandom] = useState(false);
 
   const fetchQuestion = useCallback(async (roomId: string, playerId: string, playerToken: string) => {
     const { data } = await supabase.functions.invoke("game-action", {
