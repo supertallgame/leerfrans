@@ -899,8 +899,9 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
           </div>
 
           {countdown !== null && (
-            <div className="text-center">
-              <div className="text-7xl font-bold text-primary animate-pulse">{countdown}</div>
+            <div className="text-center space-y-2">
+              <div className="text-7xl font-bold text-primary animate-pulse">{countdown || "🚀"}</div>
+              <p className="text-sm text-muted-foreground animate-pulse">Het spel begint zo...</p>
             </div>
           )}
 
