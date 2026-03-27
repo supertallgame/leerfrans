@@ -381,10 +381,12 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
   useEffect(() => {
     if (countdown === null) return;
     if (countdown <= 0) { setCountdown(null); return; }
+    playCountdownTick();
     const timer = setTimeout(async () => {
       const next = countdown - 1;
       setCountdown(next);
       if (next === 0) {
+        playCountdownGo();
         const { data } = await supabase.functions.invoke("game-action", {
           body: { action: "start-game", roomId: room!.id, playerId: myPlayerId, playerToken: myPlayerToken },
         });
@@ -392,6 +394,8 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
           toast.error(data.error === "Need at least 2 players" ? "Er zijn minimaal 2 spelers nodig!" : data.error);
           setCountdown(null);
         }
+      } else {
+        playCountdownTick();
       }
     }, 1000);
     return () => clearTimeout(timer);
