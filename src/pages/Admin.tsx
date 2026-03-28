@@ -596,7 +596,66 @@ export default function Admin() {
             </div>
           )}
         </div>
-      </div>
+        </div>
+
+        {/* Game rooms beheer */}
+        <div className="rounded-2xl border border-border bg-card p-6 space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold flex items-center gap-2">
+              <Gamepad2 className="h-5 w-5" /> Multiplayer kamers
+            </h2>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">{gameRooms.length} kamer{gameRooms.length !== 1 ? "s" : ""}</span>
+              <Button variant="outline" size="sm" onClick={fetchGameRooms} className="gap-1.5">
+                🔄 Vernieuwen
+              </Button>
+            </div>
+          </div>
+          {gameRooms.length === 0 ? (
+            <p className="text-sm text-muted-foreground">Geen actieve kamers.</p>
+          ) : (
+            <div className="space-y-2">
+              {gameRooms.map((room) => (
+                <div key={room.id} className="flex items-center justify-between px-4 py-3 rounded-lg border border-border">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-medium text-sm">{room.host_name}</span>
+                      <span className="font-mono text-xs bg-muted px-1.5 py-0.5 rounded">{room.code}</span>
+                      {room.is_public ? (
+                        <span className="inline-flex items-center gap-1 text-[10px] text-primary bg-primary/10 px-1.5 py-0.5 rounded-full">
+                          <Globe className="h-3 w-3" /> Publiek
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded-full">
+                          <Lock className="h-3 w-3" /> Privé
+                        </span>
+                      )}
+                      <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${
+                        room.status === "waiting" ? "bg-yellow-500/10 text-yellow-600" :
+                        room.status === "playing" ? "bg-green-500/10 text-green-600" :
+                        "bg-muted text-muted-foreground"
+                      }`}>
+                        {room.status === "waiting" ? "Wachtend" : room.status === "playing" ? "Bezig" : room.status === "finished" ? "Klaar" : room.status}
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      {room.game_mode === "kahoot" ? "🎯 Kahoot" : "⚡ Normaal"} · {room.team_mode === "teams" ? "👥 Teams" : "👤 Solo"} · {new Date(room.created_at).toLocaleString("nl-NL")}
+                    </p>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-destructive hover:text-destructive shrink-0"
+                    onClick={() => setCloseRoomId(room.id)}
+                    title="Kamer sluiten"
+                  >
+                    <XCircle className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
 
       <AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
         <AlertDialogContent>
