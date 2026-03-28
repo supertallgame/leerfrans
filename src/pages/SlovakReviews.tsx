@@ -100,6 +100,25 @@ function useTranslations(items: { id: string; text: string }[]) {
   return translated;
 }
 
+interface ReviewReply {
+  id: string;
+  review_id: string;
+  display_name: string;
+  message: string;
+  created_at: string;
+}
+
+interface Review {
+  id: string;
+  display_name: string;
+  rating: number;
+  message: string;
+  created_at: string;
+}
+
+const OPERATOR_EMAILS = ["brankovantland@gmail.com", "branko18vantland@gmail.com", "tamoopdam@gmail.com", "jack.ouwerkerk@vsodaafgeluk.nl"];
+
+
 function Stars({ rating }: { rating: number }) {
   return (
     <div className="flex gap-0.5">
