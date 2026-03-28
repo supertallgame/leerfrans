@@ -298,6 +298,7 @@ export type Database = {
           host_name: string | null
           id: string | null
           is_public: boolean | null
+          kahoot_timer: number | null
           num_teams: number | null
           status: string | null
           team_emojis: Json | null
@@ -314,6 +315,7 @@ export type Database = {
           host_name?: string | null
           id?: string | null
           is_public?: boolean | null
+          kahoot_timer?: number | null
           num_teams?: number | null
           status?: string | null
           team_emojis?: Json | null
@@ -330,6 +332,7 @@ export type Database = {
           host_name?: string | null
           id?: string | null
           is_public?: boolean | null
+          kahoot_timer?: number | null
           num_teams?: number | null
           status?: string | null
           team_emojis?: Json | null
