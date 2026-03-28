@@ -888,7 +888,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
                           <div className="min-w-0">
                             <p className="font-medium text-sm truncate">{r.host_name}</p>
                             <p className="text-xs text-muted-foreground">
-                              {r.game_mode === "kahoot" ?  : } · {r.team_mode === "teams" ? `👥 ${r.num_teams} teams` : "👤 Solo"} · {r.player_count}/{r.max_players} {m.playersCount}
+                              {r.game_mode === "kahoot" ? `🎯 ${m.kahoot2}` : `⚡ ${m.normal2}`} · {r.team_mode === "teams" ? `👥 ${r.num_teams} ${m.teamsWord}` : `👤 ${m.solo2}`} · {r.player_count}/{r.max_players} {m.playersCount}
                             </p>
                           </div>
                           <div className="flex items-center gap-1 shrink-0 ml-2">
