@@ -154,12 +154,14 @@ function ReplySection({
   isOperator,
   onReplyAdded,
   onDeleteReply,
+  translatedMessages,
 }: {
   reviewId: string;
   replies: ReviewReply[];
   isOperator: boolean;
   onReplyAdded: (reply: ReviewReply) => void;
   onDeleteReply: (id: string) => void;
+  translatedMessages: Record<string, string>;
 }) {
   const [expanded, setExpanded] = useState(false);
   const [showForm, setShowForm] = useState(false);
