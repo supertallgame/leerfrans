@@ -1104,7 +1104,15 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
 
           {countdown !== null && (
             <div className="text-center space-y-2">
-              <div className="text-7xl font-bold text-primary animate-pulse">{countdown || "🚀"}</div>
+              <div
+                key={countdown}
+                className="text-8xl font-black text-primary drop-shadow-lg"
+                style={{
+                  animation: "countdown-pop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards",
+                }}
+              >
+                {countdown || "🚀"}
+              </div>
               <p className="text-sm text-muted-foreground animate-pulse">{m.gameStarting}</p>
             </div>
           )}

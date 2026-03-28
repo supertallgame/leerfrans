@@ -114,3 +114,17 @@
     scrollbar-color: hsl(240 10% 30%) hsl(240 15% 12%);
   }
 }
+
+@keyframes countdown-pop {
+  0% {
+    transform: scale(2.5);
+    opacity: 0;
+  }
+  40% {
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
