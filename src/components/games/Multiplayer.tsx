@@ -690,53 +690,57 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
           </Card>
 
           {/* Public rooms browser */}
-          {showPublicRooms && (
-            <Card ref={publicRoomsRef}>
-              <CardContent className="p-4 md:p-6 space-y-3">
-                <div className="flex items-center gap-2">
-                  <Search className="h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Zoek op host of code..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="text-sm"
-                  />
-                </div>
-                <Button variant="ghost" size="sm" onClick={fetchPublicRooms} className="w-full text-xs text-muted-foreground">
-                  🔄 Vernieuwen
-                </Button>
-                {filteredPublicRooms.length === 0 ? (
-                  <p className="text-center text-sm text-muted-foreground py-4">Geen openbare kamers gevonden</p>
-                ) : (
-                  <div className="space-y-2 max-h-64 overflow-y-auto">
-                    {filteredPublicRooms.map((r) => (
-                      <div
-                        key={r.id}
-                        className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
-                      >
-                        <div className="min-w-0">
-                          <p className="font-medium text-sm truncate">{r.host_name}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {r.game_mode === "kahoot" ? "🎯 Kahoot" : "⚡ Normaal"} · {r.team_mode === "teams" ? `👥 ${r.num_teams} teams` : "👤 Solo"} · {r.player_count}/{r.max_players} spelers
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-1 shrink-0 ml-2">
-                          <Button size="sm" onClick={() => joinPublicRoom(r)}>
-                            <UserPlus className="h-4 w-4 mr-1" /> Join
-                          </Button>
-                          {isAdminUser && (
-                            <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive h-8 w-8 p-0" onClick={() => adminCloseRoom(r.id)} title="Kamer sluiten">
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          )}
-                        </div>
-                      </div>
-                    ))}
+          <div
+            className={`grid transition-all duration-300 ease-out ${showPublicRooms ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}`}
+          >
+            <div className="overflow-hidden">
+              <Card ref={publicRoomsRef} className="mt-2">
+                <CardContent className="p-4 md:p-6 space-y-3">
+                  <div className="flex items-center gap-2">
+                    <Search className="h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Zoek op host of code..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="text-sm"
+                    />
                   </div>
-                )}
-              </CardContent>
-            </Card>
-          )}
+                  <Button variant="ghost" size="sm" onClick={fetchPublicRooms} className="w-full text-xs text-muted-foreground">
+                    🔄 Vernieuwen
+                  </Button>
+                  {filteredPublicRooms.length === 0 ? (
+                    <p className="text-center text-sm text-muted-foreground py-4">Geen openbare kamers gevonden</p>
+                  ) : (
+                    <div className="space-y-2 max-h-64 overflow-y-auto">
+                      {filteredPublicRooms.map((r) => (
+                        <div
+                          key={r.id}
+                          className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
+                        >
+                          <div className="min-w-0">
+                            <p className="font-medium text-sm truncate">{r.host_name}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {r.game_mode === "kahoot" ? "🎯 Kahoot" : "⚡ Normaal"} · {r.team_mode === "teams" ? `👥 ${r.num_teams} teams` : "👤 Solo"} · {r.player_count}/{r.max_players} spelers
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-1 shrink-0 ml-2">
+                            <Button size="sm" onClick={() => joinPublicRoom(r)}>
+                              <UserPlus className="h-4 w-4 mr-1" /> Join
+                            </Button>
+                            {isAdminUser && (
+                              <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive h-8 w-8 p-0" onClick={() => adminCloseRoom(r.id)} title="Kamer sluiten">
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </div>
         </div>
       </div>
     );
