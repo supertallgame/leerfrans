@@ -1056,6 +1056,36 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
             </CardContent>
           </Card>
 
+          {/* Kahoot timer setting */}
+          {gameMode === "kahoot" && (
+            <Card>
+              <CardContent className="p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm font-medium">{m.scoreboardTime}</span>
+                  </div>
+                  <span className="text-sm font-bold text-primary">
+                    {kahootTimerSetting === 0 ? m.instant : `${kahootTimerSetting} ${m.seconds}`}
+                  </span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-xs text-muted-foreground w-6">0</span>
+                  <input
+                    type="range"
+                    min={0}
+                    max={10}
+                    step={1}
+                    value={kahootTimerSetting}
+                    onChange={(e) => setKahootTimerSetting(Number(e.target.value))}
+                    className="flex-1 h-2 accent-primary cursor-pointer"
+                  />
+                  <span className="text-xs text-muted-foreground w-6">10</span>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           <div className="grid gap-3">
             <Card className="cursor-pointer transition-all hover:shadow-lg hover:-translate-y-1 active:scale-[0.98] border-2 hover:border-primary/50" onClick={() => startWithSettings("solo")}>
               <CardContent className="p-4 md:p-6 flex items-center gap-4">
