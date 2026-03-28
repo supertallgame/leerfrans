@@ -391,6 +391,11 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
     setKahootCountdown(3);
     if (pendingCorrect === true) playCorrect();
     else if (pendingCorrect === false) playWrong();
+    // Fire confetti if current player is #1
+    const sorted = [...players].sort((a, b) => b.score - a.score);
+    if (sorted[0]?.id === myPlayerId && sorted[0]?.score > 0) {
+      setTimeout(() => fireConfetti(), 300);
+    }
   }, [players, room, phase, showKahootScoreboard, pendingCorrect]);
 
   useEffect(() => {
