@@ -310,7 +310,7 @@ function ReplySection({
                   )}
                 </div>
               </div>
-              <p className="text-xs text-foreground/70">{translateToSlovak(reply.message)}</p>
+              <p className="text-xs text-foreground/70">{translatedMessages[`reply-${reply.id}`] || reply.message}</p>
             </div>
           ))}
         </div>
