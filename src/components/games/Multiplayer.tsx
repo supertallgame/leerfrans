@@ -22,6 +22,7 @@ import { useChapter } from "@/contexts/ChapterContext";
 import { useLocale } from "@/contexts/LocaleContext";
 import { toast } from "sonner";
 import { playCorrect, playWrong, playCountdownTick, playCountdownGo } from "@/lib/sounds";
+import { fireConfetti } from "@/lib/confetti";
 
 const mp = {
   nl: {
