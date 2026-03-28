@@ -60,8 +60,45 @@ Deno.serve(async (req) => {
       await supabase.from("game_players").delete().in("id", nonHostInactive);
     }
 
+    // Delete orphan rooms: no players left and older than 5 minutes
+    const { data: orphanRooms } = await supabase
+      .from("game_rooms")
+      .select("id")
+      .lt("created_at", fiveMinutesAgo);
+
+    let orphanCount = 0;
+    if (orphanRooms) {
+      for (const room of orphanRooms) {
+        const { count } = await supabase
+          .from("game_players")
+          .select("*", { count: "exact", head: true })
+          .eq("room_id", room.id);
+        if ((count ?? 0) === 0) {
+          await supabase.from("game_questions").delete().eq("room_id", room.id);
+          await supabase.from("game_rooms").delete().eq("id", room.id);
+          orphanCount++;
+        }
+      }
+    }
+
+    // Delete finished rooms older than 10 minutes
+    const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000).toISOString();
+    const { data: finishedRooms } = await supabase
+      .from("game_rooms")
+      .select("id")
+      .eq("status", "finished")
+      .lt("created_at", tenMinutesAgo);
+
+    if (finishedRooms && finishedRooms.length > 0) {
+      const finishedIds = finishedRooms.map((r) => r.id);
+      await supabase.from("game_players").delete().in("room_id", finishedIds);
+      await supabase.from("game_questions").delete().in("room_id", finishedIds);
+      await supabase.from("game_rooms").delete().in("id", finishedIds);
+      orphanCount += finishedIds.length;
+    }
+
     const totalRemoved = inactivePlayers.length;
-    console.log(`Cleaned up ${totalRemoved} inactive players, ${hostRoomIds.size} rooms deleted`);
+    console.log(`Cleaned up ${totalRemoved} inactive players, ${hostRoomIds.size + orphanCount} rooms deleted`);
 
     return new Response(JSON.stringify({ removed: totalRemoved, roomsDeleted: hostRoomIds.size }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
