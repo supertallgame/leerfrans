@@ -400,6 +400,22 @@ export type Database = {
             }
             Returns: Json
           }
+        | {
+            Args: {
+              p_code: string
+              p_game_mode?: string
+              p_host_name: string
+              p_is_public?: boolean
+              p_kahoot_timer?: number
+              p_max_players?: number
+              p_num_teams?: number
+              p_team_emojis?: Json
+              p_team_mode?: string
+              p_team_names?: Json
+              p_total_questions?: number
+            }
+            Returns: Json
+          }
       get_my_mute_status: {
         Args: never
         Returns: {
