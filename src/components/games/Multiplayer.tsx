@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, Users, Copy, Check, Trophy, LogOut, Zap, Clock, Shuffle, UserPlus, Globe, Lock, Search, Dice5 } from "lucide-react";
+import { ArrowLeft, Users, Copy, Check, Trophy, LogOut, Zap, Clock, Shuffle, UserPlus, Globe, Lock, Search, Dice5, Trash2 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import {
@@ -116,6 +116,14 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
   const publicRoomsRef = useRef<HTMLDivElement>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [loadingRandom, setLoadingRandom] = useState(false);
+  const [isAdminUser, setIsAdminUser] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      const adminEmails = ["brankovantland@gmail.com", "branko18vantland@gmail.com", "tamoopdam@gmail.com", "jack.ouwerkerk@vsodaafgeluk.nl"];
+      setIsAdminUser(adminEmails.includes(session?.user?.email ?? ""));
+    });
+  }, []);
 
   const fetchQuestion = useCallback(async (roomId: string, playerId: string, playerToken: string) => {
     const { data } = await supabase.functions.invoke("game-action", {
@@ -615,6 +623,18 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
     }
   };
 
+  const adminCloseRoom = async (roomId: string) => {
+    const { data, error } = await supabase.functions.invoke("game-action", {
+      body: { action: "admin-close-room", roomId },
+    });
+    if (error || data?.error) {
+      toast.error(data?.error || "Kon kamer niet sluiten");
+    } else {
+      setPublicRooms((prev) => prev.filter((r) => r.id !== roomId));
+      toast.success("Kamer gesloten");
+    }
+  };
+
   const filteredPublicRooms = publicRooms.filter(r =>
     r.host_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     r.code.toLowerCase().includes(searchQuery.toLowerCase())
@@ -700,9 +720,16 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
                             {r.game_mode === "kahoot" ? "🎯 Kahoot" : "⚡ Normaal"} · {r.team_mode === "teams" ? `👥 ${r.num_teams} teams` : "👤 Solo"} · {r.player_count}/{r.max_players} spelers
                           </p>
                         </div>
-                        <Button size="sm" onClick={() => joinPublicRoom(r)} className="shrink-0 ml-2">
-                          <UserPlus className="h-4 w-4 mr-1" /> Join
-                        </Button>
+                        <div className="flex items-center gap-1 shrink-0 ml-2">
+                          <Button size="sm" onClick={() => joinPublicRoom(r)}>
+                            <UserPlus className="h-4 w-4 mr-1" /> Join
+                          </Button>
+                          {isAdminUser && (
+                            <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive h-8 w-8 p-0" onClick={() => adminCloseRoom(r.id)} title="Kamer sluiten">
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
                       </div>
                     ))}
                   </div>

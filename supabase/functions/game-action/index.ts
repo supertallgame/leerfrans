@@ -6,6 +6,8 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const ADMIN_EMAILS = ["brankovantland@gmail.com", "branko18vantland@gmail.com", "tamoopdam@gmail.com", "jack.ouwerkerk@vsodaafgeluk.nl"];
+
 function jsonResponse(body: Record<string, unknown>, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
@@ -47,6 +49,19 @@ function isHost(player: any, room: any): boolean {
   return player.player_name === room.host_name;
 }
 
+async function getAdminEmail(req: Request, supabase: ReturnType<typeof createClient>): Promise<string | null> {
+  const authHeader = req.headers.get("authorization");
+  if (!authHeader?.startsWith("Bearer ")) return null;
+  const token = authHeader.slice(7);
+  const anonClient = createClient(
+    Deno.env.get("SUPABASE_URL")!,
+    Deno.env.get("SUPABASE_ANON_KEY")!
+  );
+  const { data: { user } } = await anonClient.auth.getUser(token);
+  if (!user?.email || !ADMIN_EMAILS.includes(user.email)) return null;
+  return user.email;
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -58,7 +73,20 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    const { action, roomId, playerId, playerToken, answer, questions: bodyQuestions, teamAssignments, numTeams, teamNames, teamEmojis } = await req.json();
+    const body = await req.json();
+    const { action, roomId, playerId, playerToken, answer, questions: bodyQuestions, teamAssignments, numTeams, teamNames, teamEmojis } = body;
+
+    // Admin-only action: close room (no player verification needed)
+    if (action === "admin-close-room") {
+      if (!roomId) return jsonResponse({ error: "Missing roomId" }, 400);
+      const adminEmail = await getAdminEmail(req, supabase);
+      if (!adminEmail) return jsonResponse({ error: "Not authorized" }, 403);
+      // Delete players first, then room
+      await supabase.from("game_players").delete().eq("room_id", roomId);
+      await supabase.from("game_questions").delete().eq("room_id", roomId);
+      await supabase.from("game_rooms").delete().eq("id", roomId);
+      return jsonResponse({ success: true });
+    }
 
     if (!roomId || !playerId || !playerToken) {
       return jsonResponse({ error: "Missing fields" }, 400);
@@ -151,7 +179,6 @@ Deno.serve(async (req) => {
       if (!teamAssignments || typeof teamAssignments !== "object") {
         return jsonResponse({ error: "Invalid team assignments" }, 400);
       }
-      // teamAssignments is { playerId: teamNumber }
       for (const [pid, teamNum] of Object.entries(teamAssignments)) {
         await supabase
           .from("game_players")

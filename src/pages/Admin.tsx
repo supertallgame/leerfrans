@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Shield, Home, FlaskConical, Microscope, Trash2, Star, MessageSquare, Search, Filter, Download, BarChart3, TrendingUp, Users, Mail, VolumeX, Clock } from "lucide-react";
+import { Shield, Home, FlaskConical, Microscope, Trash2, Star, MessageSquare, Search, Filter, Download, BarChart3, TrendingUp, Users, Mail, VolumeX, Clock, Gamepad2, Globe, Lock, XCircle } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -44,6 +44,18 @@ interface MutedUser {
   created_at: string;
 }
 
+interface GameRoom {
+  id: string;
+  code: string;
+  host_name: string;
+  status: string;
+  is_public: boolean;
+  game_mode: string;
+  team_mode: string;
+  created_at: string;
+  max_players: number;
+}
+
 const ADMIN_EMAILS = ["brankovantland@gmail.com", "branko18vantland@gmail.com", "tamoopdam@gmail.com", "jack.ouwerkerk@vsodaafgeluk.nl"];
 
 const FlagEN = ({ className = "w-5 h-3.5" }: { className?: string }) => (
@@ -80,6 +92,8 @@ export default function Admin() {
   const [muteDuration, setMuteDuration] = useState("1h");
   const [muteReason, setMuteReason] = useState("");
   const [blockAnonymous, setBlockAnonymous] = useState(false);
+  const [gameRooms, setGameRooms] = useState<GameRoom[]>([]);
+  const [closeRoomId, setCloseRoomId] = useState<string | null>(null);
 
   useEffect(() => {
     checkAdmin();
@@ -107,11 +121,12 @@ export default function Admin() {
     }
     setIsAdmin(true);
     // Load disabled subjects + reviews in parallel
-    const [settingsRes, anonRes, reviewsRes, mutesRes] = await Promise.all([
+    const [settingsRes, anonRes, reviewsRes, mutesRes, roomsRes] = await Promise.all([
       supabase.from("admin_settings").select("value").eq("key", "disabled_subjects").single(),
       supabase.from("admin_settings").select("value").eq("key", "block_anonymous_reviews").maybeSingle(),
       supabase.rpc("get_reviews_admin" as any),
       supabase.from("muted_users" as any).select("*").order("created_at", { ascending: false }) as any,
+      supabase.from("game_rooms").select("id, code, host_name, status, is_public, game_mode, team_mode, created_at, max_players").order("created_at", { ascending: false }) as any,
     ]);
     if (settingsRes.data?.value) {
       setDisabledSubjects(settingsRes.data.value as string[]);
@@ -124,6 +139,9 @@ export default function Admin() {
     }
     if (mutesRes.data) {
       setMutedUsers(mutesRes.data);
+    }
+    if (roomsRes.data) {
+      setGameRooms(roomsRes.data);
     }
     setLoading(false);
   };
@@ -192,6 +210,26 @@ export default function Admin() {
       toast.success("Review verwijderd");
     }
     setDeleteId(null);
+  };
+
+  const handleCloseRoom = async () => {
+    if (!closeRoomId) return;
+    const { data: { session } } = await supabase.auth.getSession();
+    const { data, error } = await supabase.functions.invoke("game-action", {
+      body: { action: "admin-close-room", roomId: closeRoomId },
+    });
+    if (error || data?.error) {
+      toast.error(data?.error || "Kon kamer niet sluiten");
+    } else {
+      setGameRooms((prev) => prev.filter((r) => r.id !== closeRoomId));
+      toast.success("Kamer gesloten");
+    }
+    setCloseRoomId(null);
+  };
+
+  const fetchGameRooms = async () => {
+    const { data } = await supabase.from("game_rooms").select("id, code, host_name, status, is_public, game_mode, team_mode, created_at, max_players").order("created_at", { ascending: false }) as any;
+    if (data) setGameRooms(data);
   };
 
   const exportReviewsCsv = () => {
@@ -558,7 +596,66 @@ export default function Admin() {
             </div>
           )}
         </div>
-      </div>
+        </div>
+
+        {/* Game rooms beheer */}
+        <div className="rounded-2xl border border-border bg-card p-6 space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold flex items-center gap-2">
+              <Gamepad2 className="h-5 w-5" /> Multiplayer kamers
+            </h2>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">{gameRooms.length} kamer{gameRooms.length !== 1 ? "s" : ""}</span>
+              <Button variant="outline" size="sm" onClick={fetchGameRooms} className="gap-1.5">
+                🔄 Vernieuwen
+              </Button>
+            </div>
+          </div>
+          {gameRooms.length === 0 ? (
+            <p className="text-sm text-muted-foreground">Geen actieve kamers.</p>
+          ) : (
+            <div className="space-y-2">
+              {gameRooms.map((room) => (
+                <div key={room.id} className="flex items-center justify-between px-4 py-3 rounded-lg border border-border">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-medium text-sm">{room.host_name}</span>
+                      <span className="font-mono text-xs bg-muted px-1.5 py-0.5 rounded">{room.code}</span>
+                      {room.is_public ? (
+                        <span className="inline-flex items-center gap-1 text-[10px] text-primary bg-primary/10 px-1.5 py-0.5 rounded-full">
+                          <Globe className="h-3 w-3" /> Publiek
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded-full">
+                          <Lock className="h-3 w-3" /> Privé
+                        </span>
+                      )}
+                      <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${
+                        room.status === "waiting" ? "bg-yellow-500/10 text-yellow-600" :
+                        room.status === "playing" ? "bg-green-500/10 text-green-600" :
+                        "bg-muted text-muted-foreground"
+                      }`}>
+                        {room.status === "waiting" ? "Wachtend" : room.status === "playing" ? "Bezig" : room.status === "finished" ? "Klaar" : room.status}
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      {room.game_mode === "kahoot" ? "🎯 Kahoot" : "⚡ Normaal"} · {room.team_mode === "teams" ? "👥 Teams" : "👤 Solo"} · {new Date(room.created_at).toLocaleString("nl-NL")}
+                    </p>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-destructive hover:text-destructive shrink-0"
+                    onClick={() => setCloseRoomId(room.id)}
+                    title="Kamer sluiten"
+                  >
+                    <XCircle className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
 
       <AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
         <AlertDialogContent>
@@ -572,6 +669,23 @@ export default function Admin() {
             <AlertDialogCancel>Annuleren</AlertDialogCancel>
             <AlertDialogAction onClick={handleDeleteReview} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
               Verwijderen
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={!!closeRoomId} onOpenChange={(open) => !open && setCloseRoomId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Kamer sluiten?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Weet je zeker dat je deze multiplayer kamer wilt sluiten? Alle spelers worden verwijderd.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuleren</AlertDialogCancel>
+            <AlertDialogAction onClick={handleCloseRoom} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Sluiten
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
