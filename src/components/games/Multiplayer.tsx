@@ -395,13 +395,17 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
     if (!allAnswered) return;
     setShowResult(true);
     setShowKahootScoreboard(true);
-    setKahootCountdown(3);
+    setKahootCountdown(5);
     if (pendingCorrect === true) playCorrect();
     else if (pendingCorrect === false) playWrong();
-    // Fire confetti if current player is #1
-    const sorted = [...players].sort((a, b) => b.score - a.score);
-    if (sorted[0]?.id === myPlayerId && sorted[0]?.score > 0) {
-      setTimeout(() => { fireConfetti(); playVictory(); }, 300);
+    // Fire confetti if current player is #1 (only once per question)
+    const qIndex = room.current_question_index;
+    if (victoryFiredForIndex.current !== qIndex) {
+      const sorted = [...players].sort((a, b) => b.score - a.score);
+      if (sorted[0]?.id === myPlayerId && sorted[0]?.score > 0) {
+        victoryFiredForIndex.current = qIndex;
+        setTimeout(() => { fireConfetti(); playVictory(); }, 300);
+      }
     }
   }, [players, room, phase, showKahootScoreboard, pendingCorrect]);
 
