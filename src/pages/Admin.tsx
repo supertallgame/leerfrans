@@ -92,6 +92,8 @@ export default function Admin() {
   const [muteDuration, setMuteDuration] = useState("1h");
   const [muteReason, setMuteReason] = useState("");
   const [blockAnonymous, setBlockAnonymous] = useState(false);
+  const [gameRooms, setGameRooms] = useState<GameRoom[]>([]);
+  const [closeRoomId, setCloseRoomId] = useState<string | null>(null);
 
   useEffect(() => {
     checkAdmin();
