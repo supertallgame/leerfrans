@@ -311,7 +311,11 @@ function ReplySection({
                   )}
                 </div>
               </div>
-              <p className="text-xs text-foreground/70">{translatedMessages[`reply-${reply.id}`] || reply.message}</p>
+              <p className="text-xs text-foreground/70">
+                {translatedMessages[`reply-${reply.id}`] || (
+                  <span className={isTranslating ? "animate-pulse text-muted-foreground" : ""}>{reply.message}{isTranslating && " ⏳"}</span>
+                )}
+              </p>
             </div>
           ))}
         </div>
