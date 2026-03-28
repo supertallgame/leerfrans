@@ -623,6 +623,18 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
     }
   };
 
+  const adminCloseRoom = async (roomId: string) => {
+    const { data, error } = await supabase.functions.invoke("game-action", {
+      body: { action: "admin-close-room", roomId },
+    });
+    if (error || data?.error) {
+      toast.error(data?.error || "Kon kamer niet sluiten");
+    } else {
+      setPublicRooms((prev) => prev.filter((r) => r.id !== roomId));
+      toast.success("Kamer gesloten");
+    }
+  };
+
   const filteredPublicRooms = publicRooms.filter(r =>
     r.host_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     r.code.toLowerCase().includes(searchQuery.toLowerCase())
