@@ -27,8 +27,9 @@ const AiChat = lazy(() => import("@/components/games/AiChat"));
 const TrueOrFalse = lazy(() => import("@/components/games/TrueOrFalse"));
 const MemoryGame = lazy(() => import("@/components/games/MemoryGame"));
 const SkeletonLabel = lazy(() => import("@/components/games/SkeletonLabel"));
+const Multiplayer = lazy(() => import("@/components/games/Multiplayer"));
 
-type Game = "menu" | "flashcards" | "quiz" | "match" | "type" | "fill" | "sentence" | "ai" | "truefalse" | "memory" | "skeleton";
+type Game = "menu" | "flashcards" | "quiz" | "match" | "type" | "fill" | "sentence" | "ai" | "truefalse" | "memory" | "skeleton" | "multiplayer";
 
 const FlagFR = ({ className = "w-5 h-3.5" }: { className?: string }) => (
   <svg viewBox="0 0 640 480" className={className} aria-label="Francúzsko">
