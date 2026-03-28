@@ -156,6 +156,7 @@ function ReplySection({
   onReplyAdded,
   onDeleteReply,
   translatedMessages,
+  isTranslating,
 }: {
   reviewId: string;
   replies: ReviewReply[];
@@ -163,6 +164,7 @@ function ReplySection({
   onReplyAdded: (reply: ReviewReply) => void;
   onDeleteReply: (id: string) => void;
   translatedMessages: Record<string, string>;
+  isTranslating: boolean;
 }) {
   const [expanded, setExpanded] = useState(false);
   const [showForm, setShowForm] = useState(false);
