@@ -423,8 +423,19 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
     const allAnswered = players.every((p) => p.has_answered);
     if (!allAnswered) return;
     setShowResult(true);
-    setShowKahootScoreboard(true);
-    setKahootCountdown(5);
+    const timer = room.kahoot_timer ?? 5;
+    if (timer === 0) {
+      // Instant advance: show scoreboard briefly for feedback, then advance
+      setShowKahootScoreboard(true);
+      setKahootCountdown(null);
+      setTimeout(() => {
+        setShowKahootScoreboard(false);
+        if (isHost) nextQuestion();
+      }, 1500);
+    } else {
+      setShowKahootScoreboard(true);
+      setKahootCountdown(timer);
+    }
     if (pendingCorrect === true) playCorrect();
     else if (pendingCorrect === false) playWrong();
     // Fire confetti if current player is #1 (only once per question)
