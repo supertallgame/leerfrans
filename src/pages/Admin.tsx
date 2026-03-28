@@ -212,6 +212,26 @@ export default function Admin() {
     setDeleteId(null);
   };
 
+  const handleCloseRoom = async () => {
+    if (!closeRoomId) return;
+    const { data: { session } } = await supabase.auth.getSession();
+    const { data, error } = await supabase.functions.invoke("game-action", {
+      body: { action: "admin-close-room", roomId: closeRoomId },
+    });
+    if (error || data?.error) {
+      toast.error(data?.error || "Kon kamer niet sluiten");
+    } else {
+      setGameRooms((prev) => prev.filter((r) => r.id !== closeRoomId));
+      toast.success("Kamer gesloten");
+    }
+    setCloseRoomId(null);
+  };
+
+  const fetchGameRooms = async () => {
+    const { data } = await supabase.from("game_rooms").select("id, code, host_name, status, is_public, game_mode, team_mode, created_at, max_players").order("created_at", { ascending: false }) as any;
+    if (data) setGameRooms(data);
+  };
+
   const exportReviewsCsv = () => {
     if (reviews.length === 0) return;
     const header = "Naam,Sterren,Bericht,Datum";
