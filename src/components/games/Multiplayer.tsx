@@ -340,8 +340,13 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
               fetchQuestion(updatedRoom.id, myPlayerId, myPlayerToken);
             }
           }
-          if (newRoom.status === "finished") {
+           if (newRoom.status === "finished") {
             setPhase("results");
+            // Fire confetti for #1 player
+            const sorted = [...players].sort((a, b) => b.score - a.score);
+            if (sorted[0]?.id === myPlayerId && sorted[0]?.score > 0) {
+              setTimeout(() => fireConfetti(), 500);
+            }
           }
         }
       )
