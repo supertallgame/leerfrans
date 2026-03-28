@@ -106,6 +106,9 @@ const mp = {
     kahoot2: "Kahoot",
     solo2: "Solo",
     playerLeft: (name: string) => `${name} heeft het spel verlaten`,
+    scoreboardTime: "Scorebord tijd",
+    instant: "Direct",
+    seconds: "sec",
   },
   sk: {
     back: "Späť",
@@ -188,6 +191,9 @@ const mp = {
     kahoot2: "Kahoot",
     solo2: "Sólo",
     playerLeft: (name: string) => `${name} opustil hru`,
+    scoreboardTime: "Čas výsledkovej tabule",
+    instant: "Okamžite",
+    seconds: "sek",
   },
 } as const;
 
@@ -265,6 +271,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
   const [numTeams, setNumTeams] = useState(2);
   const [teamNames, setTeamNames] = useState<string[]>(["Team 1", "Team 2", "Team 3", "Team 4"]);
   const [teamEmojis, setTeamEmojis] = useState<string[]>(["🔵", "🔴", "🟢", "🟡"]);
+  const [kahootTimerSetting, setKahootTimerSetting] = useState(5);
   const [showEmojiPicker, setShowEmojiPicker] = useState<number | null>(null);
   const [isHost, setIsHost] = useState(false);
   const [room, setRoom] = useState<Room | null>(null);
@@ -331,6 +338,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
             num_teams: newRoom.num_teams || 2,
             team_names: newRoom.team_names || [],
             team_emojis: newRoom.team_emojis || ["🔵", "🔴", "🟢", "🟡"],
+            kahoot_timer: newRoom.kahoot_timer ?? 5,
           };
           setRoom(updatedRoom);
           if (updatedRoom.team_names?.length > 0) setTeamNames(updatedRoom.team_names);
