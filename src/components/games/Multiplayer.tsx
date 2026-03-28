@@ -106,6 +106,7 @@ const mp = {
     kahoot2: "Kahoot",
     solo2: "Solo",
     playerLeft: (name: string) => `${name} heeft het spel verlaten`,
+    playerJoined: (name: string) => `${name} is toegetreden!`,
     scoreboardTime: "Scorebord tijd",
     instant: "Direct",
     seconds: "sec",
