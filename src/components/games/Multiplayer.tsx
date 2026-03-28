@@ -720,9 +720,16 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
                             {r.game_mode === "kahoot" ? "🎯 Kahoot" : "⚡ Normaal"} · {r.team_mode === "teams" ? `👥 ${r.num_teams} teams` : "👤 Solo"} · {r.player_count}/{r.max_players} spelers
                           </p>
                         </div>
-                        <Button size="sm" onClick={() => joinPublicRoom(r)} className="shrink-0 ml-2">
-                          <UserPlus className="h-4 w-4 mr-1" /> Join
-                        </Button>
+                        <div className="flex items-center gap-1 shrink-0 ml-2">
+                          <Button size="sm" onClick={() => joinPublicRoom(r)}>
+                            <UserPlus className="h-4 w-4 mr-1" /> Join
+                          </Button>
+                          {isAdminUser && (
+                            <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive h-8 w-8 p-0" onClick={() => adminCloseRoom(r.id)} title="Kamer sluiten">
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
                       </div>
                     ))}
                   </div>
