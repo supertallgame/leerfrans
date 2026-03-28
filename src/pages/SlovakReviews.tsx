@@ -519,7 +519,14 @@ export default function SlovakReviews() {
                     </div>
                   </div>
                   <Stars rating={review.rating} />
-                  <p className="text-sm text-foreground/80">{translatedMessages[`review-${review.id}`] || review.message}</p>
+                  {translatedMessages[`review-${review.id}`] ? (
+                    <p className="text-sm text-foreground/80">{translatedMessages[`review-${review.id}`]}</p>
+                  ) : (
+                    <p className="text-sm text-foreground/80">
+                      <span className={isTranslating ? "animate-pulse text-muted-foreground" : ""}>{review.message}</span>
+                      {isTranslating && <span className="ml-2 text-xs text-muted-foreground">⏳</span>}
+                    </p>
+                  )}
                   <ReplySection
                     reviewId={review.id}
                     replies={replies}
