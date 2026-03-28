@@ -213,6 +213,7 @@ interface Room {
   team_names: string[];
   team_emojis: string[];
   is_public?: boolean;
+  kahoot_timer: number;
 }
 
 interface PublicRoom {
