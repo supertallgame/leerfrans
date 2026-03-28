@@ -64,3 +64,13 @@ export function playCountdownGo() {
   setTimeout(() => beep(784, 0.15, "sine", 0.25), 160); // G5
   setTimeout(() => beep(1047, 0.25, "sine", 0.3), 240); // C6
 }
+
+export function playVictory() {
+  // Triumphant ascending fanfare
+  beep(523, 0.12, "sine", 0.2);    // C5
+  setTimeout(() => beep(659, 0.12, "sine", 0.2), 100);  // E5
+  setTimeout(() => beep(784, 0.12, "sine", 0.25), 200); // G5
+  setTimeout(() => beep(1047, 0.15, "sine", 0.3), 300);  // C6
+  setTimeout(() => beep(1319, 0.15, "sine", 0.3), 420);  // E6
+  setTimeout(() => beep(1568, 0.3, "sine", 0.25), 540);  // G6 (held)
+}
