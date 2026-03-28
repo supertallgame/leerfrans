@@ -105,6 +105,7 @@ const mp = {
     normal2: "Normaal",
     kahoot2: "Kahoot",
     solo2: "Solo",
+    playerLeft: (name: string) => `${name} heeft het spel verlaten`,
   },
   sk: {
     back: "Späť",
@@ -186,6 +187,7 @@ const mp = {
     normal2: "Normálny",
     kahoot2: "Kahoot",
     solo2: "Sólo",
+    playerLeft: (name: string) => `${name} opustil hru`,
   },
 } as const;
 
