@@ -136,6 +136,7 @@ export type Database = {
           host_player_id: string | null
           id: string
           is_public: boolean
+          kahoot_timer: number
           max_players: number
           num_teams: number
           status: string
@@ -154,6 +155,7 @@ export type Database = {
           host_player_id?: string | null
           id?: string
           is_public?: boolean
+          kahoot_timer?: number
           max_players?: number
           num_teams?: number
           status?: string
@@ -172,6 +174,7 @@ export type Database = {
           host_player_id?: string | null
           id?: string
           is_public?: boolean
+          kahoot_timer?: number
           max_players?: number
           num_teams?: number
           status?: string
@@ -295,6 +298,7 @@ export type Database = {
           host_name: string | null
           id: string | null
           is_public: boolean | null
+          kahoot_timer: number | null
           num_teams: number | null
           status: string | null
           team_emojis: Json | null
@@ -311,6 +315,7 @@ export type Database = {
           host_name?: string | null
           id?: string | null
           is_public?: boolean | null
+          kahoot_timer?: number | null
           num_teams?: number | null
           status?: string | null
           team_emojis?: Json | null
@@ -327,6 +332,7 @@ export type Database = {
           host_name?: string | null
           id?: string | null
           is_public?: boolean | null
+          kahoot_timer?: number | null
           num_teams?: number | null
           status?: string | null
           team_emojis?: Json | null
@@ -385,6 +391,22 @@ export type Database = {
               p_game_mode?: string
               p_host_name: string
               p_is_public?: boolean
+              p_max_players?: number
+              p_num_teams?: number
+              p_team_emojis?: Json
+              p_team_mode?: string
+              p_team_names?: Json
+              p_total_questions?: number
+            }
+            Returns: Json
+          }
+        | {
+            Args: {
+              p_code: string
+              p_game_mode?: string
+              p_host_name: string
+              p_is_public?: boolean
+              p_kahoot_timer?: number
               p_max_players?: number
               p_num_teams?: number
               p_team_emojis?: Json

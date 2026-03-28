@@ -1,0 +1,1 @@
+ALTER TABLE public.game_rooms ADD COLUMN kahoot_timer integer NOT NULL DEFAULT 5;

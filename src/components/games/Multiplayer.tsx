@@ -106,6 +106,9 @@ const mp = {
     kahoot2: "Kahoot",
     solo2: "Solo",
     playerLeft: (name: string) => `${name} heeft het spel verlaten`,
+    scoreboardTime: "Scorebord tijd",
+    instant: "Direct",
+    seconds: "sec",
   },
   sk: {
     back: "Späť",
@@ -188,6 +191,9 @@ const mp = {
     kahoot2: "Kahoot",
     solo2: "Sólo",
     playerLeft: (name: string) => `${name} opustil hru`,
+    scoreboardTime: "Čas výsledkovej tabule",
+    instant: "Okamžite",
+    seconds: "sek",
   },
 } as const;
 
@@ -213,6 +219,7 @@ interface Room {
   team_names: string[];
   team_emojis: string[];
   is_public?: boolean;
+  kahoot_timer: number;
 }
 
 interface PublicRoom {
@@ -264,6 +271,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
   const [numTeams, setNumTeams] = useState(2);
   const [teamNames, setTeamNames] = useState<string[]>(["Team 1", "Team 2", "Team 3", "Team 4"]);
   const [teamEmojis, setTeamEmojis] = useState<string[]>(["🔵", "🔴", "🟢", "🟡"]);
+  const [kahootTimerSetting, setKahootTimerSetting] = useState(5);
   const [showEmojiPicker, setShowEmojiPicker] = useState<number | null>(null);
   const [isHost, setIsHost] = useState(false);
   const [room, setRoom] = useState<Room | null>(null);
@@ -330,6 +338,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
             num_teams: newRoom.num_teams || 2,
             team_names: newRoom.team_names || [],
             team_emojis: newRoom.team_emojis || ["🔵", "🔴", "🟢", "🟡"],
+            kahoot_timer: newRoom.kahoot_timer ?? 5,
           };
           setRoom(updatedRoom);
           if (updatedRoom.team_names?.length > 0) setTeamNames(updatedRoom.team_names);
@@ -414,8 +423,19 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
     const allAnswered = players.every((p) => p.has_answered);
     if (!allAnswered) return;
     setShowResult(true);
-    setShowKahootScoreboard(true);
-    setKahootCountdown(5);
+    const timer = room.kahoot_timer ?? 5;
+    if (timer === 0) {
+      // Instant advance: show scoreboard briefly for feedback, then advance
+      setShowKahootScoreboard(true);
+      setKahootCountdown(null);
+      setTimeout(() => {
+        setShowKahootScoreboard(false);
+        if (isHost) nextQuestion();
+      }, 1500);
+    } else {
+      setShowKahootScoreboard(true);
+      setKahootCountdown(timer);
+    }
     if (pendingCorrect === true) playCorrect();
     else if (pendingCorrect === false) playWrong();
     // Fire confetti if current player is #1 (only once per question)
@@ -508,6 +528,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
         p_team_names: teamNames.slice(0, teams),
         p_team_emojis: teamEmojis.slice(0, teams),
         p_is_public: isPublic,
+        p_kahoot_timer: gameMode === "kahoot" ? kahootTimerSetting : 5,
       });
 
     if (roomError || !roomData) return toast.error("Room error");
@@ -531,6 +552,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
       num_teams: teams,
       team_names: teamNames.slice(0, teams),
       team_emojis: teamEmojis.slice(0, teams),
+      kahoot_timer: roomData.kahoot_timer ?? kahootTimerSetting,
     });
     setMyPlayerId(pid);
     setMyPlayerToken(ptoken);
@@ -554,7 +576,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
 
     const { data: roomData, error } = await (supabase
       .from("game_rooms_public" as any)
-      .select("id, code, host_name, status, current_question_index, total_questions, direction, game_mode, team_mode, num_teams, team_names, team_emojis")
+      .select("id, code, host_name, status, current_question_index, total_questions, direction, game_mode, team_mode, num_teams, team_names, team_emojis, kahoot_timer")
       .eq("code", roomCode.toUpperCase().trim())
       .eq("status", "waiting")
       .maybeSingle() as any);
@@ -571,6 +593,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
       num_teams: roomData.num_teams || 2,
       team_names: roomData.team_names || [],
       team_emojis: roomData.team_emojis || ["🔵", "🔴", "🟢", "🟡"],
+      kahoot_timer: roomData.kahoot_timer ?? 5,
     } as Room);
     if (roomData.team_emojis?.length > 0) setTeamEmojis(roomData.team_emojis);
     setMyPlayerId(playerData?.id ?? null);
@@ -1032,6 +1055,36 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
               <Switch checked={!isPublic} onCheckedChange={(checked) => setIsPublic(!checked)} />
             </CardContent>
           </Card>
+
+          {/* Kahoot timer setting */}
+          {gameMode === "kahoot" && (
+            <Card>
+              <CardContent className="p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm font-medium">{m.scoreboardTime}</span>
+                  </div>
+                  <span className="text-sm font-bold text-primary">
+                    {kahootTimerSetting === 0 ? m.instant : `${kahootTimerSetting} ${m.seconds}`}
+                  </span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-xs text-muted-foreground w-6">0</span>
+                  <input
+                    type="range"
+                    min={0}
+                    max={10}
+                    step={1}
+                    value={kahootTimerSetting}
+                    onChange={(e) => setKahootTimerSetting(Number(e.target.value))}
+                    className="flex-1 h-2 accent-primary cursor-pointer"
+                  />
+                  <span className="text-xs text-muted-foreground w-6">10</span>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           <div className="grid gap-3">
             <Card className="cursor-pointer transition-all hover:shadow-lg hover:-translate-y-1 active:scale-[0.98] border-2 hover:border-primary/50" onClick={() => startWithSettings("solo")}>
