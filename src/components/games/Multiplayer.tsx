@@ -21,7 +21,7 @@ import { shuffle } from "@/data/vocabulary";
 import { useChapter } from "@/contexts/ChapterContext";
 import { useLocale } from "@/contexts/LocaleContext";
 import { toast } from "sonner";
-import { playCorrect, playWrong, playCountdownTick, playCountdownGo } from "@/lib/sounds";
+import { playCorrect, playWrong, playCountdownTick, playCountdownGo, playVictory } from "@/lib/sounds";
 import { fireConfetti } from "@/lib/confetti";
 
 const mp = {
@@ -345,7 +345,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
             // Fire confetti for #1 player
             const sorted = [...players].sort((a, b) => b.score - a.score);
             if (sorted[0]?.id === myPlayerId && sorted[0]?.score > 0) {
-              setTimeout(() => fireConfetti(), 500);
+              setTimeout(() => { fireConfetti(); playVictory(); }, 500);
             }
           }
         }
@@ -399,7 +399,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
     // Fire confetti if current player is #1
     const sorted = [...players].sort((a, b) => b.score - a.score);
     if (sorted[0]?.id === myPlayerId && sorted[0]?.score > 0) {
-      setTimeout(() => fireConfetti(), 300);
+      setTimeout(() => { fireConfetti(); playVictory(); }, 300);
     }
   }, [players, room, phase, showKahootScoreboard, pendingCorrect]);
 
