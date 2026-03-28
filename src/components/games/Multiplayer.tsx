@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -113,6 +113,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
   const [isPublic, setIsPublic] = useState(false);
   const [publicRooms, setPublicRooms] = useState<PublicRoom[]>([]);
   const [showPublicRooms, setShowPublicRooms] = useState(false);
+  const publicRoomsRef = useRef<HTMLDivElement>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [loadingRandom, setLoadingRandom] = useState(false);
 
@@ -659,7 +660,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
                 {loadingRandom ? "Zoeken..." : "🎲 Ga willekeurige kamer in"}
               </Button>
               <Button
-                onClick={() => { setShowPublicRooms(!showPublicRooms); if (!showPublicRooms) fetchPublicRooms(); }}
+                onClick={() => { const opening = !showPublicRooms; setShowPublicRooms(opening); if (opening) { fetchPublicRooms(); setTimeout(() => publicRoomsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 100); } }}
                 variant="ghost"
                 className="w-full gap-2 text-muted-foreground"
               >
@@ -670,7 +671,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
 
           {/* Public rooms browser */}
           {showPublicRooms && (
-            <Card>
+            <Card ref={publicRoomsRef}>
               <CardContent className="p-4 md:p-6 space-y-3">
                 <div className="flex items-center gap-2">
                   <Search className="h-4 w-4 text-muted-foreground" />
