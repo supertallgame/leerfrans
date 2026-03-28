@@ -332,6 +332,13 @@ export default function SlovakReviews() {
   const [sortBy, setSortBy] = useState<"newest" | "rating">("newest");
   const [filterRating, setFilterRating] = useState<number | null>(null);
 
+  // Build translation items for all review messages + reply messages
+  const translationItems = [
+    ...reviews.map((r) => ({ id: `review-${r.id}`, text: r.message })),
+    ...replies.map((r) => ({ id: `reply-${r.id}`, text: r.message })),
+  ];
+  const translatedMessages = useTranslations(translationItems);
+
   useEffect(() => {
     const fetchData = async () => {
       const [reviewsRes, repliesRes] = await Promise.all([
@@ -511,13 +518,14 @@ export default function SlovakReviews() {
                     </div>
                   </div>
                   <Stars rating={review.rating} />
-                  <p className="text-sm text-foreground/80">{translateToSlovak(review.message)}</p>
+                  <p className="text-sm text-foreground/80">{translatedMessages[`review-${review.id}`] || review.message}</p>
                   <ReplySection
                     reviewId={review.id}
                     replies={replies}
                     isOperator={isOperator}
                     onReplyAdded={(reply) => setReplies((prev) => [...prev, reply])}
                     onDeleteReply={(id) => setDeleteReplyId(id)}
+                    translatedMessages={translatedMessages}
                   />
                 </CardContent>
               </Card>
