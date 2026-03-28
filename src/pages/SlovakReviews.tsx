@@ -540,6 +540,7 @@ export default function SlovakReviews() {
                     onReplyAdded={(reply) => setReplies((prev) => [...prev, reply])}
                     onDeleteReply={(id) => setDeleteReplyId(id)}
                     translatedMessages={translatedMessages}
+                    isTranslating={isTranslating}
                   />
                 </CardContent>
               </Card>
