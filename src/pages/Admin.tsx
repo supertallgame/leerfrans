@@ -109,7 +109,25 @@ export default function Admin() {
       })
       .subscribe();
 
-    return () => { supabase.removeChannel(reviewChannel); };
+    const roomsChannel = supabase
+      .channel('admin-rooms-realtime')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'game_rooms' }, (payload) => {
+        const newRoom = payload.new as GameRoom;
+        setGameRooms((prev) => [newRoom, ...prev]);
+      })
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'game_rooms' }, (payload) => {
+        const updated = payload.new as GameRoom;
+        setGameRooms((prev) => prev.map((r) => r.id === updated.id ? updated : r));
+      })
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'game_rooms' }, (payload) => {
+        setGameRooms((prev) => prev.filter((r) => r.id !== (payload.old as any).id));
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(reviewChannel);
+      supabase.removeChannel(roomsChannel);
+    };
   }, []);
 
   const checkAdmin = async () => {
