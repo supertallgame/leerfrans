@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useThemeSync } from "@/hooks/use-theme-sync";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -20,6 +20,86 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { containsBannedWord } from "@/lib/censor";
 
+// In-memory translation cache
+const translationCache = new Map<string, string>();
+
+async function translateTexts(texts: string[]): Promise<string[]> {
+  // Find which texts need translation
+  const uncached: { index: number; text: string }[] = [];
+  const results: string[] = new Array(texts.length);
+
+  texts.forEach((text, i) => {
+    const cached = translationCache.get(text);
+    if (cached) {
+      results[i] = cached;
+    } else {
+      uncached.push({ index: i, text });
+    }
+  });
+
+  if (uncached.length === 0) return results;
+
+  try {
+    const { data, error } = await supabase.functions.invoke("translate", {
+      body: { texts: uncached.map((u) => u.text), targetLanguage: "Slovak" },
+    });
+
+    if (error || !data?.translations) {
+      // Fallback: return originals
+      uncached.forEach((u) => { results[u.index] = u.text; });
+      return results;
+    }
+
+    const translations = data.translations as string[];
+    uncached.forEach((u, i) => {
+      const translated = translations[i] || u.text;
+      translationCache.set(u.text, translated);
+      results[u.index] = translated;
+    });
+  } catch {
+    uncached.forEach((u) => { results[u.index] = u.text; });
+  }
+
+  return results;
+}
+
+// Hook for translating a map of id→text
+function useTranslations(items: { id: string; text: string }[]) {
+  const [translated, setTranslated] = useState<Record<string, string>>({});
+  const pendingRef = useRef(false);
+
+  useEffect(() => {
+    if (items.length === 0 || pendingRef.current) return;
+    const untranslated = items.filter((i) => !translated[i.id] && !translationCache.has(i.text));
+    const fromCache = items.filter((i) => !translated[i.id] && translationCache.has(i.text));
+
+    // Apply cached immediately
+    if (fromCache.length > 0) {
+      setTranslated((prev) => {
+        const next = { ...prev };
+        fromCache.forEach((i) => { next[i.id] = translationCache.get(i.text)!; });
+        return next;
+      });
+    }
+
+    if (untranslated.length === 0) return;
+
+    pendingRef.current = true;
+    // Batch in groups of 20
+    const batch = untranslated.slice(0, 20);
+    translateTexts(batch.map((b) => b.text)).then((results) => {
+      setTranslated((prev) => {
+        const next = { ...prev };
+        batch.forEach((b, i) => { next[b.id] = results[i]; });
+        return next;
+      });
+      pendingRef.current = false;
+    });
+  }, [items, translated]);
+
+  return translated;
+}
+
 interface ReviewReply {
   id: string;
   review_id: string;
@@ -38,54 +118,6 @@ interface Review {
 
 const OPERATOR_EMAILS = ["brankovantland@gmail.com", "branko18vantland@gmail.com", "tamoopdam@gmail.com", "jack.ouwerkerk@vsodaafgeluk.nl"];
 
-// Simple NL→SK translation map for common review words/phrases
-const nlToSkMap: Record<string, string> = {
-  // Common words
-  "goed": "dobrý", "goeie": "dobrá", "leuk": "zábavné", "leuke": "zábavná",
-  "mooi": "pekný", "mooie": "pekná", "slecht": "zlý", "slechte": "zlá",
-  "app": "aplikácia", "super": "super", "top": "top",
-  "erg": "veľmi", "heel": "veľmi", "zeer": "veľmi",
-  "woorden": "slovíčka", "woordjes": "slovíčka", "woord": "slovo",
-  "leren": "učiť sa", "oefenen": "cvičiť", "studeren": "študovať",
-  "spel": "hra", "spellen": "hry", "spelletje": "hra", "spelletjes": "hry",
-  "quiz": "kvíz", "quizzen": "kvízy",
-  "makkelijk": "ľahké", "makkelijke": "ľahká", "moeilijk": "ťažké", "moeilijke": "ťažká",
-  "handig": "praktické", "handige": "praktická",
-  "bedankt": "ďakujem", "dankjewel": "ďakujem", "dank": "vďaka",
-  "prima": "výborné", "perfect": "perfektné", "geweldig": "skvelé",
-  "fantastisch": "fantastické", "uitstekend": "vynikajúce",
-  "fijn": "fajn", "fijne": "fajn",
-  "niet": "nie", "geen": "žiadny", "wel": "áno",
-  "maar": "ale", "en": "a", "ook": "tiež", "met": "s",
-  "voor": "pre", "van": "z", "het": "to", "de": "ten/tá",
-  "is": "je", "zijn": "sú", "was": "bol", "kan": "môže",
-  "veel": "veľa", "meer": "viac", "beste": "najlepšia",
-  "school": "škola", "toets": "test", "toetsen": "testy",
-  "frans": "francúzština", "engels": "angličtina",
-  "werkt": "funguje", "helpt": "pomáha",
-  "ik": "ja", "we": "my", "je": "ty",
-  "vind": "myslím", "houd": "mám rád",
-};
-
-function translateToSlovak(text: string): string {
-  if (!text) return text;
-  // Word-by-word replacement (case-insensitive)
-  let result = text;
-  const words = text.split(/(\s+|[.,!?;:]+)/);
-  const translated = words.map((word) => {
-    const lower = word.toLowerCase();
-    if (nlToSkMap[lower]) {
-      // Preserve original casing of first letter
-      const replacement = nlToSkMap[lower];
-      if (word[0] === word[0].toUpperCase() && word[0] !== word[0].toLowerCase()) {
-        return replacement.charAt(0).toUpperCase() + replacement.slice(1);
-      }
-      return replacement;
-    }
-    return word;
-  });
-  return translated.join("");
-}
 
 function Stars({ rating }: { rating: number }) {
   return (
@@ -122,12 +154,14 @@ function ReplySection({
   isOperator,
   onReplyAdded,
   onDeleteReply,
+  translatedMessages,
 }: {
   reviewId: string;
   replies: ReviewReply[];
   isOperator: boolean;
   onReplyAdded: (reply: ReviewReply) => void;
   onDeleteReply: (id: string) => void;
+  translatedMessages: Record<string, string>;
 }) {
   const [expanded, setExpanded] = useState(false);
   const [showForm, setShowForm] = useState(false);
@@ -276,7 +310,7 @@ function ReplySection({
                   )}
                 </div>
               </div>
-              <p className="text-xs text-foreground/70">{translateToSlovak(reply.message)}</p>
+              <p className="text-xs text-foreground/70">{translatedMessages[`reply-${reply.id}`] || reply.message}</p>
             </div>
           ))}
         </div>
@@ -297,6 +331,13 @@ export default function SlovakReviews() {
   const [deleteReplyId, setDeleteReplyId] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<"newest" | "rating">("newest");
   const [filterRating, setFilterRating] = useState<number | null>(null);
+
+  // Build translation items for all review messages + reply messages
+  const translationItems = [
+    ...reviews.map((r) => ({ id: `review-${r.id}`, text: r.message })),
+    ...replies.map((r) => ({ id: `reply-${r.id}`, text: r.message })),
+  ];
+  const translatedMessages = useTranslations(translationItems);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -477,13 +518,14 @@ export default function SlovakReviews() {
                     </div>
                   </div>
                   <Stars rating={review.rating} />
-                  <p className="text-sm text-foreground/80">{translateToSlovak(review.message)}</p>
+                  <p className="text-sm text-foreground/80">{translatedMessages[`review-${review.id}`] || review.message}</p>
                   <ReplySection
                     reviewId={review.id}
                     replies={replies}
                     isOperator={isOperator}
                     onReplyAdded={(reply) => setReplies((prev) => [...prev, reply])}
                     onDeleteReply={(id) => setDeleteReplyId(id)}
+                    translatedMessages={translatedMessages}
                   />
                 </CardContent>
               </Card>
