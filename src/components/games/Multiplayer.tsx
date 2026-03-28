@@ -445,7 +445,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
   };
 
   const createRoom = async () => {
-    if (!playerName.trim()) return toast.error("Vul je naam in!");
+    if (!playerName.trim()) return toast.error(m.noName);
     setPhase("mode-select");
   };
 
