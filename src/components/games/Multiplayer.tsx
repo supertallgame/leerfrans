@@ -286,6 +286,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [loadingRandom, setLoadingRandom] = useState(false);
   const [isAdminUser, setIsAdminUser] = useState(false);
+  const victoryFiredForIndex = useRef<number | null>(null);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
