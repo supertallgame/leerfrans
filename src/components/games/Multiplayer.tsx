@@ -106,6 +106,7 @@ const mp = {
     kahoot2: "Kahoot",
     solo2: "Solo",
     playerLeft: (name: string) => `${name} heeft het spel verlaten`,
+    playerJoined: (name: string) => `${name} is toegetreden!`,
     scoreboardTime: "Scorebord tijd",
     instant: "Direct",
     seconds: "sec",
@@ -191,6 +192,7 @@ const mp = {
     kahoot2: "Kahoot",
     solo2: "Sólo",
     playerLeft: (name: string) => `${name} opustil hru`,
+    playerJoined: (name: string) => `${name} sa pripojil!`,
     scoreboardTime: "Čas výsledkovej tabule",
     instant: "Okamžite",
     seconds: "sek",
@@ -389,7 +391,11 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "game_players", filter: `room_id=eq.${room.id}` },
-        () => {
+        (payload) => {
+          const newPlayer = payload.new as any;
+          if (newPlayer?.id && newPlayer.id !== myPlayerId && newPlayer.player_name) {
+            toast.info(m.playerJoined(newPlayer.player_name), { icon: "🎉" });
+          }
           fetchPlayers(room.id);
         }
       )
