@@ -136,6 +136,7 @@ export type Database = {
           host_player_id: string | null
           id: string
           is_public: boolean
+          kahoot_timer: number
           max_players: number
           num_teams: number
           status: string
@@ -154,6 +155,7 @@ export type Database = {
           host_player_id?: string | null
           id?: string
           is_public?: boolean
+          kahoot_timer?: number
           max_players?: number
           num_teams?: number
           status?: string
@@ -172,6 +174,7 @@ export type Database = {
           host_player_id?: string | null
           id?: string
           is_public?: boolean
+          kahoot_timer?: number
           max_players?: number
           num_teams?: number
           status?: string
