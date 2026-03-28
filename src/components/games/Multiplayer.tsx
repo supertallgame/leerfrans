@@ -19,8 +19,174 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { shuffle } from "@/data/vocabulary";
 import { useChapter } from "@/contexts/ChapterContext";
+import { useLocale } from "@/contexts/LocaleContext";
 import { toast } from "sonner";
 import { playCorrect, playWrong, playCountdownTick, playCountdownGo } from "@/lib/sounds";
+
+const mp = {
+  nl: {
+    back: "Terug",
+    title: m.title,
+    subtitle: m.subtitle,
+    yourName: m.yourName,
+    newGame: "{m.newGame}",
+    or: "of",
+    enterCode: m.enterCode,
+    join: "{m.join}",
+    randomJoin: "{m.randomJoin}",
+    searching: m.searching,
+    searchPublic: m.searchPublic,
+    searchPlaceholder: m.searchPlaceholder,
+    refresh: "{m.refresh}",
+    noPublicRooms: m.noPublicRooms,
+    chooseMode: m.chooseMode,
+    howToPlay: m.howToPlay,
+    normal: "⚡ Normaal",
+    normalDesc: m.normalDesc,
+    kahoot: "🎯 Kahoot-stijl",
+    kahootDesc: m.kahootDesc,
+    soloOrTeams: m.soloOrTeams,
+    chooseHow: m.chooseHow,
+    privateRoom: m.privateRoom,
+    publicRoom: m.publicRoom,
+    privateDesc: m.privateDesc,
+    publicDesc: m.publicDesc,
+    solo: "👤 Iedereen voor zich",
+    soloDesc: m.soloDesc,
+    teams: "👥 Teams",
+    teamsDesc: m.teamsDesc,
+    numTeams: m.numTeams,
+    teamsLabel: m.teamsLabel,
+    chooseEmoji: m.chooseEmoji,
+    startWith: "Starten met",
+    teamsWord: "teams",
+    gameCode: m.gameCode,
+    teamsModeLabel: "Teams modus",
+    shareCode: m.shareCode,
+    gameStarting: m.gameStarting,
+    shuffleTeams: m.shuffleTeams,
+    unassigned: "Niet ingedeeld",
+    noPlayers: m.noPlayers,
+    players: "Spelers",
+    startGame: "🚀 Start het spel!",
+    playersCount: "spelers",
+    waitingHost: m.waitingHost,
+    leaveGame: m.leaveGame,
+    cancel: m.cancel,
+    leaveTitle: m.leaveTitle,
+    leaveHostDesc: m.leaveHostDesc,
+    leavePlayerDesc: m.leavePlayerDesc,
+    leave: m.leave,
+    question: "Vraag",
+    conceptToDesc: m.conceptToDesc,
+    descToConcept: m.descToConcept,
+    nlToTranslation: m.nlToTranslation,
+    translationToNl: m.translationToNl,
+    answerLocked: "✅ Antwoord vergrendeld! Wachten op andere spelers...",
+    viewResults: m.viewResults,
+    nextQuestion: m.nextQuestion,
+    standings: m.standings,
+    nextQuestionIn: "Volgende vraag over",
+    liveScore: m.liveScore,
+    results: m.results,
+    teamRanking: m.teamRanking,
+    individualScores: m.individualScores,
+    backToMenu: m.backToMenu,
+    hostLeft: "De host heeft het spel verlaten.",
+    couldNotClose: m.couldNotClose,
+    roomClosed: m.roomClosed,
+    closeRoom: m.closeRoom,
+    noName: "Vul je naam in!",
+    noCode: "Vul een code in!",
+    noRoomsAvailable: "Geen beschikbare kamers gevonden. Maak er zelf een aan!",
+    nameTaken: "Deze naam is al bezet",
+    needMinPlayers: "Er zijn minimaal 2 spelers nodig",
+    normal2: "Normaal",
+    kahoot2: "Kahoot",
+    solo2: "Solo",
+  },
+  sk: {
+    back: "Späť",
+    title: "Multiplayer Kvíz",
+    subtitle: "Hraj proti kamarátom!",
+    yourName: "Tvoje meno",
+    newGame: "🎮 Nová hra",
+    or: "alebo",
+    enterCode: "Zadaj kód (napr. ABC12)",
+    join: "🚀 Pripojiť sa",
+    randomJoin: "🎲 Náhodná izba",
+    searching: "Hľadám...",
+    searchPublic: "Hľadať verejné izby",
+    searchPlaceholder: "Hľadaj podľa mena alebo kódu...",
+    refresh: "🔄 Obnoviť",
+    noPublicRooms: "Žiadne verejné izby",
+    chooseMode: "Vyber režim",
+    howToPlay: "Ako chceš hrať?",
+    normal: "⚡ Normálny",
+    normalDesc: "Host určuje tempo a pokračuje na ďalšiu otázku",
+    kahoot: "🎯 Kahoot štýl",
+    kahootDesc: "Všetci musia odpovedať pred ďalšou otázkou",
+    soloOrTeams: "Sólo alebo Tímy?",
+    chooseHow: "Vyber si, ako chceš hrať",
+    privateRoom: "Súkromná izba",
+    publicRoom: "Verejná izba",
+    privateDesc: "Prístupná len s kódom",
+    publicDesc: "Ktokoľvek sa môže pripojiť",
+    solo: "👤 Každý sám za seba",
+    soloDesc: "Každý hráč hrá individuálne",
+    teams: "👥 Tímy",
+    teamsDesc: "Hraj v tímoch – host rozdeľuje hráčov",
+    numTeams: "Počet tímov:",
+    teamsLabel: "Tímy:",
+    chooseEmoji: "Vyber emoji",
+    startWith: "Začať s",
+    teamsWord: "tímami",
+    gameCode: "Herný kód",
+    teamsModeLabel: "Tímový režim",
+    shareCode: "Zdieľaj tento kód!",
+    gameStarting: "Hra začína...",
+    shuffleTeams: "Náhodne rozdeliť",
+    unassigned: "Nerozdelení",
+    noPlayers: "Zatiaľ žiadni hráči",
+    players: "Hráči",
+    startGame: "🚀 Spustiť hru!",
+    playersCount: "hráčov",
+    waitingHost: "Čakám, kým host spustí hru...",
+    leaveGame: "Opustiť hru",
+    cancel: "Zrušiť",
+    leaveTitle: "Opustiť hru?",
+    leaveHostDesc: "Ako host bude celá izba zmazaná a ostatní hráči nebudú môcť pokračovať.",
+    leavePlayerDesc: "Stratíš svoj postup, ak teraz opustíš hru.",
+    leave: "Opustiť",
+    question: "Otázka",
+    conceptToDesc: "Pojem → Popis",
+    descToConcept: "Popis → Pojem",
+    nlToTranslation: "SK Slovenčina → Preklad",
+    translationToNl: "Preklad → Slovenčina SK",
+    answerLocked: "✅ Odpoveď zamknutá! Čakám na ostatných hráčov...",
+    viewResults: "🏆 Zobraziť výsledky",
+    nextQuestion: "Ďalšia otázka →",
+    standings: "Priebežné poradie",
+    nextQuestionIn: "Ďalšia otázka o",
+    liveScore: "Live skóre",
+    results: "Výsledky!",
+    teamRanking: "🏆 Poradie tímov",
+    individualScores: "Individuálne skóre",
+    backToMenu: "Späť do menu",
+    hostLeft: "Host opustil hru.",
+    couldNotClose: "Nepodarilo sa zatvoriť izbu",
+    roomClosed: "Izba zatvorená",
+    closeRoom: "Zatvoriť izbu",
+    noName: "Zadaj svoje meno!",
+    noCode: "Zadaj kód!",
+    noRoomsAvailable: "Žiadne dostupné izby. Vytvor si vlastnú!",
+    nameTaken: "Toto meno je už obsadené",
+    needMinPlayers: "Potrebuješ minimálne 2 hráčov",
+    normal2: "Normálny",
+    kahoot2: "Kahoot",
+    solo2: "Sólo",
+  },
+} as const;
 
 interface MultiplayerProps {
   onBack: () => void;
@@ -85,6 +251,8 @@ function generateCode(): string {
 
 export default function Multiplayer({ onBack }: MultiplayerProps) {
   const { activeVocabulary, language } = useChapter();
+  const locale = useLocale();
+  const m = mp[locale];
   const [phase, setPhase] = useState<Phase>("setup");
   const [playerName, setPlayerName] = useState("");
   const [roomCode, setRoomCode] = useState("");
@@ -180,7 +348,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
         "postgres_changes",
         { event: "DELETE", schema: "public", table: "game_rooms", filter: `id=eq.${room.id}` },
         () => {
-          toast.info("De host heeft het spel verlaten.");
+          toast.info(m.hostLeft);
           setPhase("setup");
           setRoom(null);
           setMyPlayerId(null);
@@ -277,7 +445,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
   };
 
   const createRoom = async () => {
-    if (!playerName.trim()) return toast.error("Vul je naam in!");
+    if (!playerName.trim()) return toast.error(m.noName);
     setPhase("mode-select");
   };
 
@@ -305,7 +473,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
         p_is_public: isPublic,
       });
 
-    if (roomError || !roomData) return toast.error("Kon geen room aanmaken");
+    if (roomError || !roomData) return toast.error("Room error");
 
     const { data: playerData } = await supabase
       .rpc("join_game_room", { p_room_id: roomData.id, p_player_name: playerName }) as any;
@@ -344,8 +512,8 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
   };
 
   const joinRoom = async () => {
-    if (!playerName.trim()) return toast.error("Vul je naam in!");
-    if (!roomCode.trim()) return toast.error("Vul een code in!");
+    if (!playerName.trim()) return toast.error(m.noName);
+    if (!roomCode.trim()) return toast.error(m.noCode);
 
     const { data: roomData, error } = await (supabase
       .from("game_rooms_public" as any)
@@ -354,7 +522,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
       .eq("status", "waiting")
       .maybeSingle() as any);
 
-    if (error || !roomData) return toast.error("Room niet gevonden! Controleer de code en probeer opnieuw.");
+    if (error || !roomData) return toast.error(locale === "sk" ? "Izba nenájdená!" : "Room niet gevonden!");
 
     const { data: playerData } = await supabase
       .rpc("join_game_room", { p_room_id: roomData.id, p_player_name: playerName }) as any;
@@ -381,7 +549,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
     if (room.team_mode === "teams") {
       const unassigned = players.filter((p) => !p.team_number);
       if (unassigned.length > 0) {
-        return toast.error("Wijs eerst alle spelers toe aan een team!");
+        return toast.error(locale === "sk" ? "Najskôr priraď všetkých hráčov do tímu!" : "Wijs eerst alle spelers toe aan een team!");
       }
     }
     setCountdown(3);
@@ -400,7 +568,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
           body: { action: "start-game", roomId: room!.id, playerId: myPlayerId, playerToken: myPlayerToken },
         });
         if (data?.error) {
-          toast.error(data.error === "Need at least 2 players" ? "Er zijn minimaal 2 spelers nodig!" : data.error);
+          toast.error(data.error === "Need at least 2 players" ? m.needMinPlayers : data.error);
           setCountdown(null);
         }
       } else {
@@ -547,13 +715,13 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
   };
 
   const randomJoin = async () => {
-    if (!playerName.trim()) return toast.error("Vul eerst je naam in!");
+    if (!playerName.trim()) return toast.error(m.noName);
     setLoadingRandom(true);
     try {
       const { data: rooms } = await supabase.rpc("get_public_rooms" as any);
       const available = (rooms as PublicRoom[] | null)?.filter(r => r.player_count < r.max_players);
       if (!available || available.length === 0) {
-        return toast.error("Geen openbare kamers beschikbaar!");
+        return toast.error(m.noRoomsAvailable);
       }
       const randomRoom = available[Math.floor(Math.random() * available.length)];
       const { data: playerData } = await supabase
@@ -566,7 +734,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
         .eq("id", randomRoom.id)
         .maybeSingle() as any);
 
-      if (!roomData) return toast.error("Kamer niet meer beschikbaar!");
+      if (!roomData) return toast.error(locale === "sk" ? "Izba už nie je dostupná!" : "Kamer niet meer beschikbaar!");
 
       setRoom({
         ...roomData,
@@ -584,14 +752,14 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
       fetchPlayers(roomData.id);
       toast.success(`Je bent toegevoegd aan de kamer van ${randomRoom.host_name}!`);
     } catch {
-      toast.error("Er ging iets mis bij het joinen.");
+      toast.error(locale === "sk" ? "Niečo sa pokazilo." : "Er ging iets mis bij het joinen.");
     } finally {
       setLoadingRandom(false);
     }
   };
 
   const joinPublicRoom = async (publicRoom: PublicRoom) => {
-    if (!playerName.trim()) return toast.error("Vul eerst je naam in!");
+    if (!playerName.trim()) return toast.error(m.noName);
     try {
       const { data: playerData } = await supabase
         .rpc("join_game_room", { p_room_id: publicRoom.id, p_player_name: playerName }) as any;
@@ -602,7 +770,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
         .eq("id", publicRoom.id)
         .maybeSingle() as any);
 
-      if (!roomData) return toast.error("Kamer niet meer beschikbaar!");
+      if (!roomData) return toast.error(locale === "sk" ? "Izba už nie je dostupná!" : "Kamer niet meer beschikbaar!");
 
       setRoom({
         ...roomData,
@@ -619,7 +787,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
       setPhase("lobby");
       fetchPlayers(roomData.id);
     } catch {
-      toast.error("Kon niet joinen.");
+      toast.error(locale === "sk" ? "Pripojenie zlyhalo." : "Kon niet joinen.");
     }
   };
 
@@ -628,10 +796,10 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
       body: { action: "admin-close-room", roomId },
     });
     if (error || data?.error) {
-      toast.error(data?.error || "Kon kamer niet sluiten");
+      toast.error(data?.error || m.couldNotClose);
     } else {
       setPublicRooms((prev) => prev.filter((r) => r.id !== roomId));
-      toast.success("Kamer gesloten");
+      toast.success(m.roomClosed);
     }
   };
 
@@ -646,28 +814,28 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
       <div className="min-h-screen flex flex-col items-center px-3 py-6 md:px-4 md:py-12">
         <div className="max-w-md w-full space-y-4 md:space-y-6">
           <Button variant="ghost" onClick={onBack} className="gap-2 text-sm">
-            <ArrowLeft className="h-4 w-4" /> Terug
+            <ArrowLeft className="h-4 w-4" /> {m.back}
           </Button>
           <div className="text-center space-y-2">
             <div className="w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto">
               <Users className="h-7 w-7 md:h-8 md:w-8 text-primary" />
             </div>
-            <h1 className="text-2xl md:text-3xl font-bold">Multiplayer Quiz</h1>
-            <p className="text-sm md:text-base text-muted-foreground">Speel tegen je vrienden!</p>
+            <h1 className="text-2xl md:text-3xl font-bold">{m.title}</h1>
+            <p className="text-sm md:text-base text-muted-foreground">{m.subtitle}</p>
           </div>
           <Card>
             <CardContent className="p-4 md:p-6 space-y-3 md:space-y-4">
-              <Input placeholder="Jouw naam" value={playerName} onChange={(e) => setPlayerName(e.target.value)} className="text-center text-base md:text-lg" maxLength={20} />
-              <Button onClick={createRoom} className="w-full text-base md:text-lg h-11 md:h-12" size="lg">🎮 Nieuw spel starten</Button>
+              <Input placeholder={m.yourName} value={playerName} onChange={(e) => setPlayerName(e.target.value)} className="text-center text-base md:text-lg" maxLength={20} />
+              <Button onClick={createRoom} className="w-full text-base md:text-lg h-11 md:h-12" size="lg">{m.newGame}</Button>
               <div className="relative">
                 <div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div>
-                <div className="relative flex justify-center text-xs uppercase"><span className="bg-card px-2 text-muted-foreground">of</span></div>
+                <div className="relative flex justify-center text-xs uppercase"><span className="bg-card px-2 text-muted-foreground">{m.or}</span></div>
               </div>
-              <Input placeholder="Code invoeren (bv. ABC12)" value={roomCode} onChange={(e) => setRoomCode(e.target.value.toUpperCase())} className="text-center text-base md:text-lg tracking-widest font-mono" maxLength={5} />
-              <Button onClick={joinRoom} variant="outline" className="w-full text-base md:text-lg h-11 md:h-12" size="lg">🚀 Deelnemen</Button>
+              <Input placeholder={m.enterCode} value={roomCode} onChange={(e) => setRoomCode(e.target.value.toUpperCase())} className="text-center text-base md:text-lg tracking-widest font-mono" maxLength={5} />
+              <Button onClick={joinRoom} variant="outline" className="w-full text-base md:text-lg h-11 md:h-12" size="lg">{m.join}</Button>
               <div className="relative">
                 <div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div>
-                <div className="relative flex justify-center text-xs uppercase"><span className="bg-card px-2 text-muted-foreground">of</span></div>
+                <div className="relative flex justify-center text-xs uppercase"><span className="bg-card px-2 text-muted-foreground">{m.or}</span></div>
               </div>
               <Button
                 onClick={randomJoin}
@@ -677,14 +845,14 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
                 disabled={loadingRandom}
               >
                 <Dice5 className="h-5 w-5" />
-                {loadingRandom ? "Zoeken..." : "🎲 Ga willekeurige kamer in"}
+                {loadingRandom ? m.searching : m.randomJoin}
               </Button>
               <Button
                 onClick={() => { const opening = !showPublicRooms; setShowPublicRooms(opening); if (opening) { fetchPublicRooms(); setTimeout(() => publicRoomsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 100); } }}
                 variant="ghost"
                 className="w-full gap-2 text-muted-foreground"
               >
-                <Search className="h-4 w-4" /> Openbare kamers zoeken
+                <Search className="h-4 w-4" /> {m.searchPublic}
               </Button>
             </CardContent>
           </Card>
@@ -699,17 +867,17 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
                   <div className="flex items-center gap-2">
                     <Search className="h-4 w-4 text-muted-foreground" />
                     <Input
-                      placeholder="Zoek op host of code..."
+                      placeholder={m.searchPlaceholder}
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       className="text-sm"
                     />
                   </div>
                   <Button variant="ghost" size="sm" onClick={fetchPublicRooms} className="w-full text-xs text-muted-foreground">
-                    🔄 Vernieuwen
+                    {m.refresh}
                   </Button>
                   {filteredPublicRooms.length === 0 ? (
-                    <p className="text-center text-sm text-muted-foreground py-4">Geen openbare kamers gevonden</p>
+                    <p className="text-center text-sm text-muted-foreground py-4">{m.noPublicRooms}</p>
                   ) : (
                     <div className="space-y-2 max-h-64 overflow-y-auto">
                       {filteredPublicRooms.map((r) => (
@@ -720,7 +888,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
                           <div className="min-w-0">
                             <p className="font-medium text-sm truncate">{r.host_name}</p>
                             <p className="text-xs text-muted-foreground">
-                              {r.game_mode === "kahoot" ? "🎯 Kahoot" : "⚡ Normaal"} · {r.team_mode === "teams" ? `👥 ${r.num_teams} teams` : "👤 Solo"} · {r.player_count}/{r.max_players} spelers
+                              {r.game_mode === "kahoot" ?  : } · {r.team_mode === "teams" ? `👥 ${r.num_teams} teams` : "👤 Solo"} · {r.player_count}/{r.max_players} {m.playersCount}
                             </p>
                           </div>
                           <div className="flex items-center gap-1 shrink-0 ml-2">
@@ -728,7 +896,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
                               <UserPlus className="h-4 w-4 mr-1" /> Join
                             </Button>
                             {isAdminUser && (
-                              <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive h-8 w-8 p-0" onClick={() => adminCloseRoom(r.id)} title="Kamer sluiten">
+                              <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive h-8 w-8 p-0" onClick={() => adminCloseRoom(r.id)} title={m.closeRoom}>
                                 <Trash2 className="h-4 w-4" />
                               </Button>
                             )}
@@ -752,11 +920,11 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
       <div className="min-h-screen flex flex-col items-center px-3 py-6 md:px-4 md:py-12">
         <div className="max-w-md w-full space-y-4 md:space-y-6">
           <Button variant="ghost" onClick={() => setPhase("setup")} className="gap-2 text-sm">
-            <ArrowLeft className="h-4 w-4" /> Terug
+            <ArrowLeft className="h-4 w-4" /> {m.back}
           </Button>
           <div className="text-center space-y-2">
-            <h1 className="text-2xl md:text-3xl font-bold">Kies een modus</h1>
-            <p className="text-sm md:text-base text-muted-foreground">Hoe wil je spelen?</p>
+            <h1 className="text-2xl md:text-3xl font-bold">{m.chooseMode}</h1>
+            <p className="text-sm md:text-base text-muted-foreground">{m.howToPlay}</p>
           </div>
           <div className="grid gap-3">
             <Card className="cursor-pointer transition-all hover:shadow-lg hover:-translate-y-1 active:scale-[0.98] border-2 hover:border-primary/50" onClick={() => selectGameMode("normal")}>
@@ -765,8 +933,8 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
                   <Zap className="h-6 w-6 text-primary" />
                 </div>
                 <div>
-                  <h2 className="text-base md:text-lg font-bold">⚡ Normaal</h2>
-                  <p className="text-xs md:text-sm text-muted-foreground">De host bepaalt het tempo en gaat door naar de volgende vraag</p>
+                  <h2 className="text-base md:text-lg font-bold">{m.normal}</h2>
+                  <p className="text-xs md:text-sm text-muted-foreground">{m.normalDesc}</p>
                 </div>
               </CardContent>
             </Card>
@@ -776,8 +944,8 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
                   <Clock className="h-6 w-6 text-accent" />
                 </div>
                 <div>
-                  <h2 className="text-base md:text-lg font-bold">🎯 Kahoot-stijl</h2>
-                  <p className="text-xs md:text-sm text-muted-foreground">Iedereen moet antwoorden voordat de volgende vraag komt</p>
+                  <h2 className="text-base md:text-lg font-bold">{m.kahoot}</h2>
+                  <p className="text-xs md:text-sm text-muted-foreground">{m.kahootDesc}</p>
                 </div>
               </CardContent>
             </Card>
@@ -793,11 +961,11 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
       <div className="min-h-screen flex flex-col items-center px-3 py-6 md:px-4 md:py-12">
         <div className="max-w-md w-full space-y-4 md:space-y-6">
           <Button variant="ghost" onClick={() => setPhase("mode-select")} className="gap-2 text-sm">
-            <ArrowLeft className="h-4 w-4" /> Terug
+            <ArrowLeft className="h-4 w-4" /> {m.back}
           </Button>
           <div className="text-center space-y-2">
-            <h1 className="text-2xl md:text-3xl font-bold">Solo of Teams?</h1>
-            <p className="text-sm md:text-base text-muted-foreground">Kies hoe je wilt spelen</p>
+            <h1 className="text-2xl md:text-3xl font-bold">{m.soloOrTeams}</h1>
+            <p className="text-sm md:text-base text-muted-foreground">{m.chooseHow}</p>
           </div>
           {/* Public/Private toggle */}
           <Card>
@@ -805,9 +973,9 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
               <div className="flex items-center gap-3">
                 {!isPublic ? <Lock className="h-5 w-5 text-primary" /> : <Globe className="h-5 w-5 text-muted-foreground" />}
                 <div>
-                  <p className="font-medium text-sm">{!isPublic ? "Privékamer" : "Openbare kamer"}</p>
+                  <p className="font-medium text-sm">{!isPublic ? m.privateRoom : m.publicRoom}</p>
                   <p className="text-xs text-muted-foreground">
-                    {!isPublic ? "Alleen toegankelijk met code" : "Iedereen kan joinen of zoeken"}
+                    {!isPublic ? m.privateDesc : m.publicDesc}
                   </p>
                 </div>
               </div>
@@ -822,8 +990,8 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
                   <Zap className="h-6 w-6 text-primary" />
                 </div>
                 <div>
-                  <h2 className="text-base md:text-lg font-bold">👤 Iedereen voor zich</h2>
-                  <p className="text-xs md:text-sm text-muted-foreground">Elke speler speelt individueel</p>
+                  <h2 className="text-base md:text-lg font-bold">{m.solo}</h2>
+                  <p className="text-xs md:text-sm text-muted-foreground">{m.soloDesc}</p>
                 </div>
               </CardContent>
             </Card>
@@ -834,12 +1002,12 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
                     <Users className="h-6 w-6 text-accent" />
                   </div>
                   <div>
-                    <h2 className="text-base md:text-lg font-bold">👥 Teams</h2>
-                    <p className="text-xs md:text-sm text-muted-foreground">Speel in teams – de host deelt spelers in</p>
+                    <h2 className="text-base md:text-lg font-bold">{m.teams}</h2>
+                    <p className="text-xs md:text-sm text-muted-foreground">{m.teamsDesc}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground whitespace-nowrap">Aantal teams:</span>
+                  <span className="text-sm text-muted-foreground whitespace-nowrap">{m.numTeams}</span>
                   <div className="flex gap-2">
                     {[2, 3, 4].map((n) => (
                       <Button
@@ -855,14 +1023,14 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <span className="text-sm text-muted-foreground">Teams:</span>
+                  <span className="text-sm text-muted-foreground">{m.teamsLabel}</span>
                   {Array.from({ length: numTeams }, (_, i) => (
                     <div key={i} className="flex items-center gap-2">
                       <div className="relative">
                         <button
                           className="text-lg w-9 h-9 flex items-center justify-center rounded-md border border-input hover:bg-accent transition-colors"
                           onClick={(e) => { e.stopPropagation(); setShowEmojiPicker(showEmojiPicker === i ? null : i); }}
-                          title="Kies emoji"
+                          title={m.chooseEmoji}
                         >
                           {teamEmojis[i] || TEAM_COLORS[i]?.emoji}
                         </button>
@@ -902,7 +1070,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
                   ))}
                 </div>
                 <Button className="w-full" onClick={(e) => { e.stopPropagation(); startWithSettings("teams", numTeams); }}>
-                  Starten met {numTeams} teams
+                  {m.startWith} {numTeams} {m.teamsWord}
                 </Button>
               </CardContent>
             </Card>
@@ -922,7 +1090,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
       <div className="min-h-screen flex flex-col items-center px-3 py-6 md:px-4 md:py-12">
         <div className="max-w-md w-full space-y-4 md:space-y-6">
           <div className="text-center space-y-2 md:space-y-3">
-            <p className="text-xs md:text-sm text-muted-foreground uppercase tracking-wide">Game Code</p>
+            <p className="text-xs md:text-sm text-muted-foreground uppercase tracking-wide">{m.gameCode}</p>
             <div className="flex items-center justify-center gap-2">
               <span className="text-4xl md:text-5xl font-bold font-mono tracking-[0.3em]">{room?.code}</span>
               <Button variant="ghost" size="icon" onClick={copyCode}>
@@ -930,14 +1098,14 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
               </Button>
             </div>
             <p className="text-sm text-muted-foreground">
-              {isTeamMode ? `Teams modus (${room?.num_teams} teams)` : "Deel deze code!"}
+              {isTeamMode ? `Teams modus (${room?.num_teams} teams)` : m.shareCode}
             </p>
           </div>
 
           {countdown !== null && (
             <div className="text-center space-y-2">
               <div className="text-7xl font-bold text-primary animate-pulse">{countdown || "🚀"}</div>
-              <p className="text-sm text-muted-foreground animate-pulse">Het spel begint zo...</p>
+              <p className="text-sm text-muted-foreground animate-pulse">{m.gameStarting}</p>
             </div>
           )}
 
@@ -947,7 +1115,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
               {/* Shuffle button for host */}
               {isHost && countdown === null && (
                 <Button variant="outline" className="w-full gap-2" onClick={shuffleTeams}>
-                  <Shuffle className="h-4 w-4" /> Willekeurig indelen
+                  <Shuffle className="h-4 w-4" /> {m.shuffleTeams}
                 </Button>
               )}
 
@@ -955,7 +1123,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
               {unassignedPlayers.length > 0 && (
                 <Card>
                   <CardContent className="p-4">
-                    <h3 className="font-semibold mb-2 text-sm text-muted-foreground">Niet ingedeeld ({unassignedPlayers.length})</h3>
+                    <h3 className="font-semibold mb-2 text-sm text-muted-foreground">{m.unassigned} ({unassignedPlayers.length})</h3>
                     <div className="space-y-2">
                       {unassignedPlayers.map((p) => (
                         <div key={p.id} className="flex items-center justify-between p-2 rounded-lg bg-muted/50">
@@ -1044,7 +1212,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
                           </div>
                         ))}
                         {teamPlayers.length === 0 && (
-                          <p className="text-xs text-muted-foreground italic p-2">Nog geen spelers</p>
+                          <p className="text-xs text-muted-foreground italic p-2">{m.noPlayers}</p>
                         )}
                       </div>
                     </CardContent>
@@ -1057,7 +1225,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
             <Card>
               <CardContent className="p-6">
                 <h3 className="font-semibold mb-3 flex items-center gap-2">
-                  <Users className="h-4 w-4" /> Spelers ({players.length})
+                  <Users className="h-4 w-4" /> {m.players} ({players.length})
                 </h3>
                 <div className="space-y-2">
                   {players.map((p) => (
@@ -1075,35 +1243,35 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
 
           {isHost && countdown === null && (
             <Button onClick={startGame} className="w-full text-lg h-12" size="lg" disabled={players.length < 2 || (isTeamMode && !allAssigned)}>
-              🚀 Start het spel! ({players.length} spelers)
+              {m.startGame} ({players.length} {m.playersCount})
             </Button>
           )}
           {!isHost && (
             <div className="space-y-3">
-              <p className="text-center text-muted-foreground animate-pulse">Wachten tot de host het spel start...</p>
+              <p className="text-center text-muted-foreground animate-pulse">{m.waitingHost}</p>
               <Button onClick={() => setShowLeaveConfirm(true)} variant="outline" className="w-full gap-2 text-destructive hover:text-destructive">
-                <LogOut className="h-4 w-4" /> Verlaat het spel
+                <LogOut className="h-4 w-4" /> {m.leaveGame}
               </Button>
             </div>
           )}
           {isHost && countdown === null && (
             <Button onClick={() => setShowLeaveConfirm(true)} variant="ghost" className="w-full gap-2 text-muted-foreground">
-              <LogOut className="h-4 w-4" /> Annuleren
+              <LogOut className="h-4 w-4" /> {m.cancel}
             </Button>
           )}
           <AlertDialog open={showLeaveConfirm} onOpenChange={setShowLeaveConfirm}>
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>Spel verlaten?</AlertDialogTitle>
+                <AlertDialogTitle>{m.leaveTitle}</AlertDialogTitle>
                 <AlertDialogDescription>
                   {isHost
-                    ? "Als host wordt de hele room verwijderd en kunnen andere spelers niet meer verder spelen."
-                    : "Je verliest je voortgang als je nu het spel verlaat."}
+                    ? m.leaveHostDesc
+                    : m.leavePlayerDesc}
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel>Annuleren</AlertDialogCancel>
-                <AlertDialogAction onClick={leaveGame} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Verlaten</AlertDialogAction>
+                <AlertDialogCancel>{m.cancel}</AlertDialogCancel>
+                <AlertDialogAction onClick={leaveGame} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">{m.leave}</AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
@@ -1116,16 +1284,16 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
     <AlertDialog open={showLeaveConfirm} onOpenChange={setShowLeaveConfirm}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Spel verlaten?</AlertDialogTitle>
+          <AlertDialogTitle>{m.leaveTitle}</AlertDialogTitle>
           <AlertDialogDescription>
             {isHost
-              ? "Als host wordt de hele room verwijderd en kunnen andere spelers niet meer verder spelen."
-              : "Je verliest je voortgang als je nu het spel verlaat."}
+              ? m.leaveHostDesc
+              : m.leavePlayerDesc}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Annuleren</AlertDialogCancel>
-          <AlertDialogAction onClick={leaveGame} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Verlaten</AlertDialogAction>
+          <AlertDialogCancel>{m.cancel}</AlertDialogCancel>
+          <AlertDialogAction onClick={leaveGame} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">{m.leave}</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
@@ -1142,10 +1310,10 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
         <div className="max-w-lg w-full space-y-6">
           <div className="flex items-center justify-between">
             <Button variant="ghost" size="sm" onClick={() => setShowLeaveConfirm(true)} className="gap-1 text-muted-foreground">
-              <LogOut className="h-3 w-3" /> Verlaten
+              <LogOut className="h-3 w-3" /> {m.leave}
             </Button>
             <span className="text-sm text-muted-foreground font-medium">
-              Vraag {room.current_question_index + 1}/{room.total_questions}
+              {m.question} {room.current_question_index + 1}/{room.total_questions}
             </span>
             <span className="text-sm text-muted-foreground flex items-center gap-1">
               <Users className="h-3 w-3" /> {answeredCount}/{players.length}
@@ -1157,8 +1325,8 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
             <CardContent className="p-8 text-center">
               <p className="text-sm text-muted-foreground mb-2">
                 {language === "nask"
-                  ? (room.direction === "nl_to_fr" ? "Begrip → Omschrijving" : "Omschrijving → Begrip")
-                  : (room.direction === "nl_to_fr" ? "NL Nederlands → Vertaling" : "Vertaling → Nederlands NL")}
+                  ? (room.direction === "nl_to_fr" ? m.conceptToDesc : m.descToConcept)
+                  : (room.direction === "nl_to_fr" ? m.nlToTranslation : m.translationToNl)}
               </p>
               <h2 className="text-2xl md:text-3xl font-bold">{currentQuestion}</h2>
             </CardContent>
@@ -1183,13 +1351,13 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
 
           {selectedAnswer && !showResult && room.game_mode === "kahoot" && (
             <p className="text-center text-sm text-muted-foreground animate-pulse">
-              ✅ Antwoord vergrendeld! Wachten op andere spelers... ({answeredCount}/{players.length})
+              {m.answerLocked} ({answeredCount}/{players.length})
             </p>
           )}
 
           {showResult && isHost && room.game_mode === "normal" && (
             <Button onClick={nextQuestion} className="w-full h-12 text-lg" size="lg">
-              {room.current_question_index + 1 >= room.total_questions ? "🏆 Resultaten bekijken" : "Volgende vraag →"}
+              {room.current_question_index + 1 >= room.total_questions ? m.viewResults : m.nextQuestion}
             </Button>
           )}
 
@@ -1199,10 +1367,10 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
               <CardContent className="p-6 space-y-4">
                 <div className="text-center animate-fade-in">
                   <h3 className="text-lg font-bold flex items-center justify-center gap-2">
-                    <Trophy className="h-5 w-5 text-primary" /> Tussenstand
+                    <Trophy className="h-5 w-5 text-primary" /> {m.standings}
                   </h3>
                   {kahootCountdown !== null && (
-                    <p className="text-xs text-muted-foreground mt-1">Volgende vraag over {kahootCountdown}s...</p>
+                    <p className="text-xs text-muted-foreground mt-1">{m.nextQuestionIn} {kahootCountdown}s...</p>
                   )}
                 </div>
                 {isTeamMode ? (
@@ -1249,7 +1417,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
           <Card className="bg-muted/30">
             <CardContent className="p-4">
               <h3 className="text-sm font-semibold mb-2 flex items-center gap-1">
-                <Trophy className="h-3 w-3" /> Live Score
+                <Trophy className="h-3 w-3" /> {m.liveScore}
               </h3>
               {isTeamMode ? (
                 <div className="space-y-2">
@@ -1302,13 +1470,13 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
         <div className="max-w-md w-full space-y-6">
           <div className="text-center space-y-3">
             <div className="text-6xl">🏆</div>
-            <h1 className="text-3xl font-bold">Resultaten!</h1>
+            <h1 className="text-3xl font-bold">{m.results}</h1>
           </div>
 
           {isTeamMode && (
             <Card className="border-2 border-yellow-400">
               <CardContent className="p-6 space-y-3">
-                <h2 className="text-lg font-bold text-center mb-2">🏆 Team Ranking</h2>
+                <h2 className="text-lg font-bold text-center mb-2">{m.teamRanking}</h2>
                 {teamScores.map((team, i) => {
                   const tc = TEAM_COLORS[team.teamNumber - 1];
                   return (
@@ -1332,7 +1500,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
 
           <Card>
             <CardContent className="p-6 space-y-3">
-              <h2 className="text-lg font-bold text-center mb-2">{isTeamMode ? "Individuele scores" : ""}</h2>
+              <h2 className="text-lg font-bold text-center mb-2">{isTeamMode ? m.individualScores : ""}</h2>
               {sorted.map((p, i) => {
                 const tc = isTeamMode && p.team_number ? TEAM_COLORS[p.team_number - 1] : null;
                 return (
@@ -1358,7 +1526,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
             </CardContent>
           </Card>
 
-          <Button onClick={onBack} className="w-full h-12 text-lg" size="lg">Terug naar menu</Button>
+          <Button onClick={onBack} className="w-full h-12 text-lg" size="lg">{m.backToMenu}</Button>
         </div>
       </div>
     );
