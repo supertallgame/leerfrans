@@ -192,6 +192,7 @@ const mp = {
     kahoot2: "Kahoot",
     solo2: "Sólo",
     playerLeft: (name: string) => `${name} opustil hru`,
+    playerJoined: (name: string) => `${name} sa pripojil!`,
     scoreboardTime: "Čas výsledkovej tabule",
     instant: "Okamžite",
     seconds: "sek",
