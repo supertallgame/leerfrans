@@ -1386,12 +1386,18 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
                     {getTeamScores().map((team, i) => {
                       const tc = TEAM_COLORS[team.teamNumber - 1];
                       return (
-                        <div key={team.teamNumber} className={`p-3 rounded-lg animate-fade-in ${tc?.bg} border ${tc?.border}`} style={{ animationDelay: `${i * 150}ms`, animationFillMode: "backwards" }}>
+                        <div key={team.teamNumber} className={`p-3 rounded-lg animate-fade-in ${tc?.bg} border ${tc?.border} transition-all duration-500`} style={{ animationDelay: `${i * 150}ms`, animationFillMode: "backwards" }}>
                           <div className="flex items-center justify-between mb-1">
                             <span className={`font-bold ${tc?.text}`}>
                               {i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `${i + 1}.`} {getTeamEmoji(team.teamNumber)} {getTeamName(team.teamNumber)}
                             </span>
-                            <span className="font-mono font-bold text-lg">{team.total}</span>
+                            <span
+                              key={`team-score-${team.teamNumber}-${team.total}`}
+                              className="font-mono font-bold text-lg"
+                              style={{ animation: "score-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)" }}
+                            >
+                              {team.total}
+                            </span>
                           </div>
                           <div className="text-xs text-muted-foreground">
                             {team.players.map((p) => p.player_name).join(", ")}
@@ -1405,14 +1411,20 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
                     {[...players].sort((a, b) => b.score - a.score).map((p, i) => (
                       <div
                         key={p.id}
-                        className={`flex items-center justify-between p-3 rounded-lg animate-fade-in ${p.id === myPlayerId ? "bg-primary/10 border border-primary/20" : "bg-muted/50"}`}
+                        className={`flex items-center justify-between p-3 rounded-lg animate-fade-in transition-all duration-500 ${p.id === myPlayerId ? "bg-primary/10 border border-primary/20" : "bg-muted/50"}`}
                         style={{ animationDelay: `${i * 150}ms`, animationFillMode: "backwards" }}
                       >
                         <div className="flex items-center gap-2">
                           <span className="text-lg">{i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `${i + 1}.`}</span>
                           <span className={`font-medium ${p.id === myPlayerId ? "text-primary font-bold" : ""}`}>{p.player_name}</span>
                         </div>
-                        <span className="font-mono font-bold text-lg">{p.score}</span>
+                        <span
+                          key={`score-${p.id}-${p.score}`}
+                          className="font-mono font-bold text-lg"
+                          style={{ animation: "score-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)" }}
+                        >
+                          {p.score}
+                        </span>
                       </div>
                     ))}
                   </div>
