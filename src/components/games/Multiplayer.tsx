@@ -29,15 +29,15 @@ const mp = {
     title: m.title,
     subtitle: m.subtitle,
     yourName: m.yourName,
-    newGame: "🎮 Nieuw spel starten",
+    newGame: "{m.newGame}",
     or: "of",
     enterCode: m.enterCode,
-    join: "🚀 Deelnemen",
-    randomJoin: "🎲 Ga willekeurige kamer in",
+    join: "{m.join}",
+    randomJoin: "{m.randomJoin}",
     searching: m.searching,
     searchPublic: m.searchPublic,
     searchPlaceholder: m.searchPlaceholder,
-    refresh: "🔄 Vernieuwen",
+    refresh: "{m.refresh}",
     noPublicRooms: m.noPublicRooms,
     chooseMode: m.chooseMode,
     howToPlay: m.howToPlay,
@@ -54,7 +54,7 @@ const mp = {
     solo: "👤 Iedereen voor zich",
     soloDesc: m.soloDesc,
     teams: "👥 Teams",
-    teamsDesc: "Speel in teams – de host deelt spelers in",
+    teamsDesc: m.teamsDesc,
     numTeams: m.numTeams,
     teamsLabel: m.teamsLabel,
     chooseEmoji: m.chooseEmoji,
@@ -78,18 +78,18 @@ const mp = {
     leavePlayerDesc: m.leavePlayerDesc,
     leave: m.leave,
     question: "Vraag",
-    conceptToDesc: "Begrip → Omschrijving",
-    descToConcept: "Omschrijving → Begrip",
-    nlToTranslation: "NL Nederlands → Vertaling",
-    translationToNl: "Vertaling → Nederlands NL",
+    conceptToDesc: m.conceptToDesc,
+    descToConcept: m.descToConcept,
+    nlToTranslation: m.nlToTranslation,
+    translationToNl: m.translationToNl,
     answerLocked: "✅ Antwoord vergrendeld! Wachten op andere spelers...",
-    viewResults: "🏆 Resultaten bekijken",
-    nextQuestion: "Volgende vraag →",
+    viewResults: m.viewResults,
+    nextQuestion: m.nextQuestion,
     standings: m.standings,
     nextQuestionIn: "Volgende vraag over",
     liveScore: m.liveScore,
     results: m.results,
-    teamRanking: "🏆 Team Ranking",
+    teamRanking: m.teamRanking,
     individualScores: m.individualScores,
     backToMenu: m.backToMenu,
     hostLeft: "De host heeft het spel verlaten.",
@@ -874,7 +874,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
                     />
                   </div>
                   <Button variant="ghost" size="sm" onClick={fetchPublicRooms} className="w-full text-xs text-muted-foreground">
-                    🔄 Vernieuwen
+                    {m.refresh}
                   </Button>
                   {filteredPublicRooms.length === 0 ? (
                     <p className="text-center text-sm text-muted-foreground py-4">{m.noPublicRooms}</p>
