@@ -376,13 +376,14 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
   }, [room?.id, myPlayerId, myPlayerToken, fetchQuestion]);
 
   useEffect(() => {
-    if (room && phase === "playing" && myPlayerId && myPlayerToken) {
+    if (room && phase === "playing" && myPlayerId && myPlayerToken && !showKahootScoreboard) {
       setSelectedAnswer(null);
       setShowResult(false);
       setCorrectAnswer("");
       setPendingCorrect(null);
       setShowKahootScoreboard(false);
       setKahootCountdown(null);
+      victoryFiredForIndex.current = null;
       fetchQuestion(room.id, myPlayerId, myPlayerToken);
     }
   }, [room?.current_question_index, phase, myPlayerId, myPlayerToken, fetchQuestion]);
