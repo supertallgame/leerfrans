@@ -66,6 +66,7 @@ async function translateTexts(texts: string[]): Promise<string[]> {
 // Hook for translating a map of id→text
 function useTranslations(items: { id: string; text: string }[]) {
   const [translated, setTranslated] = useState<Record<string, string>>({});
+  const [isTranslating, setIsTranslating] = useState(false);
   const pendingRef = useRef(false);
 
   useEffect(() => {
@@ -73,7 +74,6 @@ function useTranslations(items: { id: string; text: string }[]) {
     const untranslated = items.filter((i) => !translated[i.id] && !translationCache.has(i.text));
     const fromCache = items.filter((i) => !translated[i.id] && translationCache.has(i.text));
 
-    // Apply cached immediately
     if (fromCache.length > 0) {
       setTranslated((prev) => {
         const next = { ...prev };
@@ -85,7 +85,7 @@ function useTranslations(items: { id: string; text: string }[]) {
     if (untranslated.length === 0) return;
 
     pendingRef.current = true;
-    // Batch in groups of 20
+    setIsTranslating(true);
     const batch = untranslated.slice(0, 20);
     translateTexts(batch.map((b) => b.text)).then((results) => {
       setTranslated((prev) => {
@@ -94,10 +94,11 @@ function useTranslations(items: { id: string; text: string }[]) {
         return next;
       });
       pendingRef.current = false;
+      setIsTranslating(false);
     });
   }, [items, translated]);
 
-  return translated;
+  return { translated, isTranslating };
 }
 
 interface ReviewReply {
