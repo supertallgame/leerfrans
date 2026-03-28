@@ -338,7 +338,7 @@ export default function SlovakReviews() {
     ...reviews.map((r) => ({ id: `review-${r.id}`, text: r.message })),
     ...replies.map((r) => ({ id: `reply-${r.id}`, text: r.message })),
   ];
-  const translatedMessages = useTranslations(translationItems);
+  const { translated: translatedMessages, isTranslating } = useTranslations(translationItems);
 
   useEffect(() => {
     const fetchData = async () => {
