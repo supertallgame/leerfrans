@@ -176,15 +176,26 @@ function SlovakContent() {
             <FlagSK className="w-4 h-3 md:w-5 md:h-3.5 rounded-sm shrink-0" />
             Slovenčina
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-9 w-9"
-            onClick={() => setShowSettings(true)}
-            aria-label="Nastavenia"
-          >
-            <Settings className="h-5 w-5" />
-          </Button>
+          <div className="flex items-center gap-0.5">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-9 w-9"
+              onClick={() => navigate("/slovak/reviews")}
+              aria-label="Recenzie"
+            >
+              <Star className="h-5 w-5" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-9 w-9"
+              onClick={() => setShowSettings(true)}
+              aria-label="Nastavenia"
+            >
+              <Settings className="h-5 w-5" />
+            </Button>
+          </div>
         </div>
 
         <div className="text-center space-y-2 md:space-y-3 w-full">
