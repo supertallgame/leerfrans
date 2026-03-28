@@ -1,0 +1,530 @@
+import { useEffect, useState } from "react";
+import { useThemeSync } from "@/hooks/use-theme-sync";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { ArrowLeft, Star, MessageSquare, Trash2, Reply, ChevronDown, ChevronUp, Send } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import { containsBannedWord } from "@/lib/censor";
+
+interface ReviewReply {
+  id: string;
+  review_id: string;
+  display_name: string;
+  message: string;
+  created_at: string;
+}
+
+interface Review {
+  id: string;
+  display_name: string;
+  rating: number;
+  message: string;
+  created_at: string;
+}
+
+const OPERATOR_EMAILS = ["brankovantland@gmail.com", "branko18vantland@gmail.com", "tamoopdam@gmail.com", "jack.ouwerkerk@vsodaafgeluk.nl"];
+
+// Simple NL→SK translation map for common review words/phrases
+const nlToSkMap: Record<string, string> = {
+  // Common words
+  "goed": "dobrý", "goeie": "dobrá", "leuk": "zábavné", "leuke": "zábavná",
+  "mooi": "pekný", "mooie": "pekná", "slecht": "zlý", "slechte": "zlá",
+  "app": "aplikácia", "super": "super", "top": "top",
+  "erg": "veľmi", "heel": "veľmi", "zeer": "veľmi",
+  "woorden": "slovíčka", "woordjes": "slovíčka", "woord": "slovo",
+  "leren": "učiť sa", "oefenen": "cvičiť", "studeren": "študovať",
+  "spel": "hra", "spellen": "hry", "spelletje": "hra", "spelletjes": "hry",
+  "quiz": "kvíz", "quizzen": "kvízy",
+  "makkelijk": "ľahké", "makkelijke": "ľahká", "moeilijk": "ťažké", "moeilijke": "ťažká",
+  "handig": "praktické", "handige": "praktická",
+  "bedankt": "ďakujem", "dankjewel": "ďakujem", "dank": "vďaka",
+  "prima": "výborné", "perfect": "perfektné", "geweldig": "skvelé",
+  "fantastisch": "fantastické", "uitstekend": "vynikajúce",
+  "fijn": "fajn", "fijne": "fajn",
+  "niet": "nie", "geen": "žiadny", "wel": "áno",
+  "maar": "ale", "en": "a", "ook": "tiež", "met": "s",
+  "voor": "pre", "van": "z", "het": "to", "de": "ten/tá",
+  "is": "je", "zijn": "sú", "was": "bol", "kan": "môže",
+  "veel": "veľa", "meer": "viac", "beste": "najlepšia",
+  "school": "škola", "toets": "test", "toetsen": "testy",
+  "frans": "francúzština", "engels": "angličtina",
+  "werkt": "funguje", "helpt": "pomáha",
+  "ik": "ja", "we": "my", "je": "ty",
+  "vind": "myslím", "houd": "mám rád",
+};
+
+function translateToSlovak(text: string): string {
+  if (!text) return text;
+  // Word-by-word replacement (case-insensitive)
+  let result = text;
+  const words = text.split(/(\s+|[.,!?;:]+)/);
+  const translated = words.map((word) => {
+    const lower = word.toLowerCase();
+    if (nlToSkMap[lower]) {
+      // Preserve original casing of first letter
+      const replacement = nlToSkMap[lower];
+      if (word[0] === word[0].toUpperCase() && word[0] !== word[0].toLowerCase()) {
+        return replacement.charAt(0).toUpperCase() + replacement.slice(1);
+      }
+      return replacement;
+    }
+    return word;
+  });
+  return translated.join("");
+}
+
+function Stars({ rating }: { rating: number }) {
+  return (
+    <div className="flex gap-0.5">
+      {[1, 2, 3, 4, 5].map((star) => (
+        <Star
+          key={star}
+          className={`h-4 w-4 ${
+            star <= rating
+              ? "fill-yellow-400 text-yellow-400"
+              : "text-muted-foreground/20"
+          }`}
+        />
+      ))}
+    </div>
+  );
+}
+
+function timeAgo(dateStr: string): string {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return "práve teraz";
+  if (mins < 60) return `pred ${mins}m`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `pred ${hours}h`;
+  const days = Math.floor(hours / 24);
+  if (days < 30) return `pred ${days}d`;
+  return new Date(dateStr).toLocaleDateString("sk-SK");
+}
+
+function ReplySection({
+  reviewId,
+  replies,
+  isOperator,
+  onReplyAdded,
+  onDeleteReply,
+}: {
+  reviewId: string;
+  replies: ReviewReply[];
+  isOperator: boolean;
+  onReplyAdded: (reply: ReviewReply) => void;
+  onDeleteReply: (id: string) => void;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const [showForm, setShowForm] = useState(false);
+  const [name, setName] = useState("");
+  const [message, setMessage] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [mutedUntil, setMutedUntil] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!showForm) return;
+    const checkMute = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user?.email) {
+        const { data } = await supabase.rpc("get_my_mute_status" as any);
+        if (data && (data as any[]).length > 0) {
+          setMutedUntil(new Date((data as any[])[0].muted_until).toLocaleString("sk-SK"));
+        } else {
+          setMutedUntil(null);
+        }
+      }
+    };
+    checkMute();
+  }, [showForm]);
+
+  const reviewReplies = replies.filter((r) => r.review_id === reviewId);
+
+  const handleSubmit = async () => {
+    if (!name.trim() || !message.trim()) {
+      toast.error("Vyplň meno a správu");
+      return;
+    }
+    if (containsBannedWord(name.trim()) || containsBannedWord(message.trim())) {
+      toast.error("Tvoja správa obsahuje nevhodný jazyk");
+      return;
+    }
+    setSubmitting(true);
+
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session?.user?.email) {
+      const { data: muteData } = await supabase.rpc("get_my_mute_status" as any);
+      if (muteData && (muteData as any[]).length > 0) {
+        setSubmitting(false);
+        const until = new Date((muteData as any[])[0].muted_until).toLocaleString("sk-SK");
+        toast.error(`Tvoj účet je stlmený do ${until}`);
+        return;
+      }
+    }
+
+    const { data, error } = await (supabase.from("review_replies" as any) as any)
+      .insert({ review_id: reviewId, display_name: name.trim(), message: message.trim() })
+      .select()
+      .single();
+    setSubmitting(false);
+    if (error) {
+      if (error.message?.includes("Too many replies")) {
+        toast.error("Príliš veľa odpovedí. Počkaj chvíľu.");
+      } else {
+        toast.error("Nepodarilo sa pridať odpoveď");
+      }
+      return;
+    }
+    onReplyAdded(data);
+    setName("");
+    setMessage("");
+    setShowForm(false);
+    toast.success("Odpoveď pridaná!");
+  };
+
+  return (
+    <div className="pt-1 space-y-2">
+      <div className="flex items-center gap-2">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-7 text-xs gap-1 text-muted-foreground px-2"
+          onClick={() => setShowForm(!showForm)}
+        >
+          <Reply className="h-3 w-3" /> Odpovedať
+        </Button>
+        {reviewReplies.length > 0 && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 text-xs gap-1 text-muted-foreground px-2"
+            onClick={() => setExpanded(!expanded)}
+          >
+            {expanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+            {reviewReplies.length} {reviewReplies.length === 1 ? "odpoveď" : reviewReplies.length < 5 ? "odpovede" : "odpovedí"}
+          </Button>
+        )}
+      </div>
+
+      {showForm && (
+        <div className="ml-3 border-l-2 border-primary/20 pl-3 space-y-2">
+          {mutedUntil ? (
+            <div className="bg-destructive/10 border border-destructive/30 rounded-md p-2 text-xs text-destructive flex items-center gap-1.5">
+              <span>🔇</span>
+              <span>Tvoj účet je stlmený do {mutedUntil}. Nemôžeš pridávať odpovede.</span>
+            </div>
+          ) : (
+            <>
+              <Input
+                placeholder="Tvoje meno"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                maxLength={50}
+                className="h-8 text-sm"
+              />
+              <Textarea
+                placeholder="Tvoja odpoveď..."
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                maxLength={500}
+                className="text-sm min-h-[60px] resize-none"
+              />
+              <div className="flex gap-2">
+                <Button size="sm" className="h-7 text-xs gap-1" onClick={handleSubmit} disabled={submitting}>
+                  <Send className="h-3 w-3" /> {submitting ? "Odosiela sa..." : "Odoslať"}
+                </Button>
+                <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => setShowForm(false)}>
+                  Zrušiť
+                </Button>
+              </div>
+            </>
+          )}
+        </div>
+      )}
+
+      {expanded && reviewReplies.length > 0 && (
+        <div className="ml-3 border-l-2 border-muted pl-3 space-y-2">
+          {reviewReplies.map((reply) => (
+            <div key={reply.id} className="space-y-0.5">
+              <div className="flex items-center justify-between">
+                <span className="font-medium text-xs">{reply.display_name}</span>
+                <div className="flex items-center gap-1">
+                  <span className="text-[10px] text-muted-foreground">{timeAgo(reply.created_at)}</span>
+                  {isOperator && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-5 w-5 text-destructive hover:text-destructive"
+                      onClick={() => onDeleteReply(reply.id)}
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  )}
+                </div>
+              </div>
+              <p className="text-xs text-foreground/70">{translateToSlovak(reply.message)}</p>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function SlovakReviews() {
+  const navigate = useNavigate();
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [replies, setReplies] = useState<ReviewReply[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useThemeSync();
+  const [isOperator, setIsOperator] = useState(false);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [deleteReplyId, setDeleteReplyId] = useState<string | null>(null);
+  const [sortBy, setSortBy] = useState<"newest" | "rating">("newest");
+  const [filterRating, setFilterRating] = useState<number | null>(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const [reviewsRes, repliesRes] = await Promise.all([
+        supabase.from("reviews_public" as any).select("id, display_name, rating, message, created_at").order("created_at", { ascending: false }) as any,
+        supabase.from("review_replies" as any).select("*").order("created_at", { ascending: true }) as any,
+      ]);
+      if (reviewsRes.data) setReviews(reviewsRes.data);
+      if (repliesRes.data) setReplies(repliesRes.data);
+      setLoading(false);
+    };
+    fetchData();
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setIsOperator(OPERATOR_EMAILS.includes(session?.user?.email ?? ""));
+    });
+
+    const refetchAll = async () => {
+      const [reviewsRes, repliesRes] = await Promise.all([
+        supabase.from("reviews_public" as any).select("id, display_name, rating, message, created_at").order("created_at", { ascending: false }) as any,
+        supabase.from("review_replies" as any).select("*").order("created_at", { ascending: true }) as any,
+      ]);
+      if (reviewsRes.data) setReviews(reviewsRes.data);
+      if (repliesRes.data) setReplies(repliesRes.data);
+    };
+
+    const reviewChannel = supabase
+      .channel('sk-reviews-realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'reviews' }, () => refetchAll())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'review_replies' }, () => refetchAll())
+      .subscribe();
+
+    return () => { supabase.removeChannel(reviewChannel); };
+  }, []);
+
+  const handleDelete = async () => {
+    if (!deleteId) return;
+    const { error } = await (supabase.from("reviews" as any) as any).delete().eq("id", deleteId);
+    if (error) {
+      toast.error("Nepodarilo sa odstrániť recenziu");
+    } else {
+      setReviews((prev) => prev.filter((r) => r.id !== deleteId));
+      setReplies((prev) => prev.filter((r) => r.review_id !== deleteId));
+      toast.success("Recenzia odstránená");
+    }
+    setDeleteId(null);
+  };
+
+  const handleDeleteReply = async () => {
+    if (!deleteReplyId) return;
+    const { error } = await (supabase.from("review_replies" as any) as any).delete().eq("id", deleteReplyId);
+    if (error) {
+      toast.error("Nepodarilo sa odstrániť odpoveď");
+    } else {
+      setReplies((prev) => prev.filter((r) => r.id !== deleteReplyId));
+      toast.success("Odpoveď odstránená");
+    }
+    setDeleteReplyId(null);
+  };
+
+  const filteredReviews = filterRating
+    ? reviews.filter((r) => r.rating === filterRating)
+    : reviews;
+
+  const sortedReviews = [...filteredReviews].sort((a, b) => {
+    if (sortBy === "rating") return b.rating - a.rating;
+    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+  });
+
+  const avgRating = reviews.length
+    ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
+    : "–";
+
+  return (
+    <main className="min-h-screen flex flex-col items-center px-3 py-6 md:px-4 md:py-12">
+      <div className="max-w-lg w-full space-y-4 md:space-y-6">
+        <div className="flex items-center justify-between w-full">
+          <Button variant="ghost" onClick={() => navigate("/slovak")} className="gap-2 text-sm">
+            <ArrowLeft className="h-4 w-4" /> Späť
+          </Button>
+          <Button onClick={() => navigate("/slovak/feedback")} size="sm" className="gap-1.5">
+            <MessageSquare className="h-3.5 w-3.5" /> Napísať recenziu
+          </Button>
+        </div>
+
+        <div className="text-center space-y-2">
+          <h1 className="text-2xl md:text-3xl font-bold">Recenzie</h1>
+          <p className="text-sm md:text-base text-muted-foreground">
+            Čo si ostatní myslia o aplikácii
+          </p>
+        </div>
+
+        <Card className="bg-primary/5 border-primary/20">
+          <CardContent className="p-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <span className="text-3xl font-bold">{avgRating}</span>
+              <div>
+                <Stars rating={Math.round(Number(avgRating) || 0)} />
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {reviews.length} {reviews.length === 1 ? "recenzia" : reviews.length < 5 ? "recenzie" : "recenzií"}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <div className="flex flex-wrap gap-2">
+          <Button
+            variant={sortBy === "newest" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setSortBy("newest")}
+          >
+            Najnovšie
+          </Button>
+          <Button
+            variant={sortBy === "rating" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setSortBy("rating")}
+          >
+            Najlepšie hodnotené
+          </Button>
+        </div>
+
+        <div className="flex gap-1.5 items-center">
+          <span className="text-xs text-muted-foreground mr-1">Filter:</span>
+          <Button
+            variant={filterRating === null ? "default" : "outline"}
+            size="sm"
+            className="h-7 px-2.5 text-xs"
+            onClick={() => setFilterRating(null)}
+          >
+            Všetky
+          </Button>
+          {[5, 4, 3, 2, 1].map((n) => (
+            <Button
+              key={n}
+              variant={filterRating === n ? "default" : "outline"}
+              size="sm"
+              className="h-7 px-2 text-xs gap-0.5"
+              onClick={() => setFilterRating(filterRating === n ? null : n)}
+            >
+              {n} <Star className="h-3 w-3 fill-current" />
+            </Button>
+          ))}
+        </div>
+
+        {loading ? (
+          <div className="flex justify-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+          </div>
+        ) : reviews.length === 0 ? (
+          <Card>
+            <CardContent className="p-8 text-center">
+              <p className="text-muted-foreground">Zatiaľ žiadne recenzie. Buď prvý! 🎉</p>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="space-y-3">
+            {sortedReviews.map((review) => (
+              <Card key={review.id} className="animate-fade-in">
+                <CardContent className="p-4 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold text-sm">{review.display_name}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-muted-foreground">
+                        {timeAgo(review.created_at)}
+                      </span>
+                      {isOperator && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6 text-destructive hover:text-destructive"
+                          onClick={() => setDeleteId(review.id)}
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                  <Stars rating={review.rating} />
+                  <p className="text-sm text-foreground/80">{translateToSlovak(review.message)}</p>
+                  <ReplySection
+                    reviewId={review.id}
+                    replies={replies}
+                    isOperator={isOperator}
+                    onReplyAdded={(reply) => setReplies((prev) => [...prev, reply])}
+                    onDeleteReply={(id) => setDeleteReplyId(id)}
+                  />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Odstrániť recenziu?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Naozaj chceš odstrániť túto recenziu? Toto sa nedá vrátiť.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Zrušiť</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Odstrániť
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={!!deleteReplyId} onOpenChange={(open) => !open && setDeleteReplyId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Odstrániť odpoveď?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Naozaj chceš odstrániť túto odpoveď?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Zrušiť</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteReply} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Odstrániť
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </main>
+  );
+}

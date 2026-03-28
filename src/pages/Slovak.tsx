@@ -1,7 +1,8 @@
 import { useState, useEffect, lazy, Suspense } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { BookOpen, Brain, Puzzle, Keyboard, PenTool, MessageSquare, Bot, Settings, Volume2, VolumeX, Sun, Moon, BookMarked, FlaskConical, CheckCircle, Layers, Microscope, Bone, ArrowLeft } from "lucide-react";
+import { BookOpen, Brain, Puzzle, Keyboard, Users, PenTool, MessageSquare, Bot, Settings, Volume2, VolumeX, Sun, Moon, BookMarked, FlaskConical, CheckCircle, Layers, Microscope, Bone, ArrowLeft, Star } from "lucide-react";
 import { getChaptersForLanguage, getChapter, getDefaultChapterId, getActiveVocabulary, Language } from "@/data/vocabulary";
 import { toSlovak } from "@/data/vocabulary-sk";
 import { Switch } from "@/components/ui/switch";
@@ -26,8 +27,9 @@ const AiChat = lazy(() => import("@/components/games/AiChat"));
 const TrueOrFalse = lazy(() => import("@/components/games/TrueOrFalse"));
 const MemoryGame = lazy(() => import("@/components/games/MemoryGame"));
 const SkeletonLabel = lazy(() => import("@/components/games/SkeletonLabel"));
+const Multiplayer = lazy(() => import("@/components/games/Multiplayer"));
 
-type Game = "menu" | "flashcards" | "quiz" | "match" | "type" | "fill" | "sentence" | "ai" | "truefalse" | "memory" | "skeleton";
+type Game = "menu" | "flashcards" | "quiz" | "match" | "type" | "fill" | "sentence" | "ai" | "truefalse" | "memory" | "skeleton" | "multiplayer";
 
 const FlagFR = ({ className = "w-5 h-3.5" }: { className?: string }) => (
   <svg viewBox="0 0 640 480" className={className} aria-label="Francúzsko">
@@ -121,6 +123,7 @@ const biologyGames = [
 ];
 
 function SlovakContent() {
+  const navigate = useNavigate();
   const { chapterId, setChapterId, activeVocabulary, language, setLanguage } = useChapter();
   const [activeGame, setActiveGame] = useState<Game>("menu");
   const [showSettings, setShowSettings] = useState(false);
@@ -160,6 +163,7 @@ function SlovakContent() {
   if (activeGame === "truefalse") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6"><TrueOrFalse onBack={() => setActiveGame("menu")} /></div></Suspense>;
   if (activeGame === "memory") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6"><MemoryGame onBack={() => setActiveGame("menu")} /></div></Suspense>;
   if (activeGame === "skeleton") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6"><SkeletonLabel onBack={() => setActiveGame("menu")} /></div></Suspense>;
+  if (activeGame === "multiplayer") return <Suspense fallback={gameLoader}><Multiplayer onBack={() => setActiveGame("menu")} /></Suspense>;
 
   const games = language === "biology" ? biologyGames : language === "nask" ? naskGames : languageGames;
 
@@ -172,15 +176,26 @@ function SlovakContent() {
             <FlagSK className="w-4 h-3 md:w-5 md:h-3.5 rounded-sm shrink-0" />
             Slovenčina
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-9 w-9"
-            onClick={() => setShowSettings(true)}
-            aria-label="Nastavenia"
-          >
-            <Settings className="h-5 w-5" />
-          </Button>
+          <div className="flex items-center gap-0.5">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-9 w-9"
+              onClick={() => navigate("/slovak/reviews")}
+              aria-label="Recenzie"
+            >
+              <Star className="h-5 w-5" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-9 w-9"
+              onClick={() => setShowSettings(true)}
+              aria-label="Nastavenia"
+            >
+              <Settings className="h-5 w-5" />
+            </Button>
+          </div>
         </div>
 
         <div className="text-center space-y-2 md:space-y-3 w-full">
@@ -229,13 +244,41 @@ function SlovakContent() {
           ))}
         </div>
 
-        <Card className="flex-1 bg-muted/50 w-full">
-          <CardContent className="p-3 md:p-4 text-center">
-            <p className="text-xs md:text-sm text-muted-foreground">
-              📚 <span className="font-medium">{activeVocabulary.length} {(language === "nask" || language === "biology") ? sk.concepts : sk.wordsAndSentences}</span>
-            </p>
+        <Card
+          className="w-full cursor-pointer transition-all duration-200 hover:shadow-lg hover:-translate-y-1 active:scale-[0.98] border-2 border-primary/20 bg-gradient-to-r from-primary/5 to-accent/5"
+          onClick={() => setActiveGame("multiplayer")}
+        >
+          <CardContent className="p-4 md:p-6 flex items-center gap-3 md:gap-4">
+            <div className="w-11 h-11 md:w-14 md:h-14 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
+              <Users className="h-6 w-6 md:h-7 md:w-7 text-primary" />
+            </div>
+            <div>
+              <h2 className="text-base md:text-xl font-bold">🎮 Multiplayer Kvíz</h2>
+              <p className="text-xs md:text-sm text-muted-foreground">
+                Hraj proti kamarátom pomocou zdieľacieho kódu!
+              </p>
+            </div>
           </CardContent>
         </Card>
+
+        <div className="flex gap-2 w-full">
+          <Card className="flex-1 bg-muted/50">
+            <CardContent className="p-3 md:p-4 text-center">
+              <p className="text-xs md:text-sm text-muted-foreground">
+                📚 <span className="font-medium">{activeVocabulary.length} {(language === "nask" || language === "biology") ? sk.concepts : sk.wordsAndSentences}</span>
+              </p>
+            </CardContent>
+          </Card>
+          <Card
+            className="cursor-pointer transition-all hover:shadow-md hover:-translate-y-0.5 active:scale-[0.98] bg-primary/5 border-primary/20"
+            onClick={() => navigate("/slovak/reviews")}
+          >
+            <CardContent className="p-3 md:p-4 flex items-center gap-2">
+              <Star className="h-4 w-4 text-primary" />
+              <span className="text-xs md:text-sm font-medium text-primary">Recenzie</span>
+            </CardContent>
+          </Card>
+        </div>
       </div>
 
       {/* Chapter picker */}
