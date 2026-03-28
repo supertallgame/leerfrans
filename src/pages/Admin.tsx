@@ -44,6 +44,18 @@ interface MutedUser {
   created_at: string;
 }
 
+interface GameRoom {
+  id: string;
+  code: string;
+  host_name: string;
+  status: string;
+  is_public: boolean;
+  game_mode: string;
+  team_mode: string;
+  created_at: string;
+  max_players: number;
+}
+
 const ADMIN_EMAILS = ["brankovantland@gmail.com", "branko18vantland@gmail.com", "tamoopdam@gmail.com", "jack.ouwerkerk@vsodaafgeluk.nl"];
 
 const FlagEN = ({ className = "w-5 h-3.5" }: { className?: string }) => (
