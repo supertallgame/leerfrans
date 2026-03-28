@@ -343,9 +343,9 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
           }
            if (newRoom.status === "finished") {
             setPhase("results");
-            // Fire confetti for #1 player
             const sorted = [...players].sort((a, b) => b.score - a.score);
-            if (sorted[0]?.id === myPlayerId && sorted[0]?.score > 0) {
+            if (sorted[0]?.id === myPlayerId && sorted[0]?.score > 0 && victoryFiredForIndex.current !== -1) {
+              victoryFiredForIndex.current = -1;
               setTimeout(() => { fireConfetti(); playVictory(); }, 500);
             }
           }
