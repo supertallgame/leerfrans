@@ -642,17 +642,30 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
   };
 
   useEffect(() => {
-    const handleBeforeUnload = () => {
-      if (!myPlayerId) return;
+    const fireLeaveRequest = () => {
+      if (!myPlayerId || !myPlayerToken || !room) return;
       const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/game-action`;
-      if (isHost && room && myPlayerToken) {
-        navigator.sendBeacon(url, JSON.stringify({ action: "delete-room", roomId: room.id, playerId: myPlayerId, playerToken: myPlayerToken }));
-      } else if (myPlayerId && myPlayerToken && room) {
-        navigator.sendBeacon(url, JSON.stringify({ action: "leave-game", roomId: room.id, playerId: myPlayerId, playerToken: myPlayerToken }));
+      const action = isHost ? "delete-room" : "leave-game";
+      const body = JSON.stringify({ action, roomId: room.id, playerId: myPlayerId, playerToken: myPlayerToken });
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+        "apikey": import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+      };
+      // Try fetch with keepalive first (allows headers), fall back to sendBeacon
+      try {
+        fetch(url, { method: "POST", headers, body, keepalive: true }).catch(() => {});
+      } catch {
+        navigator.sendBeacon(url, new Blob([body], { type: "application/json" }));
       }
     };
+    const handleBeforeUnload = () => fireLeaveRequest();
+    const handlePageHide = () => fireLeaveRequest();
     window.addEventListener("beforeunload", handleBeforeUnload);
-    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+    window.addEventListener("pagehide", handlePageHide);
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      window.removeEventListener("pagehide", handlePageHide);
+    };
   }, [myPlayerId, myPlayerToken, isHost, room]);
 
   const assignPlayerToTeam = async (pid: string, teamNum: number) => {
