@@ -621,6 +621,10 @@ export default function Admin() {
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold flex items-center gap-2">
               <Gamepad2 className="h-5 w-5" /> Multiplayer kamers
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-green-500/10 px-2.5 py-0.5 text-xs font-medium text-green-600 dark:text-green-400 ring-1 ring-inset ring-green-500/20">
+                <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
+                LIVE
+              </span>
             </h2>
             <div className="flex items-center gap-2">
               <span className="text-sm text-muted-foreground">{gameRooms.length} kamer{gameRooms.length !== 1 ? "s" : ""}</span>
