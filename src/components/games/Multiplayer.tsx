@@ -368,7 +368,25 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
       )
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "game_players", filter: `room_id=eq.${room.id}` },
+        { event: "DELETE", schema: "public", table: "game_players", filter: `room_id=eq.${room.id}` },
+        (payload) => {
+          const old = payload.old as any;
+          if (old?.id && old.id !== myPlayerId && old.player_name) {
+            toast.info(m.playerLeft(old.player_name), { icon: "👋" });
+          }
+          fetchPlayers(room.id);
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "game_players", filter: `room_id=eq.${room.id}` },
+        () => {
+          fetchPlayers(room.id);
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "game_players", filter: `room_id=eq.${room.id}` },
         () => {
           fetchPlayers(room.id);
         }
