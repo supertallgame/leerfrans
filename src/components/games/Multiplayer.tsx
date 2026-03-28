@@ -389,7 +389,11 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "game_players", filter: `room_id=eq.${room.id}` },
-        () => {
+        (payload) => {
+          const newPlayer = payload.new as any;
+          if (newPlayer?.id && newPlayer.id !== myPlayerId && newPlayer.player_name) {
+            toast.info(m.playerJoined(newPlayer.player_name), { icon: "🎉" });
+          }
           fetchPlayers(room.id);
         }
       )
