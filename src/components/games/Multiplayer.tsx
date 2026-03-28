@@ -348,7 +348,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
         "postgres_changes",
         { event: "DELETE", schema: "public", table: "game_rooms", filter: `id=eq.${room.id}` },
         () => {
-          toast.info("De host heeft het spel verlaten.");
+          toast.info(m.hostLeft);
           setPhase("setup");
           setRoom(null);
           setMyPlayerId(null);
