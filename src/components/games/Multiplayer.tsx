@@ -116,6 +116,14 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
   const publicRoomsRef = useRef<HTMLDivElement>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [loadingRandom, setLoadingRandom] = useState(false);
+  const [isAdminUser, setIsAdminUser] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      const adminEmails = ["brankovantland@gmail.com", "branko18vantland@gmail.com", "tamoopdam@gmail.com", "jack.ouwerkerk@vsodaafgeluk.nl"];
+      setIsAdminUser(adminEmails.includes(session?.user?.email ?? ""));
+    });
+  }, []);
 
   const fetchQuestion = useCallback(async (roomId: string, playerId: string, playerToken: string) => {
     const { data } = await supabase.functions.invoke("game-action", {
