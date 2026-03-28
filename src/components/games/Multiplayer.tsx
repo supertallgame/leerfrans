@@ -541,6 +541,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
       num_teams: teams,
       team_names: teamNames.slice(0, teams),
       team_emojis: teamEmojis.slice(0, teams),
+      kahoot_timer: roomData.kahoot_timer ?? kahootTimerSetting,
     });
     setMyPlayerId(pid);
     setMyPlayerToken(ptoken);
@@ -564,7 +565,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
 
     const { data: roomData, error } = await (supabase
       .from("game_rooms_public" as any)
-      .select("id, code, host_name, status, current_question_index, total_questions, direction, game_mode, team_mode, num_teams, team_names, team_emojis")
+      .select("id, code, host_name, status, current_question_index, total_questions, direction, game_mode, team_mode, num_teams, team_names, team_emojis, kahoot_timer")
       .eq("code", roomCode.toUpperCase().trim())
       .eq("status", "waiting")
       .maybeSingle() as any);
@@ -581,6 +582,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
       num_teams: roomData.num_teams || 2,
       team_names: roomData.team_names || [],
       team_emojis: roomData.team_emojis || ["🔵", "🔴", "🟢", "🟡"],
+      kahoot_timer: roomData.kahoot_timer ?? 5,
     } as Room);
     if (roomData.team_emojis?.length > 0) setTeamEmojis(roomData.team_emojis);
     setMyPlayerId(playerData?.id ?? null);
