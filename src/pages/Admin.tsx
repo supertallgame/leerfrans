@@ -94,6 +94,7 @@ export default function Admin() {
   const [blockAnonymous, setBlockAnonymous] = useState(false);
   const [gameRooms, setGameRooms] = useState<GameRoom[]>([]);
   const [closeRoomId, setCloseRoomId] = useState<string | null>(null);
+  const [refreshingRooms, setRefreshingRooms] = useState(false);
 
   useEffect(() => {
     checkAdmin();
