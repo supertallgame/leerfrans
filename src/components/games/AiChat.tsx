@@ -3,7 +3,7 @@ import ReactMarkdown from "react-markdown";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, Send, Bot, User } from "lucide-react";
+import { ArrowLeft, Send, Bot, User, Lightbulb, Trophy } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useChapter } from "@/contexts/ChapterContext";
 import { useLocale } from "@/contexts/LocaleContext";
@@ -27,6 +27,7 @@ export default function AiChat({ onBack }: Props) {
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [started, setStarted] = useState(false);
+  const [score, setScore] = useState({ correct: 0, wrong: 0 });
 
   const title = (i.aiTeacherTitle as Record<string, string>)[language] || i.aiTeacher;
 
@@ -34,14 +35,30 @@ export default function AiChat({ onBack }: Props) {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  // Parse score from AI response
+  useEffect(() => {
+    if (messages.length === 0) return;
+    const lastAssistant = [...messages].reverse().find((m) => m.role === "assistant");
+    if (!lastAssistant) return;
+    const content = lastAssistant.content;
+    // Look for patterns like "Score: 3/5", "3 goed, 2 fout", "3 correct, 2 incorrect"
+    const scoreMatch = content.match(/(\d+)\s*(?:\/|van|uit)\s*(\d+)/i) 
+      || content.match(/(\d+)\s*(?:goed|correct|juist|správn)/i);
+    if (scoreMatch) {
+      const correct = parseInt(scoreMatch[1]);
+      const total = scoreMatch[2] ? parseInt(scoreMatch[2]) : correct + score.wrong;
+      setScore({ correct, wrong: Math.max(0, total - correct) });
+    }
+  }, [messages]);
+
+  const vocabSample = activeVocabulary.slice(0, 30).map((v) => ({
+    dutch: v.dutch,
+    french: v.french,
+  }));
+
   const startChat = async () => {
     setStarted(true);
     setIsLoading(true);
-
-    const vocabSample = activeVocabulary.slice(0, 30).map((v) => ({
-      dutch: v.dutch,
-      french: v.french,
-    }));
 
     try {
       const { data, error } = await supabase.functions.invoke("ai-chat", {
@@ -58,18 +75,14 @@ export default function AiChat({ onBack }: Props) {
     setIsLoading(false);
   };
 
-  const sendMessage = async () => {
-    if (!input.trim() || isLoading) return;
-    const userMsg: Message = { role: "user", content: input.trim() };
+  const sendMessage = async (text?: string) => {
+    const msg = text || input.trim();
+    if (!msg || isLoading) return;
+    const userMsg: Message = { role: "user", content: msg };
     const newMessages = [...messages, userMsg];
     setMessages(newMessages);
-    setInput("");
+    if (!text) setInput("");
     setIsLoading(true);
-
-    const vocabSample = activeVocabulary.slice(0, 30).map((v) => ({
-      dutch: v.dutch,
-      french: v.french,
-    }));
 
     try {
       const { data, error } = await supabase.functions.invoke("ai-chat", {
@@ -87,6 +100,13 @@ export default function AiChat({ onBack }: Props) {
       ]);
     }
     setIsLoading(false);
+  };
+
+  const askHint = () => {
+    const hintMsg = locale === "sk"
+      ? "Kun je me een hint geven? Ik weet het antwoord niet."
+      : "Kun je me een hint geven? Ik weet het antwoord niet.";
+    sendMessage(hintMsg);
   };
 
   const chatDesc = language === "nask"
@@ -123,7 +143,7 @@ export default function AiChat({ onBack }: Props) {
         <Button variant="ghost" size="icon" onClick={onBack}>
           <ArrowLeft className="h-4 w-4" />
         </Button>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-1">
           <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
             <Bot className="h-4 w-4 text-primary" />
           </div>
@@ -132,6 +152,14 @@ export default function AiChat({ onBack }: Props) {
             <p className="text-xs text-muted-foreground">{i.online}</p>
           </div>
         </div>
+        {(score.correct > 0 || score.wrong > 0) && (
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 text-sm font-medium">
+            <Trophy className="h-3.5 w-3.5 text-primary" />
+            <span className="text-green-500">{score.correct}</span>
+            <span className="text-muted-foreground">/</span>
+            <span className="text-red-500">{score.wrong}</span>
+          </div>
+        )}
       </div>
 
       <div className="flex-1 overflow-y-auto py-4 space-y-4">
@@ -182,18 +210,32 @@ export default function AiChat({ onBack }: Props) {
         <div ref={messagesEndRef} />
       </div>
 
-      <div className="border-t pt-4 pb-2 flex gap-2">
-        <Input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-          placeholder={i.typeAnswer}
-          disabled={isLoading}
-          autoFocus
-        />
-        <Button onClick={sendMessage} disabled={isLoading || !input.trim()} size="icon">
-          <Send className="h-4 w-4" />
-        </Button>
+      <div className="border-t pt-4 pb-2 space-y-2">
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={askHint}
+            disabled={isLoading || messages.length < 1}
+            className="gap-1.5 text-xs"
+          >
+            <Lightbulb className="h-3.5 w-3.5" />
+            {i.giveHint}
+          </Button>
+        </div>
+        <div className="flex gap-2">
+          <Input
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+            placeholder={i.typeAnswer}
+            disabled={isLoading}
+            autoFocus
+          />
+          <Button onClick={() => sendMessage()} disabled={isLoading || !input.trim()} size="icon">
+            <Send className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
     </div>
   );
