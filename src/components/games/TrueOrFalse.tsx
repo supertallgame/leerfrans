@@ -37,7 +37,11 @@ export default function TrueOrFalse({ onBack }: Props) {
           isCorrect: true,
         };
       } else {
-        const others = activeVocabulary.filter((v) => v.dutch !== item.dutch);
+        const others = activeVocabulary.filter((v) => v.dutch !== item.dutch && v.french !== item.french);
+        if (others.length === 0) {
+          // No different definition available, make it a "true" question
+          return { term: item.dutch, shownDefinition: item.french, correctDefinition: item.french, isCorrect: true };
+        }
         const wrong = others[Math.floor(Math.random() * others.length)];
         return {
           term: item.dutch,
