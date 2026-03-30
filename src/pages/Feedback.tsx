@@ -10,9 +10,6 @@ import { toast } from "sonner";
 import { containsBannedWord } from "@/lib/censor";
 import { useThemeSync } from "@/hooks/use-theme-sync";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { toast } from "sonner";
-import { containsBannedWord } from "@/lib/censor";
-import { useThemeSync } from "@/hooks/use-theme-sync";
 
 const MAX_IMAGE_SIZE = 2 * 1024 * 1024; // 2MB
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"];
