@@ -4,18 +4,19 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Star, Send, VolumeX, ImagePlus, X } from "lucide-react";
+import { ArrowLeft, Star, Send, VolumeX, ImagePlus, X, Camera } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { containsBannedWord } from "@/lib/censor";
 import { useThemeSync } from "@/hooks/use-theme-sync";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const MAX_IMAGE_SIZE = 2 * 1024 * 1024; // 2MB
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"];
 
 export default function Feedback() {
   const navigate = useNavigate();
-  useThemeSync();
+  const isMobile = useIsMobile();
 
   const [name, setName] = useState("");
   const [rating, setRating] = useState(0);
@@ -28,6 +29,9 @@ export default function Feedback() {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+
+  useThemeSync();
 
   useEffect(() => {
     const checkStatus = async () => {
@@ -267,6 +271,25 @@ export default function Feedback() {
                     <X className="h-3 w-3" />
                   </Button>
                 </div>
+              ) : isMobile ? (
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="gap-2 flex-1 border-dashed"
+                    onClick={() => cameraInputRef.current?.click()}
+                  >
+                    <Camera className="h-4 w-4" /> Maak foto
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="gap-2 flex-1 border-dashed"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <ImagePlus className="h-4 w-4" /> Kies foto
+                  </Button>
+                </div>
               ) : (
                 <Button
                   type="button"
@@ -277,6 +300,14 @@ export default function Feedback() {
                   <ImagePlus className="h-4 w-4" /> Kies een afbeelding
                 </Button>
               )}
+              <input
+                ref={cameraInputRef}
+                type="file"
+                accept="image/*"
+                capture="environment"
+                className="hidden"
+                onChange={handleImageSelect}
+              />
               <input
                 ref={fileInputRef}
                 type="file"
