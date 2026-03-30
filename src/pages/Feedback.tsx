@@ -32,7 +32,6 @@ export default function Feedback() {
   const cameraInputRef = useRef<HTMLInputElement>(null);
 
   useThemeSync();
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const checkStatus = async () => {
