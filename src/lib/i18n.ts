@@ -149,6 +149,8 @@ export const translations = {
     fallbackReply: "Prepáč, niečo sa pokazilo. Skús to znova!",
     errorReply: "⚠️ Niečo sa pokazilo. Skús to znova!",
     fallbackGreeting: "Ahoj! Poďme začať cvičiť!",
+    giveHint: "💡 Nápoveda",
+    scoreLabel: "Skóre",
     // Skeleton
     questionBone: "Otázka {n}/{total}: Aká kosť je číslo {id}?",
     typeBoneName: "Napíš názov kosti...",
