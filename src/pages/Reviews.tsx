@@ -414,34 +414,48 @@ export default function Reviews() {
           <div className="space-y-3">
             {sortedReviews.map((review) => (
               <Card key={review.id} className="animate-fade-in">
-                <CardContent className="p-4 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="font-semibold text-sm">{review.display_name}</span>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-muted-foreground">
-                        {timeAgo(review.created_at)}
-                      </span>
-                      {isOperator && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-6 w-6 text-destructive hover:text-destructive"
-                          onClick={() => setDeleteId(review.id)}
-                        >
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </Button>
-                      )}
+                <CardContent className="p-4">
+                  <div className="flex gap-4">
+                    <div className="flex-1 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="font-semibold text-sm">{review.display_name}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-muted-foreground">
+                            {timeAgo(review.created_at)}
+                          </span>
+                          {isOperator && (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-6 w-6 text-destructive hover:text-destructive"
+                              onClick={() => setDeleteId(review.id)}
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                      <Stars rating={review.rating} />
+                      <p className="text-sm text-foreground/80">{review.message}</p>
+                      <ReplySection
+                        reviewId={review.id}
+                        replies={replies}
+                        isOperator={isOperator}
+                        onReplyAdded={(reply) => setReplies((prev) => [...prev, reply])}
+                        onDeleteReply={(id) => setDeleteReplyId(id)}
+                      />
                     </div>
+                    {review.image_url && (
+                      <div className="shrink-0">
+                        <img
+                          src={review.image_url}
+                          alt="Review afbeelding"
+                          className="rounded-lg w-24 h-24 md:w-32 md:h-32 object-cover border cursor-pointer hover:opacity-90 transition-opacity"
+                          onClick={() => window.open(review.image_url!, "_blank")}
+                        />
+                      </div>
+                    )}
                   </div>
-                  <Stars rating={review.rating} />
-                  <p className="text-sm text-foreground/80">{review.message}</p>
-                  <ReplySection
-                    reviewId={review.id}
-                    replies={replies}
-                    isOperator={isOperator}
-                    onReplyAdded={(reply) => setReplies((prev) => [...prev, reply])}
-                    onDeleteReply={(id) => setDeleteReplyId(id)}
-                  />
                 </CardContent>
               </Card>
             ))}
