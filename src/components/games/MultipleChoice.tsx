@@ -101,7 +101,7 @@ export default function MultipleChoice({ onBack }: Props) {
       </Card>
 
       <div className="grid grid-cols-1 gap-2 md:gap-3 w-full">
-        {options.map((opt) => {
+        {options.map((opt, idx) => {
           const isCorrect = opt === correctAnswer;
           const isSelected = opt === selected;
           let variant: "outline" | "default" | "destructive" = "outline";
@@ -111,7 +111,7 @@ export default function MultipleChoice({ onBack }: Props) {
           }
           return (
             <Button
-              key={opt}
+              key={`${qIndex}-${idx}-${opt}`}
               variant={variant}
               className={`h-auto py-3 px-4 text-left justify-start whitespace-normal ${
                 selected && isCorrect ? "bg-[hsl(var(--success))] text-[hsl(var(--success-foreground))] hover:bg-[hsl(var(--success))]" : ""
