@@ -636,8 +636,8 @@ export default function Admin() {
             </h2>
             <div className="flex items-center gap-2">
               <span className="text-sm text-muted-foreground">{gameRooms.length} kamer{gameRooms.length !== 1 ? "s" : ""}</span>
-              <Button variant="outline" size="sm" onClick={fetchGameRooms} className="gap-1.5">
-                🔄 Vernieuwen
+              <Button variant="outline" size="sm" onClick={fetchGameRooms} disabled={refreshingRooms} className="gap-1.5">
+                <span className={refreshingRooms ? "animate-spin" : ""}>🔄</span> {refreshingRooms ? "Laden..." : "Vernieuwen"}
               </Button>
             </div>
           </div>
