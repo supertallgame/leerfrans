@@ -115,6 +115,7 @@ interface Review {
   rating: number;
   message: string;
   created_at: string;
+  image_url?: string | null;
 }
 
 const OPERATOR_EMAILS = ["brankovantland@gmail.com", "branko18vantland@gmail.com", "tamoopdam@gmail.com", "jack.ouwerkerk@vsodaafgeluk.nl"];
