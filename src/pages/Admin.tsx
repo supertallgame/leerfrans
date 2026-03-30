@@ -246,7 +246,12 @@ export default function Admin() {
   };
 
   const fetchGameRooms = async () => {
-    const { data } = await supabase.from("game_rooms").select("id, code, host_name, status, is_public, game_mode, team_mode, created_at, max_players").order("created_at", { ascending: false }) as any;
+    const { data, error } = await supabase.from("game_rooms").select("id, code, host_name, status, is_public, game_mode, team_mode, created_at, max_players").order("created_at", { ascending: false }) as any;
+    if (error) {
+      console.error("fetchGameRooms error:", error);
+      toast.error("Kon kamers niet laden");
+      return;
+    }
     if (data) setGameRooms(data);
   };
 
