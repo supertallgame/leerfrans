@@ -275,6 +275,25 @@ export default function Feedback() {
                     <X className="h-3 w-3" />
                   </Button>
                 </div>
+              ) : isMobile ? (
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="gap-2 flex-1 border-dashed"
+                    onClick={() => cameraInputRef.current?.click()}
+                  >
+                    <Camera className="h-4 w-4" /> Maak foto
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="gap-2 flex-1 border-dashed"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <ImagePlus className="h-4 w-4" /> Kies foto
+                  </Button>
+                </div>
               ) : (
                 <Button
                   type="button"
@@ -285,6 +304,14 @@ export default function Feedback() {
                   <ImagePlus className="h-4 w-4" /> Kies een afbeelding
                 </Button>
               )}
+              <input
+                ref={cameraInputRef}
+                type="file"
+                accept="image/*"
+                capture="environment"
+                className="hidden"
+                onChange={handleImageSelect}
+              />
               <input
                 ref={fileInputRef}
                 type="file"
