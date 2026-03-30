@@ -19,7 +19,7 @@ const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"];
 
 export default function Feedback() {
   const navigate = useNavigate();
-  useThemeSync();
+  const isMobile = useIsMobile();
 
   const [name, setName] = useState("");
   const [rating, setRating] = useState(0);
