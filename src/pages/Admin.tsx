@@ -94,6 +94,7 @@ export default function Admin() {
   const [blockAnonymous, setBlockAnonymous] = useState(false);
   const [gameRooms, setGameRooms] = useState<GameRoom[]>([]);
   const [closeRoomId, setCloseRoomId] = useState<string | null>(null);
+  const [refreshingRooms, setRefreshingRooms] = useState(false);
 
   useEffect(() => {
     checkAdmin();
@@ -246,13 +247,15 @@ export default function Admin() {
   };
 
   const fetchGameRooms = async () => {
+    setRefreshingRooms(true);
     const { data, error } = await supabase.from("game_rooms").select("id, code, host_name, status, is_public, game_mode, team_mode, created_at, max_players").order("created_at", { ascending: false }) as any;
     if (error) {
       console.error("fetchGameRooms error:", error);
       toast.error("Kon kamers niet laden");
-      return;
+    } else if (data) {
+      setGameRooms(data);
     }
-    if (data) setGameRooms(data);
+    setRefreshingRooms(false);
   };
 
   const exportReviewsCsv = () => {
@@ -633,8 +636,8 @@ export default function Admin() {
             </h2>
             <div className="flex items-center gap-2">
               <span className="text-sm text-muted-foreground">{gameRooms.length} kamer{gameRooms.length !== 1 ? "s" : ""}</span>
-              <Button variant="outline" size="sm" onClick={fetchGameRooms} className="gap-1.5">
-                🔄 Vernieuwen
+              <Button variant="outline" size="sm" onClick={fetchGameRooms} disabled={refreshingRooms} className="gap-1.5">
+                <span className={refreshingRooms ? "animate-spin" : ""}>🔄</span> {refreshingRooms ? "Laden..." : "Vernieuwen"}
               </Button>
             </div>
           </div>
