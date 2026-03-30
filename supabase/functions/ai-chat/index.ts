@@ -89,6 +89,7 @@ REGELS:
 - Wees enthousiast en motiverend! Gebruik emoji's 🎉🇫🇷
 - Als er GEEN eerdere berichten zijn, begin met een kort welkomstbericht in het Nederlands en stel meteen de eerste vraag IN HET FRANS
 - BELANGRIJK: Als er WEL eerdere berichten zijn, BEOORDEEL het antwoord van de leerling op de vorige vraag. Herhaal NOOIT je welkomstbericht. Ga gewoon door met het gesprek.`;
+}
 
 const MAX_MESSAGES = 50;
 const MAX_CONTENT_LENGTH = 500;
