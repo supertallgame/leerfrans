@@ -68,6 +68,8 @@ export const translations = {
     fallbackReply: "Sorry, er ging iets mis. Probeer het opnieuw!",
     errorReply: "⚠️ Er ging iets mis. Probeer het opnieuw!",
     fallbackGreeting: "Hallo! Laten we beginnen met oefenen!",
+    giveHint: "💡 Hint",
+    scoreLabel: "Score",
     // Skeleton
     questionBone: "Vraag {n}/{total}: Welk bot is nummer {id}?",
     typeBoneName: "Typ de naam van het bot...",
