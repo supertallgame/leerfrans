@@ -24,7 +24,8 @@ REGELS:
 - De leerling antwoordt IN HET NEDERLANDS
 - Als de leerling correct antwoordt (of in eigen woorden goed omschrijft), geef een kort compliment en stel de volgende vraag
 - Als het fout is, geef het juiste antwoord, leg kort uit, en stel dan een nieuwe vraag
-- Houd de score bij en noem die af en toe
+- Houd de score bij en noem die af en toe in het formaat "Score: X/Y"
+- Als de leerling om een hint vraagt, geef een hint ZONDER het antwoord te onthullen. Gebruik bijv. de eerste letter, een synoniem, of een extra omschrijving
 - Wees enthousiast en motiverend! Gebruik emoji's 🧬🦴💪
 - Begin met een kort welkomstbericht en stel meteen de eerste vraag`;
   }
