@@ -1,14 +1,17 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Star, Send, VolumeX } from "lucide-react";
+import { ArrowLeft, Star, Send, VolumeX, ImagePlus, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { containsBannedWord } from "@/lib/censor";
 import { useThemeSync } from "@/hooks/use-theme-sync";
+
+const MAX_IMAGE_SIZE = 2 * 1024 * 1024; // 2MB
+const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"];
 
 export default function Feedback() {
   const navigate = useNavigate();
@@ -22,11 +25,14 @@ export default function Feedback() {
   const [mutedUntil, setMutedUntil] = useState<string | null>(null);
   const [blocked, setBlocked] = useState(false);
 
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   useEffect(() => {
     const checkStatus = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       
-      // Check if anonymous reviews are blocked and user is not logged in
       if (!session?.user) {
         const { data: anonSetting } = await supabase
           .rpc("get_public_setting", { p_key: "block_anonymous_reviews" });
@@ -35,7 +41,6 @@ export default function Feedback() {
         }
       }
 
-      // Check if user is muted
       if (session?.user?.email) {
         const { data: muteData } = await supabase.rpc("get_my_mute_status" as any);
         if (muteData && (muteData as any[]).length > 0) {
@@ -45,6 +50,34 @@ export default function Feedback() {
     };
     checkStatus();
   }, []);
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      toast.error("Dit is geen afbeelding. Upload een JPG, PNG, GIF of WebP bestand.");
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+
+    if (file.size > MAX_IMAGE_SIZE) {
+      toast.error("Afbeelding is te groot. Maximaal 2MB.");
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+
+    setImageFile(file);
+    const reader = new FileReader();
+    reader.onload = (ev) => setImagePreview(ev.target?.result as string);
+    reader.readAsDataURL(file);
+  };
+
+  const removeImage = () => {
+    setImageFile(null);
+    setImagePreview(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
 
   const handleSubmit = async () => {
     const trimmedName = name.trim();
@@ -63,10 +96,8 @@ export default function Feedback() {
 
     setSubmitting(true);
 
-    // Get current user session if logged in
     const { data: { session } } = await supabase.auth.getSession();
 
-    // Check if anonymous reviews are blocked
     if (!session?.user) {
       const { data: anonSetting } = await supabase
         .rpc("get_public_setting", { p_key: "block_anonymous_reviews" });
@@ -76,7 +107,6 @@ export default function Feedback() {
       }
     }
 
-    // Check if user is muted
     if (session?.user?.email) {
       const { data: muteData } = await supabase.rpc("get_my_mute_status" as any);
       if (muteData && (muteData as any[]).length > 0) {
@@ -86,10 +116,32 @@ export default function Feedback() {
       }
     }
 
+    // Upload image if selected
+    let imageUrl: string | null = null;
+    if (imageFile) {
+      const ext = imageFile.name.split(".").pop() || "jpg";
+      const fileName = `${crypto.randomUUID()}.${ext}`;
+      const { error: uploadError } = await supabase.storage
+        .from("review-images")
+        .upload(fileName, imageFile, { contentType: imageFile.type });
+
+      if (uploadError) {
+        setSubmitting(false);
+        toast.error("Kon afbeelding niet uploaden");
+        return;
+      }
+
+      const { data: urlData } = supabase.storage
+        .from("review-images")
+        .getPublicUrl(fileName);
+      imageUrl = urlData.publicUrl;
+    }
+
     const insertData: any = {
       display_name: trimmedName,
       rating,
       message: trimmedMessage,
+      image_url: imageUrl,
     };
     if (session?.user?.id) {
       insertData.user_id = session.user.id;
@@ -197,13 +249,53 @@ export default function Feedback() {
               </p>
             </div>
 
+            <div>
+              <label className="text-sm font-medium mb-1.5 block">Afbeelding (optioneel)</label>
+              {imagePreview ? (
+                <div className="relative inline-block">
+                  <img
+                    src={imagePreview}
+                    alt="Preview"
+                    className="rounded-lg max-h-40 object-cover border"
+                  />
+                  <Button
+                    variant="destructive"
+                    size="icon"
+                    className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
+                    onClick={removeImage}
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                </div>
+              ) : (
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="gap-2 w-full border-dashed"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <ImagePlus className="h-4 w-4" /> Kies een afbeelding
+                </Button>
+              )}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/gif,image/webp"
+                className="hidden"
+                onChange={handleImageSelect}
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                JPG, PNG, GIF of WebP · max 2MB
+              </p>
+            </div>
+
             <Button
               onClick={handleSubmit}
               disabled={submitting}
               className="w-full gap-2"
               size="lg"
             >
-              <Send className="h-4 w-4" /> Versturen
+              <Send className="h-4 w-4" /> {submitting ? "Bezig met versturen..." : "Versturen"}
             </Button>
           </CardContent>
         </Card>
