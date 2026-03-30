@@ -261,6 +261,7 @@ export type Database = {
           created_at: string
           display_name: string
           id: string
+          image_url: string | null
           message: string
           rating: number
           user_email: string | null
@@ -270,6 +271,7 @@ export type Database = {
           created_at?: string
           display_name: string
           id?: string
+          image_url?: string | null
           message: string
           rating: number
           user_email?: string | null
@@ -279,6 +281,7 @@ export type Database = {
           created_at?: string
           display_name?: string
           id?: string
+          image_url?: string | null
           message?: string
           rating?: number
           user_email?: string | null
@@ -347,6 +350,7 @@ export type Database = {
           created_at: string | null
           display_name: string | null
           id: string | null
+          image_url: string | null
           message: string | null
           rating: number | null
         }
@@ -354,6 +358,7 @@ export type Database = {
           created_at?: string | null
           display_name?: string | null
           id?: string | null
+          image_url?: string | null
           message?: string | null
           rating?: number | null
         }
@@ -361,6 +366,7 @@ export type Database = {
           created_at?: string | null
           display_name?: string | null
           id?: string | null
+          image_url?: string | null
           message?: string | null
           rating?: number | null
         }
