@@ -32,6 +32,10 @@ export default function Feedback() {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+
+  useThemeSync();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const checkStatus = async () => {
