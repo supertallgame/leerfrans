@@ -33,9 +33,12 @@ export default function MultipleChoice({ onBack }: Props) {
     const correctIsSentence = isSentence(correct);
     const sameType = activeVocabulary
       .filter((v) => v !== current && isSentence(showDutch ? v.french : v.dutch) === correctIsSentence)
-      .map((v) => (showDutch ? v.french : v.dutch));
-    const pool = sameType.length >= 3 ? sameType : activeVocabulary.filter((v) => v !== current).map((v) => (showDutch ? v.french : v.dutch));
-    const others = shuffle(pool).slice(0, 3);
+      .map((v) => (showDutch ? v.french : v.dutch))
+      .filter((v) => v !== correct);
+    const pool = sameType.length >= 3 ? sameType : activeVocabulary.filter((v) => v !== current).map((v) => (showDutch ? v.french : v.dutch)).filter((v) => v !== correct);
+    // Ensure unique distractors
+    const uniquePool = [...new Set(pool)];
+    const others = shuffle(uniquePool).slice(0, 3);
     return shuffle([correct, ...others]);
   }, [qIndex, showDutch, finished]);
 
