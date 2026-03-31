@@ -199,7 +199,8 @@ export default function Coderen() {
     if (lessons.length > 0) {
       setLesson(lessons[0]);
       lessonQueueRef.current = lessons.slice(1);
-      prefetchIfNeeded(selectedLang, startLesson + 1);
+      saveProgress(selectedLang, startLesson, newScore, null, level, lessons.slice(1));
+      prefetchIfNeeded(selectedLang, startLesson + lessons.length);
     } else {
       toast.error("Kon de lessen niet laden. Probeer opnieuw.");
     }
