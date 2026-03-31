@@ -270,8 +270,9 @@ export default function Reviews() {
   const [myVotes, setMyVotes] = useState<MyVotes>({});
   const [animatingVote, setAnimatingVote] = useState<string | null>(null);
 
-  const fetchVotes = async () => {
-    const voterId = getVoterId();
+  const fetchVotes = async (userId?: string | null) => {
+    const voterId = userId ?? currentUserId;
+    if (!voterId) return;
     const [countsRes, myRes] = await Promise.all([
       supabase.rpc("get_review_vote_counts" as any) as any,
       supabase.from("review_votes" as any).select("review_id, vote_type").eq("voter_id", voterId) as any,
