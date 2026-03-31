@@ -34,7 +34,7 @@ function pickMissingWord(sentence: string): { display: string; correctWord: stri
 
 
 export default function SentenceFill({ onBack }: Props) {
-  const { activeVocabulary, language } = useChapter();
+  const { activeVocabulary, language, chapterId } = useChapter();
   const locale = useLocale();
   const i = t(locale);
   const sentences = useMemo(() => {
