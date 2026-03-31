@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { trackAnswer } from "@/lib/trackAnswer";
 import { playCorrect, playWrong } from "@/lib/sounds";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -127,8 +128,10 @@ export default function ClockTimes({ onBack }: Props) {
   const handleSelect = (opt: string) => {
     if (selected) return;
     setSelected(opt);
-    if (opt === current.french) { setScore((s) => s + 1); playCorrect(); }
+    const isCorrect = opt === current.french;
+    if (isCorrect) { setScore((s) => s + 1); playCorrect(); }
     else { playWrong(); }
+    trackAnswer({ gameType: "clocktimes", language: "french", chapterId: "clocktimes", question: current.dutch, correctAnswer: current.french, givenAnswer: opt, isCorrect });
   };
 
   const handleNext = () => {

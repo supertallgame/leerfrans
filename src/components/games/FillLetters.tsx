@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { playCorrect, playWrong } from "@/lib/sounds";
 import { isAnswerCorrect } from "@/lib/utils";
+import { trackAnswer } from "@/lib/trackAnswer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -43,7 +44,7 @@ function removeSomeLetters(word: string): { display: string; removed: { index: n
 }
 
 export default function FillLetters({ onBack }: Props) {
-  const { activeVocabulary, language } = useChapter();
+  const { activeVocabulary, language, chapterId } = useChapter();
   const locale = useLocale();
   const i = t(locale);
   const foreignShort = (i.foreignShort as any)[language];
@@ -75,9 +76,11 @@ export default function FillLetters({ onBack }: Props) {
   const isCorrectFn = (input: string) => isAnswerCorrect(input, targetWord);
 
   const checkAnswer = () => {
-    if (isCorrectFn(userInput)) { setScore((s) => s + 1); playCorrect(); }
+    const correct = isCorrectFn(userInput);
+    if (correct) { setScore((s) => s + 1); playCorrect(); }
     else { playWrong(); }
     setShowResult(true);
+    trackAnswer({ gameType: "fill", language, chapterId, question: hintWord, correctAnswer: targetWord, givenAnswer: userInput, isCorrect: correct });
   };
 
   const next = () => {

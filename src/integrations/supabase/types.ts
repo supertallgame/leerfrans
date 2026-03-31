@@ -35,6 +35,48 @@ export type Database = {
         }
         Relationships: []
       }
+      game_answers: {
+        Row: {
+          chapter_id: string
+          correct_answer: string
+          created_at: string
+          game_type: string
+          given_answer: string | null
+          id: string
+          is_correct: boolean
+          language: string
+          question: string
+          session_id: string
+          user_id: string | null
+        }
+        Insert: {
+          chapter_id: string
+          correct_answer: string
+          created_at?: string
+          game_type: string
+          given_answer?: string | null
+          id?: string
+          is_correct?: boolean
+          language: string
+          question: string
+          session_id: string
+          user_id?: string | null
+        }
+        Update: {
+          chapter_id?: string
+          correct_answer?: string
+          created_at?: string
+          game_type?: string
+          given_answer?: string | null
+          id?: string
+          is_correct?: boolean
+          language?: string
+          question?: string
+          session_id?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       game_players: {
         Row: {
           current_answer: string | null

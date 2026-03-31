@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { isAnswerCorrect } from "@/lib/utils";
+import { trackAnswer } from "@/lib/trackAnswer";
 import { playCorrect, playWrong } from "@/lib/sounds";
 import { shuffle, getForeignLabel } from "@/data/vocabulary";
 import { useChapter } from "@/contexts/ChapterContext";
@@ -18,7 +19,7 @@ interface Props {
 }
 
 export default function TypeAnswer({ onBack }: Props) {
-  const { activeVocabulary, language } = useChapter();
+  const { activeVocabulary, language, chapterId } = useChapter();
   const locale = useLocale();
   const i = t(locale);
   const [questions] = useState(() => shuffle(activeVocabulary));
@@ -44,6 +45,7 @@ export default function TypeAnswer({ onBack }: Props) {
         setScore((s) => s + 1);
         setAiFeedback(null);
         playCorrect();
+        trackAnswer({ gameType: "type", language, chapterId, question: showDutch ? current.dutch : current.french, correctAnswer: answer, givenAnswer: input, isCorrect: true });
         return;
       }
 
@@ -61,10 +63,12 @@ export default function TypeAnswer({ onBack }: Props) {
           setScore((s) => s + 1);
           setAiFeedback(data.feedback || null);
           playCorrect();
+          trackAnswer({ gameType: "type", language, chapterId, question: showDutch ? current.dutch : current.french, correctAnswer: answer, givenAnswer: input, isCorrect: true });
         } else {
           setResult("wrong");
           setAiFeedback(data?.feedback || null);
           playWrong();
+          trackAnswer({ gameType: "type", language, chapterId, question: showDutch ? current.dutch : current.french, correctAnswer: answer, givenAnswer: input, isCorrect: false });
         }
       } catch (e) {
         console.error("AI check error:", e);
@@ -81,9 +85,11 @@ export default function TypeAnswer({ onBack }: Props) {
       setResult("correct");
       setScore((s) => s + 1);
       playCorrect();
+      trackAnswer({ gameType: "type", language, chapterId, question: showDutch ? current.dutch : current.french, correctAnswer: answer, givenAnswer: input, isCorrect: true });
     } else {
       setResult("wrong");
       playWrong();
+      trackAnswer({ gameType: "type", language, chapterId, question: showDutch ? current.dutch : current.french, correctAnswer: answer, givenAnswer: input, isCorrect: false });
     }
   };
 

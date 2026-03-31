@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { playCorrect, playWrong } from "@/lib/sounds";
 import { isAnswerCorrect } from "@/lib/utils";
+import { trackAnswer } from "@/lib/trackAnswer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -33,7 +34,7 @@ function pickMissingWord(sentence: string): { display: string; correctWord: stri
 
 
 export default function SentenceFill({ onBack }: Props) {
-  const { activeVocabulary, language } = useChapter();
+  const { activeVocabulary, language, chapterId } = useChapter();
   const locale = useLocale();
   const i = t(locale);
   const sentences = useMemo(() => {
@@ -65,6 +66,7 @@ export default function SentenceFill({ onBack }: Props) {
     if (correct) { setScore((s) => s + 1); playCorrect(); }
     else { playWrong(); }
     setShowResult(true);
+    trackAnswer({ gameType: "sentence", language, chapterId, question: puzzle.display, correctAnswer: puzzle.correctWord, givenAnswer: userInput, isCorrect: correct });
   };
 
   const next = () => {

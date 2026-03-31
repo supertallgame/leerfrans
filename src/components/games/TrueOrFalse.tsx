@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { playCorrect, playWrong } from "@/lib/sounds";
 import { shuffle } from "@/data/vocabulary";
+import { trackAnswer } from "@/lib/trackAnswer";
 import { useChapter } from "@/contexts/ChapterContext";
 import { useLocale } from "@/contexts/LocaleContext";
 import { t } from "@/lib/i18n";
@@ -21,7 +22,7 @@ interface Question {
 }
 
 export default function TrueOrFalse({ onBack }: Props) {
-  const { activeVocabulary } = useChapter();
+  const { activeVocabulary, language, chapterId } = useChapter();
   const locale = useLocale();
   const i = t(locale);
 
@@ -70,6 +71,15 @@ export default function TrueOrFalse({ onBack }: Props) {
     } else {
       playWrong();
     }
+    trackAnswer({
+      gameType: "truefalse",
+      language,
+      chapterId,
+      question: `${current.term} → ${current.shownDefinition}`,
+      correctAnswer: current.isCorrect ? "waar" : "onwaar",
+      givenAnswer: userSaysTrue ? "waar" : "onwaar",
+      isCorrect: correct,
+    });
   };
 
   const handleNext = () => {

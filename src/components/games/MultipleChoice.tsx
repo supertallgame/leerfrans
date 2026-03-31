@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { playCorrect, playWrong } from "@/lib/sounds";
 import { shuffle } from "@/data/vocabulary";
+import { trackAnswer } from "@/lib/trackAnswer";
 import { useChapter } from "@/contexts/ChapterContext";
 import { useLocale } from "@/contexts/LocaleContext";
 import { t } from "@/lib/i18n";
@@ -14,7 +15,7 @@ interface Props {
 }
 
 export default function MultipleChoice({ onBack }: Props) {
-  const { activeVocabulary, language } = useChapter();
+  const { activeVocabulary, language, chapterId } = useChapter();
   const locale = useLocale();
   const i = t(locale);
   const [questions] = useState(() => shuffle(activeVocabulary));
@@ -47,8 +48,18 @@ export default function MultipleChoice({ onBack }: Props) {
   const handleSelect = (opt: string) => {
     if (selected) return;
     setSelected(opt);
-    if (opt === correctAnswer) { setScore((s) => s + 1); playCorrect(); }
+    const isCorrect = opt === correctAnswer;
+    if (isCorrect) { setScore((s) => s + 1); playCorrect(); }
     else { playWrong(); }
+    trackAnswer({
+      gameType: "quiz",
+      language,
+      chapterId,
+      question: showDutch ? current.dutch : current.french,
+      correctAnswer: correctAnswer!,
+      givenAnswer: opt,
+      isCorrect,
+    });
   };
 
   const handleNext = () => {
