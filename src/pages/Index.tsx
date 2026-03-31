@@ -3,7 +3,7 @@ import { useThemeSync } from "@/hooks/use-theme-sync";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { BookOpen, Brain, Puzzle, Keyboard, Users, PenTool, MessageSquare, Bot, Settings, Volume2, VolumeX, LogOut, Sun, Moon, Star, Lock, BookMarked, FlaskConical, CheckCircle, Layers, Microscope, Bone, Clock, BookType } from "lucide-react";
+import { BookOpen, Brain, Puzzle, Keyboard, Users, PenTool, MessageSquare, Bot, Settings, Volume2, VolumeX, LogOut, Sun, Moon, Star, Lock, BookMarked, FlaskConical, CheckCircle, Layers, Microscope, Bone, Clock, BookType, Trash2 } from "lucide-react";
 import { FlagNL, FlagFR } from "@/components/Flags";
 import { getChaptersForLanguage, getChapter, getForeignLabel, getForeignLabelNative, Language } from "@/data/vocabulary";
 import { useChapter } from "@/contexts/ChapterContext";
@@ -90,6 +90,8 @@ const Index = () => {
   const [user, setUser] = useState<any>(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [disabledSubjects, setDisabledSubjects] = useState<string[]>([]);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deletingAccount, setDeletingAccount] = useState(false);
   const [darkMode, setDarkMode] = useState(() => {
     const saved = localStorage.getItem("theme");
     if (saved) return saved === "dark";
@@ -450,13 +452,56 @@ const Index = () => {
               </button>
             </div>
             {user && (
-              <div className="pt-2 border-t">
-                <p className="text-xs text-muted-foreground mb-2">
+              <div className="pt-2 border-t space-y-3">
+                <p className="text-xs text-muted-foreground">
                   Ingelogd als {user?.email}
                 </p>
                 <Button variant="outline" size="sm" onClick={handleLogout} className="gap-2">
                   <LogOut className="h-4 w-4" /> Uitloggen
                 </Button>
+                {!showDeleteConfirm ? (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="gap-2 text-destructive hover:text-destructive hover:bg-destructive/10 w-full"
+                    onClick={() => setShowDeleteConfirm(true)}
+                  >
+                    <Trash2 className="h-4 w-4" /> Account verwijderen
+                  </Button>
+                ) : (
+                  <div className="rounded-lg border border-destructive/50 bg-destructive/5 p-3 space-y-2">
+                    <p className="text-xs font-medium text-destructive">Weet je het zeker? Dit kan niet ongedaan worden gemaakt.</p>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        className="flex-1"
+                        disabled={deletingAccount}
+                        onClick={async () => {
+                          setDeletingAccount(true);
+                          try {
+                            const { error } = await supabase.functions.invoke("delete-account");
+                            if (error) throw error;
+                            await supabase.auth.signOut();
+                            setShowSettings(false);
+                            setShowDeleteConfirm(false);
+                            toast.success("Account verwijderd");
+                          } catch (e: any) {
+                            console.error(e);
+                            toast.error("Kon account niet verwijderen. Probeer opnieuw.");
+                          } finally {
+                            setDeletingAccount(false);
+                          }
+                        }}
+                      >
+                        {deletingAccount ? "Bezig..." : "Ja, verwijder"}
+                      </Button>
+                      <Button variant="outline" size="sm" className="flex-1" onClick={() => setShowDeleteConfirm(false)}>
+                        Annuleren
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
