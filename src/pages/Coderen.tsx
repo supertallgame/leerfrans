@@ -50,17 +50,26 @@ function saveProgress(lang: CodingLanguage, lessonNumber: number, score: { corre
 export default function Coderen() {
   useThemeSync();
 
-  const [darkMode, setDarkMode] = useState(() => {
-    const saved = localStorage.getItem("theme");
-    if (saved) return saved === "dark";
-    return window.matchMedia("(prefers-color-scheme: dark)").matches;
-  });
+  const [showSettings, setShowSettings] = useState(false);
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+  const [user, setUser] = useState<any>(null);
 
-  const toggleDarkMode = () => {
-    const next = !darkMode;
-    setDarkMode(next);
-    localStorage.setItem("theme", next ? "dark" : "light");
-    document.documentElement.classList.toggle("dark", next);
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleSettingsClick = () => {
+    if (!user) {
+      setShowLoginPrompt(true);
+    } else {
+      setShowSettings(true);
+    }
   };
 
   const [selectedLang, setSelectedLang] = useState<CodingLanguage | null>(null);
