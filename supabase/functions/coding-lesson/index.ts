@@ -6,39 +6,40 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-function buildSystemPrompt(language: string): string {
+function buildSystemPrompt(language: string, batchSize: number): string {
   return `Je bent een ervaren programmeerleraar die adaptieve lessen geeft in ${language}. Je past het niveau aan op basis van de voortgang van de leerling.
 
 REGELS:
 - Geef les in het NEDERLANDS maar code-voorbeelden in ${language}
+- Je genereert ${batchSize} lessen tegelijk
 - Elke les bevat:
   1. Een korte uitleg van het concept (2-4 zinnen)
   2. Een codevoorbeeld
   3. Een oefening voor de leerling (multiple choice OF code invullen)
-- Geef het antwoord in het volgende JSON-formaat (ALTIJD valide JSON):
-{
-  "lessonTitle": "Titel van de les",
-  "lessonNumber": <nummer>,
-  "concept": "Uitleg van het concept",
-  "codeExample": "Code voorbeeld met comments",
-  "exercise": {
-    "type": "multiple_choice" of "fill_code",
-    "question": "De vraag",
-    "options": ["A", "B", "C", "D"],
-    "correctAnswer": "Het juiste antwoord (letter of code)",
-    "explanation": "Uitleg waarom dit juist is"
+- Geef het antwoord als een JSON ARRAY van ${batchSize} lessen in dit formaat:
+[
+  {
+    "lessonTitle": "Titel van de les",
+    "lessonNumber": <nummer>,
+    "concept": "Uitleg van het concept",
+    "codeExample": "Code voorbeeld met comments",
+    "exercise": {
+      "type": "multiple_choice" of "fill_code",
+      "question": "De vraag",
+      "options": ["A", "B", "C", "D"],
+      "correctAnswer": "Het juiste antwoord (letter of code)",
+      "explanation": "Uitleg waarom dit juist is"
+    }
   }
-}
-- Begin bij les 1 met de absolute basis
-- Als de leerling de vorige les goed had, ga naar het volgende concept
-- Als de leerling fout had, geef een makkelijkere variant van hetzelfde concept
+]
+- Elk concept moet ANDERS zijn, bouw voort op het vorige
 - Maak het leuk en motiverend!
 
 CURRICULUM voor ${language} (100+ lessen verdeeld over niveaus):
 
 ${getCurriculum(language)}
 
-BELANGRIJK: Antwoord ALLEEN met valide JSON, geen tekst ervoor of erna.`;
+BELANGRIJK: Antwoord ALLEEN met valide JSON (een array), geen tekst ervoor of erna.`;
 }
 
 function getCurriculum(language: string): string {
@@ -74,7 +75,7 @@ serve(async (req) => {
   }
 
   try {
-    const { language, lessonNumber, previousCorrect, previousTopic } = await req.json();
+    const { language, lessonNumber, batchSize: reqBatch } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
       return new Response(JSON.stringify({ error: "Service configuration error" }), {
@@ -85,15 +86,9 @@ serve(async (req) => {
 
     const lang = language || "python";
     const lesNum = lessonNumber || 1;
+    const batchSize = Math.min(Math.max(reqBatch || 5, 1), 10);
 
-    let userMessage = `Geef les nummer ${lesNum} voor ${lang}.`;
-    if (previousTopic) {
-      if (previousCorrect) {
-        userMessage += ` De leerling had de vorige les over "${previousTopic}" GOED. Ga naar het volgende concept.`;
-      } else {
-        userMessage += ` De leerling had de vorige les over "${previousTopic}" FOUT. Geef een makkelijkere variant van hetzelfde concept.`;
-      }
-    }
+    const userMessage = `Genereer ${batchSize} opeenvolgende lessen, startend vanaf les nummer ${lesNum} voor ${lang}. Nummer ze ${lesNum} t/m ${lesNum + batchSize - 1}.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -104,7 +99,7 @@ serve(async (req) => {
       body: JSON.stringify({
         model: "google/gemini-3-flash-preview",
         messages: [
-          { role: "system", content: buildSystemPrompt(lang) },
+          { role: "system", content: buildSystemPrompt(lang, batchSize) },
           { role: "user", content: userMessage },
         ],
       }),
@@ -134,23 +129,30 @@ serve(async (req) => {
     const data = await response.json();
     const raw = data.choices?.[0]?.message?.content || "";
 
-    // Extract JSON from response
-    let lesson;
+    // Extract JSON array from response
+    let lessons;
     try {
-      const jsonMatch = raw.match(/\{[\s\S]*\}/);
-      lesson = jsonMatch ? JSON.parse(jsonMatch[0]) : null;
+      const jsonMatch = raw.match(/\[[\s\S]*\]/);
+      lessons = jsonMatch ? JSON.parse(jsonMatch[0]) : null;
     } catch {
-      lesson = null;
+      // Fallback: try parsing as single object
+      try {
+        const objMatch = raw.match(/\{[\s\S]*\}/);
+        const single = objMatch ? JSON.parse(objMatch[0]) : null;
+        lessons = single ? [single] : null;
+      } catch {
+        lessons = null;
+      }
     }
 
-    if (!lesson) {
-      return new Response(JSON.stringify({ error: "Failed to parse lesson", raw }), {
+    if (!lessons || !Array.isArray(lessons) || lessons.length === 0) {
+      return new Response(JSON.stringify({ error: "Failed to parse lessons", raw }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    return new Response(JSON.stringify({ lesson }), {
+    return new Response(JSON.stringify({ lessons }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {

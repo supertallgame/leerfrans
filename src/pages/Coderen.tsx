@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { useThemeSync } from "@/hooks/use-theme-sync";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -85,38 +85,72 @@ export default function Coderen() {
   const [score, setScore] = useState({ correct: 0, total: 0 });
   const [previousTopic, setPreviousTopic] = useState<string | null>(null);
 
-  const fetchLesson = useCallback(async (lang: CodingLanguage, num: number, prevCorrect?: boolean, prevTopic?: string | null) => {
-    setLoading(true);
-    setLesson(null);
-    setSelectedAnswer(null);
-    setAnswered(false);
-    setFillAnswer("");
+  // Lesson queue for pre-fetched lessons
+  const lessonQueueRef = useRef<Lesson[]>([]);
+  const fetchingRef = useRef(false);
+
+  const BATCH_SIZE = 5;
+
+  const fetchBatch = useCallback(async (lang: CodingLanguage, startNum: number): Promise<Lesson[]> => {
     try {
       const { data, error } = await supabase.functions.invoke("coding-lesson", {
-        body: { language: lang, lessonNumber: num, previousCorrect: prevCorrect, previousTopic: prevTopic },
+        body: { language: lang, lessonNumber: startNum, batchSize: BATCH_SIZE },
       });
       if (error) throw error;
-      if (data?.lesson) {
-        setLesson(data.lesson);
-      } else {
-        toast.error("Kon de les niet laden. Probeer opnieuw.");
+      if (data?.lessons && Array.isArray(data.lessons)) {
+        return data.lessons;
       }
     } catch (e: any) {
-      console.error(e);
-      toast.error("Er ging iets mis bij het laden van de les.");
-    } finally {
-      setLoading(false);
+      console.error("Batch fetch error:", e);
     }
+    return [];
   }, []);
 
-  const startLanguage = (lang: CodingLanguage) => {
+  const prefetchIfNeeded = useCallback(async (lang: CodingLanguage, currentNum: number) => {
+    // If 2 or fewer lessons left in queue, fetch more in background
+    if (lessonQueueRef.current.length <= 2 && !fetchingRef.current) {
+      fetchingRef.current = true;
+      const nextStart = currentNum + lessonQueueRef.current.length;
+      const newLessons = await fetchBatch(lang, nextStart);
+      lessonQueueRef.current = [...lessonQueueRef.current, ...newLessons];
+      fetchingRef.current = false;
+    }
+  }, [fetchBatch]);
+
+  const showNextFromQueue = useCallback(() => {
+    if (lessonQueueRef.current.length > 0) {
+      const next = lessonQueueRef.current.shift()!;
+      setLesson(next);
+      setSelectedAnswer(null);
+      setAnswered(false);
+      setFillAnswer("");
+      return true;
+    }
+    return false;
+  }, []);
+
+  const startLanguage = useCallback(async (lang: CodingLanguage) => {
     const saved = loadProgress(lang);
     setSelectedLang(lang);
     setLessonNumber(saved.lessonNumber);
     setScore(saved.score);
     setPreviousTopic(saved.previousTopic);
-    fetchLesson(lang, saved.lessonNumber, undefined, saved.previousTopic);
-  };
+    setLoading(true);
+    setLesson(null);
+    lessonQueueRef.current = [];
+    fetchingRef.current = false;
+
+    const lessons = await fetchBatch(lang, saved.lessonNumber);
+    if (lessons.length > 0) {
+      setLesson(lessons[0]);
+      lessonQueueRef.current = lessons.slice(1);
+      // Start prefetching next batch in background
+      prefetchIfNeeded(lang, saved.lessonNumber + 1);
+    } else {
+      toast.error("Kon de lessen niet laden. Probeer opnieuw.");
+    }
+    setLoading(false);
+  }, [fetchBatch, prefetchIfNeeded]);
 
   const checkAnswer = (answer: string) => {
     if (!lesson || !selectedLang) return;
@@ -127,24 +161,42 @@ export default function Coderen() {
     const newScore = { correct: score.correct + (correct ? 1 : 0), total: score.total + 1 };
     setScore(newScore);
     setPreviousTopic(lesson.lessonTitle);
-    // Save progress after answering
     const nextNum = correct ? lessonNumber + 1 : lessonNumber;
     saveProgress(selectedLang, nextNum, newScore, lesson.lessonTitle);
   };
 
-  const nextLesson = () => {
+  const nextLesson = useCallback(() => {
     if (!selectedLang) return;
     const next = isCorrect ? lessonNumber + 1 : lessonNumber;
     setLessonNumber(next);
-    fetchLesson(selectedLang, next, isCorrect, previousTopic);
-  };
+
+    // Try to show from queue instantly
+    if (showNextFromQueue()) {
+      // Prefetch more if needed
+      prefetchIfNeeded(selectedLang, next);
+    } else {
+      // Queue empty, fetch and wait
+      setLoading(true);
+      setLesson(null);
+      fetchBatch(selectedLang, next).then((lessons) => {
+        if (lessons.length > 0) {
+          setLesson(lessons[0]);
+          lessonQueueRef.current = lessons.slice(1);
+        } else {
+          toast.error("Kon de les niet laden. Probeer opnieuw.");
+        }
+        setLoading(false);
+      });
+    }
+  }, [selectedLang, isCorrect, lessonNumber, showNextFromQueue, prefetchIfNeeded, fetchBatch]);
 
   const resetProgress = (lang: CodingLanguage) => {
     localStorage.removeItem(`coderen_progress_${lang}`);
     setLessonNumber(1);
     setScore({ correct: 0, total: 0 });
     setPreviousTopic(null);
-    fetchLesson(lang, 1);
+    lessonQueueRef.current = [];
+    startLanguage(lang);
   };
 
   const goBack = () => {
@@ -152,6 +204,7 @@ export default function Coderen() {
     setLesson(null);
     setLessonNumber(1);
     setScore({ correct: 0, total: 0 });
+    lessonQueueRef.current = [];
   };
 
   const settingsAndAuth = (
@@ -366,7 +419,7 @@ export default function Coderen() {
           <Card className="p-8">
             <div className="flex flex-col items-center gap-4">
               <p className="text-muted-foreground">De les kon niet geladen worden.</p>
-              <Button onClick={() => fetchLesson(selectedLang, lessonNumber)} variant="outline">
+              <Button onClick={() => selectedLang && startLanguage(selectedLang)} variant="outline">
                 <RotateCcw className="h-4 w-4 mr-2" /> Opnieuw proberen
               </Button>
             </div>
