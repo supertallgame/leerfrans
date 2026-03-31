@@ -63,10 +63,12 @@ export default function TypeAnswer({ onBack }: Props) {
           setScore((s) => s + 1);
           setAiFeedback(data.feedback || null);
           playCorrect();
+          trackAnswer({ gameType: "type", language, chapterId, question: showDutch ? current.dutch : current.french, correctAnswer: answer, givenAnswer: input, isCorrect: true });
         } else {
           setResult("wrong");
           setAiFeedback(data?.feedback || null);
           playWrong();
+          trackAnswer({ gameType: "type", language, chapterId, question: showDutch ? current.dutch : current.french, correctAnswer: answer, givenAnswer: input, isCorrect: false });
         }
       } catch (e) {
         console.error("AI check error:", e);
