@@ -450,6 +450,52 @@ const Juf = () => {
                 </CardContent>
               </Card>
             )}
+
+            {/* Notes */}
+            <Card>
+              <CardContent className="p-5 md:p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <StickyNote className="h-5 w-5 text-primary" />
+                    <h2 className="text-lg font-bold">Notities</h2>
+                  </div>
+                  <Button variant="ghost" size="sm" onClick={() => setShowNotes(!showNotes)}>
+                    {showNotes ? "Verbergen" : `Tonen (${notes.length})`}
+                  </Button>
+                </div>
+                <div className="flex gap-2 mb-3">
+                  <Textarea
+                    placeholder="Schrijf een opmerking bij deze analyse..."
+                    value={newNote}
+                    onChange={(e) => setNewNote(e.target.value)}
+                    className="min-h-[60px] text-sm"
+                    maxLength={500}
+                  />
+                  <Button onClick={saveNote} disabled={!newNote.trim()} size="icon" className="shrink-0 self-end">
+                    <MessageSquarePlus className="h-4 w-4" />
+                  </Button>
+                </div>
+                {showNotes && notes.length > 0 && (
+                  <div className="space-y-2 mt-3 border-t pt-3">
+                    {notes.map(n => (
+                      <div key={n.id} className="flex items-start gap-2 text-sm border rounded-lg p-2.5">
+                        <div className="flex-1">
+                          <p className="whitespace-pre-wrap">{n.note}</p>
+                          <div className="flex gap-2 mt-1 text-xs text-muted-foreground">
+                            <span>{new Date(n.created_at).toLocaleDateString("nl-NL", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</span>
+                            {n.filters?.language && n.filters.language !== "all" && <span>· {n.filters.language}</span>}
+                            {n.filters?.days && <span>· {PERIOD_LABELS[n.filters.days] || n.filters.days}</span>}
+                          </div>
+                        </div>
+                        <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0 text-muted-foreground hover:text-destructive" onClick={() => deleteNote(n.id)}>
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </>
         )}
       </div>
