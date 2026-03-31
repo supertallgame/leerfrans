@@ -323,11 +323,12 @@ export default function Reviews() {
       setLoading(false);
     };
     fetchData();
-    fetchVotes();
 
     supabase.auth.getSession().then(({ data: { session } }) => {
+      const uid = session?.user?.id ?? null;
       setIsOperator(OPERATOR_EMAILS.includes(session?.user?.email ?? ""));
-      setCurrentUserId(session?.user?.id ?? null);
+      setCurrentUserId(uid);
+      if (uid) fetchVotes(uid);
     });
 
     const refetchAll = async () => {

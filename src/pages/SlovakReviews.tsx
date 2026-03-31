@@ -377,7 +377,8 @@ export default function SlovakReviews() {
       toast.error("Je moet ingelogd zijn om te liken of disliken.");
       return;
     }
-    const voterId = getVoterId();
+    const voterId = currentUserId;
+    if (!voterId) return;
     const animKey = `${reviewId}-${voteType}`;
     setAnimatingVote(animKey);
     setTimeout(() => setAnimatingVote(null), 300);
