@@ -688,9 +688,8 @@ export default function Admin() {
             </div>
           )}
         </div>
-        </div>
 
-        <div className="h-4" />
+
 
         {/* Game rooms beheer */}
         <div className="rounded-2xl border border-border bg-card p-6 space-y-4">
