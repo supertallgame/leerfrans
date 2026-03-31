@@ -27,8 +27,13 @@ export default function ObamaPopup() {
     if (!ready || !isHomePage) return;
     if (window.scrollY > 400) {
       setVisible(true);
+    } else {
+      if (visible && !exiting) {
+        setExiting(true);
+        setTimeout(() => { setVisible(false); setExiting(false); }, 500);
+      }
     }
-  }, [ready, isHomePage]);
+  }, [ready, isHomePage, visible, exiting]);
 
   useEffect(() => {
     if (!ready || !isHomePage) return;
