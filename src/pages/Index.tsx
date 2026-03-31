@@ -8,6 +8,7 @@ import { FlagNL, FlagFR } from "@/components/Flags";
 import { getChaptersForLanguage, getChapter, getForeignLabel, getForeignLabelNative, Language } from "@/data/vocabulary";
 import { useChapter } from "@/contexts/ChapterContext";
 import { Switch } from "@/components/ui/switch";
+import SettingsDialog from "@/components/SettingsDialog";
 import {
   Dialog,
   DialogContent,
