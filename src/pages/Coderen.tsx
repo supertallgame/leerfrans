@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { useThemeSync } from "@/hooks/use-theme-sync";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
