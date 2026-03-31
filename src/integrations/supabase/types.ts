@@ -464,6 +464,7 @@ export type Database = {
           image_url: string | null
           message: string | null
           rating: number | null
+          user_id: string | null
         }
         Insert: {
           created_at?: string | null
@@ -472,6 +473,7 @@ export type Database = {
           image_url?: string | null
           message?: string | null
           rating?: number | null
+          user_id?: string | null
         }
         Update: {
           created_at?: string | null
@@ -480,6 +482,7 @@ export type Database = {
           image_url?: string | null
           message?: string | null
           rating?: number | null
+          user_id?: string | null
         }
         Relationships: []
       }
