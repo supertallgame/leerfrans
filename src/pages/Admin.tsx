@@ -688,9 +688,8 @@ export default function Admin() {
             </div>
           )}
         </div>
-        </div>
 
-        <div className="h-4" />
+
 
         {/* Game rooms beheer */}
         <div className="rounded-2xl border border-border bg-card p-6 space-y-4">
@@ -754,6 +753,7 @@ export default function Admin() {
             </div>
           )}
         </div>
+      </div>
 
       <AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
         <AlertDialogContent>
@@ -789,6 +789,7 @@ export default function Admin() {
         </AlertDialogContent>
       </AlertDialog>
 
+      <AlertDialog open={!!closeRoomId} onOpenChange={(open) => !open && setCloseRoomId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Kamer sluiten?</AlertDialogTitle>
