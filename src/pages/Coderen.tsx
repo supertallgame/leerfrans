@@ -85,6 +85,8 @@ export default function Coderen() {
   const [fillAnswer, setFillAnswer] = useState("");
   const [score, setScore] = useState({ correct: 0, total: 0 });
   const [previousTopic, setPreviousTopic] = useState<string | null>(null);
+  const [showLevelTest, setShowLevelTest] = useState(false);
+  const [userLevel, setUserLevel] = useState<string | null>(null);
 
   // Lesson queue for pre-fetched lessons
   const lessonQueueRef = useRef<Lesson[]>([]);
