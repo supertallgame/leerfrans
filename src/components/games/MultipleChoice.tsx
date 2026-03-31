@@ -15,7 +15,7 @@ interface Props {
 }
 
 export default function MultipleChoice({ onBack }: Props) {
-  const { activeVocabulary, language } = useChapter();
+  const { activeVocabulary, language, chapterId } = useChapter();
   const locale = useLocale();
   const i = t(locale);
   const [questions] = useState(() => shuffle(activeVocabulary));
