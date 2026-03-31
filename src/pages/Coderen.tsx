@@ -152,6 +152,13 @@ export default function Coderen() {
     setScore({ correct: 0, total: 0 });
   };
 
+  const settingsAndAuth = (
+    <>
+      <SettingsDialog open={showSettings} onOpenChange={setShowSettings} user={user} />
+      <AuthDialog open={showLoginPrompt} onOpenChange={setShowLoginPrompt} />
+    </>
+  );
+
   // Language selection screen
   if (!selectedLang) {
     return (
@@ -202,6 +209,7 @@ export default function Coderen() {
             })}
           </div>
         </div>
+        {settingsAndAuth}
       </div>
     );
   }
