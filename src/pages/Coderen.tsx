@@ -252,6 +252,24 @@ export default function Coderen() {
     </>
   );
 
+  // Level test screen
+  if (selectedLang && showLevelTest) {
+    const langInfo = LANGUAGES.find((l) => l.id === selectedLang)!;
+    return (
+      <>
+        <LevelTest
+          language={selectedLang}
+          languageLabel={langInfo.label}
+          languageColor={langInfo.color}
+          languageIcon={langInfo.icon}
+          onComplete={handleLevelTestComplete}
+          onBack={goBack}
+        />
+        {settingsAndAuth}
+      </>
+    );
+  }
+
   // Language selection screen
   if (!selectedLang) {
     return (
