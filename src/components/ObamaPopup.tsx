@@ -44,9 +44,11 @@ export default function ObamaPopup() {
   return (
     <button
       onClick={handleClick}
-      className="fixed bottom-0 left-1/2 -translate-x-1/2 z-[9999] cursor-pointer focus:outline-none"
+      className="fixed bottom-0 left-0 z-[9999] cursor-pointer focus:outline-none"
       style={{
         animation: exiting ? "obama-slide-down 0.5s ease-in forwards" : "obama-slide-up 0.8s ease-out forwards",
+        transform: "scale(0.7)",
+        transformOrigin: "bottom left",
       }}
       aria-label="Secret Obama"
     >
