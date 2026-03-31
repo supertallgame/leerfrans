@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import obamaImg from "@/assets/obama.jpg";
+import { fireConfetti } from "@/lib/confetti";
 
 export default function ObamaPopup() {
   const [visible, setVisible] = useState(false);

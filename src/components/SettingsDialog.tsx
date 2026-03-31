@@ -65,6 +65,7 @@ export default function SettingsDialog({ open, onOpenChange, user, children }: S
     localStorage.setItem("obama_mode", checked ? "true" : "false");
     document.documentElement.classList.toggle("obama-mode", checked);
     if (checked) {
+      fireConfetti();
       // Remove dark mode when enabling obama mode
       setDarkMode(false);
       document.documentElement.classList.remove("dark");
