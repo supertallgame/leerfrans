@@ -494,9 +494,9 @@ const Juf = () => {
                     <MessageSquarePlus className="h-4 w-4" />
                   </Button>
                 </div>
-                {showNotes && notes.length > 0 && (
+                {showNotes && filteredNotes.length > 0 && (
                   <div className="space-y-2 mt-3 border-t pt-3">
-                    {notes.map(n => (
+                    {filteredNotes.map(n => (
                       <div key={n.id} className="flex items-start gap-2 text-sm border rounded-lg p-2.5">
                         <div className="flex-1">
                           <p className="whitespace-pre-wrap">{n.note}</p>
