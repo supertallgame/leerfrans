@@ -221,8 +221,9 @@ function ReplySection({
     }
 
     const userEmail = session?.user?.email || null;
+    const userId = session?.user?.id || null;
     const { data, error } = await (supabase.from("review_replies" as any) as any)
-      .insert({ review_id: reviewId, display_name: name.trim(), message: message.trim(), user_email: userEmail })
+      .insert({ review_id: reviewId, display_name: name.trim(), message: message.trim(), user_email: userEmail, user_id: userId })
       .select()
       .single();
     setSubmitting(false);
