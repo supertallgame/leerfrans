@@ -235,6 +235,30 @@ export type Database = {
           },
         ]
       }
+      juf_notes: {
+        Row: {
+          created_at: string
+          filters: Json
+          id: string
+          note: string
+          user_email: string
+        }
+        Insert: {
+          created_at?: string
+          filters?: Json
+          id?: string
+          note: string
+          user_email: string
+        }
+        Update: {
+          created_at?: string
+          filters?: Json
+          id?: string
+          note?: string
+          user_email?: string
+        }
+        Relationships: []
+      }
       muted_users: {
         Row: {
           created_at: string
