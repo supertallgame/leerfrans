@@ -370,6 +370,7 @@ export default function Coderen() {
             </div>
           </Card>
         )}
+      {settingsAndAuth}
       </div>
     </div>
   );
