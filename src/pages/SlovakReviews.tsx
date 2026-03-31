@@ -411,6 +411,7 @@ export default function SlovakReviews() {
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       setIsOperator(OPERATOR_EMAILS.includes(session?.user?.email ?? ""));
+      setCurrentUserId(session?.user?.id ?? null);
     });
 
     const refetchAll = async () => {
