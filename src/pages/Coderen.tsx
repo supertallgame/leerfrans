@@ -357,6 +357,11 @@ export default function Coderen() {
             <ArrowLeft className="h-4 w-4 mr-1" /> Terug
           </Button>
           <div className="flex items-center gap-2">
+            {userLevel && (
+              <Badge className="text-sm capitalize" variant={userLevel === "gevorderd" ? "default" : userLevel === "gemiddeld" ? "secondary" : "outline"}>
+                {userLevel === "beginner" ? "🌱 Beginner" : userLevel === "gemiddeld" ? "📚 Gemiddeld" : "🚀 Gevorderd"}
+              </Badge>
+            )}
             <Badge variant="outline" className="text-sm">
               Les {lessonNumber}
             </Badge>
