@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { trackAnswer } from "@/lib/trackAnswer";
 import { playCorrect, playWrong } from "@/lib/sounds";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
