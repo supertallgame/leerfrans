@@ -11,8 +11,8 @@ export default function ObamaPopup() {
     // Already unlocked? Don't show popup anymore
     if (localStorage.getItem("obama_unlocked") === "true") return;
 
-    // Random delay between 30s and 120s
-    const delay = 30000 + Math.random() * 90000;
+    // Random delay between 20s and 30s
+    const delay = 20000 + Math.random() * 10000;
     const timer = setTimeout(() => setVisible(true), delay);
     return () => clearTimeout(timer);
   }, []);
