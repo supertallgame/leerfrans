@@ -573,6 +573,22 @@ export default function SlovakReviews() {
                           {isTranslating && <span className="ml-2 text-xs text-muted-foreground">⏳</span>}
                         </p>
                       )}
+                      <div className="flex items-center gap-3">
+                        <button
+                          onClick={() => handleVote(review.id, "like")}
+                          className={`flex items-center gap-1 text-xs transition-colors ${myVotes[review.id] === "like" ? "text-primary font-semibold" : "text-muted-foreground hover:text-primary"}`}
+                        >
+                          <ThumbsUp className={`h-3.5 w-3.5 ${myVotes[review.id] === "like" ? "fill-current" : ""}`} />
+                          {voteCounts[review.id]?.likes || 0}
+                        </button>
+                        <button
+                          onClick={() => handleVote(review.id, "dislike")}
+                          className={`flex items-center gap-1 text-xs transition-colors ${myVotes[review.id] === "dislike" ? "text-destructive font-semibold" : "text-muted-foreground hover:text-destructive"}`}
+                        >
+                          <ThumbsDown className={`h-3.5 w-3.5 ${myVotes[review.id] === "dislike" ? "fill-current" : ""}`} />
+                          {voteCounts[review.id]?.dislikes || 0}
+                        </button>
+                      </div>
                       <ReplySection
                         reviewId={review.id}
                         replies={replies}
