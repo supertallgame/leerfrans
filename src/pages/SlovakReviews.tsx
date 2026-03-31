@@ -520,6 +520,13 @@ export default function SlovakReviews() {
           >
             Najlepšie hodnotené
           </Button>
+          <Button
+            variant={sortBy === "likes" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setSortBy("likes")}
+          >
+            Najviac lajkov
+          </Button>
         </div>
 
         <div className="flex gap-1.5 items-center">
