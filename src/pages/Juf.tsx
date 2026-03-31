@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { getChaptersForLanguage, Language } from "@/data/vocabulary";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -91,7 +92,18 @@ const Juf = () => {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [language, setLanguage] = useState("all");
+  const [chapterFilter, setChapterFilter] = useState("all");
   const [days, setDays] = useState("7");
+
+  const availableChapters = useMemo(() => {
+    if (language === "all") return [];
+    return getChaptersForLanguage(language as Language);
+  }, [language]);
+
+  // Reset chapter filter when language changes
+  useEffect(() => {
+    setChapterFilter("all");
+  }, [language]);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -107,7 +119,11 @@ const Juf = () => {
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke("analyze-answers", {
-        body: { language: language === "all" ? null : language, days: parseInt(days) },
+        body: {
+          language: language === "all" ? null : language,
+          chapterId: chapterFilter === "all" ? null : chapterFilter,
+          days: parseInt(days),
+        },
       });
       if (error) throw error;
       setResult(data);
@@ -167,6 +183,20 @@ const Juf = () => {
               </SelectContent>
             </Select>
           </div>
+          {language !== "all" && availableChapters.length > 0 && (
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-muted-foreground">Hoofdstuk</label>
+              <Select value={chapterFilter} onValueChange={setChapterFilter}>
+                <SelectTrigger className="w-[180px]"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Alle hoofdstukken</SelectItem>
+                  {availableChapters.map(ch => (
+                    <SelectItem key={ch.id} value={ch.id}>{ch.title}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
           <div className="space-y-1">
             <label className="text-xs font-medium text-muted-foreground">Periode</label>
             <Select value={days} onValueChange={setDays}>
