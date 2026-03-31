@@ -605,6 +605,7 @@ export default function SlovakReviews() {
                           {isTranslating && <span className="ml-2 text-xs text-muted-foreground">⏳</span>}
                         </p>
                       )}
+                      {(!currentUserId || review.user_id !== currentUserId) && (
                       <div className="flex items-center gap-3">
                         <button
                           onClick={() => handleVote(review.id, "like")}
@@ -621,6 +622,7 @@ export default function SlovakReviews() {
                           {voteCounts[review.id]?.dislikes || 0}
                         </button>
                       </div>
+                      )}
                       <ReplySection
                         reviewId={review.id}
                         replies={replies}
