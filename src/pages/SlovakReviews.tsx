@@ -348,6 +348,7 @@ export default function SlovakReviews() {
   const [filterRating, setFilterRating] = useState<number | null>(null);
   const [voteCounts, setVoteCounts] = useState<{[k:string]:{likes:number;dislikes:number}}>({});
   const [myVotes, setMyVotes] = useState<{[k:string]:"like"|"dislike"}>({});
+  const [animatingVote, setAnimatingVote] = useState<string | null>(null);
 
   const fetchVotes = async () => {
     const voterId = getVoterId();
