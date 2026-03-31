@@ -107,6 +107,7 @@ serve(async (req) => {
         stats: { total, correct, wrong, accuracy },
         difficultItems,
         gameStats,
+        dailyStats,
       }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
