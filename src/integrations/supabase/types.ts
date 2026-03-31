@@ -529,7 +529,6 @@ export type Database = {
           team_number: number
         }[]
       }
-      is_room_player: { Args: { _room_id: string }; Returns: boolean }
       join_game_room: {
         Args: { p_player_name: string; p_room_id: string }
         Returns: Json
