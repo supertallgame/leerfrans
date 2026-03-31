@@ -44,7 +44,7 @@ function removeSomeLetters(word: string): { display: string; removed: { index: n
 }
 
 export default function FillLetters({ onBack }: Props) {
-  const { activeVocabulary, language } = useChapter();
+  const { activeVocabulary, language, chapterId } = useChapter();
   const locale = useLocale();
   const i = t(locale);
   const foreignShort = (i.foreignShort as any)[language];
