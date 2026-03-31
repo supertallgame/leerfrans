@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Shield, Home, FlaskConical, Microscope, Trash2, Star, MessageSquare, Search, Filter, Download, BarChart3, TrendingUp, Users, Mail, VolumeX, Clock, Gamepad2, Globe, Lock, XCircle } from "lucide-react";
+import { Shield, Home, FlaskConical, Microscope, Trash2, Star, MessageSquare, Search, Filter, Download, BarChart3, TrendingUp, Users, Mail, VolumeX, Clock, Gamepad2, Globe, Lock, XCircle, Reply, ChevronDown, ChevronUp } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -34,6 +34,14 @@ interface Review {
   message: string;
   created_at: string;
   user_email: string | null;
+}
+
+interface ReviewReply {
+  id: string;
+  review_id: string;
+  display_name: string;
+  message: string;
+  created_at: string;
 }
 
 interface MutedUser {
@@ -92,6 +100,9 @@ export default function Admin() {
   const [muteDuration, setMuteDuration] = useState("1h");
   const [muteReason, setMuteReason] = useState("");
   const [blockAnonymous, setBlockAnonymous] = useState(false);
+  const [replies, setReplies] = useState<ReviewReply[]>([]);
+  const [expandedReviewId, setExpandedReviewId] = useState<string | null>(null);
+  const [deleteReplyId, setDeleteReplyId] = useState<string | null>(null);
   const [gameRooms, setGameRooms] = useState<GameRoom[]>([]);
   const [closeRoomId, setCloseRoomId] = useState<string | null>(null);
   const [refreshingRooms, setRefreshingRooms] = useState(false);
@@ -135,12 +146,13 @@ export default function Admin() {
     }
     setIsAdmin(true);
     // Load disabled subjects + reviews in parallel
-    const [settingsRes, anonRes, reviewsRes, mutesRes, roomsRes] = await Promise.all([
+    const [settingsRes, anonRes, reviewsRes, mutesRes, roomsRes, repliesRes] = await Promise.all([
       supabase.from("admin_settings").select("value").eq("key", "disabled_subjects").single(),
       supabase.from("admin_settings").select("value").eq("key", "block_anonymous_reviews").maybeSingle(),
       supabase.rpc("get_reviews_admin" as any),
       supabase.from("muted_users" as any).select("*").order("created_at", { ascending: false }) as any,
       supabase.from("game_rooms").select("id, code, host_name, status, is_public, game_mode, team_mode, created_at, max_players").order("created_at", { ascending: false }) as any,
+      supabase.from("review_replies").select("*").order("created_at", { ascending: true }),
     ]);
     if (settingsRes.data?.value) {
       setDisabledSubjects(settingsRes.data.value as string[]);
@@ -156,6 +168,9 @@ export default function Admin() {
     }
     if (roomsRes.data) {
       setGameRooms(roomsRes.data);
+    }
+    if (repliesRes.data) {
+      setReplies(repliesRes.data as ReviewReply[]);
     }
     setLoading(false);
   };
@@ -224,6 +239,18 @@ export default function Admin() {
       toast.success("Review verwijderd");
     }
     setDeleteId(null);
+  };
+
+  const handleDeleteReply = async () => {
+    if (!deleteReplyId) return;
+    const { error } = await supabase.from("review_replies").delete().eq("id", deleteReplyId);
+    if (error) {
+      toast.error("Kon reactie niet verwijderen");
+    } else {
+      setReplies((prev) => prev.filter((r) => r.id !== deleteReplyId));
+      toast.success("Reactie verwijderd");
+    }
+    setDeleteReplyId(null);
   };
 
   const handleCloseRoom = async () => {
@@ -509,50 +536,94 @@ export default function Admin() {
             <p className="text-sm text-muted-foreground">Geen reviews gevonden.</p>
           ) : (
             <div className="space-y-2">
-              {filteredReviews.map((review) => (
-                <div key={review.id} className="flex items-start justify-between gap-3 px-4 py-3 rounded-lg border border-border">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-medium text-sm">{review.display_name}</span>
-                      <div className="flex gap-0.5">
-                        {[1, 2, 3, 4, 5].map((s) => (
-                          <Star key={s} className={`h-3 w-3 ${s <= review.rating ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground/20"}`} />
+              {filteredReviews.map((review) => {
+                const reviewReplies = replies.filter((r) => r.review_id === review.id);
+                const isExpanded = expandedReviewId === review.id;
+                return (
+                  <div key={review.id} className="rounded-lg border border-border overflow-hidden">
+                    <div className="flex items-start justify-between gap-3 px-4 py-3">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-medium text-sm">{review.display_name}</span>
+                          <div className="flex gap-0.5">
+                            {[1, 2, 3, 4, 5].map((s) => (
+                              <Star key={s} className={`h-3 w-3 ${s <= review.rating ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground/20"}`} />
+                            ))}
+                          </div>
+                          <span className="text-xs text-muted-foreground">{new Date(review.created_at).toLocaleDateString("nl-NL")}</span>
+                        </div>
+                        {review.user_email ? (
+                          <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1">
+                            <Mail className="h-3 w-3" /> {review.user_email}
+                          </p>
+                        ) : (
+                          <p className="text-xs text-muted-foreground/50 mt-0.5 italic">Anoniem (niet ingelogd)</p>
+                        )}
+                        <p className="text-sm text-muted-foreground mt-1 truncate">{review.message}</p>
+                      </div>
+                      <div className="flex items-center gap-1 shrink-0">
+                        {reviewReplies.length > 0 && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                            title={`${reviewReplies.length} reactie(s)`}
+                            onClick={() => setExpandedReviewId(isExpanded ? null : review.id)}
+                          >
+                            <Reply className="h-4 w-4" />
+                            <span className="sr-only">{reviewReplies.length}</span>
+                          </Button>
+                        )}
+                        {review.user_email && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                            title="Mute gebruiker"
+                            onClick={() => { setMuteEmail(review.user_email!); }}
+                          >
+                            <VolumeX className="h-4 w-4" />
+                          </Button>
+                        )}
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-destructive hover:text-destructive"
+                          onClick={() => setDeleteId(review.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                    {isExpanded && reviewReplies.length > 0 && (
+                      <div className="border-t border-border bg-muted/30 px-4 py-2 space-y-2">
+                        <p className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                          <Reply className="h-3 w-3" /> {reviewReplies.length} reactie{reviewReplies.length !== 1 ? "s" : ""}
+                        </p>
+                        {reviewReplies.map((reply) => (
+                          <div key={reply.id} className="flex items-start justify-between gap-2 pl-3 border-l-2 border-border py-1">
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs font-medium">{reply.display_name}</span>
+                                <span className="text-[10px] text-muted-foreground">{new Date(reply.created_at).toLocaleString("nl-NL")}</span>
+                              </div>
+                              <p className="text-xs text-muted-foreground mt-0.5">{reply.message}</p>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-6 w-6 text-destructive hover:text-destructive shrink-0"
+                              onClick={() => setDeleteReplyId(reply.id)}
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          </div>
                         ))}
                       </div>
-                      <span className="text-xs text-muted-foreground">{new Date(review.created_at).toLocaleDateString("nl-NL")}</span>
-                    </div>
-                    {review.user_email ? (
-                      <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1">
-                        <Mail className="h-3 w-3" /> {review.user_email}
-                      </p>
-                    ) : (
-                      <p className="text-xs text-muted-foreground/50 mt-0.5 italic">Anoniem (niet ingelogd)</p>
                     )}
-                    <p className="text-sm text-muted-foreground mt-1 truncate">{review.message}</p>
                   </div>
-                  <div className="flex items-center gap-1 shrink-0">
-                    {review.user_email && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-muted-foreground hover:text-foreground"
-                        title="Mute gebruiker"
-                        onClick={() => { setMuteEmail(review.user_email!); }}
-                      >
-                        <VolumeX className="h-4 w-4" />
-                      </Button>
-                    )}
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 text-destructive hover:text-destructive"
-                      onClick={() => setDeleteId(review.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
@@ -701,7 +772,23 @@ export default function Admin() {
         </AlertDialogContent>
       </AlertDialog>
 
-      <AlertDialog open={!!closeRoomId} onOpenChange={(open) => !open && setCloseRoomId(null)}>
+      <AlertDialog open={!!deleteReplyId} onOpenChange={(open) => !open && setDeleteReplyId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Reactie verwijderen?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Weet je zeker dat je deze reactie wilt verwijderen? Dit kan niet ongedaan worden gemaakt.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuleren</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteReply} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Verwijderen
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Kamer sluiten?</AlertDialogTitle>
