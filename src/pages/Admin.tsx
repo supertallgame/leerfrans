@@ -241,6 +241,18 @@ export default function Admin() {
     setDeleteId(null);
   };
 
+  const handleDeleteReply = async () => {
+    if (!deleteReplyId) return;
+    const { error } = await supabase.from("review_replies").delete().eq("id", deleteReplyId);
+    if (error) {
+      toast.error("Kon reactie niet verwijderen");
+    } else {
+      setReplies((prev) => prev.filter((r) => r.id !== deleteReplyId));
+      toast.success("Reactie verwijderd");
+    }
+    setDeleteReplyId(null);
+  };
+
   const handleCloseRoom = async () => {
     if (!closeRoomId) return;
     const { data: { session } } = await supabase.auth.getSession();
