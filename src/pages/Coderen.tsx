@@ -151,6 +151,18 @@ export default function Coderen() {
     setLessonNumber(saved.lessonNumber);
     setScore(saved.score);
     setPreviousTopic(saved.previousTopic);
+
+    // If we have cached lessons, use them instantly
+    if (saved.cachedLessons && saved.cachedLessons.length > 0) {
+      setLesson(saved.cachedLessons[0]);
+      lessonQueueRef.current = saved.cachedLessons.slice(1);
+      setLoading(false);
+      // Prefetch more in background
+      prefetchIfNeeded(lang, saved.lessonNumber + saved.cachedLessons.length);
+      return;
+    }
+
+    // No cache, fetch fresh
     setLoading(true);
     setLesson(null);
     lessonQueueRef.current = [];
@@ -160,7 +172,9 @@ export default function Coderen() {
     if (lessons.length > 0) {
       setLesson(lessons[0]);
       lessonQueueRef.current = lessons.slice(1);
-      prefetchIfNeeded(lang, saved.lessonNumber + 1);
+      // Save remaining to cache
+      saveProgress(lang, saved.lessonNumber, saved.score, saved.previousTopic, saved.level, lessons.slice(1));
+      prefetchIfNeeded(lang, saved.lessonNumber + lessons.length);
     } else {
       toast.error("Kon de lessen niet laden. Probeer opnieuw.");
     }
