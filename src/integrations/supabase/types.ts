@@ -291,6 +291,7 @@ export type Database = {
           message: string
           review_id: string
           user_email: string | null
+          user_id: string | null
         }
         Insert: {
           created_at?: string
@@ -299,6 +300,7 @@ export type Database = {
           message: string
           review_id: string
           user_email?: string | null
+          user_id?: string | null
         }
         Update: {
           created_at?: string
@@ -307,6 +309,7 @@ export type Database = {
           message?: string
           review_id?: string
           user_email?: string | null
+          user_id?: string | null
         }
         Relationships: [
           {
