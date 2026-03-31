@@ -289,6 +289,10 @@ export default function Reviews() {
   };
 
   const handleVote = async (reviewId: string, voteType: "like" | "dislike") => {
+    if (!currentUserId) {
+      toast.error("Je moet ingelogd zijn om te liken of disliken.");
+      return;
+    }
     const voterId = getVoterId();
     const current = myVotes[reviewId];
     const animKey = `${reviewId}-${voteType}`;
