@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { useLocation } from "react-router-dom";
 import obamaImg from "@/assets/obama.jpg";
 import { fireConfetti } from "@/lib/confetti";
 import { toast } from "sonner";
@@ -6,16 +7,36 @@ import { toast } from "sonner";
 export default function ObamaPopup() {
   const [visible, setVisible] = useState(false);
   const [exiting, setExiting] = useState(false);
+  const [ready, setReady] = useState(false);
+  const location = useLocation();
+
+  // Only allow on the home page
+  const isHomePage = location.pathname === "/";
 
   useEffect(() => {
-    // Already unlocked? Don't show popup anymore
+    if (!isHomePage) { setVisible(false); return; }
     if (localStorage.getItem("obama_unlocked") === "true") return;
 
-    // Random delay between 20s and 30s
     const delay = 20000 + Math.random() * 10000;
-    const timer = setTimeout(() => setVisible(true), delay);
+    const timer = setTimeout(() => setReady(true), delay);
     return () => clearTimeout(timer);
-  }, []);
+  }, [isHomePage]);
+
+  // Show only when scrolled down (past 400px)
+  const handleScroll = useCallback(() => {
+    if (!ready || !isHomePage) return;
+    if (window.scrollY > 400) {
+      setVisible(true);
+    }
+  }, [ready, isHomePage]);
+
+  useEffect(() => {
+    if (!ready || !isHomePage) return;
+    // Check immediately in case already scrolled
+    if (window.scrollY > 400) { setVisible(true); return; }
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [ready, isHomePage, handleScroll]);
 
   useEffect(() => {
     if (!visible) return;
