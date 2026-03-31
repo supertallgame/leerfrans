@@ -45,6 +45,7 @@ export default function TypeAnswer({ onBack }: Props) {
         setScore((s) => s + 1);
         setAiFeedback(null);
         playCorrect();
+        trackAnswer({ gameType: "type", language, chapterId, question: showDutch ? current.dutch : current.french, correctAnswer: answer, givenAnswer: input, isCorrect: true });
         return;
       }
 
