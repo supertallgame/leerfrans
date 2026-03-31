@@ -38,16 +38,16 @@ const LANGUAGES: { id: CodingLanguage; label: string; icon: React.ReactNode; col
 ];
 
 // Helper to load/save progress from localStorage
-function loadProgress(lang: CodingLanguage): { lessonNumber: number; score: { correct: number; total: number }; previousTopic: string | null } {
+function loadProgress(lang: CodingLanguage): { lessonNumber: number; score: { correct: number; total: number }; previousTopic: string | null; level: string | null } {
   try {
     const raw = localStorage.getItem(`coderen_progress_${lang}`);
     if (raw) return JSON.parse(raw);
   } catch {}
-  return { lessonNumber: 1, score: { correct: 0, total: 0 }, previousTopic: null };
+  return { lessonNumber: 1, score: { correct: 0, total: 0 }, previousTopic: null, level: null };
 }
 
-function saveProgress(lang: CodingLanguage, lessonNumber: number, score: { correct: number; total: number }, previousTopic: string | null) {
-  localStorage.setItem(`coderen_progress_${lang}`, JSON.stringify({ lessonNumber, score, previousTopic }));
+function saveProgress(lang: CodingLanguage, lessonNumber: number, score: { correct: number; total: number }, previousTopic: string | null, level: string | null) {
+  localStorage.setItem(`coderen_progress_${lang}`, JSON.stringify({ lessonNumber, score, previousTopic, level }));
 }
 
 export default function Coderen() {
