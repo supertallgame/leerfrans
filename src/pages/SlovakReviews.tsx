@@ -343,6 +343,7 @@ export default function SlovakReviews() {
   const [loading, setLoading] = useState(true);
 
   useThemeSync();
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [isOperator, setIsOperator] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleteReplyId, setDeleteReplyId] = useState<string | null>(null);
