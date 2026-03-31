@@ -536,50 +536,94 @@ export default function Admin() {
             <p className="text-sm text-muted-foreground">Geen reviews gevonden.</p>
           ) : (
             <div className="space-y-2">
-              {filteredReviews.map((review) => (
-                <div key={review.id} className="flex items-start justify-between gap-3 px-4 py-3 rounded-lg border border-border">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-medium text-sm">{review.display_name}</span>
-                      <div className="flex gap-0.5">
-                        {[1, 2, 3, 4, 5].map((s) => (
-                          <Star key={s} className={`h-3 w-3 ${s <= review.rating ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground/20"}`} />
+              {filteredReviews.map((review) => {
+                const reviewReplies = replies.filter((r) => r.review_id === review.id);
+                const isExpanded = expandedReviewId === review.id;
+                return (
+                  <div key={review.id} className="rounded-lg border border-border overflow-hidden">
+                    <div className="flex items-start justify-between gap-3 px-4 py-3">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-medium text-sm">{review.display_name}</span>
+                          <div className="flex gap-0.5">
+                            {[1, 2, 3, 4, 5].map((s) => (
+                              <Star key={s} className={`h-3 w-3 ${s <= review.rating ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground/20"}`} />
+                            ))}
+                          </div>
+                          <span className="text-xs text-muted-foreground">{new Date(review.created_at).toLocaleDateString("nl-NL")}</span>
+                        </div>
+                        {review.user_email ? (
+                          <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1">
+                            <Mail className="h-3 w-3" /> {review.user_email}
+                          </p>
+                        ) : (
+                          <p className="text-xs text-muted-foreground/50 mt-0.5 italic">Anoniem (niet ingelogd)</p>
+                        )}
+                        <p className="text-sm text-muted-foreground mt-1 truncate">{review.message}</p>
+                      </div>
+                      <div className="flex items-center gap-1 shrink-0">
+                        {reviewReplies.length > 0 && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                            title={`${reviewReplies.length} reactie(s)`}
+                            onClick={() => setExpandedReviewId(isExpanded ? null : review.id)}
+                          >
+                            <Reply className="h-4 w-4" />
+                            <span className="sr-only">{reviewReplies.length}</span>
+                          </Button>
+                        )}
+                        {review.user_email && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                            title="Mute gebruiker"
+                            onClick={() => { setMuteEmail(review.user_email!); }}
+                          >
+                            <VolumeX className="h-4 w-4" />
+                          </Button>
+                        )}
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-destructive hover:text-destructive"
+                          onClick={() => setDeleteId(review.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                    {isExpanded && reviewReplies.length > 0 && (
+                      <div className="border-t border-border bg-muted/30 px-4 py-2 space-y-2">
+                        <p className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                          <Reply className="h-3 w-3" /> {reviewReplies.length} reactie{reviewReplies.length !== 1 ? "s" : ""}
+                        </p>
+                        {reviewReplies.map((reply) => (
+                          <div key={reply.id} className="flex items-start justify-between gap-2 pl-3 border-l-2 border-border py-1">
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs font-medium">{reply.display_name}</span>
+                                <span className="text-[10px] text-muted-foreground">{new Date(reply.created_at).toLocaleString("nl-NL")}</span>
+                              </div>
+                              <p className="text-xs text-muted-foreground mt-0.5">{reply.message}</p>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-6 w-6 text-destructive hover:text-destructive shrink-0"
+                              onClick={() => setDeleteReplyId(reply.id)}
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          </div>
                         ))}
                       </div>
-                      <span className="text-xs text-muted-foreground">{new Date(review.created_at).toLocaleDateString("nl-NL")}</span>
-                    </div>
-                    {review.user_email ? (
-                      <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1">
-                        <Mail className="h-3 w-3" /> {review.user_email}
-                      </p>
-                    ) : (
-                      <p className="text-xs text-muted-foreground/50 mt-0.5 italic">Anoniem (niet ingelogd)</p>
                     )}
-                    <p className="text-sm text-muted-foreground mt-1 truncate">{review.message}</p>
                   </div>
-                  <div className="flex items-center gap-1 shrink-0">
-                    {review.user_email && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-muted-foreground hover:text-foreground"
-                        title="Mute gebruiker"
-                        onClick={() => { setMuteEmail(review.user_email!); }}
-                      >
-                        <VolumeX className="h-4 w-4" />
-                      </Button>
-                    )}
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 text-destructive hover:text-destructive"
-                      onClick={() => setDeleteId(review.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
