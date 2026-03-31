@@ -288,12 +288,13 @@ export default function Reviews() {
   const handleVote = async (reviewId: string, voteType: "like" | "dislike") => {
     const voterId = getVoterId();
     const current = myVotes[reviewId];
+    const animKey = `${reviewId}-${voteType}`;
+    setAnimatingVote(animKey);
+    setTimeout(() => setAnimatingVote(null), 300);
     if (current === voteType) {
-      // Remove vote
       await (supabase.from("review_votes" as any) as any).delete().eq("review_id", reviewId).eq("voter_id", voterId);
       setMyVotes(prev => { const n = { ...prev }; delete n[reviewId]; return n; });
     } else {
-      // Upsert vote
       await (supabase.from("review_votes" as any) as any).upsert(
         { review_id: reviewId, voter_id: voterId, vote_type: voteType },
         { onConflict: "review_id,voter_id" }
