@@ -788,6 +788,7 @@ export default function Admin() {
         </AlertDialogContent>
       </AlertDialog>
 
+      <AlertDialog open={!!closeRoomId} onOpenChange={(open) => !open && setCloseRoomId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Kamer sluiten?</AlertDialogTitle>
