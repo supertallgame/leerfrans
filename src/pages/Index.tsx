@@ -9,6 +9,7 @@ import { getChaptersForLanguage, getChapter, getForeignLabel, getForeignLabelNat
 import { useChapter } from "@/contexts/ChapterContext";
 import { Switch } from "@/components/ui/switch";
 import SettingsDialog from "@/components/SettingsDialog";
+import ObamaPopup from "@/components/ObamaPopup";
 import {
   Dialog,
   DialogContent,
@@ -380,6 +381,7 @@ const Index = () => {
         </DialogContent>
       </Dialog>
 
+      <ObamaPopup />
       <AuthDialog open={showLoginPrompt} onOpenChange={setShowLoginPrompt} />
 
       <SettingsDialog open={showSettings} onOpenChange={setShowSettings} user={user}>

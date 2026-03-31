@@ -10,5 +10,8 @@ export function useThemeSync() {
     const saved = localStorage.getItem("theme");
     const prefersDark = saved ? saved === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
     document.documentElement.classList.toggle("dark", prefersDark);
+    // Sync obama mode
+    const obamaOn = localStorage.getItem("obama_mode") === "true";
+    document.documentElement.classList.toggle("obama-mode", obamaOn);
   }, []);
 }

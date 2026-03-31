@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -7,7 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Volume2, VolumeX, Sun, Moon, LogOut, Trash2 } from "lucide-react";
+import { Volume2, VolumeX, Sun, Moon, LogOut, Trash2, ImageIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { isSoundEnabled, setSoundEnabled } from "@/lib/sounds";
 import { toast } from "sonner";
@@ -30,6 +30,17 @@ export default function SettingsDialog({ open, onOpenChange, user, children }: S
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deletingAccount, setDeletingAccount] = useState(false);
   const [deleteEmailInput, setDeleteEmailInput] = useState("");
+  const [obamaUnlocked, setObamaUnlocked] = useState(() => localStorage.getItem("obama_unlocked") === "true");
+  const [obamaMode, setObamaMode] = useState(() => localStorage.getItem("obama_mode") === "true");
+
+  useEffect(() => {
+    const handler = () => {
+      setObamaUnlocked(true);
+      setObamaMode(true);
+    };
+    window.addEventListener("obama-unlocked", handler);
+    return () => window.removeEventListener("obama-unlocked", handler);
+  }, []);
 
   const toggleSound = (checked: boolean) => {
     setSoundOn(checked);
@@ -40,6 +51,24 @@ export default function SettingsDialog({ open, onOpenChange, user, children }: S
     setDarkMode(checked);
     document.documentElement.classList.toggle("dark", checked);
     localStorage.setItem("theme", checked ? "dark" : "light");
+    // Disable obama mode when switching themes
+    if (obamaMode) {
+      setObamaMode(false);
+      localStorage.setItem("obama_mode", "false");
+      document.documentElement.classList.remove("obama-mode");
+    }
+  };
+
+  const toggleObamaMode = (checked: boolean) => {
+    setObamaMode(checked);
+    localStorage.setItem("obama_mode", checked ? "true" : "false");
+    document.documentElement.classList.toggle("obama-mode", checked);
+    if (checked) {
+      // Remove dark mode when enabling obama mode
+      setDarkMode(false);
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem("theme", "light");
+    }
   };
 
   const handleLogout = async () => {
@@ -69,6 +98,16 @@ export default function SettingsDialog({ open, onOpenChange, user, children }: S
             </div>
             <Switch checked={darkMode} onCheckedChange={toggleDarkMode} />
           </div>
+
+          {obamaUnlocked && (
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <ImageIcon className="h-4 w-4" />
+                <span className="text-sm font-medium">🇺🇸 Obama modus</span>
+              </div>
+              <Switch checked={obamaMode} onCheckedChange={toggleObamaMode} />
+            </div>
+          )}
 
           {children}
 
