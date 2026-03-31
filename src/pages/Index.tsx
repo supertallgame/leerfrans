@@ -92,6 +92,7 @@ const Index = () => {
   const [disabledSubjects, setDisabledSubjects] = useState<string[]>([]);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deletingAccount, setDeletingAccount] = useState(false);
+  const [deleteEmailInput, setDeleteEmailInput] = useState("");
   const [darkMode, setDarkMode] = useState(() => {
     const saved = localStorage.getItem("theme");
     if (saved) return saved === "dark";
