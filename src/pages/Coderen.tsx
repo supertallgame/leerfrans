@@ -114,7 +114,7 @@ export default function Coderen() {
 
   const prefetchIfNeeded = useCallback(async (lang: CodingLanguage, currentNum: number) => {
     // If 2 or fewer lessons left in queue, fetch more in background
-    if (lessonQueueRef.current.length <= 2 && !fetchingRef.current) {
+    if (lessonQueueRef.current.length <= 4 && !fetchingRef.current) {
       fetchingRef.current = true;
       const nextStart = currentNum + lessonQueueRef.current.length;
       const newLessons = await fetchBatch(lang, nextStart);
