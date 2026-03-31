@@ -169,6 +169,9 @@ export default function Admin() {
     if (roomsRes.data) {
       setGameRooms(roomsRes.data);
     }
+    if (repliesRes.data) {
+      setReplies(repliesRes.data as ReviewReply[]);
+    }
     setLoading(false);
   };
 
