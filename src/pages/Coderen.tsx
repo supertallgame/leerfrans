@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Code2, Terminal, Globe, Coffee, ArrowLeft, CheckCircle2, XCircle, Loader2, RotateCcw, Settings, Hash, Cpu } from "lucide-react";
+import LevelTest from "@/components/games/LevelTest";
 import { toast } from "sonner";
 import SettingsDialog from "@/components/SettingsDialog";
 import AuthDialog from "@/components/AuthDialog";
@@ -37,16 +38,16 @@ const LANGUAGES: { id: CodingLanguage; label: string; icon: React.ReactNode; col
 ];
 
 // Helper to load/save progress from localStorage
-function loadProgress(lang: CodingLanguage): { lessonNumber: number; score: { correct: number; total: number }; previousTopic: string | null } {
+function loadProgress(lang: CodingLanguage): { lessonNumber: number; score: { correct: number; total: number }; previousTopic: string | null; level: string | null } {
   try {
     const raw = localStorage.getItem(`coderen_progress_${lang}`);
     if (raw) return JSON.parse(raw);
   } catch {}
-  return { lessonNumber: 1, score: { correct: 0, total: 0 }, previousTopic: null };
+  return { lessonNumber: 1, score: { correct: 0, total: 0 }, previousTopic: null, level: null };
 }
 
-function saveProgress(lang: CodingLanguage, lessonNumber: number, score: { correct: number; total: number }, previousTopic: string | null) {
-  localStorage.setItem(`coderen_progress_${lang}`, JSON.stringify({ lessonNumber, score, previousTopic }));
+function saveProgress(lang: CodingLanguage, lessonNumber: number, score: { correct: number; total: number }, previousTopic: string | null, level: string | null) {
+  localStorage.setItem(`coderen_progress_${lang}`, JSON.stringify({ lessonNumber, score, previousTopic, level }));
 }
 
 export default function Coderen() {
@@ -84,6 +85,8 @@ export default function Coderen() {
   const [fillAnswer, setFillAnswer] = useState("");
   const [score, setScore] = useState({ correct: 0, total: 0 });
   const [previousTopic, setPreviousTopic] = useState<string | null>(null);
+  const [showLevelTest, setShowLevelTest] = useState(false);
+  const [userLevel, setUserLevel] = useState<string | null>(null);
 
   // Lesson queue for pre-fetched lessons
   const lessonQueueRef = useRef<Lesson[]>([]);
@@ -131,7 +134,17 @@ export default function Coderen() {
 
   const startLanguage = useCallback(async (lang: CodingLanguage) => {
     const saved = loadProgress(lang);
+
+    // If no progress and no level determined, show level test
+    if (saved.lessonNumber <= 1 && saved.score.total === 0 && !saved.level) {
+      setSelectedLang(lang);
+      setShowLevelTest(true);
+      return;
+    }
+
     setSelectedLang(lang);
+    setShowLevelTest(false);
+    setUserLevel(saved.level);
     setLessonNumber(saved.lessonNumber);
     setScore(saved.score);
     setPreviousTopic(saved.previousTopic);
@@ -144,13 +157,37 @@ export default function Coderen() {
     if (lessons.length > 0) {
       setLesson(lessons[0]);
       lessonQueueRef.current = lessons.slice(1);
-      // Start prefetching next batch in background
       prefetchIfNeeded(lang, saved.lessonNumber + 1);
     } else {
       toast.error("Kon de lessen niet laden. Probeer opnieuw.");
     }
     setLoading(false);
   }, [fetchBatch, prefetchIfNeeded]);
+
+  const handleLevelTestComplete = useCallback(async (startLesson: number, level: string) => {
+    if (!selectedLang) return;
+    const newScore = { correct: 0, total: 0 };
+    saveProgress(selectedLang, startLesson, newScore, null, level);
+    setShowLevelTest(false);
+    setUserLevel(level);
+    setLessonNumber(startLesson);
+    setScore(newScore);
+    setPreviousTopic(null);
+    setLoading(true);
+    setLesson(null);
+    lessonQueueRef.current = [];
+    fetchingRef.current = false;
+
+    const lessons = await fetchBatch(selectedLang, startLesson);
+    if (lessons.length > 0) {
+      setLesson(lessons[0]);
+      lessonQueueRef.current = lessons.slice(1);
+      prefetchIfNeeded(selectedLang, startLesson + 1);
+    } else {
+      toast.error("Kon de lessen niet laden. Probeer opnieuw.");
+    }
+    setLoading(false);
+  }, [selectedLang, fetchBatch, prefetchIfNeeded]);
 
   const checkAnswer = (answer: string) => {
     if (!lesson || !selectedLang) return;
@@ -162,7 +199,7 @@ export default function Coderen() {
     setScore(newScore);
     setPreviousTopic(lesson.lessonTitle);
     const nextNum = correct ? lessonNumber + 1 : lessonNumber;
-    saveProgress(selectedLang, nextNum, newScore, lesson.lessonTitle);
+    saveProgress(selectedLang, nextNum, newScore, lesson.lessonTitle, userLevel);
   };
 
   const nextLesson = useCallback(() => {
@@ -201,6 +238,7 @@ export default function Coderen() {
 
   const goBack = () => {
     setSelectedLang(null);
+    setShowLevelTest(false);
     setLesson(null);
     setLessonNumber(1);
     setScore({ correct: 0, total: 0 });
@@ -213,6 +251,24 @@ export default function Coderen() {
       <AuthDialog open={showLoginPrompt} onOpenChange={setShowLoginPrompt} />
     </>
   );
+
+  // Level test screen
+  if (selectedLang && showLevelTest) {
+    const langInfo = LANGUAGES.find((l) => l.id === selectedLang)!;
+    return (
+      <>
+        <LevelTest
+          language={selectedLang}
+          languageLabel={langInfo.label}
+          languageColor={langInfo.color}
+          languageIcon={langInfo.icon}
+          onComplete={handleLevelTestComplete}
+          onBack={goBack}
+        />
+        {settingsAndAuth}
+      </>
+    );
+  }
 
   // Language selection screen
   if (!selectedLang) {
