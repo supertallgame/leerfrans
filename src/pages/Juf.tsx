@@ -4,8 +4,9 @@ import { getChaptersForLanguage, Language } from "@/data/vocabulary";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, BarChart3, Brain, Download, GitCompareArrows, Loader2, MessageSquarePlus, RefreshCw, StickyNote, Trash2, TrendingDown } from "lucide-react";
+import { ArrowLeft, BarChart3, Brain, Download, GitCompareArrows, Loader2, MessageSquarePlus, RefreshCw, Search, StickyNote, Trash2, TrendingDown } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
 import { Progress } from "@/components/ui/progress";
 import ReactMarkdown from "react-markdown";
@@ -106,6 +107,13 @@ const Juf = () => {
   const [notes, setNotes] = useState<JufNote[]>([]);
   const [newNote, setNewNote] = useState("");
   const [showNotes, setShowNotes] = useState(false);
+  const [noteSearch, setNoteSearch] = useState("");
+
+  const filteredNotes = useMemo(() => {
+    if (!noteSearch.trim()) return notes;
+    const q = noteSearch.toLowerCase();
+    return notes.filter(n => n.note.toLowerCase().includes(q));
+  }, [notes, noteSearch]);
 
   const fetchNotes = useCallback(async () => {
     const { data } = await supabase.from("juf_notes").select("*").order("created_at", { ascending: false }).limit(50);
@@ -463,6 +471,17 @@ const Juf = () => {
                     {showNotes ? "Verbergen" : `Tonen (${notes.length})`}
                   </Button>
                 </div>
+                {showNotes && notes.length > 2 && (
+                  <div className="relative mb-3">
+                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Zoek in notities..."
+                      value={noteSearch}
+                      onChange={(e) => setNoteSearch(e.target.value)}
+                      className="pl-9 h-9 text-sm"
+                    />
+                  </div>
+                )}
                 <div className="flex gap-2 mb-3">
                   <Textarea
                     placeholder="Schrijf een opmerking bij deze analyse..."
@@ -475,9 +494,9 @@ const Juf = () => {
                     <MessageSquarePlus className="h-4 w-4" />
                   </Button>
                 </div>
-                {showNotes && notes.length > 0 && (
+                {showNotes && filteredNotes.length > 0 && (
                   <div className="space-y-2 mt-3 border-t pt-3">
-                    {notes.map(n => (
+                    {filteredNotes.map(n => (
                       <div key={n.id} className="flex items-start gap-2 text-sm border rounded-lg p-2.5">
                         <div className="flex-1">
                           <p className="whitespace-pre-wrap">{n.note}</p>
