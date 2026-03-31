@@ -146,6 +146,11 @@ export default function Coderen() {
     return (
       <div className="min-h-screen bg-background p-4 md:p-8">
         <div className="max-w-4xl mx-auto">
+          <div className="flex justify-end mb-4">
+            <Button variant="ghost" size="icon" onClick={toggleDarkMode} aria-label="Thema wisselen">
+              {darkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+            </Button>
+          </div>
           <div className="text-center mb-10">
             <div className="inline-flex items-center gap-2 mb-4">
               <Code2 className="h-10 w-10 text-primary" />
@@ -154,24 +159,36 @@ export default function Coderen() {
             <p className="text-muted-foreground text-lg">Kies een programmeertaal en begin met leren! 🚀</p>
           </div>
           <div className="grid md:grid-cols-3 gap-6">
-            {LANGUAGES.map((lang) => (
-              <Card
-                key={lang.id}
-                className="cursor-pointer hover:scale-105 transition-transform duration-200 border-2 hover:border-primary"
-                onClick={() => startLanguage(lang.id)}
-              >
-                <CardHeader className="text-center pb-2">
-                  <div className={`mx-auto mb-3 p-4 rounded-2xl bg-gradient-to-br ${lang.color} text-white`}>
-                    {lang.icon}
-                  </div>
-                  <CardTitle className="text-2xl">{lang.label}</CardTitle>
-                </CardHeader>
-                <CardContent className="text-center">
-                  <p className="text-muted-foreground text-sm">{lang.desc}</p>
-                  <Badge className="mt-3" variant="secondary">100+ lessen</Badge>
-                </CardContent>
-              </Card>
-            ))}
+            {LANGUAGES.map((lang) => {
+              const saved = loadProgress(lang.id);
+              const hasProgress = saved.lessonNumber > 1 || saved.score.total > 0;
+              return (
+                <Card
+                  key={lang.id}
+                  className="cursor-pointer hover:scale-105 transition-transform duration-200 border-2 hover:border-primary"
+                  onClick={() => startLanguage(lang.id)}
+                >
+                  <CardHeader className="text-center pb-2">
+                    <div className={`mx-auto mb-3 p-4 rounded-2xl bg-gradient-to-br ${lang.color} text-white`}>
+                      {lang.icon}
+                    </div>
+                    <CardTitle className="text-2xl">{lang.label}</CardTitle>
+                  </CardHeader>
+                  <CardContent className="text-center">
+                    <p className="text-muted-foreground text-sm">{lang.desc}</p>
+                    <Badge className="mt-3" variant="secondary">100+ lessen</Badge>
+                    {hasProgress && (
+                      <div className="mt-3 space-y-1">
+                        <Progress value={Math.min((saved.lessonNumber / 100) * 100, 100)} className="h-1.5" />
+                        <p className="text-xs text-muted-foreground">
+                          Les {saved.lessonNumber} · Score: {saved.score.correct}/{saved.score.total}
+                        </p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         </div>
       </div>
