@@ -1,10 +1,11 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
+import { useThemeSync } from "@/hooks/use-theme-sync";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Code2, Terminal, Globe, Coffee, ArrowLeft, CheckCircle2, XCircle, Loader2, RotateCcw } from "lucide-react";
+import { Code2, Terminal, Globe, Coffee, ArrowLeft, CheckCircle2, XCircle, Loader2, RotateCcw, Sun, Moon } from "lucide-react";
 import { toast } from "sonner";
 
 type CodingLanguage = "python" | "html" | "java";
