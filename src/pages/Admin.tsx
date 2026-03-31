@@ -36,6 +36,14 @@ interface Review {
   user_email: string | null;
 }
 
+interface ReviewReply {
+  id: string;
+  review_id: string;
+  display_name: string;
+  message: string;
+  created_at: string;
+}
+
 interface MutedUser {
   id: string;
   user_email: string;
