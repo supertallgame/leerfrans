@@ -164,17 +164,6 @@ const Index = () => {
     toast.success("Uitgelogd");
   };
 
-  const toggleSound = (checked: boolean) => {
-    setSoundOn(checked);
-    setSoundEnabled(checked);
-  };
-
-  const toggleDarkMode = (checked: boolean) => {
-    setDarkMode(checked);
-    document.documentElement.classList.toggle("dark", checked);
-    localStorage.setItem("theme", checked ? "dark" : "light");
-  };
-
   const gameLoader = <div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>;
 
   if (activeGame === "flashcards") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6"><Flashcards onBack={() => setActiveGame("menu")} /></div></Suspense>;
