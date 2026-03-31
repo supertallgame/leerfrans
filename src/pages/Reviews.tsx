@@ -260,7 +260,7 @@ export default function Reviews() {
   const [isOperator, setIsOperator] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleteReplyId, setDeleteReplyId] = useState<string | null>(null);
-  const [sortBy, setSortBy] = useState<"newest" | "rating">("newest");
+  const [sortBy, setSortBy] = useState<"newest" | "rating" | "likes">("newest");
   const [filterRating, setFilterRating] = useState<number | null>(null);
   const [voteCounts, setVoteCounts] = useState<VoteCounts>({});
   const [myVotes, setMyVotes] = useState<MyVotes>({});
