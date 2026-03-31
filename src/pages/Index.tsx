@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/dialog";
 import AuthDialog from "@/components/AuthDialog";
 import { supabase } from "@/integrations/supabase/client";
-import { isSoundEnabled, setSoundEnabled } from "@/lib/sounds";
+import { toast } from "sonner";
 import { toast } from "sonner";
 
 const Flashcards = lazy(() => import("@/components/games/Flashcards"));
