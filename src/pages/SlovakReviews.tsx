@@ -399,7 +399,7 @@ export default function SlovakReviews() {
   useEffect(() => {
     const fetchData = async () => {
       const [reviewsRes, repliesRes] = await Promise.all([
-        supabase.from("reviews_public" as any).select("id, display_name, rating, message, created_at, image_url").order("created_at", { ascending: false }) as any,
+        supabase.from("reviews_public" as any).select("id, display_name, rating, message, created_at, image_url, user_id").order("created_at", { ascending: false }) as any,
         supabase.from("review_replies" as any).select("*").order("created_at", { ascending: true }) as any,
       ]);
       if (reviewsRes.data) setReviews(reviewsRes.data);
