@@ -95,7 +95,7 @@ export default function Coderen() {
   const lessonQueueRef = useRef<Lesson[]>([]);
   const fetchingRef = useRef(false);
 
-  const BATCH_SIZE = 5;
+  const BATCH_SIZE = 10;
 
   const fetchBatch = useCallback(async (lang: CodingLanguage, startNum: number): Promise<Lesson[]> => {
     try {
