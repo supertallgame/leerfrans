@@ -217,7 +217,7 @@ export default function Coderen() {
     setScore(newScore);
     setPreviousTopic(lesson.lessonTitle);
     const nextNum = correct ? lessonNumber + 1 : lessonNumber;
-    saveProgress(selectedLang, nextNum, newScore, lesson.lessonTitle, userLevel);
+    saveProgress(selectedLang, nextNum, newScore, lesson.lessonTitle, userLevel, [...lessonQueueRef.current]);
   };
 
   const nextLesson = useCallback(() => {
