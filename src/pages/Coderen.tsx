@@ -238,6 +238,7 @@ export default function Coderen() {
 
   const goBack = () => {
     setSelectedLang(null);
+    setShowLevelTest(false);
     setLesson(null);
     setLessonNumber(1);
     setScore({ correct: 0, total: 0 });
