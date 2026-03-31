@@ -183,6 +183,20 @@ const Juf = () => {
               </SelectContent>
             </Select>
           </div>
+          {language !== "all" && availableChapters.length > 0 && (
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-muted-foreground">Hoofdstuk</label>
+              <Select value={chapterFilter} onValueChange={setChapterFilter}>
+                <SelectTrigger className="w-[180px]"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Alle hoofdstukken</SelectItem>
+                  {availableChapters.map(ch => (
+                    <SelectItem key={ch.id} value={ch.id}>{ch.title}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
           <div className="space-y-1">
             <label className="text-xs font-medium text-muted-foreground">Periode</label>
             <Select value={days} onValueChange={setDays}>
