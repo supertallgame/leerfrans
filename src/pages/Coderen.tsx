@@ -10,7 +10,7 @@ import { toast } from "sonner";
 import SettingsDialog from "@/components/SettingsDialog";
 import AuthDialog from "@/components/AuthDialog";
 
-type CodingLanguage = "python" | "html" | "java";
+type CodingLanguage = "python" | "html" | "java" | "csharp" | "cpp";
 
 interface Exercise {
   type: "multiple_choice" | "fill_code";
