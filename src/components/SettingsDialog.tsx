@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -7,7 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Volume2, VolumeX, Sun, Moon, LogOut, Trash2 } from "lucide-react";
+import { Volume2, VolumeX, Sun, Moon, LogOut, Trash2, ImageIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { isSoundEnabled, setSoundEnabled } from "@/lib/sounds";
 import { toast } from "sonner";
