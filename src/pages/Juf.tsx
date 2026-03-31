@@ -107,6 +107,13 @@ const Juf = () => {
   const [notes, setNotes] = useState<JufNote[]>([]);
   const [newNote, setNewNote] = useState("");
   const [showNotes, setShowNotes] = useState(false);
+  const [noteSearch, setNoteSearch] = useState("");
+
+  const filteredNotes = useMemo(() => {
+    if (!noteSearch.trim()) return notes;
+    const q = noteSearch.toLowerCase();
+    return notes.filter(n => n.note.toLowerCase().includes(q));
+  }, [notes, noteSearch]);
 
   const fetchNotes = useCallback(async () => {
     const { data } = await supabase.from("juf_notes").select("*").order("created_at", { ascending: false }).limit(50);
