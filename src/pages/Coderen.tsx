@@ -158,8 +158,8 @@ export default function Coderen() {
       <div className="min-h-screen bg-background p-4 md:p-8">
         <div className="max-w-4xl mx-auto">
           <div className="flex justify-end mb-4">
-            <Button variant="ghost" size="icon" onClick={toggleDarkMode} aria-label="Thema wisselen">
-              {darkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+            <Button variant="ghost" size="icon" onClick={handleSettingsClick} aria-label="Instellingen">
+              <Settings className="h-5 w-5" />
             </Button>
           </div>
           <div className="text-center mb-10">
