@@ -121,9 +121,6 @@ interface Review {
 
 const OPERATOR_EMAILS = ["brankovantland@gmail.com", "branko18vantland@gmail.com", "tamoopdam@gmail.com", "jack.ouwerkerk@vsodaafgeluk.nl"];
 
-  return id;
-}
-
 
 function Stars({ rating }: { rating: number }) {
   return (
