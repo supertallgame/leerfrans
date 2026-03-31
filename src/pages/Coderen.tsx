@@ -32,7 +32,35 @@ const LANGUAGES: { id: CodingLanguage; label: string; icon: React.ReactNode; col
   { id: "java", label: "Java", icon: <Coffee className="h-8 w-8" />, color: "from-red-500 to-orange-600", desc: "Krachtige taal voor apps en enterprise software" },
 ];
 
+// Helper to load/save progress from localStorage
+function loadProgress(lang: CodingLanguage): { lessonNumber: number; score: { correct: number; total: number }; previousTopic: string | null } {
+  try {
+    const raw = localStorage.getItem(`coderen_progress_${lang}`);
+    if (raw) return JSON.parse(raw);
+  } catch {}
+  return { lessonNumber: 1, score: { correct: 0, total: 0 }, previousTopic: null };
+}
+
+function saveProgress(lang: CodingLanguage, lessonNumber: number, score: { correct: number; total: number }, previousTopic: string | null) {
+  localStorage.setItem(`coderen_progress_${lang}`, JSON.stringify({ lessonNumber, score, previousTopic }));
+}
+
 export default function Coderen() {
+  useThemeSync();
+
+  const [darkMode, setDarkMode] = useState(() => {
+    const saved = localStorage.getItem("theme");
+    if (saved) return saved === "dark";
+    return window.matchMedia("(prefers-color-scheme: dark)").matches;
+  });
+
+  const toggleDarkMode = () => {
+    const next = !darkMode;
+    setDarkMode(next);
+    localStorage.setItem("theme", next ? "dark" : "light");
+    document.documentElement.classList.toggle("dark", next);
+  };
+
   const [selectedLang, setSelectedLang] = useState<CodingLanguage | null>(null);
   const [lesson, setLesson] = useState<Lesson | null>(null);
   const [lessonNumber, setLessonNumber] = useState(1);
@@ -69,21 +97,26 @@ export default function Coderen() {
   }, []);
 
   const startLanguage = (lang: CodingLanguage) => {
+    const saved = loadProgress(lang);
     setSelectedLang(lang);
-    setLessonNumber(1);
-    setScore({ correct: 0, total: 0 });
-    setPreviousTopic(null);
-    fetchLesson(lang, 1);
+    setLessonNumber(saved.lessonNumber);
+    setScore(saved.score);
+    setPreviousTopic(saved.previousTopic);
+    fetchLesson(lang, saved.lessonNumber, undefined, saved.previousTopic);
   };
 
   const checkAnswer = (answer: string) => {
-    if (!lesson) return;
+    if (!lesson || !selectedLang) return;
     setSelectedAnswer(answer);
     setAnswered(true);
     const correct = answer.trim().toLowerCase() === lesson.exercise.correctAnswer.trim().toLowerCase();
     setIsCorrect(correct);
-    setScore((s) => ({ correct: s.correct + (correct ? 1 : 0), total: s.total + 1 }));
+    const newScore = { correct: score.correct + (correct ? 1 : 0), total: score.total + 1 };
+    setScore(newScore);
     setPreviousTopic(lesson.lessonTitle);
+    // Save progress after answering
+    const nextNum = correct ? lessonNumber + 1 : lessonNumber;
+    saveProgress(selectedLang, nextNum, newScore, lesson.lessonTitle);
   };
 
   const nextLesson = () => {
@@ -91,6 +124,14 @@ export default function Coderen() {
     const next = isCorrect ? lessonNumber + 1 : lessonNumber;
     setLessonNumber(next);
     fetchLesson(selectedLang, next, isCorrect, previousTopic);
+  };
+
+  const resetProgress = (lang: CodingLanguage) => {
+    localStorage.removeItem(`coderen_progress_${lang}`);
+    setLessonNumber(1);
+    setScore({ correct: 0, total: 0 });
+    setPreviousTopic(null);
+    fetchLesson(lang, 1);
   };
 
   const goBack = () => {
