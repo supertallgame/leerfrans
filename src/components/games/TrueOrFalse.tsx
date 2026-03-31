@@ -22,7 +22,7 @@ interface Question {
 }
 
 export default function TrueOrFalse({ onBack }: Props) {
-  const { activeVocabulary } = useChapter();
+  const { activeVocabulary, language, chapterId } = useChapter();
   const locale = useLocale();
   const i = t(locale);
 
