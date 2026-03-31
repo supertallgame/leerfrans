@@ -10,6 +10,7 @@ import {
 import { Volume2, VolumeX, Sun, Moon, LogOut, Trash2, ImageIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { isSoundEnabled, setSoundEnabled } from "@/lib/sounds";
+import { fireConfetti } from "@/lib/confetti";
 import { toast } from "sonner";
 
 interface SettingsDialogProps {
@@ -64,6 +65,7 @@ export default function SettingsDialog({ open, onOpenChange, user, children }: S
     localStorage.setItem("obama_mode", checked ? "true" : "false");
     document.documentElement.classList.toggle("obama-mode", checked);
     if (checked) {
+      fireConfetti();
       // Remove dark mode when enabling obama mode
       setDarkMode(false);
       document.documentElement.classList.remove("dark");

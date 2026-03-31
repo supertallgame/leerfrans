@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import obamaImg from "@/assets/obama.jpg";
+import { fireConfetti } from "@/lib/confetti";
 
 export default function ObamaPopup() {
   const [visible, setVisible] = useState(false);
@@ -29,6 +30,7 @@ export default function ObamaPopup() {
     localStorage.setItem("obama_unlocked", "true");
     localStorage.setItem("obama_mode", "true");
     document.documentElement.classList.add("obama-mode");
+    fireConfetti();
     setExiting(true);
     setTimeout(() => { setVisible(false); setExiting(false); }, 500);
     // Dispatch storage event so settings can react
