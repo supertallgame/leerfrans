@@ -602,8 +602,13 @@ export default function Admin() {
                         {reviewReplies.map((reply) => (
                           <div key={reply.id} className="flex items-start justify-between gap-2 pl-3 border-l-2 border-border py-1">
                             <div className="min-w-0">
-                              <div className="flex items-center gap-2">
+                              <div className="flex items-center gap-2 flex-wrap">
                                 <span className="text-xs font-medium">{reply.display_name}</span>
+                                {reply.user_email && (
+                                  <span className="text-[10px] text-muted-foreground flex items-center gap-0.5">
+                                    <Mail className="h-2.5 w-2.5" /> {reply.user_email}
+                                  </span>
+                                )}
                                 <span className="text-[10px] text-muted-foreground">{new Date(reply.created_at).toLocaleString("nl-NL")}</span>
                               </div>
                               <p className="text-xs text-muted-foreground mt-0.5">{reply.message}</p>
