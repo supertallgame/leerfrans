@@ -408,114 +408,32 @@ const Index = () => {
 
       <AuthDialog open={showLoginPrompt} onOpenChange={setShowLoginPrompt} />
 
-      {/* Settings dialog */}
-      <Dialog open={showSettings} onOpenChange={setShowSettings}>
-        <DialogContent className="sm:max-w-sm">
-          <DialogHeader>
-            <DialogTitle>Instellingen</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                {soundOn ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
-                <span className="text-sm font-medium">Geluidseffecten</span>
-              </div>
-              <Switch checked={soundOn} onCheckedChange={toggleSound} />
+      <SettingsDialog open={showSettings} onOpenChange={setShowSettings} user={user}>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <BookMarked className="h-4 w-4" />
+              <span className="text-sm font-medium">Vak</span>
             </div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                {darkMode ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
-                <span className="text-sm font-medium">Donkere modus</span>
-              </div>
-              <Switch checked={darkMode} onCheckedChange={toggleDarkMode} />
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <BookMarked className="h-4 w-4" />
-                <span className="text-sm font-medium">Vak</span>
-              </div>
-              <button
-                onClick={() => { setShowSettings(false); setShowLanguagePicker(true); }}
-                className="text-sm font-medium px-3 py-1 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
-              >
-                <span className="inline-flex items-center gap-1.5">{language === "nask" ? <FlaskConical className="h-3.5 w-3.5" /> : language === "biology" ? <Microscope className="h-3.5 w-3.5" /> : language === "french" ? <FlagFR className="w-4 h-3 rounded-sm" /> : <FlagEN className="w-4 h-3 rounded-sm" />} {language === "nask" ? "NASK" : language === "biology" ? "Biologie" : language === "french" ? "Frans" : "Engels"}</span>
-              </button>
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <BookMarked className="h-4 w-4" />
-                <span className="text-sm font-medium">{(language === "nask" || language === "biology") ? "Hoofdstuk" : language === "french" ? "Chapitre" : "Chapter"}</span>
-              </div>
-              <button
-                onClick={() => { setShowSettings(false); setShowChapterPicker(true); }}
-                className="text-sm font-medium px-3 py-1 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
-              >
-                {getChapter(chapterId)?.title ?? "Chapitre 3"}
-              </button>
-            </div>
-            {user && (
-              <div className="pt-2 border-t space-y-3">
-                <p className="text-xs text-muted-foreground">
-                  Ingelogd als {user?.email}
-                </p>
-                <Button variant="outline" size="sm" onClick={handleLogout} className="gap-2">
-                  <LogOut className="h-4 w-4" /> Uitloggen
-                </Button>
-                {!showDeleteConfirm ? (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="gap-2 text-destructive hover:text-destructive hover:bg-destructive/10 w-full"
-                    onClick={() => { setShowDeleteConfirm(true); setDeleteEmailInput(""); }}
-                  >
-                    <Trash2 className="h-4 w-4" /> Account verwijderen
-                  </Button>
-                ) : (
-                  <div className="rounded-lg border border-destructive/50 bg-destructive/5 p-3 space-y-3">
-                    <p className="text-xs font-medium text-destructive">Dit kan niet ongedaan worden gemaakt. Typ je e-mailadres om te bevestigen:</p>
-                    <input
-                      type="email"
-                      className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                      placeholder={user?.email || "je@email.com"}
-                      value={deleteEmailInput}
-                      onChange={(e) => setDeleteEmailInput(e.target.value)}
-                    />
-                    <div className="flex gap-2">
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        className="flex-1"
-                        disabled={deletingAccount || deleteEmailInput !== user?.email}
-                        onClick={async () => {
-                          setDeletingAccount(true);
-                          try {
-                            const { error } = await supabase.functions.invoke("delete-account");
-                            if (error) throw error;
-                            await supabase.auth.signOut();
-                            setShowSettings(false);
-                            setShowDeleteConfirm(false);
-                            toast.success("Account verwijderd");
-                          } catch (e: any) {
-                            console.error(e);
-                            toast.error("Kon account niet verwijderen. Probeer opnieuw.");
-                          } finally {
-                            setDeletingAccount(false);
-                          }
-                        }}
-                      >
-                        {deletingAccount ? "Bezig..." : "Verwijder definitief"}
-                      </Button>
-                      <Button variant="outline" size="sm" className="flex-1" onClick={() => setShowDeleteConfirm(false)}>
-                        Annuleren
-                      </Button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
+            <button
+              onClick={() => { setShowSettings(false); setShowLanguagePicker(true); }}
+              className="text-sm font-medium px-3 py-1 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+            >
+              <span className="inline-flex items-center gap-1.5">{language === "nask" ? <FlaskConical className="h-3.5 w-3.5" /> : language === "biology" ? <Microscope className="h-3.5 w-3.5" /> : language === "french" ? <FlagFR className="w-4 h-3 rounded-sm" /> : <FlagEN className="w-4 h-3 rounded-sm" />} {language === "nask" ? "NASK" : language === "biology" ? "Biologie" : language === "french" ? "Frans" : "Engels"}</span>
+            </button>
           </div>
-        </DialogContent>
-      </Dialog>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <BookMarked className="h-4 w-4" />
+              <span className="text-sm font-medium">{(language === "nask" || language === "biology") ? "Hoofdstuk" : language === "french" ? "Chapitre" : "Chapter"}</span>
+            </div>
+            <button
+              onClick={() => { setShowSettings(false); setShowChapterPicker(true); }}
+              className="text-sm font-medium px-3 py-1 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+            >
+              {getChapter(chapterId)?.title ?? "Chapitre 3"}
+            </button>
+          </div>
+      </SettingsDialog>
      </main>
   );
 };
