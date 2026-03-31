@@ -92,7 +92,18 @@ const Juf = () => {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [language, setLanguage] = useState("all");
+  const [chapterFilter, setChapterFilter] = useState("all");
   const [days, setDays] = useState("7");
+
+  const availableChapters = useMemo(() => {
+    if (language === "all") return [];
+    return getChaptersForLanguage(language as Language);
+  }, [language]);
+
+  // Reset chapter filter when language changes
+  useEffect(() => {
+    setChapterFilter("all");
+  }, [language]);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
