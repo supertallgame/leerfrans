@@ -294,12 +294,12 @@ export default function Reviews() {
       toast.error("Je moet ingelogd zijn om te liken of disliken.");
       return;
     }
-    const voterId = getVoterId();
-    const current = myVotes[reviewId];
+    const voterId = currentUserId;
+    if (!voterId) return;
     const animKey = `${reviewId}-${voteType}`;
     setAnimatingVote(animKey);
     setTimeout(() => setAnimatingVote(null), 300);
-    if (current === voteType) {
+    if (myVotes[reviewId] === voteType) {
       await (supabase.from("review_votes" as any) as any).delete().eq("review_id", reviewId).eq("voter_id", voterId);
       setMyVotes(prev => { const n = { ...prev }; delete n[reviewId]; return n; });
     } else {
