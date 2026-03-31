@@ -327,9 +327,21 @@ export default function Reviews() {
       if (repliesRes.data) setReplies(repliesRes.data);
     };
 
-    // Poll for new reviews every 15 seconds instead of realtime (email privacy)
+    // Poll for new reviews every 15 seconds
     const interval = setInterval(refetchAll, 15000);
-    return () => clearInterval(interval);
+
+    // Realtime subscription for votes
+    const votesChannel = supabase
+      .channel('review-votes-realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'review_votes' }, () => {
+        fetchVotes();
+      })
+      .subscribe();
+
+    return () => {
+      clearInterval(interval);
+      supabase.removeChannel(votesChannel);
+    };
   }, []);
 
   const handleDelete = async () => {
