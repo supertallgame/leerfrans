@@ -370,6 +370,9 @@ export default function SlovakReviews() {
 
   const handleVote = async (reviewId: string, voteType: "like" | "dislike") => {
     const voterId = getVoterId();
+    const animKey = `${reviewId}-${voteType}`;
+    setAnimatingVote(animKey);
+    setTimeout(() => setAnimatingVote(null), 300);
     if (myVotes[reviewId] === voteType) {
       await (supabase.from("review_votes" as any) as any).delete().eq("review_id", reviewId).eq("voter_id", voterId);
       setMyVotes(prev => { const n = { ...prev }; delete n[reviewId]; return n; });
