@@ -239,15 +239,18 @@ export default function LevelTest({ language, languageLabel, languageColor, lang
               })}
             </div>
 
-              {!answered && (
-                <Button
-                  variant="ghost"
-                  className="w-full text-muted-foreground"
-                  onClick={skipQuestion}
-                >
-                  🤷 Weet ik niet
-                </Button>
-              )}
+            {!answered && (
+              <Button
+                variant="ghost"
+                className="w-full text-muted-foreground"
+                onClick={skipQuestion}
+              >
+                🤷 Weet ik niet
+              </Button>
+            )}
+
+            {answered && (
+              <>
                 <div className={`rounded-lg p-4 ${isCorrect ? "bg-green-500/10 border border-green-500/30" : "bg-red-500/10 border border-red-500/30"}`}>
                   <div className="flex items-center gap-2 mb-1">
                     {isCorrect ? (
