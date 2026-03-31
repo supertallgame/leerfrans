@@ -381,6 +381,7 @@ const Index = () => {
         </DialogContent>
       </Dialog>
 
+      <ObamaPopup />
       <AuthDialog open={showLoginPrompt} onOpenChange={setShowLoginPrompt} />
 
       <SettingsDialog open={showSettings} onOpenChange={setShowSettings} user={user}>
