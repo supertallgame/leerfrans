@@ -38,16 +38,19 @@ const LANGUAGES: { id: CodingLanguage; label: string; icon: React.ReactNode; col
 ];
 
 // Helper to load/save progress from localStorage
-function loadProgress(lang: CodingLanguage): { lessonNumber: number; score: { correct: number; total: number }; previousTopic: string | null; level: string | null } {
+function loadProgress(lang: CodingLanguage): { lessonNumber: number; score: { correct: number; total: number }; previousTopic: string | null; level: string | null; cachedLessons: Lesson[] } {
   try {
     const raw = localStorage.getItem(`coderen_progress_${lang}`);
-    if (raw) return JSON.parse(raw);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      return { ...parsed, cachedLessons: parsed.cachedLessons || [] };
+    }
   } catch {}
-  return { lessonNumber: 1, score: { correct: 0, total: 0 }, previousTopic: null, level: null };
+  return { lessonNumber: 1, score: { correct: 0, total: 0 }, previousTopic: null, level: null, cachedLessons: [] };
 }
 
-function saveProgress(lang: CodingLanguage, lessonNumber: number, score: { correct: number; total: number }, previousTopic: string | null, level: string | null) {
-  localStorage.setItem(`coderen_progress_${lang}`, JSON.stringify({ lessonNumber, score, previousTopic, level }));
+function saveProgress(lang: CodingLanguage, lessonNumber: number, score: { correct: number; total: number }, previousTopic: string | null, level: string | null, cachedLessons: Lesson[] = []) {
+  localStorage.setItem(`coderen_progress_${lang}`, JSON.stringify({ lessonNumber, score, previousTopic, level, cachedLessons }));
 }
 
 export default function Coderen() {
