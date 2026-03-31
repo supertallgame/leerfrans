@@ -51,6 +51,24 @@ export default function SettingsDialog({ open, onOpenChange, user, children }: S
     setDarkMode(checked);
     document.documentElement.classList.toggle("dark", checked);
     localStorage.setItem("theme", checked ? "dark" : "light");
+    // Disable obama mode when switching themes
+    if (obamaMode) {
+      setObamaMode(false);
+      localStorage.setItem("obama_mode", "false");
+      document.documentElement.classList.remove("obama-mode");
+    }
+  };
+
+  const toggleObamaMode = (checked: boolean) => {
+    setObamaMode(checked);
+    localStorage.setItem("obama_mode", checked ? "true" : "false");
+    document.documentElement.classList.toggle("obama-mode", checked);
+    if (checked) {
+      // Remove dark mode when enabling obama mode
+      setDarkMode(false);
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem("theme", "light");
+    }
   };
 
   const handleLogout = async () => {
