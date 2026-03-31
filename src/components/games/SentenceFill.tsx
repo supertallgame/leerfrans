@@ -66,6 +66,7 @@ export default function SentenceFill({ onBack }: Props) {
     if (correct) { setScore((s) => s + 1); playCorrect(); }
     else { playWrong(); }
     setShowResult(true);
+    trackAnswer({ gameType: "sentence", language, chapterId, question: puzzle.display, correctAnswer: puzzle.correctWord, givenAnswer: userInput, isCorrect: correct });
   };
 
   const next = () => {

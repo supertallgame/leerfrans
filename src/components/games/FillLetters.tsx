@@ -76,9 +76,11 @@ export default function FillLetters({ onBack }: Props) {
   const isCorrectFn = (input: string) => isAnswerCorrect(input, targetWord);
 
   const checkAnswer = () => {
-    if (isCorrectFn(userInput)) { setScore((s) => s + 1); playCorrect(); }
+    const correct = isCorrectFn(userInput);
+    if (correct) { setScore((s) => s + 1); playCorrect(); }
     else { playWrong(); }
     setShowResult(true);
+    trackAnswer({ gameType: "fill", language, chapterId, question: hintWord, correctAnswer: targetWord, givenAnswer: userInput, isCorrect: correct });
   };
 
   const next = () => {

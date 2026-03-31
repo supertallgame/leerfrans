@@ -85,9 +85,11 @@ export default function TypeAnswer({ onBack }: Props) {
       setResult("correct");
       setScore((s) => s + 1);
       playCorrect();
+      trackAnswer({ gameType: "type", language, chapterId, question: showDutch ? current.dutch : current.french, correctAnswer: answer, givenAnswer: input, isCorrect: true });
     } else {
       setResult("wrong");
       playWrong();
+      trackAnswer({ gameType: "type", language, chapterId, question: showDutch ? current.dutch : current.french, correctAnswer: answer, givenAnswer: input, isCorrect: false });
     }
   };
 

@@ -123,8 +123,10 @@ export default function EtreConjugation({ onBack }: Props) {
   const handleSelect = (opt: string) => {
     if (selected) return;
     setSelected(opt);
-    if (opt === current.correctAnswer) { setScore((s) => s + 1); playCorrect(); }
+    const isCorrect = opt === current.correctAnswer;
+    if (isCorrect) { setScore((s) => s + 1); playCorrect(); }
     else { playWrong(); }
+    trackAnswer({ gameType: "etre", language: "french", chapterId: "etre", question: current.prompt, correctAnswer: current.correctAnswer, givenAnswer: opt, isCorrect });
   };
 
   const handleNext = () => {

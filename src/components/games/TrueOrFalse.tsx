@@ -71,6 +71,15 @@ export default function TrueOrFalse({ onBack }: Props) {
     } else {
       playWrong();
     }
+    trackAnswer({
+      gameType: "truefalse",
+      language,
+      chapterId,
+      question: `${current.term} → ${current.shownDefinition}`,
+      correctAnswer: current.isCorrect ? "waar" : "onwaar",
+      givenAnswer: userSaysTrue ? "waar" : "onwaar",
+      isCorrect: correct,
+    });
   };
 
   const handleNext = () => {
