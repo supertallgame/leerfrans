@@ -343,7 +343,7 @@ export default function SlovakReviews() {
   const [isOperator, setIsOperator] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleteReplyId, setDeleteReplyId] = useState<string | null>(null);
-  const [sortBy, setSortBy] = useState<"newest" | "rating">("newest");
+  const [sortBy, setSortBy] = useState<"newest" | "rating" | "likes">("newest");
   const [filterRating, setFilterRating] = useState<number | null>(null);
   const [voteCounts, setVoteCounts] = useState<{[k:string]:{likes:number;dislikes:number}}>({});
   const [myVotes, setMyVotes] = useState<{[k:string]:"like"|"dislike"}>({});
@@ -415,7 +415,18 @@ export default function SlovakReviews() {
     };
 
     const interval = setInterval(refetchAll, 15000);
-    return () => clearInterval(interval);
+
+    const votesChannel = supabase
+      .channel('sk-review-votes-realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'review_votes' }, () => {
+        fetchVotes();
+      })
+      .subscribe();
+
+    return () => {
+      clearInterval(interval);
+      supabase.removeChannel(votesChannel);
+    };
   }, []);
 
   const handleDelete = async () => {
@@ -449,6 +460,11 @@ export default function SlovakReviews() {
 
   const sortedReviews = [...filteredReviews].sort((a, b) => {
     if (sortBy === "rating") return b.rating - a.rating;
+    if (sortBy === "likes") {
+      const aLikes = (voteCounts[a.id]?.likes || 0) - (voteCounts[a.id]?.dislikes || 0);
+      const bLikes = (voteCounts[b.id]?.likes || 0) - (voteCounts[b.id]?.dislikes || 0);
+      return bLikes - aLikes;
+    }
     return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
   });
 
@@ -503,6 +519,13 @@ export default function SlovakReviews() {
             onClick={() => setSortBy("rating")}
           >
             Najlepšie hodnotené
+          </Button>
+          <Button
+            variant={sortBy === "likes" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setSortBy("likes")}
+          >
+            Najviac lajkov
           </Button>
         </div>
 

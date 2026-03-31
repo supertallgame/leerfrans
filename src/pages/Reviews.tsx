@@ -260,7 +260,7 @@ export default function Reviews() {
   const [isOperator, setIsOperator] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleteReplyId, setDeleteReplyId] = useState<string | null>(null);
-  const [sortBy, setSortBy] = useState<"newest" | "rating">("newest");
+  const [sortBy, setSortBy] = useState<"newest" | "rating" | "likes">("newest");
   const [filterRating, setFilterRating] = useState<number | null>(null);
   const [voteCounts, setVoteCounts] = useState<VoteCounts>({});
   const [myVotes, setMyVotes] = useState<MyVotes>({});
@@ -327,9 +327,21 @@ export default function Reviews() {
       if (repliesRes.data) setReplies(repliesRes.data);
     };
 
-    // Poll for new reviews every 15 seconds instead of realtime (email privacy)
+    // Poll for new reviews every 15 seconds
     const interval = setInterval(refetchAll, 15000);
-    return () => clearInterval(interval);
+
+    // Realtime subscription for votes
+    const votesChannel = supabase
+      .channel('review-votes-realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'review_votes' }, () => {
+        fetchVotes();
+      })
+      .subscribe();
+
+    return () => {
+      clearInterval(interval);
+      supabase.removeChannel(votesChannel);
+    };
   }, []);
 
   const handleDelete = async () => {
@@ -363,6 +375,11 @@ export default function Reviews() {
 
   const sortedReviews = [...filteredReviews].sort((a, b) => {
     if (sortBy === "rating") return b.rating - a.rating;
+    if (sortBy === "likes") {
+      const aLikes = (voteCounts[a.id]?.likes || 0) - (voteCounts[a.id]?.dislikes || 0);
+      const bLikes = (voteCounts[b.id]?.likes || 0) - (voteCounts[b.id]?.dislikes || 0);
+      return bLikes - aLikes;
+    }
     return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
   });
 
@@ -417,6 +434,13 @@ export default function Reviews() {
             onClick={() => setSortBy("rating")}
           >
             Hoogste score
+          </Button>
+          <Button
+            variant={sortBy === "likes" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setSortBy("likes")}
+          >
+            Meeste likes
           </Button>
         </div>
 
