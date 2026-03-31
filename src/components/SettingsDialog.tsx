@@ -30,6 +30,17 @@ export default function SettingsDialog({ open, onOpenChange, user, children }: S
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deletingAccount, setDeletingAccount] = useState(false);
   const [deleteEmailInput, setDeleteEmailInput] = useState("");
+  const [obamaUnlocked, setObamaUnlocked] = useState(() => localStorage.getItem("obama_unlocked") === "true");
+  const [obamaMode, setObamaMode] = useState(() => localStorage.getItem("obama_mode") === "true");
+
+  useEffect(() => {
+    const handler = () => {
+      setObamaUnlocked(true);
+      setObamaMode(true);
+    };
+    window.addEventListener("obama-unlocked", handler);
+    return () => window.removeEventListener("obama-unlocked", handler);
+  }, []);
 
   const toggleSound = (checked: boolean) => {
     setSoundOn(checked);
