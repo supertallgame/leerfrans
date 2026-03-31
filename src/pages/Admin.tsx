@@ -100,6 +100,9 @@ export default function Admin() {
   const [muteDuration, setMuteDuration] = useState("1h");
   const [muteReason, setMuteReason] = useState("");
   const [blockAnonymous, setBlockAnonymous] = useState(false);
+  const [replies, setReplies] = useState<ReviewReply[]>([]);
+  const [expandedReviewId, setExpandedReviewId] = useState<string | null>(null);
+  const [deleteReplyId, setDeleteReplyId] = useState<string | null>(null);
   const [gameRooms, setGameRooms] = useState<GameRoom[]>([]);
   const [closeRoomId, setCloseRoomId] = useState<string | null>(null);
   const [refreshingRooms, setRefreshingRooms] = useState(false);
