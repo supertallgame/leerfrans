@@ -471,6 +471,17 @@ const Juf = () => {
                     {showNotes ? "Verbergen" : `Tonen (${notes.length})`}
                   </Button>
                 </div>
+                {showNotes && notes.length > 2 && (
+                  <div className="relative mb-3">
+                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Zoek in notities..."
+                      value={noteSearch}
+                      onChange={(e) => setNoteSearch(e.target.value)}
+                      className="pl-9 h-9 text-sm"
+                    />
+                  </div>
+                )
                 <div className="flex gap-2 mb-3">
                   <Textarea
                     placeholder="Schrijf een opmerking bij deze analyse..."
