@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Star, MessageSquare, Trash2, Reply, ChevronDown, ChevronUp, Send } from "lucide-react";
+import { ArrowLeft, Star, MessageSquare, Trash2, Reply, ChevronDown, ChevronUp, Send, ThumbsUp, ThumbsDown } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
