@@ -223,8 +223,8 @@ export default function Coderen() {
             <Badge variant="secondary" className="text-sm">
               Score: {score.correct}/{score.total}
             </Badge>
-            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={toggleDarkMode} aria-label="Thema wisselen">
-              {darkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleSettingsClick} aria-label="Instellingen">
+              <Settings className="h-4 w-4" />
             </Button>
             <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground" onClick={() => { if (selectedLang && confirm("Voortgang resetten voor deze taal?")) resetProgress(selectedLang); }} aria-label="Reset voortgang">
               <RotateCcw className="h-4 w-4" />
