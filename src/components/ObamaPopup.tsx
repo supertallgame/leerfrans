@@ -30,6 +30,7 @@ export default function ObamaPopup() {
     localStorage.setItem("obama_unlocked", "true");
     localStorage.setItem("obama_mode", "true");
     document.documentElement.classList.add("obama-mode");
+    fireConfetti();
     setExiting(true);
     setTimeout(() => { setVisible(false); setExiting(false); }, 500);
     // Dispatch storage event so settings can react
