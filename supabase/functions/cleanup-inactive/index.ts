@@ -81,6 +81,29 @@ Deno.serve(async (req) => {
       }
     }
 
+    // Delete rooms where ALL players are inactive (no one active in last 5 min)
+    const { data: allRooms } = await supabase
+      .from("game_rooms")
+      .select("id")
+      .in("status", ["waiting", "playing"])
+      .lt("created_at", fiveMinutesAgo);
+
+    if (allRooms) {
+      for (const room of allRooms) {
+        const { count: activeCount } = await supabase
+          .from("game_players")
+          .select("*", { count: "exact", head: true })
+          .eq("room_id", room.id)
+          .gte("last_active", fiveMinutesAgo);
+        if ((activeCount ?? 0) === 0) {
+          await supabase.from("game_players").delete().eq("room_id", room.id);
+          await supabase.from("game_questions").delete().eq("room_id", room.id);
+          await supabase.from("game_rooms").delete().eq("id", room.id);
+          orphanCount++;
+        }
+      }
+    }
+
     // Delete finished rooms older than 10 minutes
     const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000).toISOString();
     const { data: finishedRooms } = await supabase
