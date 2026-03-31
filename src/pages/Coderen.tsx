@@ -205,13 +205,19 @@ export default function Coderen() {
           <Button variant="ghost" size="sm" onClick={goBack}>
             <ArrowLeft className="h-4 w-4 mr-1" /> Terug
           </Button>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <Badge variant="outline" className="text-sm">
               Les {lessonNumber}
             </Badge>
             <Badge variant="secondary" className="text-sm">
               Score: {score.correct}/{score.total}
             </Badge>
+            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={toggleDarkMode} aria-label="Thema wisselen">
+              {darkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            </Button>
+            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground" onClick={() => { if (selectedLang && confirm("Voortgang resetten voor deze taal?")) resetProgress(selectedLang); }} aria-label="Reset voortgang">
+              <RotateCcw className="h-4 w-4" />
+            </Button>
           </div>
         </div>
 
