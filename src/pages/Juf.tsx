@@ -119,7 +119,11 @@ const Juf = () => {
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke("analyze-answers", {
-        body: { language: language === "all" ? null : language, days: parseInt(days) },
+        body: {
+          language: language === "all" ? null : language,
+          chapterId: chapterFilter === "all" ? null : chapterFilter,
+          days: parseInt(days),
+        },
       });
       if (error) throw error;
       setResult(data);
