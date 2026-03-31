@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { isAnswerCorrect } from "@/lib/utils";
+import { trackAnswer } from "@/lib/trackAnswer";
 import { playCorrect, playWrong } from "@/lib/sounds";
 import { shuffle, getForeignLabel } from "@/data/vocabulary";
 import { useChapter } from "@/contexts/ChapterContext";
