@@ -176,7 +176,7 @@ const Juf = () => {
   };
 
   useEffect(() => {
-    if (authorized) fetchAnalysis();
+    if (authorized) { fetchAnalysis(); fetchNotes(); }
   }, [authorized]);
 
   if (authorized === null) {
