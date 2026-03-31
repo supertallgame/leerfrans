@@ -164,6 +164,7 @@ Houd het beknopt en praktisch.`;
       stats: { total, correct, wrong, accuracy },
       difficultItems,
       gameStats,
+      dailyStats,
     }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
   } catch (e) {
