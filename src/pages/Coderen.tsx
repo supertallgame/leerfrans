@@ -38,16 +38,19 @@ const LANGUAGES: { id: CodingLanguage; label: string; icon: React.ReactNode; col
 ];
 
 // Helper to load/save progress from localStorage
-function loadProgress(lang: CodingLanguage): { lessonNumber: number; score: { correct: number; total: number }; previousTopic: string | null; level: string | null } {
+function loadProgress(lang: CodingLanguage): { lessonNumber: number; score: { correct: number; total: number }; previousTopic: string | null; level: string | null; cachedLessons: Lesson[] } {
   try {
     const raw = localStorage.getItem(`coderen_progress_${lang}`);
-    if (raw) return JSON.parse(raw);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      return { ...parsed, cachedLessons: parsed.cachedLessons || [] };
+    }
   } catch {}
-  return { lessonNumber: 1, score: { correct: 0, total: 0 }, previousTopic: null, level: null };
+  return { lessonNumber: 1, score: { correct: 0, total: 0 }, previousTopic: null, level: null, cachedLessons: [] };
 }
 
-function saveProgress(lang: CodingLanguage, lessonNumber: number, score: { correct: number; total: number }, previousTopic: string | null, level: string | null) {
-  localStorage.setItem(`coderen_progress_${lang}`, JSON.stringify({ lessonNumber, score, previousTopic, level }));
+function saveProgress(lang: CodingLanguage, lessonNumber: number, score: { correct: number; total: number }, previousTopic: string | null, level: string | null, cachedLessons: Lesson[] = []) {
+  localStorage.setItem(`coderen_progress_${lang}`, JSON.stringify({ lessonNumber, score, previousTopic, level, cachedLessons }));
 }
 
 export default function Coderen() {
@@ -92,7 +95,7 @@ export default function Coderen() {
   const lessonQueueRef = useRef<Lesson[]>([]);
   const fetchingRef = useRef(false);
 
-  const BATCH_SIZE = 5;
+  const BATCH_SIZE = 10;
 
   const fetchBatch = useCallback(async (lang: CodingLanguage, startNum: number): Promise<Lesson[]> => {
     try {
@@ -111,7 +114,7 @@ export default function Coderen() {
 
   const prefetchIfNeeded = useCallback(async (lang: CodingLanguage, currentNum: number) => {
     // If 2 or fewer lessons left in queue, fetch more in background
-    if (lessonQueueRef.current.length <= 2 && !fetchingRef.current) {
+    if (lessonQueueRef.current.length <= 4 && !fetchingRef.current) {
       fetchingRef.current = true;
       const nextStart = currentNum + lessonQueueRef.current.length;
       const newLessons = await fetchBatch(lang, nextStart);
@@ -148,6 +151,18 @@ export default function Coderen() {
     setLessonNumber(saved.lessonNumber);
     setScore(saved.score);
     setPreviousTopic(saved.previousTopic);
+
+    // If we have cached lessons, use them instantly
+    if (saved.cachedLessons && saved.cachedLessons.length > 0) {
+      setLesson(saved.cachedLessons[0]);
+      lessonQueueRef.current = saved.cachedLessons.slice(1);
+      setLoading(false);
+      // Prefetch more in background
+      prefetchIfNeeded(lang, saved.lessonNumber + saved.cachedLessons.length);
+      return;
+    }
+
+    // No cache, fetch fresh
     setLoading(true);
     setLesson(null);
     lessonQueueRef.current = [];
@@ -157,7 +172,9 @@ export default function Coderen() {
     if (lessons.length > 0) {
       setLesson(lessons[0]);
       lessonQueueRef.current = lessons.slice(1);
-      prefetchIfNeeded(lang, saved.lessonNumber + 1);
+      // Save remaining to cache
+      saveProgress(lang, saved.lessonNumber, saved.score, saved.previousTopic, saved.level, lessons.slice(1));
+      prefetchIfNeeded(lang, saved.lessonNumber + lessons.length);
     } else {
       toast.error("Kon de lessen niet laden. Probeer opnieuw.");
     }
@@ -182,7 +199,8 @@ export default function Coderen() {
     if (lessons.length > 0) {
       setLesson(lessons[0]);
       lessonQueueRef.current = lessons.slice(1);
-      prefetchIfNeeded(selectedLang, startLesson + 1);
+      saveProgress(selectedLang, startLesson, newScore, null, level, lessons.slice(1));
+      prefetchIfNeeded(selectedLang, startLesson + lessons.length);
     } else {
       toast.error("Kon de lessen niet laden. Probeer opnieuw.");
     }
@@ -199,7 +217,7 @@ export default function Coderen() {
     setScore(newScore);
     setPreviousTopic(lesson.lessonTitle);
     const nextNum = correct ? lessonNumber + 1 : lessonNumber;
-    saveProgress(selectedLang, nextNum, newScore, lesson.lessonTitle, userLevel);
+    saveProgress(selectedLang, nextNum, newScore, lesson.lessonTitle, userLevel, [...lessonQueueRef.current]);
   };
 
   const nextLesson = useCallback(() => {
@@ -209,8 +227,10 @@ export default function Coderen() {
 
     // Try to show from queue instantly
     if (showNextFromQueue()) {
+      // Save updated queue to cache
+      saveProgress(selectedLang, next, score, previousTopic, userLevel, [...lessonQueueRef.current]);
       // Prefetch more if needed
-      prefetchIfNeeded(selectedLang, next);
+      prefetchIfNeeded(selectedLang, next + lessonQueueRef.current.length + 1);
     } else {
       // Queue empty, fetch and wait
       setLoading(true);
@@ -219,6 +239,7 @@ export default function Coderen() {
         if (lessons.length > 0) {
           setLesson(lessons[0]);
           lessonQueueRef.current = lessons.slice(1);
+          saveProgress(selectedLang, next, score, previousTopic, userLevel, lessons.slice(1));
         } else {
           toast.error("Kon de les niet laden. Probeer opnieuw.");
         }
