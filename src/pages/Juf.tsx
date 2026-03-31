@@ -481,7 +481,7 @@ const Juf = () => {
                       className="pl-9 h-9 text-sm"
                     />
                   </div>
-                )
+                )}
                 <div className="flex gap-2 mb-3">
                   <Textarea
                     placeholder="Schrijf een opmerking bij deze analyse..."
