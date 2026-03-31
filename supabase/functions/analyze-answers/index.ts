@@ -87,6 +87,18 @@ serve(async (req) => {
       if (a.is_correct) gameStats[a.game_type].correct++;
     }
 
+    // Daily accuracy for chart
+    const dailyMap: Record<string, { total: number; correct: number }> = {};
+    for (const a of answers) {
+      const day = a.created_at.substring(0, 10); // YYYY-MM-DD
+      if (!dailyMap[day]) dailyMap[day] = { total: 0, correct: 0 };
+      dailyMap[day].total++;
+      if (a.is_correct) dailyMap[day].correct++;
+    }
+    const dailyStats = Object.entries(dailyMap)
+      .map(([date, s]) => ({ date, total: s.total, correct: s.correct, accuracy: Math.round((s.correct / s.total) * 100) }))
+      .sort((a, b) => a.date.localeCompare(b.date));
+
     // Build AI prompt
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
@@ -95,6 +107,7 @@ serve(async (req) => {
         stats: { total, correct, wrong, accuracy },
         difficultItems,
         gameStats,
+        dailyStats,
       }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
@@ -151,6 +164,7 @@ Houd het beknopt en praktisch.`;
       stats: { total, correct, wrong, accuracy },
       difficultItems,
       gameStats,
+      dailyStats,
     }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
   } catch (e) {
