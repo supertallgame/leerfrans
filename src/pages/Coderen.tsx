@@ -5,8 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Code2, Terminal, Globe, Coffee, ArrowLeft, CheckCircle2, XCircle, Loader2, RotateCcw, Sun, Moon } from "lucide-react";
+import { Code2, Terminal, Globe, Coffee, ArrowLeft, CheckCircle2, XCircle, Loader2, RotateCcw, Settings } from "lucide-react";
 import { toast } from "sonner";
+import SettingsDialog from "@/components/SettingsDialog";
+import AuthDialog from "@/components/AuthDialog";
 
 type CodingLanguage = "python" | "html" | "java";
 
@@ -48,17 +50,26 @@ function saveProgress(lang: CodingLanguage, lessonNumber: number, score: { corre
 export default function Coderen() {
   useThemeSync();
 
-  const [darkMode, setDarkMode] = useState(() => {
-    const saved = localStorage.getItem("theme");
-    if (saved) return saved === "dark";
-    return window.matchMedia("(prefers-color-scheme: dark)").matches;
-  });
+  const [showSettings, setShowSettings] = useState(false);
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+  const [user, setUser] = useState<any>(null);
 
-  const toggleDarkMode = () => {
-    const next = !darkMode;
-    setDarkMode(next);
-    localStorage.setItem("theme", next ? "dark" : "light");
-    document.documentElement.classList.toggle("dark", next);
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleSettingsClick = () => {
+    if (!user) {
+      setShowLoginPrompt(true);
+    } else {
+      setShowSettings(true);
+    }
   };
 
   const [selectedLang, setSelectedLang] = useState<CodingLanguage | null>(null);
@@ -141,14 +152,21 @@ export default function Coderen() {
     setScore({ correct: 0, total: 0 });
   };
 
+  const settingsAndAuth = (
+    <>
+      <SettingsDialog open={showSettings} onOpenChange={setShowSettings} user={user} />
+      <AuthDialog open={showLoginPrompt} onOpenChange={setShowLoginPrompt} />
+    </>
+  );
+
   // Language selection screen
   if (!selectedLang) {
     return (
       <div className="min-h-screen bg-background p-4 md:p-8">
         <div className="max-w-4xl mx-auto">
           <div className="flex justify-end mb-4">
-            <Button variant="ghost" size="icon" onClick={toggleDarkMode} aria-label="Thema wisselen">
-              {darkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+            <Button variant="ghost" size="icon" onClick={handleSettingsClick} aria-label="Instellingen">
+              <Settings className="h-5 w-5" />
             </Button>
           </div>
           <div className="text-center mb-10">
@@ -191,6 +209,7 @@ export default function Coderen() {
             })}
           </div>
         </div>
+        {settingsAndAuth}
       </div>
     );
   }
@@ -212,8 +231,8 @@ export default function Coderen() {
             <Badge variant="secondary" className="text-sm">
               Score: {score.correct}/{score.total}
             </Badge>
-            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={toggleDarkMode} aria-label="Thema wisselen">
-              {darkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleSettingsClick} aria-label="Instellingen">
+              <Settings className="h-4 w-4" />
             </Button>
             <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground" onClick={() => { if (selectedLang && confirm("Voortgang resetten voor deze taal?")) resetProgress(selectedLang); }} aria-label="Reset voortgang">
               <RotateCcw className="h-4 w-4" />
@@ -351,6 +370,7 @@ export default function Coderen() {
             </div>
           </Card>
         )}
+      {settingsAndAuth}
       </div>
     </div>
   );
