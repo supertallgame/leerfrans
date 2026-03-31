@@ -353,8 +353,9 @@ export default function SlovakReviews() {
   const [myVotes, setMyVotes] = useState<{[k:string]:"like"|"dislike"}>({});
   const [animatingVote, setAnimatingVote] = useState<string | null>(null);
 
-  const fetchVotes = async () => {
-    const voterId = getVoterId();
+  const fetchVotes = async (userId?: string | null) => {
+    const voterId = userId ?? currentUserId;
+    if (!voterId) return;
     const [countsRes, myRes] = await Promise.all([
       supabase.rpc("get_review_vote_counts" as any) as any,
       supabase.from("review_votes" as any).select("review_id, vote_type").eq("voter_id", voterId) as any,
@@ -376,7 +377,8 @@ export default function SlovakReviews() {
       toast.error("Je moet ingelogd zijn om te liken of disliken.");
       return;
     }
-    const voterId = getVoterId();
+    const voterId = currentUserId;
+    if (!voterId) return;
     const animKey = `${reviewId}-${voteType}`;
     setAnimatingVote(animKey);
     setTimeout(() => setAnimatingVote(null), 300);
@@ -411,11 +413,12 @@ export default function SlovakReviews() {
       setLoading(false);
     };
     fetchData();
-    fetchVotes();
 
     supabase.auth.getSession().then(({ data: { session } }) => {
+      const uid = session?.user?.id ?? null;
       setIsOperator(OPERATOR_EMAILS.includes(session?.user?.email ?? ""));
-      setCurrentUserId(session?.user?.id ?? null);
+      setCurrentUserId(uid);
+      if (uid) fetchVotes(uid);
     });
 
     const refetchAll = async () => {
