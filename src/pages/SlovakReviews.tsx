@@ -372,13 +372,8 @@ export default function SlovakReviews() {
       if (repliesRes.data) setReplies(repliesRes.data);
     };
 
-    const reviewChannel = supabase
-      .channel('sk-reviews-realtime')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'reviews' }, () => refetchAll())
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'review_replies' }, () => refetchAll())
-      .subscribe();
-
-    return () => { supabase.removeChannel(reviewChannel); };
+    const interval = setInterval(refetchAll, 15000);
+    return () => clearInterval(interval);
   }, []);
 
   const handleDelete = async () => {

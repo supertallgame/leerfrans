@@ -121,7 +121,7 @@ export default function Admin() {
       .subscribe();
 
     return () => {
-      supabase.removeChannel(reviewChannel);
+      clearInterval(reviewInterval);
       supabase.removeChannel(roomsChannel);
     };
   }, []);
