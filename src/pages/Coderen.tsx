@@ -1,10 +1,11 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
+import { useThemeSync } from "@/hooks/use-theme-sync";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Code2, Terminal, Globe, Coffee, ArrowLeft, CheckCircle2, XCircle, Loader2, RotateCcw } from "lucide-react";
+import { Code2, Terminal, Globe, Coffee, ArrowLeft, CheckCircle2, XCircle, Loader2, RotateCcw, Sun, Moon } from "lucide-react";
 import { toast } from "sonner";
 
 type CodingLanguage = "python" | "html" | "java";
@@ -31,7 +32,35 @@ const LANGUAGES: { id: CodingLanguage; label: string; icon: React.ReactNode; col
   { id: "java", label: "Java", icon: <Coffee className="h-8 w-8" />, color: "from-red-500 to-orange-600", desc: "Krachtige taal voor apps en enterprise software" },
 ];
 
+// Helper to load/save progress from localStorage
+function loadProgress(lang: CodingLanguage): { lessonNumber: number; score: { correct: number; total: number }; previousTopic: string | null } {
+  try {
+    const raw = localStorage.getItem(`coderen_progress_${lang}`);
+    if (raw) return JSON.parse(raw);
+  } catch {}
+  return { lessonNumber: 1, score: { correct: 0, total: 0 }, previousTopic: null };
+}
+
+function saveProgress(lang: CodingLanguage, lessonNumber: number, score: { correct: number; total: number }, previousTopic: string | null) {
+  localStorage.setItem(`coderen_progress_${lang}`, JSON.stringify({ lessonNumber, score, previousTopic }));
+}
+
 export default function Coderen() {
+  useThemeSync();
+
+  const [darkMode, setDarkMode] = useState(() => {
+    const saved = localStorage.getItem("theme");
+    if (saved) return saved === "dark";
+    return window.matchMedia("(prefers-color-scheme: dark)").matches;
+  });
+
+  const toggleDarkMode = () => {
+    const next = !darkMode;
+    setDarkMode(next);
+    localStorage.setItem("theme", next ? "dark" : "light");
+    document.documentElement.classList.toggle("dark", next);
+  };
+
   const [selectedLang, setSelectedLang] = useState<CodingLanguage | null>(null);
   const [lesson, setLesson] = useState<Lesson | null>(null);
   const [lessonNumber, setLessonNumber] = useState(1);
@@ -68,21 +97,26 @@ export default function Coderen() {
   }, []);
 
   const startLanguage = (lang: CodingLanguage) => {
+    const saved = loadProgress(lang);
     setSelectedLang(lang);
-    setLessonNumber(1);
-    setScore({ correct: 0, total: 0 });
-    setPreviousTopic(null);
-    fetchLesson(lang, 1);
+    setLessonNumber(saved.lessonNumber);
+    setScore(saved.score);
+    setPreviousTopic(saved.previousTopic);
+    fetchLesson(lang, saved.lessonNumber, undefined, saved.previousTopic);
   };
 
   const checkAnswer = (answer: string) => {
-    if (!lesson) return;
+    if (!lesson || !selectedLang) return;
     setSelectedAnswer(answer);
     setAnswered(true);
     const correct = answer.trim().toLowerCase() === lesson.exercise.correctAnswer.trim().toLowerCase();
     setIsCorrect(correct);
-    setScore((s) => ({ correct: s.correct + (correct ? 1 : 0), total: s.total + 1 }));
+    const newScore = { correct: score.correct + (correct ? 1 : 0), total: score.total + 1 };
+    setScore(newScore);
     setPreviousTopic(lesson.lessonTitle);
+    // Save progress after answering
+    const nextNum = correct ? lessonNumber + 1 : lessonNumber;
+    saveProgress(selectedLang, nextNum, newScore, lesson.lessonTitle);
   };
 
   const nextLesson = () => {
@@ -90,6 +124,14 @@ export default function Coderen() {
     const next = isCorrect ? lessonNumber + 1 : lessonNumber;
     setLessonNumber(next);
     fetchLesson(selectedLang, next, isCorrect, previousTopic);
+  };
+
+  const resetProgress = (lang: CodingLanguage) => {
+    localStorage.removeItem(`coderen_progress_${lang}`);
+    setLessonNumber(1);
+    setScore({ correct: 0, total: 0 });
+    setPreviousTopic(null);
+    fetchLesson(lang, 1);
   };
 
   const goBack = () => {
@@ -104,6 +146,11 @@ export default function Coderen() {
     return (
       <div className="min-h-screen bg-background p-4 md:p-8">
         <div className="max-w-4xl mx-auto">
+          <div className="flex justify-end mb-4">
+            <Button variant="ghost" size="icon" onClick={toggleDarkMode} aria-label="Thema wisselen">
+              {darkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+            </Button>
+          </div>
           <div className="text-center mb-10">
             <div className="inline-flex items-center gap-2 mb-4">
               <Code2 className="h-10 w-10 text-primary" />
@@ -112,24 +159,36 @@ export default function Coderen() {
             <p className="text-muted-foreground text-lg">Kies een programmeertaal en begin met leren! 🚀</p>
           </div>
           <div className="grid md:grid-cols-3 gap-6">
-            {LANGUAGES.map((lang) => (
-              <Card
-                key={lang.id}
-                className="cursor-pointer hover:scale-105 transition-transform duration-200 border-2 hover:border-primary"
-                onClick={() => startLanguage(lang.id)}
-              >
-                <CardHeader className="text-center pb-2">
-                  <div className={`mx-auto mb-3 p-4 rounded-2xl bg-gradient-to-br ${lang.color} text-white`}>
-                    {lang.icon}
-                  </div>
-                  <CardTitle className="text-2xl">{lang.label}</CardTitle>
-                </CardHeader>
-                <CardContent className="text-center">
-                  <p className="text-muted-foreground text-sm">{lang.desc}</p>
-                  <Badge className="mt-3" variant="secondary">100+ lessen</Badge>
-                </CardContent>
-              </Card>
-            ))}
+            {LANGUAGES.map((lang) => {
+              const saved = loadProgress(lang.id);
+              const hasProgress = saved.lessonNumber > 1 || saved.score.total > 0;
+              return (
+                <Card
+                  key={lang.id}
+                  className="cursor-pointer hover:scale-105 transition-transform duration-200 border-2 hover:border-primary"
+                  onClick={() => startLanguage(lang.id)}
+                >
+                  <CardHeader className="text-center pb-2">
+                    <div className={`mx-auto mb-3 p-4 rounded-2xl bg-gradient-to-br ${lang.color} text-white`}>
+                      {lang.icon}
+                    </div>
+                    <CardTitle className="text-2xl">{lang.label}</CardTitle>
+                  </CardHeader>
+                  <CardContent className="text-center">
+                    <p className="text-muted-foreground text-sm">{lang.desc}</p>
+                    <Badge className="mt-3" variant="secondary">100+ lessen</Badge>
+                    {hasProgress && (
+                      <div className="mt-3 space-y-1">
+                        <Progress value={Math.min((saved.lessonNumber / 100) * 100, 100)} className="h-1.5" />
+                        <p className="text-xs text-muted-foreground">
+                          Les {saved.lessonNumber} · Score: {saved.score.correct}/{saved.score.total}
+                        </p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         </div>
       </div>
@@ -146,13 +205,19 @@ export default function Coderen() {
           <Button variant="ghost" size="sm" onClick={goBack}>
             <ArrowLeft className="h-4 w-4 mr-1" /> Terug
           </Button>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <Badge variant="outline" className="text-sm">
               Les {lessonNumber}
             </Badge>
             <Badge variant="secondary" className="text-sm">
               Score: {score.correct}/{score.total}
             </Badge>
+            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={toggleDarkMode} aria-label="Thema wisselen">
+              {darkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            </Button>
+            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground" onClick={() => { if (selectedLang && confirm("Voortgang resetten voor deze taal?")) resetProgress(selectedLang); }} aria-label="Reset voortgang">
+              <RotateCcw className="h-4 w-4" />
+            </Button>
           </div>
         </div>
 
