@@ -604,10 +604,12 @@ export default function Admin() {
                             <div className="min-w-0">
                               <div className="flex items-center gap-2 flex-wrap">
                                 <span className="text-xs font-medium">{reply.display_name}</span>
-                                {reply.user_email && (
+                                {reply.user_email ? (
                                   <span className="text-[10px] text-muted-foreground flex items-center gap-0.5">
                                     <Mail className="h-2.5 w-2.5" /> {reply.user_email}
                                   </span>
+                                ) : (
+                                  <span className="text-[10px] text-muted-foreground/50 italic">Anoniem</span>
                                 )}
                                 <span className="text-[10px] text-muted-foreground">{new Date(reply.created_at).toLocaleString("nl-NL")}</span>
                               </div>
