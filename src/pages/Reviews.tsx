@@ -40,14 +40,6 @@ interface Review {
 
 const OPERATOR_EMAILS = ["brankovantland@gmail.com", "branko18vantland@gmail.com", "tamoopdam@gmail.com", "jack.ouwerkerk@vsodaafgeluk.nl"];
 
-function getVoterId(): string {
-  let id = localStorage.getItem("review_voter_id");
-  if (!id) {
-    id = crypto.randomUUID();
-    localStorage.setItem("review_voter_id", id);
-  }
-  return id;
-}
 
 interface VoteCounts { [reviewId: string]: { likes: number; dislikes: number } }
 interface MyVotes { [reviewId: string]: "like" | "dislike" }
