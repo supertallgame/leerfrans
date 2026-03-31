@@ -1,0 +1,1 @@
+ALTER TABLE public.review_replies ADD COLUMN user_email text DEFAULT NULL;

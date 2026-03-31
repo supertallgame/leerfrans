@@ -141,8 +141,9 @@ function ReplySection({
       }
     }
 
+    const userEmail = session?.user?.email || null;
     const { data, error } = await (supabase.from("review_replies" as any) as any)
-      .insert({ review_id: reviewId, display_name: name.trim(), message: message.trim() })
+      .insert({ review_id: reviewId, display_name: name.trim(), message: message.trim(), user_email: userEmail })
       .select()
       .single();
     setSubmitting(false);
@@ -264,6 +265,7 @@ export default function Reviews() {
   const [filterRating, setFilterRating] = useState<number | null>(null);
   const [voteCounts, setVoteCounts] = useState<VoteCounts>({});
   const [myVotes, setMyVotes] = useState<MyVotes>({});
+  const [animatingVote, setAnimatingVote] = useState<string | null>(null);
 
   const fetchVotes = async () => {
     const voterId = getVoterId();
@@ -286,12 +288,13 @@ export default function Reviews() {
   const handleVote = async (reviewId: string, voteType: "like" | "dislike") => {
     const voterId = getVoterId();
     const current = myVotes[reviewId];
+    const animKey = `${reviewId}-${voteType}`;
+    setAnimatingVote(animKey);
+    setTimeout(() => setAnimatingVote(null), 300);
     if (current === voteType) {
-      // Remove vote
       await (supabase.from("review_votes" as any) as any).delete().eq("review_id", reviewId).eq("voter_id", voterId);
       setMyVotes(prev => { const n = { ...prev }; delete n[reviewId]; return n; });
     } else {
-      // Upsert vote
       await (supabase.from("review_votes" as any) as any).upsert(
         { review_id: reviewId, voter_id: voterId, vote_type: voteType },
         { onConflict: "review_id,voter_id" }
@@ -509,14 +512,14 @@ export default function Reviews() {
                           onClick={() => handleVote(review.id, "like")}
                           className={`flex items-center gap-1 text-xs transition-colors ${myVotes[review.id] === "like" ? "text-primary font-semibold" : "text-muted-foreground hover:text-primary"}`}
                         >
-                          <ThumbsUp className={`h-3.5 w-3.5 ${myVotes[review.id] === "like" ? "fill-current" : ""}`} />
+                          <ThumbsUp className={`h-3.5 w-3.5 transition-transform ${myVotes[review.id] === "like" ? "fill-current" : ""} ${animatingVote === `${review.id}-like` ? "scale-150" : "scale-100"}`} style={{ transitionDuration: "200ms" }} />
                           {voteCounts[review.id]?.likes || 0}
                         </button>
                         <button
                           onClick={() => handleVote(review.id, "dislike")}
                           className={`flex items-center gap-1 text-xs transition-colors ${myVotes[review.id] === "dislike" ? "text-destructive font-semibold" : "text-muted-foreground hover:text-destructive"}`}
                         >
-                          <ThumbsDown className={`h-3.5 w-3.5 ${myVotes[review.id] === "dislike" ? "fill-current" : ""}`} />
+                          <ThumbsDown className={`h-3.5 w-3.5 transition-transform ${myVotes[review.id] === "dislike" ? "fill-current" : ""} ${animatingVote === `${review.id}-dislike` ? "scale-150" : "scale-100"}`} style={{ transitionDuration: "200ms" }} />
                           {voteCounts[review.id]?.dislikes || 0}
                         </button>
                       </div>
