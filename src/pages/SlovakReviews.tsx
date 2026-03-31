@@ -116,6 +116,7 @@ interface Review {
   message: string;
   created_at: string;
   image_url?: string | null;
+  user_id?: string | null;
 }
 
 const OPERATOR_EMAILS = ["brankovantland@gmail.com", "branko18vantland@gmail.com", "tamoopdam@gmail.com", "jack.ouwerkerk@vsodaafgeluk.nl"];
@@ -342,6 +343,7 @@ export default function SlovakReviews() {
   const [loading, setLoading] = useState(true);
 
   useThemeSync();
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [isOperator, setIsOperator] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleteReplyId, setDeleteReplyId] = useState<string | null>(null);
@@ -397,7 +399,7 @@ export default function SlovakReviews() {
   useEffect(() => {
     const fetchData = async () => {
       const [reviewsRes, repliesRes] = await Promise.all([
-        supabase.from("reviews_public" as any).select("id, display_name, rating, message, created_at, image_url").order("created_at", { ascending: false }) as any,
+        supabase.from("reviews_public" as any).select("id, display_name, rating, message, created_at, image_url, user_id").order("created_at", { ascending: false }) as any,
         supabase.from("review_replies" as any).select("*").order("created_at", { ascending: true }) as any,
       ]);
       if (reviewsRes.data) setReviews(reviewsRes.data);
@@ -409,11 +411,12 @@ export default function SlovakReviews() {
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       setIsOperator(OPERATOR_EMAILS.includes(session?.user?.email ?? ""));
+      setCurrentUserId(session?.user?.id ?? null);
     });
 
     const refetchAll = async () => {
       const [reviewsRes, repliesRes] = await Promise.all([
-        supabase.from("reviews_public" as any).select("id, display_name, rating, message, created_at, image_url").order("created_at", { ascending: false }) as any,
+        supabase.from("reviews_public" as any).select("id, display_name, rating, message, created_at, image_url, user_id").order("created_at", { ascending: false }) as any,
         supabase.from("review_replies" as any).select("*").order("created_at", { ascending: true }) as any,
       ]);
       if (reviewsRes.data) setReviews(reviewsRes.data);
@@ -602,6 +605,7 @@ export default function SlovakReviews() {
                           {isTranslating && <span className="ml-2 text-xs text-muted-foreground">⏳</span>}
                         </p>
                       )}
+                      {(!currentUserId || review.user_id !== currentUserId) && (
                       <div className="flex items-center gap-3">
                         <button
                           onClick={() => handleVote(review.id, "like")}
@@ -618,6 +622,7 @@ export default function SlovakReviews() {
                           {voteCounts[review.id]?.dislikes || 0}
                         </button>
                       </div>
+                      )}
                       <ReplySection
                         reviewId={review.id}
                         replies={replies}
