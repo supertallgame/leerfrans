@@ -529,7 +529,6 @@ export default function Reviews() {
                         </button>
                       </div>
                       )}
-                      </div>
                       <ReplySection
                         reviewId={review.id}
                         replies={replies}
