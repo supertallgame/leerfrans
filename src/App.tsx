@@ -15,6 +15,7 @@ const Admin = lazyRetry(() => import("./pages/Admin.tsx"));
 const Slovak = lazyRetry(() => import("./pages/Slovak.tsx"));
 const SlovakReviews = lazyRetry(() => import("./pages/SlovakReviews.tsx"));
 const SlovakFeedback = lazyRetry(() => import("./pages/SlovakFeedback.tsx"));
+const Juf = lazyRetry(() => import("./pages/Juf.tsx"));
 const NotFound = lazyRetry(() => import("./pages/NotFound.tsx"));
 
 const queryClient = new QueryClient();
@@ -36,6 +37,7 @@ const App = () => (
               <Route path="/slovak" element={<Slovak />} />
               <Route path="/slovak/reviews" element={<SlovakReviews />} />
               <Route path="/slovak/feedback" element={<SlovakFeedback />} />
+              <Route path="/juf" element={<Juf />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
