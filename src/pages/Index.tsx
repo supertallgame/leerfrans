@@ -92,6 +92,7 @@ const Index = () => {
   const [disabledSubjects, setDisabledSubjects] = useState<string[]>([]);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deletingAccount, setDeletingAccount] = useState(false);
+  const [deleteEmailInput, setDeleteEmailInput] = useState("");
   const [darkMode, setDarkMode] = useState(() => {
     const saved = localStorage.getItem("theme");
     if (saved) return saved === "dark";
@@ -464,19 +465,26 @@ const Index = () => {
                     variant="ghost"
                     size="sm"
                     className="gap-2 text-destructive hover:text-destructive hover:bg-destructive/10 w-full"
-                    onClick={() => setShowDeleteConfirm(true)}
+                    onClick={() => { setShowDeleteConfirm(true); setDeleteEmailInput(""); }}
                   >
                     <Trash2 className="h-4 w-4" /> Account verwijderen
                   </Button>
                 ) : (
-                  <div className="rounded-lg border border-destructive/50 bg-destructive/5 p-3 space-y-2">
-                    <p className="text-xs font-medium text-destructive">Weet je het zeker? Dit kan niet ongedaan worden gemaakt.</p>
+                  <div className="rounded-lg border border-destructive/50 bg-destructive/5 p-3 space-y-3">
+                    <p className="text-xs font-medium text-destructive">Dit kan niet ongedaan worden gemaakt. Typ je e-mailadres om te bevestigen:</p>
+                    <input
+                      type="email"
+                      className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                      placeholder={user?.email || "je@email.com"}
+                      value={deleteEmailInput}
+                      onChange={(e) => setDeleteEmailInput(e.target.value)}
+                    />
                     <div className="flex gap-2">
                       <Button
                         variant="destructive"
                         size="sm"
                         className="flex-1"
-                        disabled={deletingAccount}
+                        disabled={deletingAccount || deleteEmailInput !== user?.email}
                         onClick={async () => {
                           setDeletingAccount(true);
                           try {
@@ -494,7 +502,7 @@ const Index = () => {
                           }
                         }}
                       >
-                        {deletingAccount ? "Bezig..." : "Ja, verwijder"}
+                        {deletingAccount ? "Bezig..." : "Verwijder definitief"}
                       </Button>
                       <Button variant="outline" size="sm" className="flex-1" onClick={() => setShowDeleteConfirm(false)}>
                         Annuleren
