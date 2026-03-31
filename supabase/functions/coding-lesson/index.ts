@@ -69,13 +69,34 @@ GEMIDDELD (31-65): methoden (static), return types, parameters, method overloadi
 GEVORDERD (66-100+): generics, Collections framework, Comparable/Comparator, enums, nested classes, anonymous classes, lambda expressies, Stream API, Optional, file I/O (Files/Path), BufferedReader/Writer, StringBuilder, regex in Java, multithreading basis, synchronized, Runnable/Thread, JavaFX intro, design patterns (Singleton, Factory, Observer), SOLID principles, unit testing (JUnit), annotations, record classes, sealed classes`;
 }
 
+function buildLevelTestPrompt(language: string): string {
+  return `Je bent een programmeerleraar. Genereer een niveautest voor ${language} met 6 meerkeuzevragen:
+- Vragen 1-2: BEGINNER niveau (basis syntax, variabelen, print)
+- Vragen 3-4: GEMIDDELD niveau (functies, klassen, data structures)
+- Vragen 5-6: GEVORDERD niveau (design patterns, geavanceerde concepten)
+
+Antwoord als JSON array:
+[
+  {
+    "level": "beginner" | "gemiddeld" | "gevorderd",
+    "question": "De vraag in het Nederlands",
+    "codeSnippet": "optioneel code voorbeeld",
+    "options": ["A optie", "B optie", "C optie", "D optie"],
+    "correctAnswer": "A" | "B" | "C" | "D",
+    "explanation": "Korte uitleg"
+  }
+]
+
+BELANGRIJK: Antwoord ALLEEN met valide JSON array, geen tekst ervoor of erna.`;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { language, lessonNumber, batchSize: reqBatch } = await req.json();
+    const { language, lessonNumber, batchSize: reqBatch, levelTest } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
       return new Response(JSON.stringify({ error: "Service configuration error" }), {
@@ -85,6 +106,56 @@ serve(async (req) => {
     }
 
     const lang = language || "python";
+
+    // Level test mode
+    if (levelTest) {
+      const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "google/gemini-3-flash-preview",
+          messages: [
+            { role: "system", content: buildLevelTestPrompt(lang) },
+            { role: "user", content: `Genereer een niveautest voor ${lang}.` },
+          ],
+        }),
+      });
+
+      if (!response.ok) {
+        const t = await response.text();
+        console.error("AI error:", response.status, t);
+        return new Response(JSON.stringify({ error: "Failed to generate level test" }), {
+          status: response.status,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const data = await response.json();
+      const raw = data.choices?.[0]?.message?.content || "";
+      let questions;
+      try {
+        const jsonMatch = raw.match(/\[[\s\S]*\]/);
+        questions = jsonMatch ? JSON.parse(jsonMatch[0]) : null;
+      } catch {
+        questions = null;
+      }
+
+      if (!questions || !Array.isArray(questions)) {
+        return new Response(JSON.stringify({ error: "Failed to parse level test" }), {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      return new Response(JSON.stringify({ questions }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Normal lesson mode
     const lesNum = lessonNumber || 1;
     const batchSize = Math.min(Math.max(reqBatch || 5, 1), 10);
 
