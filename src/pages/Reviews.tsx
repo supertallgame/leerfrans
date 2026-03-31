@@ -375,6 +375,11 @@ export default function Reviews() {
 
   const sortedReviews = [...filteredReviews].sort((a, b) => {
     if (sortBy === "rating") return b.rating - a.rating;
+    if (sortBy === "likes") {
+      const aLikes = (voteCounts[a.id]?.likes || 0) - (voteCounts[a.id]?.dislikes || 0);
+      const bLikes = (voteCounts[b.id]?.likes || 0) - (voteCounts[b.id]?.dislikes || 0);
+      return bLikes - aLikes;
+    }
     return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
   });
 
