@@ -6,39 +6,40 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-function buildSystemPrompt(language: string): string {
+function buildSystemPrompt(language: string, batchSize: number): string {
   return `Je bent een ervaren programmeerleraar die adaptieve lessen geeft in ${language}. Je past het niveau aan op basis van de voortgang van de leerling.
 
 REGELS:
 - Geef les in het NEDERLANDS maar code-voorbeelden in ${language}
+- Je genereert ${batchSize} lessen tegelijk
 - Elke les bevat:
   1. Een korte uitleg van het concept (2-4 zinnen)
   2. Een codevoorbeeld
   3. Een oefening voor de leerling (multiple choice OF code invullen)
-- Geef het antwoord in het volgende JSON-formaat (ALTIJD valide JSON):
-{
-  "lessonTitle": "Titel van de les",
-  "lessonNumber": <nummer>,
-  "concept": "Uitleg van het concept",
-  "codeExample": "Code voorbeeld met comments",
-  "exercise": {
-    "type": "multiple_choice" of "fill_code",
-    "question": "De vraag",
-    "options": ["A", "B", "C", "D"],
-    "correctAnswer": "Het juiste antwoord (letter of code)",
-    "explanation": "Uitleg waarom dit juist is"
+- Geef het antwoord als een JSON ARRAY van ${batchSize} lessen in dit formaat:
+[
+  {
+    "lessonTitle": "Titel van de les",
+    "lessonNumber": <nummer>,
+    "concept": "Uitleg van het concept",
+    "codeExample": "Code voorbeeld met comments",
+    "exercise": {
+      "type": "multiple_choice" of "fill_code",
+      "question": "De vraag",
+      "options": ["A", "B", "C", "D"],
+      "correctAnswer": "Het juiste antwoord (letter of code)",
+      "explanation": "Uitleg waarom dit juist is"
+    }
   }
-}
-- Begin bij les 1 met de absolute basis
-- Als de leerling de vorige les goed had, ga naar het volgende concept
-- Als de leerling fout had, geef een makkelijkere variant van hetzelfde concept
+]
+- Elk concept moet ANDERS zijn, bouw voort op het vorige
 - Maak het leuk en motiverend!
 
 CURRICULUM voor ${language} (100+ lessen verdeeld over niveaus):
 
 ${getCurriculum(language)}
 
-BELANGRIJK: Antwoord ALLEEN met valide JSON, geen tekst ervoor of erna.`;
+BELANGRIJK: Antwoord ALLEEN met valide JSON (een array), geen tekst ervoor of erna.`;
 }
 
 function getCurriculum(language: string): string {
