@@ -772,7 +772,23 @@ export default function Admin() {
         </AlertDialogContent>
       </AlertDialog>
 
-      <AlertDialog open={!!closeRoomId} onOpenChange={(open) => !open && setCloseRoomId(null)}>
+      <AlertDialog open={!!deleteReplyId} onOpenChange={(open) => !open && setDeleteReplyId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Reactie verwijderen?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Weet je zeker dat je deze reactie wilt verwijderen? Dit kan niet ongedaan worden gemaakt.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuleren</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteReply} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Verwijderen
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Kamer sluiten?</AlertDialogTitle>
