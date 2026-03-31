@@ -99,6 +99,16 @@ export default function SettingsDialog({ open, onOpenChange, user, children }: S
             <Switch checked={darkMode} onCheckedChange={toggleDarkMode} />
           </div>
 
+          {obamaUnlocked && (
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <ImageIcon className="h-4 w-4" />
+                <span className="text-sm font-medium">🇺🇸 Obama modus</span>
+              </div>
+              <Switch checked={obamaMode} onCheckedChange={toggleObamaMode} />
+            </div>
+          )}
+
           {children}
 
           {user && (
