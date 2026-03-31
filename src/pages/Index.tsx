@@ -87,18 +87,9 @@ const Index = () => {
   const [showChapterPicker, setShowChapterPicker] = useState(false);
   const [showLanguagePicker, setShowLanguagePicker] = useState(false);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
-  const [soundOn, setSoundOn] = useState(isSoundEnabled());
   const [user, setUser] = useState<any>(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [disabledSubjects, setDisabledSubjects] = useState<string[]>([]);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [deletingAccount, setDeletingAccount] = useState(false);
-  const [deleteEmailInput, setDeleteEmailInput] = useState("");
-  const [darkMode, setDarkMode] = useState(() => {
-    const saved = localStorage.getItem("theme");
-    if (saved) return saved === "dark";
-    return window.matchMedia("(prefers-color-scheme: dark)").matches;
-  });
 
   const chaptersForLanguage = getChaptersForLanguage(language);
   const foreignLabel = getForeignLabel(language);
