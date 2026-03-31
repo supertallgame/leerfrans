@@ -4,7 +4,8 @@ import { getChaptersForLanguage, Language } from "@/data/vocabulary";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, BarChart3, Brain, Download, GitCompareArrows, Loader2, RefreshCw, TrendingDown } from "lucide-react";
+import { ArrowLeft, BarChart3, Brain, Download, GitCompareArrows, Loader2, MessageSquarePlus, RefreshCw, StickyNote, Trash2, TrendingDown } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
 import { useNavigate } from "react-router-dom";
 import { Progress } from "@/components/ui/progress";
 import ReactMarkdown from "react-markdown";
@@ -100,6 +101,33 @@ const Juf = () => {
   const [compareResult, setCompareResult] = useState<AnalysisResult | null>(null);
   const [compareLoading, setCompareLoading] = useState(false);
 
+  // Notes
+  interface JufNote { id: string; note: string; filters: Record<string, string>; created_at: string; }
+  const [notes, setNotes] = useState<JufNote[]>([]);
+  const [newNote, setNewNote] = useState("");
+  const [showNotes, setShowNotes] = useState(false);
+
+  const fetchNotes = useCallback(async () => {
+    const { data } = await supabase.from("juf_notes").select("*").order("created_at", { ascending: false }).limit(50);
+    if (data) setNotes(data as unknown as JufNote[]);
+  }, []);
+
+  const saveNote = async () => {
+    if (!newNote.trim()) return;
+    await supabase.from("juf_notes").insert({
+      user_email: (await supabase.auth.getUser()).data.user?.email ?? "",
+      note: newNote.trim(),
+      filters: { language, chapter: chapterFilter, days } as unknown as Record<string, string>,
+    });
+    setNewNote("");
+    fetchNotes();
+  };
+
+  const deleteNote = async (id: string) => {
+    await supabase.from("juf_notes").delete().eq("id", id);
+    fetchNotes();
+  };
+
   const availableChapters = useMemo(() => {
     if (language === "all") return [];
     return getChaptersForLanguage(language as Language);
@@ -148,7 +176,7 @@ const Juf = () => {
   };
 
   useEffect(() => {
-    if (authorized) fetchAnalysis();
+    if (authorized) { fetchAnalysis(); fetchNotes(); }
   }, [authorized]);
 
   if (authorized === null) {
@@ -422,6 +450,52 @@ const Juf = () => {
                 </CardContent>
               </Card>
             )}
+
+            {/* Notes */}
+            <Card>
+              <CardContent className="p-5 md:p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <StickyNote className="h-5 w-5 text-primary" />
+                    <h2 className="text-lg font-bold">Notities</h2>
+                  </div>
+                  <Button variant="ghost" size="sm" onClick={() => setShowNotes(!showNotes)}>
+                    {showNotes ? "Verbergen" : `Tonen (${notes.length})`}
+                  </Button>
+                </div>
+                <div className="flex gap-2 mb-3">
+                  <Textarea
+                    placeholder="Schrijf een opmerking bij deze analyse..."
+                    value={newNote}
+                    onChange={(e) => setNewNote(e.target.value)}
+                    className="min-h-[60px] text-sm"
+                    maxLength={500}
+                  />
+                  <Button onClick={saveNote} disabled={!newNote.trim()} size="icon" className="shrink-0 self-end">
+                    <MessageSquarePlus className="h-4 w-4" />
+                  </Button>
+                </div>
+                {showNotes && notes.length > 0 && (
+                  <div className="space-y-2 mt-3 border-t pt-3">
+                    {notes.map(n => (
+                      <div key={n.id} className="flex items-start gap-2 text-sm border rounded-lg p-2.5">
+                        <div className="flex-1">
+                          <p className="whitespace-pre-wrap">{n.note}</p>
+                          <div className="flex gap-2 mt-1 text-xs text-muted-foreground">
+                            <span>{new Date(n.created_at).toLocaleDateString("nl-NL", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</span>
+                            {n.filters?.language && n.filters.language !== "all" && <span>· {n.filters.language}</span>}
+                            {n.filters?.days && <span>· {PERIOD_LABELS[n.filters.days] || n.filters.days}</span>}
+                          </div>
+                        </div>
+                        <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0 text-muted-foreground hover:text-destructive" onClick={() => deleteNote(n.id)}>
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </>
         )}
       </div>
