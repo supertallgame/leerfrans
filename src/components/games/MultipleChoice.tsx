@@ -48,8 +48,18 @@ export default function MultipleChoice({ onBack }: Props) {
   const handleSelect = (opt: string) => {
     if (selected) return;
     setSelected(opt);
-    if (opt === correctAnswer) { setScore((s) => s + 1); playCorrect(); }
+    const isCorrect = opt === correctAnswer;
+    if (isCorrect) { setScore((s) => s + 1); playCorrect(); }
     else { playWrong(); }
+    trackAnswer({
+      gameType: "quiz",
+      language,
+      chapterId,
+      question: showDutch ? current.dutch : current.french,
+      correctAnswer: correctAnswer!,
+      givenAnswer: opt,
+      isCorrect,
+    });
   };
 
   const handleNext = () => {
