@@ -511,6 +511,7 @@ export default function Reviews() {
                       </div>
                       <Stars rating={review.rating} />
                       <p className="text-sm text-foreground/80">{review.message}</p>
+                      {(!currentUserId || review.user_id !== currentUserId) && (
                       <div className="flex items-center gap-3">
                         <button
                           onClick={() => handleVote(review.id, "like")}
@@ -526,6 +527,8 @@ export default function Reviews() {
                           <ThumbsDown className={`h-3.5 w-3.5 transition-transform ${myVotes[review.id] === "dislike" ? "fill-current" : ""} ${animatingVote === `${review.id}-dislike` ? "scale-150" : "scale-100"}`} style={{ transitionDuration: "200ms" }} />
                           {voteCounts[review.id]?.dislikes || 0}
                         </button>
+                      </div>
+                      )}
                       </div>
                       <ReplySection
                         reviewId={review.id}
