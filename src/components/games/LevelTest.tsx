@@ -66,6 +66,13 @@ export default function LevelTest({ language, languageLabel, languageColor, lang
     setResults((prev) => [...prev, { level: current.level, correct }]);
   };
 
+  const skipQuestion = () => {
+    if (!current) return;
+    setSelectedAnswer("SKIP");
+    setAnswered(true);
+    setResults((prev) => [...prev, { level: current.level, correct: false }]);
+  };
+
   const next = () => {
     if (currentIndex + 1 >= questions.length) {
       setShowResult(true);
