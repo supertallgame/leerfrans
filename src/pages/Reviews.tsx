@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Star, MessageSquare, Trash2, Reply, ChevronDown, ChevronUp, Send } from "lucide-react";
+import { ArrowLeft, Star, MessageSquare, Trash2, Reply, ChevronDown, ChevronUp, Send, ThumbsUp, ThumbsDown } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -38,6 +38,18 @@ interface Review {
 }
 
 const OPERATOR_EMAILS = ["brankovantland@gmail.com", "branko18vantland@gmail.com", "tamoopdam@gmail.com", "jack.ouwerkerk@vsodaafgeluk.nl"];
+
+function getVoterId(): string {
+  let id = localStorage.getItem("review_voter_id");
+  if (!id) {
+    id = crypto.randomUUID();
+    localStorage.setItem("review_voter_id", id);
+  }
+  return id;
+}
+
+interface VoteCounts { [reviewId: string]: { likes: number; dislikes: number } }
+interface MyVotes { [reviewId: string]: "like" | "dislike" }
 
 function Stars({ rating }: { rating: number }) {
   return (
@@ -250,6 +262,44 @@ export default function Reviews() {
   const [deleteReplyId, setDeleteReplyId] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<"newest" | "rating">("newest");
   const [filterRating, setFilterRating] = useState<number | null>(null);
+  const [voteCounts, setVoteCounts] = useState<VoteCounts>({});
+  const [myVotes, setMyVotes] = useState<MyVotes>({});
+
+  const fetchVotes = async () => {
+    const voterId = getVoterId();
+    const [countsRes, myRes] = await Promise.all([
+      supabase.rpc("get_review_vote_counts" as any) as any,
+      supabase.from("review_votes" as any).select("review_id, vote_type").eq("voter_id", voterId) as any,
+    ]);
+    if (countsRes.data) {
+      const counts: VoteCounts = {};
+      for (const r of countsRes.data) counts[r.review_id] = { likes: Number(r.likes), dislikes: Number(r.dislikes) };
+      setVoteCounts(counts);
+    }
+    if (myRes.data) {
+      const mv: MyVotes = {};
+      for (const r of myRes.data) mv[r.review_id] = r.vote_type;
+      setMyVotes(mv);
+    }
+  };
+
+  const handleVote = async (reviewId: string, voteType: "like" | "dislike") => {
+    const voterId = getVoterId();
+    const current = myVotes[reviewId];
+    if (current === voteType) {
+      // Remove vote
+      await (supabase.from("review_votes" as any) as any).delete().eq("review_id", reviewId).eq("voter_id", voterId);
+      setMyVotes(prev => { const n = { ...prev }; delete n[reviewId]; return n; });
+    } else {
+      // Upsert vote
+      await (supabase.from("review_votes" as any) as any).upsert(
+        { review_id: reviewId, voter_id: voterId, vote_type: voteType },
+        { onConflict: "review_id,voter_id" }
+      );
+      setMyVotes(prev => ({ ...prev, [reviewId]: voteType }));
+    }
+    fetchVotes();
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -262,6 +312,7 @@ export default function Reviews() {
       setLoading(false);
     };
     fetchData();
+    fetchVotes();
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       setIsOperator(OPERATOR_EMAILS.includes(session?.user?.email ?? ""));
@@ -429,6 +480,22 @@ export default function Reviews() {
                       </div>
                       <Stars rating={review.rating} />
                       <p className="text-sm text-foreground/80">{review.message}</p>
+                      <div className="flex items-center gap-3">
+                        <button
+                          onClick={() => handleVote(review.id, "like")}
+                          className={`flex items-center gap-1 text-xs transition-colors ${myVotes[review.id] === "like" ? "text-primary font-semibold" : "text-muted-foreground hover:text-primary"}`}
+                        >
+                          <ThumbsUp className={`h-3.5 w-3.5 ${myVotes[review.id] === "like" ? "fill-current" : ""}`} />
+                          {voteCounts[review.id]?.likes || 0}
+                        </button>
+                        <button
+                          onClick={() => handleVote(review.id, "dislike")}
+                          className={`flex items-center gap-1 text-xs transition-colors ${myVotes[review.id] === "dislike" ? "text-destructive font-semibold" : "text-muted-foreground hover:text-destructive"}`}
+                        >
+                          <ThumbsDown className={`h-3.5 w-3.5 ${myVotes[review.id] === "dislike" ? "fill-current" : ""}`} />
+                          {voteCounts[review.id]?.dislikes || 0}
+                        </button>
+                      </div>
                       <ReplySection
                         reviewId={review.id}
                         replies={replies}
