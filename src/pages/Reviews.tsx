@@ -262,6 +262,44 @@ export default function Reviews() {
   const [deleteReplyId, setDeleteReplyId] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<"newest" | "rating">("newest");
   const [filterRating, setFilterRating] = useState<number | null>(null);
+  const [voteCounts, setVoteCounts] = useState<VoteCounts>({});
+  const [myVotes, setMyVotes] = useState<MyVotes>({});
+
+  const fetchVotes = async () => {
+    const voterId = getVoterId();
+    const [countsRes, myRes] = await Promise.all([
+      supabase.rpc("get_review_vote_counts" as any) as any,
+      supabase.from("review_votes" as any).select("review_id, vote_type").eq("voter_id", voterId) as any,
+    ]);
+    if (countsRes.data) {
+      const counts: VoteCounts = {};
+      for (const r of countsRes.data) counts[r.review_id] = { likes: Number(r.likes), dislikes: Number(r.dislikes) };
+      setVoteCounts(counts);
+    }
+    if (myRes.data) {
+      const mv: MyVotes = {};
+      for (const r of myRes.data) mv[r.review_id] = r.vote_type;
+      setMyVotes(mv);
+    }
+  };
+
+  const handleVote = async (reviewId: string, voteType: "like" | "dislike") => {
+    const voterId = getVoterId();
+    const current = myVotes[reviewId];
+    if (current === voteType) {
+      // Remove vote
+      await (supabase.from("review_votes" as any) as any).delete().eq("review_id", reviewId).eq("voter_id", voterId);
+      setMyVotes(prev => { const n = { ...prev }; delete n[reviewId]; return n; });
+    } else {
+      // Upsert vote
+      await (supabase.from("review_votes" as any) as any).upsert(
+        { review_id: reviewId, voter_id: voterId, vote_type: voteType },
+        { onConflict: "review_id,voter_id" }
+      );
+      setMyVotes(prev => ({ ...prev, [reviewId]: voteType }));
+    }
+    fetchVotes();
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -274,6 +312,7 @@ export default function Reviews() {
       setLoading(false);
     };
     fetchData();
+    fetchVotes();
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       setIsOperator(OPERATOR_EMAILS.includes(session?.user?.email ?? ""));
