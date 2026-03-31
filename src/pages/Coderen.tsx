@@ -227,8 +227,10 @@ export default function Coderen() {
 
     // Try to show from queue instantly
     if (showNextFromQueue()) {
+      // Save updated queue to cache
+      saveProgress(selectedLang, next, score, previousTopic, userLevel, [...lessonQueueRef.current]);
       // Prefetch more if needed
-      prefetchIfNeeded(selectedLang, next);
+      prefetchIfNeeded(selectedLang, next + lessonQueueRef.current.length + 1);
     } else {
       // Queue empty, fetch and wait
       setLoading(true);
@@ -237,6 +239,7 @@ export default function Coderen() {
         if (lessons.length > 0) {
           setLesson(lessons[0]);
           lessonQueueRef.current = lessons.slice(1);
+          saveProgress(selectedLang, next, score, previousTopic, userLevel, lessons.slice(1));
         } else {
           toast.error("Kon de les niet laden. Probeer opnieuw.");
         }
