@@ -435,6 +435,13 @@ export default function Reviews() {
           >
             Hoogste score
           </Button>
+          <Button
+            variant={sortBy === "likes" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setSortBy("likes")}
+          >
+            Meeste likes
+          </Button>
         </div>
 
         <div className="flex gap-1.5 items-center">
