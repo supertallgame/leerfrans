@@ -42,6 +42,7 @@ interface ReviewReply {
   display_name: string;
   message: string;
   created_at: string;
+  user_email: string | null;
 }
 
 interface MutedUser {
