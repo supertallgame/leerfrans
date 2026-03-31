@@ -563,16 +563,14 @@ export default function Admin() {
                       </div>
                       <div className="flex items-center gap-1 shrink-0">
                         {reviewReplies.length > 0 && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-muted-foreground hover:text-foreground"
-                            title={`${reviewReplies.length} reactie(s)`}
+                          <button
+                            className={`relative inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors ${isExpanded ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground"}`}
                             onClick={() => setExpandedReviewId(isExpanded ? null : review.id)}
                           >
-                            <Reply className="h-4 w-4" />
-                            <span className="sr-only">{reviewReplies.length}</span>
-                          </Button>
+                            <Reply className="h-3.5 w-3.5" />
+                            {reviewReplies.length} reactie{reviewReplies.length !== 1 ? "s" : ""}
+                            {isExpanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                          </button>
                         )}
                         {review.user_email && (
                           <Button
