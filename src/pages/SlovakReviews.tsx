@@ -343,7 +343,7 @@ export default function SlovakReviews() {
   const [isOperator, setIsOperator] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleteReplyId, setDeleteReplyId] = useState<string | null>(null);
-  const [sortBy, setSortBy] = useState<"newest" | "rating">("newest");
+  const [sortBy, setSortBy] = useState<"newest" | "rating" | "likes">("newest");
   const [filterRating, setFilterRating] = useState<number | null>(null);
   const [voteCounts, setVoteCounts] = useState<{[k:string]:{likes:number;dislikes:number}}>({});
   const [myVotes, setMyVotes] = useState<{[k:string]:"like"|"dislike"}>({});
