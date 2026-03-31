@@ -101,6 +101,33 @@ const Juf = () => {
   const [compareResult, setCompareResult] = useState<AnalysisResult | null>(null);
   const [compareLoading, setCompareLoading] = useState(false);
 
+  // Notes
+  interface JufNote { id: string; note: string; filters: Record<string, string>; created_at: string; }
+  const [notes, setNotes] = useState<JufNote[]>([]);
+  const [newNote, setNewNote] = useState("");
+  const [showNotes, setShowNotes] = useState(false);
+
+  const fetchNotes = useCallback(async () => {
+    const { data } = await supabase.from("juf_notes").select("*").order("created_at", { ascending: false }).limit(50);
+    if (data) setNotes(data as unknown as JufNote[]);
+  }, []);
+
+  const saveNote = async () => {
+    if (!newNote.trim()) return;
+    await supabase.from("juf_notes").insert({
+      user_email: (await supabase.auth.getUser()).data.user?.email ?? "",
+      note: newNote.trim(),
+      filters: { language, chapter: chapterFilter, days } as unknown as Record<string, string>,
+    });
+    setNewNote("");
+    fetchNotes();
+  };
+
+  const deleteNote = async (id: string) => {
+    await supabase.from("juf_notes").delete().eq("id", id);
+    fetchNotes();
+  };
+
   const availableChapters = useMemo(() => {
     if (language === "all") return [];
     return getChaptersForLanguage(language as Language);
