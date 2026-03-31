@@ -265,6 +265,7 @@ export default function Reviews() {
   const [filterRating, setFilterRating] = useState<number | null>(null);
   const [voteCounts, setVoteCounts] = useState<VoteCounts>({});
   const [myVotes, setMyVotes] = useState<MyVotes>({});
+  const [animatingVote, setAnimatingVote] = useState<string | null>(null);
 
   const fetchVotes = async () => {
     const voterId = getVoterId();
