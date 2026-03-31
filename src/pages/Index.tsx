@@ -30,8 +30,10 @@ const AiChat = lazy(() => import("@/components/games/AiChat"));
 const TrueOrFalse = lazy(() => import("@/components/games/TrueOrFalse"));
 const MemoryGame = lazy(() => import("@/components/games/MemoryGame"));
 const SkeletonLabel = lazy(() => import("@/components/games/SkeletonLabel"));
+const ClockTimes = lazy(() => import("@/components/games/ClockTimes"));
+const EtreConjugation = lazy(() => import("@/components/games/EtreConjugation"));
 
-type Game = "menu" | "flashcards" | "quiz" | "match" | "type" | "multiplayer" | "fill" | "sentence" | "ai" | "truefalse" | "memory" | "skeleton";
+type Game = "menu" | "flashcards" | "quiz" | "match" | "type" | "multiplayer" | "fill" | "sentence" | "ai" | "truefalse" | "memory" | "skeleton" | "clocktimes" | "etre";
 
 const languageGames = [
   { id: "flashcards" as Game, title: "Flashcards", description: "Draai kaarten om en leer de woorden", icon: BookOpen, color: "bg-primary/10 text-primary" },
