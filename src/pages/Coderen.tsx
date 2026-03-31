@@ -5,12 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Code2, Terminal, Globe, Coffee, ArrowLeft, CheckCircle2, XCircle, Loader2, RotateCcw, Settings } from "lucide-react";
+import { Code2, Terminal, Globe, Coffee, ArrowLeft, CheckCircle2, XCircle, Loader2, RotateCcw, Settings, Hash, Cpu } from "lucide-react";
 import { toast } from "sonner";
 import SettingsDialog from "@/components/SettingsDialog";
 import AuthDialog from "@/components/AuthDialog";
 
-type CodingLanguage = "python" | "html" | "java";
+type CodingLanguage = "python" | "html" | "java" | "csharp" | "cpp";
 
 interface Exercise {
   type: "multiple_choice" | "fill_code";
@@ -32,6 +32,8 @@ const LANGUAGES: { id: CodingLanguage; label: string; icon: React.ReactNode; col
   { id: "python", label: "Python", icon: <Terminal className="h-8 w-8" />, color: "from-yellow-500 to-blue-600", desc: "Populaire taal voor beginners, data science en AI" },
   { id: "html", label: "HTML & CSS", icon: <Globe className="h-8 w-8" />, color: "from-orange-500 to-pink-600", desc: "Bouw websites en webpagina's" },
   { id: "java", label: "Java", icon: <Coffee className="h-8 w-8" />, color: "from-red-500 to-orange-600", desc: "Krachtige taal voor apps en enterprise software" },
+  { id: "csharp", label: "C#", icon: <Hash className="h-8 w-8" />, color: "from-purple-500 to-violet-600", desc: "Veelzijdige taal voor games (Unity) en .NET apps" },
+  { id: "cpp", label: "C++", icon: <Cpu className="h-8 w-8" />, color: "from-blue-600 to-cyan-500", desc: "Snelle taal voor games, systemen en embedded" },
 ];
 
 // Helper to load/save progress from localStorage
