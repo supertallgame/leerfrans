@@ -419,7 +419,7 @@ export default function Coderen() {
           <Card className="p-8">
             <div className="flex flex-col items-center gap-4">
               <p className="text-muted-foreground">De les kon niet geladen worden.</p>
-              <Button onClick={() => fetchLesson(selectedLang, lessonNumber)} variant="outline">
+              <Button onClick={() => selectedLang && startLanguage(selectedLang)} variant="outline">
                 <RotateCcw className="h-4 w-4 mr-2" /> Opnieuw proberen
               </Button>
             </div>
