@@ -259,6 +259,11 @@ export default function LevelTest({ language, languageLabel, languageColor, lang
                       <><XCircle className="h-5 w-5 text-red-500" /><span className="font-bold text-red-600">Helaas!</span></>
                     )}
                   </div>
+                  {selectedAnswer === "SKIP" && (
+                    <p className="text-sm font-medium text-foreground mb-1">
+                      Het juiste antwoord was: <strong>{current.correctAnswer.trim().toUpperCase()}. {current.options[current.correctAnswer.trim().toUpperCase().charCodeAt(0) - 65]}</strong>
+                    </p>
+                  )}
                   <p className="text-sm text-foreground">{current.explanation}</p>
                 </div>
 
