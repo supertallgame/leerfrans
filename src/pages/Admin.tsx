@@ -149,9 +149,10 @@ export default function Admin() {
     }
     setIsAdmin(true);
     // Load disabled subjects + reviews in parallel
-    const [settingsRes, anonRes, reviewsRes, mutesRes, roomsRes, repliesRes] = await Promise.all([
+    const [settingsRes, anonRes, obamaRes, reviewsRes, mutesRes, roomsRes, repliesRes] = await Promise.all([
       supabase.from("admin_settings").select("value").eq("key", "disabled_subjects").single(),
       supabase.from("admin_settings").select("value").eq("key", "block_anonymous_reviews").maybeSingle(),
+      supabase.from("admin_settings").select("value").eq("key", "obama_enabled").maybeSingle(),
       supabase.rpc("get_reviews_admin" as any),
       supabase.from("muted_users" as any).select("*").order("created_at", { ascending: false }) as any,
       supabase.from("game_rooms").select("id, code, host_name, status, is_public, game_mode, team_mode, created_at, max_players").order("created_at", { ascending: false }) as any,
