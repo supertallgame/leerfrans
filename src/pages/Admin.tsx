@@ -108,6 +108,7 @@ export default function Admin() {
   const [closeRoomId, setCloseRoomId] = useState<string | null>(null);
   const [deleteVotesReviewId, setDeleteVotesReviewId] = useState<string | null>(null);
   const [refreshingRooms, setRefreshingRooms] = useState(false);
+  const [obamaEnabled, setObamaEnabled] = useState(true);
 
   useEffect(() => {
     checkAdmin();
@@ -148,9 +149,10 @@ export default function Admin() {
     }
     setIsAdmin(true);
     // Load disabled subjects + reviews in parallel
-    const [settingsRes, anonRes, reviewsRes, mutesRes, roomsRes, repliesRes] = await Promise.all([
+    const [settingsRes, anonRes, obamaRes, reviewsRes, mutesRes, roomsRes, repliesRes] = await Promise.all([
       supabase.from("admin_settings").select("value").eq("key", "disabled_subjects").single(),
       supabase.from("admin_settings").select("value").eq("key", "block_anonymous_reviews").maybeSingle(),
+      supabase.from("admin_settings").select("value").eq("key", "obama_enabled").maybeSingle(),
       supabase.rpc("get_reviews_admin" as any),
       supabase.from("muted_users" as any).select("*").order("created_at", { ascending: false }) as any,
       supabase.from("game_rooms").select("id, code, host_name, status, is_public, game_mode, team_mode, created_at, max_players").order("created_at", { ascending: false }) as any,
@@ -161,6 +163,9 @@ export default function Admin() {
     }
     if (anonRes.data?.value) {
       setBlockAnonymous(anonRes.data.value === true);
+    }
+    if (obamaRes.data) {
+      setObamaEnabled(obamaRes.data.value !== false);
     }
     if (reviewsRes.data) {
       setReviews(reviewsRes.data);
@@ -191,6 +196,18 @@ export default function Admin() {
     toast.success(newValue ? "Anonieme reviews geblokkeerd" : "Anonieme reviews weer toegestaan");
   };
 
+  const toggleObamaEnabled = async () => {
+    const newValue = !obamaEnabled;
+    const { error } = await supabase
+      .from("admin_settings")
+      .upsert({ key: "obama_enabled", value: newValue as any, updated_at: new Date().toISOString() } as any, { onConflict: "key" });
+    if (error) {
+      toast.error("Kon instelling niet opslaan");
+      return;
+    }
+    setObamaEnabled(newValue);
+    toast.success(newValue ? "🇺🇸 Obama easter egg ingeschakeld" : "Obama easter egg uitgeschakeld");
+  };
   const handleMuteUser = async () => {
     if (!muteEmail.trim()) return toast.error("Vul een e-mailadres in");
     
@@ -423,6 +440,23 @@ export default function Admin() {
               </p>
             </div>
             <Switch checked={!blockAnonymous} onCheckedChange={toggleBlockAnonymous} />
+          </div>
+        </div>
+
+        {/* Obama easter egg toggle */}
+        <div className="rounded-2xl border border-border bg-card p-6 space-y-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-semibold flex items-center gap-2">
+                🇺🇸 Obama Easter Egg
+              </h2>
+              <p className="text-sm text-muted-foreground mt-1">
+                {obamaEnabled
+                  ? "Obama popup is actief en kan verschijnen op de homepagina."
+                  : "Obama popup is uitgeschakeld en verschijnt niet meer."}
+              </p>
+            </div>
+            <Switch checked={obamaEnabled} onCheckedChange={toggleObamaEnabled} />
           </div>
         </div>
 
