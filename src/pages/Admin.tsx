@@ -575,13 +575,13 @@ export default function Admin() {
                           </button>
                         )}
                         <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                          variant="outline"
+                          size="sm"
+                          className="h-8 text-xs gap-1.5 text-orange-600 border-orange-300 hover:bg-orange-50 hover:text-orange-700 dark:text-orange-400 dark:border-orange-500/30 dark:hover:bg-orange-500/10"
                           title="Verwijder alle stemmen"
                           onClick={() => setDeleteVotesReviewId(review.id)}
                         >
-                          <XCircle className="h-4 w-4" />
+                          <XCircle className="h-3.5 w-3.5" /> Stemmen
                         </Button>
                         {review.user_email && (
                           <Button
