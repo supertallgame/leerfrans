@@ -196,6 +196,18 @@ export default function Admin() {
     toast.success(newValue ? "Anonieme reviews geblokkeerd" : "Anonieme reviews weer toegestaan");
   };
 
+  const toggleObamaEnabled = async () => {
+    const newValue = !obamaEnabled;
+    const { error } = await supabase
+      .from("admin_settings")
+      .upsert({ key: "obama_enabled", value: newValue as any, updated_at: new Date().toISOString() } as any, { onConflict: "key" });
+    if (error) {
+      toast.error("Kon instelling niet opslaan");
+      return;
+    }
+    setObamaEnabled(newValue);
+    toast.success(newValue ? "🇺🇸 Obama easter egg ingeschakeld" : "Obama easter egg uitgeschakeld");
+  };
   const handleMuteUser = async () => {
     if (!muteEmail.trim()) return toast.error("Vul een e-mailadres in");
     
