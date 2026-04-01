@@ -443,6 +443,23 @@ export default function Admin() {
           </div>
         </div>
 
+        {/* Obama easter egg toggle */}
+        <div className="rounded-2xl border border-border bg-card p-6 space-y-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-semibold flex items-center gap-2">
+                🇺🇸 Obama Easter Egg
+              </h2>
+              <p className="text-sm text-muted-foreground mt-1">
+                {obamaEnabled
+                  ? "Obama popup is actief en kan verschijnen op de homepagina."
+                  : "Obama popup is uitgeschakeld en verschijnt niet meer."}
+              </p>
+            </div>
+            <Switch checked={obamaEnabled} onCheckedChange={toggleObamaEnabled} />
+          </div>
+        </div>
+
         <div className="rounded-2xl border border-border bg-card p-6 space-y-4">
           <h2 className="text-lg font-semibold flex items-center gap-2">
             <BarChart3 className="h-5 w-5" /> Review statistieken
