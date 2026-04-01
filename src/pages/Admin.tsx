@@ -821,6 +821,35 @@ export default function Admin() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <AlertDialog open={!!deleteVotesReviewId} onOpenChange={(open) => !open && setDeleteVotesReviewId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Alle stemmen verwijderen?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Weet je zeker dat je alle likes en dislikes op deze review wilt verwijderen? Dit kan niet ongedaan worden gemaakt.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuleren</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={async () => {
+                if (!deleteVotesReviewId) return;
+                const { error } = await supabase.from("review_votes").delete().eq("review_id", deleteVotesReviewId);
+                if (error) {
+                  toast.error("Kon stemmen niet verwijderen");
+                } else {
+                  toast.success("Alle stemmen verwijderd");
+                }
+                setDeleteVotesReviewId(null);
+              }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Verwijderen
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
