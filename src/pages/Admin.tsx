@@ -164,6 +164,9 @@ export default function Admin() {
     if (anonRes.data?.value) {
       setBlockAnonymous(anonRes.data.value === true);
     }
+    if (obamaRes.data) {
+      setObamaEnabled(obamaRes.data.value !== false);
+    }
     if (reviewsRes.data) {
       setReviews(reviewsRes.data);
     }
