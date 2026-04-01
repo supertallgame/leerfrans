@@ -108,6 +108,7 @@ export default function Admin() {
   const [closeRoomId, setCloseRoomId] = useState<string | null>(null);
   const [deleteVotesReviewId, setDeleteVotesReviewId] = useState<string | null>(null);
   const [refreshingRooms, setRefreshingRooms] = useState(false);
+  const [obamaEnabled, setObamaEnabled] = useState(true);
 
   useEffect(() => {
     checkAdmin();
