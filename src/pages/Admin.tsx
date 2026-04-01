@@ -573,6 +573,15 @@ export default function Admin() {
                             {isExpanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
                           </button>
                         )}
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                          title="Verwijder alle stemmen"
+                          onClick={() => setDeleteVotesReviewId(review.id)}
+                        >
+                          <XCircle className="h-4 w-4" />
+                        </Button>
                         {review.user_email && (
                           <Button
                             variant="ghost"
