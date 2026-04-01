@@ -106,6 +106,7 @@ export default function Admin() {
   const [deleteReplyId, setDeleteReplyId] = useState<string | null>(null);
   const [gameRooms, setGameRooms] = useState<GameRoom[]>([]);
   const [closeRoomId, setCloseRoomId] = useState<string | null>(null);
+  const [deleteVotesReviewId, setDeleteVotesReviewId] = useState<string | null>(null);
   const [refreshingRooms, setRefreshingRooms] = useState(false);
 
   useEffect(() => {
