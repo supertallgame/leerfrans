@@ -106,6 +106,7 @@ export default function Admin() {
   const [deleteReplyId, setDeleteReplyId] = useState<string | null>(null);
   const [gameRooms, setGameRooms] = useState<GameRoom[]>([]);
   const [closeRoomId, setCloseRoomId] = useState<string | null>(null);
+  const [deleteVotesReviewId, setDeleteVotesReviewId] = useState<string | null>(null);
   const [refreshingRooms, setRefreshingRooms] = useState(false);
 
   useEffect(() => {
@@ -573,6 +574,15 @@ export default function Admin() {
                             {isExpanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
                           </button>
                         )}
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                          title="Verwijder alle stemmen"
+                          onClick={() => setDeleteVotesReviewId(review.id)}
+                        >
+                          <XCircle className="h-4 w-4" />
+                        </Button>
                         {review.user_email && (
                           <Button
                             variant="ghost"
@@ -807,6 +817,35 @@ export default function Admin() {
             <AlertDialogCancel>Annuleren</AlertDialogCancel>
             <AlertDialogAction onClick={handleCloseRoom} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
               Sluiten
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={!!deleteVotesReviewId} onOpenChange={(open) => !open && setDeleteVotesReviewId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Alle stemmen verwijderen?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Weet je zeker dat je alle likes en dislikes op deze review wilt verwijderen? Dit kan niet ongedaan worden gemaakt.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuleren</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={async () => {
+                if (!deleteVotesReviewId) return;
+                const { error } = await supabase.from("review_votes").delete().eq("review_id", deleteVotesReviewId);
+                if (error) {
+                  toast.error("Kon stemmen niet verwijderen");
+                } else {
+                  toast.success("Alle stemmen verwijderd");
+                }
+                setDeleteVotesReviewId(null);
+              }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Verwijderen
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
