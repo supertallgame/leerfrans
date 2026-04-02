@@ -859,6 +859,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
         num_teams: roomData.num_teams || 2,
         team_names: roomData.team_names || [],
         team_emojis: roomData.team_emojis || ["🔵", "🔴", "🟢", "🟡"],
+        kahoot_timer: roomData.kahoot_timer ?? 5,
       } as Room);
       if (roomData.team_emojis?.length > 0) setTeamEmojis(roomData.team_emojis);
       setMyPlayerId(playerData?.id ?? null);
