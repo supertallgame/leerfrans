@@ -326,6 +326,11 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
   const [isAdminUser, setIsAdminUser] = useState(false);
   const victoryFiredForIndex = useRef<number | null>(null);
   const [recentlyLeft, setRecentlyLeft] = useState<{ name: string; id: string }[]>([]);
+  const [quizLanguage, setQuizLanguage] = useState<Language>(language);
+  const [quizChapterId, setQuizChapterId] = useState<string>(() => getChaptersForLanguage(language)[0]?.id ?? "");
+  const [quizSections, setQuizSections] = useState<string[]>([]);
+  const [pendingTeamMode, setPendingTeamMode] = useState<TeamMode>("solo");
+  const [pendingNumTeams, setPendingNumTeams] = useState(2);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
