@@ -93,6 +93,7 @@ const mp = {
     teamRanking: "🏆 Team Ranking",
     individualScores: "Individuele scores",
     backToMenu: "Terug naar menu",
+    playAgain: "🔄 Opnieuw spelen",
     hostLeft: "De host heeft het spel verlaten.",
     couldNotClose: "Kon kamer niet sluiten",
     roomClosed: "Kamer gesloten",
