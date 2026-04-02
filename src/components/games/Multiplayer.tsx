@@ -1443,6 +1443,22 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
           </div>
           <Progress value={progress} className="h-2" />
 
+          {/* Player left indicator */}
+          {recentlyLeft.length > 0 && (
+            <div className="space-y-1">
+              {recentlyLeft.map((entry) => (
+                <div
+                  key={entry.id}
+                  className="flex items-center justify-center gap-2 py-1.5 px-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm animate-fade-in"
+                >
+                  <LogOut className="h-3.5 w-3.5" />
+                  <span className="font-medium">{entry.name}</span>
+                  <span className="text-destructive/70">{locale === "sk" ? "odišiel" : "is vertrokken"}</span>
+                </div>
+              ))}
+            </div>
+          )}
+
           <Card className="border-2">
             <CardContent className="p-8 text-center">
               <p className="text-sm text-muted-foreground mb-2">
