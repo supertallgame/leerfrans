@@ -391,6 +391,60 @@ const Index = () => {
         </DialogContent>
       </Dialog>
 
+      {/* Section picker dialog */}
+      <Dialog open={showSectionPicker} onOpenChange={setShowSectionPicker}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Kies woorden</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">Selecteer één of meerdere secties, of laat alles uit voor alle woorden.</p>
+          <div className="space-y-1.5">
+            {availableSections.map((section) => {
+              const isSelected = selectedSections.includes(section);
+              return (
+                <button
+                  key={section}
+                  onClick={() => {
+                    if (isSelected) {
+                      setSelectedSections(selectedSections.filter((s) => s !== section));
+                    } else {
+                      setSelectedSections([...selectedSections, section]);
+                    }
+                  }}
+                  className={`w-full text-left px-3 py-2.5 rounded-lg border text-sm transition-all ${
+                    isSelected
+                      ? "border-primary bg-primary/10 font-medium"
+                      : "border-border hover:border-primary/50 hover:bg-primary/5 cursor-pointer"
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium">Sectie {section}</span>
+                    {isSelected && <span className="text-primary text-xs">✓</span>}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+          <div className="flex gap-2 pt-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-1"
+              onClick={() => { setSelectedSections([]); }}
+            >
+              Alles
+            </Button>
+            <Button
+              size="sm"
+              className="flex-1"
+              onClick={() => setShowSectionPicker(false)}
+            >
+              Klaar
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <ObamaPopup />
       <AuthDialog open={showLoginPrompt} onOpenChange={setShowLoginPrompt} />
 
