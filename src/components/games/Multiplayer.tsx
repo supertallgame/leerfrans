@@ -651,7 +651,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
 
     const { data: roomData, error } = await (supabase
       .from("game_rooms_public" as any)
-      .select("id, code, host_name, status, current_question_index, total_questions, direction, game_mode, team_mode, num_teams, team_names, team_emojis, kahoot_timer")
+      .select("id, code, host_name, status, current_question_index, total_questions, direction, game_mode, team_mode, num_teams, team_names, team_emojis, kahoot_timer, quiz_language, quiz_chapter_id, quiz_sections")
       .eq("code", roomCode.toUpperCase().trim())
       .eq("status", "waiting")
       .maybeSingle() as any);
