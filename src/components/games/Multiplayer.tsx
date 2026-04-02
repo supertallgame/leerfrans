@@ -299,6 +299,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
   const [loadingRandom, setLoadingRandom] = useState(false);
   const [isAdminUser, setIsAdminUser] = useState(false);
   const victoryFiredForIndex = useRef<number | null>(null);
+  const [recentlyLeft, setRecentlyLeft] = useState<{ name: string; id: string }[]>([]);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -384,6 +385,9 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
           const old = payload.old as any;
           if (old?.id && old.id !== myPlayerId && old.player_name) {
             toast.info(m.playerLeft(old.player_name), { icon: "👋" });
+            const leftEntry = { name: old.player_name, id: old.id };
+            setRecentlyLeft((prev) => [...prev, leftEntry]);
+            setTimeout(() => setRecentlyLeft((prev) => prev.filter((e) => e.id !== old.id)), 4000);
           }
           fetchPlayers(room.id);
         }
@@ -1439,6 +1443,22 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
             </span>
           </div>
           <Progress value={progress} className="h-2" />
+
+          {/* Player left indicator */}
+          {recentlyLeft.length > 0 && (
+            <div className="space-y-1">
+              {recentlyLeft.map((entry) => (
+                <div
+                  key={entry.id}
+                  className="flex items-center justify-center gap-2 py-1.5 px-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm animate-fade-in"
+                >
+                  <LogOut className="h-3.5 w-3.5" />
+                  <span className="font-medium">{entry.name}</span>
+                  <span className="text-destructive/70">{locale === "sk" ? "odišiel" : "is vertrokken"}</span>
+                </div>
+              ))}
+            </div>
+          )}
 
           <Card className="border-2">
             <CardContent className="p-8 text-center">
