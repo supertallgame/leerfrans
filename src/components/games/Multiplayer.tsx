@@ -384,6 +384,9 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
           const old = payload.old as any;
           if (old?.id && old.id !== myPlayerId && old.player_name) {
             toast.info(m.playerLeft(old.player_name), { icon: "👋" });
+            const leftEntry = { name: old.player_name, id: old.id };
+            setRecentlyLeft((prev) => [...prev, leftEntry]);
+            setTimeout(() => setRecentlyLeft((prev) => prev.filter((e) => e.id !== old.id)), 4000);
           }
           fetchPlayers(room.id);
         }
