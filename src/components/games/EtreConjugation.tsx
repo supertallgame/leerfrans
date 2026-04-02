@@ -5,6 +5,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight, Check, X, BookOpen } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import { useLocale } from "@/contexts/LocaleContext";
+import { t, Locale } from "@/lib/i18n";
 
 interface Props {
   onBack: () => void;
@@ -14,24 +16,24 @@ interface ConjugationItem {
   pronoun: string;
   french: string;
   dutch: string;
+  slovak: string;
 }
 
 const conjugationData: ConjugationItem[] = [
-  { pronoun: "je", french: "suis", dutch: "ik ben" },
-  { pronoun: "tu", french: "es", dutch: "jij bent" },
-  { pronoun: "il/elle", french: "est", dutch: "hij/zij is" },
-  { pronoun: "on", french: "est", dutch: "wij zijn (informeel)" },
-  { pronoun: "nous", french: "sommes", dutch: "wij zijn" },
-  { pronoun: "vous", french: "êtes", dutch: "jullie zijn / u bent" },
-  { pronoun: "ils/elles", french: "sont", dutch: "zij zijn" },
+  { pronoun: "je", french: "suis", dutch: "ik ben", slovak: "ja som" },
+  { pronoun: "tu", french: "es", dutch: "jij bent", slovak: "ty si" },
+  { pronoun: "il/elle", french: "est", dutch: "hij/zij is", slovak: "on/ona je" },
+  { pronoun: "on", french: "est", dutch: "wij zijn (informeel)", slovak: "my sme (neformálne)" },
+  { pronoun: "nous", french: "sommes", dutch: "wij zijn", slovak: "my sme" },
+  { pronoun: "vous", french: "êtes", dutch: "jullie zijn / u bent", slovak: "vy ste" },
+  { pronoun: "ils/elles", french: "sont", dutch: "zij zijn", slovak: "oni/ony sú" },
 ];
 
-const specialPhrases: { french: string; dutch: string }[] = [
-  { french: "c'est", dutch: "het is / dat is" },
-  { french: "ce sont", dutch: "het zijn / dat zijn" },
+const specialPhrases: { french: string; dutch: string; slovak: string }[] = [
+  { french: "c'est", dutch: "het is / dat is", slovak: "to je" },
+  { french: "ce sont", dutch: "het zijn / dat zijn", slovak: "to sú" },
 ];
 
-// All forms for options
 const allForms = ["suis", "es", "est", "sommes", "êtes", "sont", "c'est", "ce sont"];
 
 type QuestionType = "pronoun-to-form" | "form-to-dutch" | "dutch-to-form" | "special";
@@ -52,42 +54,41 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
-function generateQuestions(): Question[] {
+function generateQuestions(locale: Locale): Question[] {
   const questions: Question[] = [];
+  const getNative = (item: ConjugationItem) => locale === "sk" ? item.slovak : item.dutch;
+  const getNativeSp = (item: { dutch: string; slovak: string }) => locale === "sk" ? item.slovak : item.dutch;
 
-  // Type 1: Given pronoun, pick correct form
   for (const item of conjugationData) {
     questions.push({
       type: "pronoun-to-form",
       prompt: `${item.pronoun} ___`,
       correctAnswer: item.french,
-      hint: item.dutch,
+      hint: getNative(item),
     });
   }
 
-  // Type 2: Given French, pick Dutch meaning
   for (const item of conjugationData) {
     questions.push({
       type: "form-to-dutch",
       prompt: `${item.pronoun} ${item.french}`,
-      correctAnswer: item.dutch,
+      correctAnswer: getNative(item),
     });
   }
 
-  // Type 3: Given Dutch, pick French form
   for (const item of conjugationData) {
     questions.push({
       type: "dutch-to-form",
-      prompt: item.dutch,
+      prompt: getNative(item),
       correctAnswer: item.french,
     });
   }
 
-  // Special phrases
   for (const sp of specialPhrases) {
+    const i = t(locale);
     questions.push({
       type: "special",
-      prompt: `Hoe zeg je "${sp.dutch}" in het Frans?`,
+      prompt: i.howDoYouSay.replace("{text}", getNativeSp(sp)),
       correctAnswer: sp.french,
     });
   }
@@ -95,19 +96,20 @@ function generateQuestions(): Question[] {
   return shuffle(questions).slice(0, 15);
 }
 
-function getOptions(question: Question): string[] {
+function getOptions(question: Question, locale: Locale): string[] {
   if (question.type === "form-to-dutch") {
-    const dutchOptions = conjugationData.map((c) => c.dutch);
-    const others = shuffle(dutchOptions.filter((d) => d !== question.correctAnswer)).slice(0, 3);
+    const nativeOptions = conjugationData.map((c) => locale === "sk" ? c.slovak : c.dutch);
+    const others = shuffle(nativeOptions.filter((d) => d !== question.correctAnswer)).slice(0, 3);
     return shuffle([question.correctAnswer, ...others]);
   }
-  // For pronoun-to-form, dutch-to-form, special: use French forms
   const others = shuffle(allForms.filter((f) => f !== question.correctAnswer)).slice(0, 3);
   return shuffle([question.correctAnswer, ...others]);
 }
 
 export default function EtreConjugation({ onBack }: Props) {
-  const [questions] = useState(() => generateQuestions());
+  const locale = useLocale();
+  const i = t(locale);
+  const [questions] = useState(() => generateQuestions(locale));
   const [qIndex, setQIndex] = useState(0);
   const [selected, setSelected] = useState<string | null>(null);
   const [score, setScore] = useState(0);
@@ -117,7 +119,7 @@ export default function EtreConjugation({ onBack }: Props) {
 
   const options = useMemo(() => {
     if (finished) return [];
-    return getOptions(current);
+    return getOptions(current, locale);
   }, [qIndex, finished]);
 
   const handleSelect = (opt: string) => {
@@ -131,23 +133,23 @@ export default function EtreConjugation({ onBack }: Props) {
 
   const handleNext = () => {
     setSelected(null);
-    setQIndex((i) => i + 1);
+    setQIndex((idx) => idx + 1);
   };
 
   if (finished) {
     return (
       <div className="flex flex-col items-center gap-6 max-w-lg mx-auto">
         <Button variant="ghost" onClick={onBack} className="self-start gap-2">
-          <ArrowLeft className="h-4 w-4" /> Terug
+          <ArrowLeft className="h-4 w-4" /> {i.back}
         </Button>
         <Card className="w-full">
           <CardContent className="flex flex-col items-center p-8 gap-4">
             <p className="text-5xl font-bold">🎉</p>
-            <h2 className="text-2xl font-bold">Klaar!</h2>
+            <h2 className="text-2xl font-bold">{i.done}</h2>
             <p className="text-lg">
-              Score: <span className="font-bold text-primary">{score}</span> / {questions.length}
+              {i.score}: <span className="font-bold text-primary">{score}</span> / {questions.length}
             </p>
-            <Button onClick={() => { setQIndex(0); setScore(0); setSelected(null); }}>Opnieuw spelen</Button>
+            <Button onClick={() => { setQIndex(0); setScore(0); setSelected(null); }}>{i.playAgain}</Button>
           </CardContent>
         </Card>
       </div>
@@ -155,21 +157,21 @@ export default function EtreConjugation({ onBack }: Props) {
   }
 
   const typeLabel = current.type === "pronoun-to-form"
-    ? "Vul de juiste vorm van être in"
+    ? i.etreFillForm
     : current.type === "form-to-dutch"
-    ? "Wat betekent dit in het Nederlands?"
+    ? i.etreWhatMeans
     : current.type === "dutch-to-form"
-    ? "Welke vorm van être hoort hierbij?"
-    : "Vertaal naar het Frans";
+    ? i.etreWhichForm
+    : i.etreTranslate;
 
   return (
     <div className="flex flex-col items-center gap-4 md:gap-6 w-full max-w-lg mx-auto">
       <div className="flex items-center justify-between w-full">
         <Button variant="ghost" onClick={onBack} className="gap-2 text-sm">
-          <ArrowLeft className="h-4 w-4" /> Terug
+          <ArrowLeft className="h-4 w-4" /> {i.back}
         </Button>
         <span className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
-          <BookOpen className="h-4 w-4" /> Être (zijn)
+          <BookOpen className="h-4 w-4" /> {i.etreTitle}
         </span>
       </div>
 
@@ -213,7 +215,7 @@ export default function EtreConjugation({ onBack }: Props) {
 
       {selected && (
         <Button onClick={handleNext} className="w-full gap-2">
-          Volgende <ArrowRight className="h-4 w-4" />
+          {i.next} <ArrowRight className="h-4 w-4" />
         </Button>
       )}
     </div>
