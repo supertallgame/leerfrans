@@ -473,6 +473,20 @@ const Index = () => {
               {getChapter(chapterId)?.title ?? "Chapitre 3"}
             </button>
           </div>
+          {availableSections.length > 0 && (
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <BookOpen className="h-4 w-4" />
+                <span className="text-sm font-medium">Woorden</span>
+              </div>
+              <button
+                onClick={() => { setShowSettings(false); setShowSectionPicker(true); }}
+                className="text-sm font-medium px-3 py-1 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+              >
+                {selectedSections.length === 0 ? "Alle" : selectedSections.sort().join(", ")}
+              </button>
+            </div>
+          )}
       </SettingsDialog>
      </main>
   );
