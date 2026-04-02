@@ -1251,7 +1251,126 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
     );
   }
 
-  // LOBBY PHASE
+  // CONTENT SELECT PHASE
+  if (phase === "content-select") {
+    const availableLanguages: Language[] = ["french", "english", "nask", "biology"];
+    const langLabels: Record<Language, string> = { french: m.french, english: m.english, nask: m.nask, biology: m.biology };
+    const quizChapters = getChaptersForLanguage(quizLanguage);
+    const quizAvailSections = getSectionsForChapter(quizChapterId);
+    const quizVocab = getQuizVocabulary();
+
+    return (
+      <div className="min-h-screen flex flex-col items-center px-3 py-6 md:px-4 md:py-12">
+        <div className="max-w-md w-full space-y-4 md:space-y-6">
+          <Button variant="ghost" onClick={() => setPhase("team-select")} className="gap-2 text-sm">
+            <ArrowLeft className="h-4 w-4" /> {m.back}
+          </Button>
+          <div className="text-center space-y-2">
+            <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto">
+              <BookOpen className="h-7 w-7 text-primary" />
+            </div>
+            <h1 className="text-2xl md:text-3xl font-bold">{m.chooseContent}</h1>
+            <p className="text-sm md:text-base text-muted-foreground">{m.chooseContentDesc}</p>
+          </div>
+
+          {/* Subject */}
+          <Card>
+            <CardContent className="p-4 space-y-2">
+              <label className="text-sm font-medium">{m.subject}</label>
+              <div className="grid grid-cols-2 gap-2">
+                {availableLanguages.map((lang) => (
+                  <Button
+                    key={lang}
+                    variant={quizLanguage === lang ? "default" : "outline"}
+                    size="sm"
+                    className="text-sm"
+                    onClick={() => {
+                      setQuizLanguage(lang);
+                      const chapters = getChaptersForLanguage(lang);
+                      setQuizChapterId(chapters[0]?.id ?? "");
+                      setQuizSections([]);
+                    }}
+                  >
+                    {langLabels[lang]}
+                  </Button>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Chapter */}
+          <Card>
+            <CardContent className="p-4 space-y-2">
+              <label className="text-sm font-medium">{m.chapter}</label>
+              <div className="grid grid-cols-2 gap-2">
+                {quizChapters.map((ch) => (
+                  <Button
+                    key={ch.id}
+                    variant={quizChapterId === ch.id ? "default" : "outline"}
+                    size="sm"
+                    className="text-xs h-auto py-2 flex flex-col items-start text-left"
+                    onClick={() => { setQuizChapterId(ch.id); setQuizSections([]); }}
+                  >
+                    <span className="font-semibold">{ch.title}</span>
+                    <span className="text-[10px] opacity-70 font-normal">{ch.description}</span>
+                  </Button>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Sections */}
+          {quizAvailSections.length > 0 && (
+            <Card>
+              <CardContent className="p-4 space-y-2">
+                <label className="text-sm font-medium">{m.sections}</label>
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    variant={quizSections.length === 0 ? "default" : "outline"}
+                    size="sm"
+                    className="text-sm"
+                    onClick={() => setQuizSections([])}
+                  >
+                    {m.allWords}
+                  </Button>
+                  {quizAvailSections.map((s) => (
+                    <Button
+                      key={s}
+                      variant={quizSections.includes(s) ? "default" : "outline"}
+                      size="sm"
+                      className="text-sm w-10"
+                      onClick={() => {
+                        setQuizSections((prev) =>
+                          prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s]
+                        );
+                      }}
+                    >
+                      {s}
+                    </Button>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Word count & start */}
+          <div className="text-center text-sm text-muted-foreground">
+            {quizVocab.length} {m.wordsSelected}
+          </div>
+          <Button
+            onClick={startWithContent}
+            className="w-full text-base md:text-lg h-11 md:h-12"
+            size="lg"
+            disabled={quizVocab.length < 8}
+          >
+            {m.startQuiz}
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+
   if (phase === "lobby") {
     const isTeamMode = room?.team_mode === "teams";
     const unassignedPlayers = isTeamMode ? players.filter((p) => !p.team_number) : [];
