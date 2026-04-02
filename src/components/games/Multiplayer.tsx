@@ -598,6 +598,9 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
         p_team_emojis: teamEmojis.slice(0, teams),
         p_is_public: isPublic,
         p_kahoot_timer: gameMode === "kahoot" ? kahootTimerSetting : 5,
+        p_quiz_language: quizLanguage,
+        p_quiz_chapter_id: quizChapterId,
+        p_quiz_sections: quizSections,
       });
 
     if (roomError || !roomData) return toast.error("Room error");
