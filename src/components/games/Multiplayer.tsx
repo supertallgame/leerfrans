@@ -552,17 +552,42 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
     setPhase("team-select");
   };
 
-  const startWithSettings = async (tm: TeamMode, teams: number = 2) => {
+  const startWithSettings = (tm: TeamMode, teams: number = 2) => {
+    setPendingTeamMode(tm);
+    setPendingNumTeams(teams);
     setTeamMode(tm);
     setNumTeams(teams);
+    // Reset quiz selections to current context defaults
+    setQuizLanguage(language);
+    setQuizChapterId(getChaptersForLanguage(language)[0]?.id ?? "");
+    setQuizSections([]);
+    setPhase("content-select");
+  };
+
+  const getQuizVocabulary = () => {
+    const chapter = getChapter(quizChapterId);
+    if (!chapter) return [];
+    const words = chapter.words;
+    const availSections = getSectionsForChapter(quizChapterId);
+    if (quizSections.length === 0 || availSections.length === 0) return words;
+    return words.filter((w) => w.section && quizSections.includes(w.section));
+  };
+
+  const startWithContent = async () => {
+    const vocab = getQuizVocabulary();
+    if (vocab.length < 8) return toast.error(m.tooFewWords);
+
+    const tm = pendingTeamMode;
+    const teams = pendingNumTeams;
     const code = generateCode();
-    const questions = shuffle(activeVocabulary).slice(0, 20).map((v: any) => ({ french: v.french, dutch: v.dutch }));
+    const numQ = Math.min(20, vocab.length);
+    const questions = shuffle(vocab).slice(0, numQ).map((v: any) => ({ french: v.french, dutch: v.dutch }));
 
     const { data: roomData, error: roomError } = await supabase
       .rpc("create_game_room" as any, {
         p_code: code,
         p_host_name: playerName,
-        p_total_questions: 20,
+        p_total_questions: numQ,
         p_game_mode: gameMode,
         p_team_mode: tm,
         p_num_teams: teams,
