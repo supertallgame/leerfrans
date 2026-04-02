@@ -255,10 +255,6 @@ const chapitre3Words: VocabItem[] = [
   { french: "travailler", dutch: "werken", section: "E" },
   { french: "encore", dutch: "nog", section: "E" },
   { french: "rentrer", dutch: "thuiskomen", section: "E" },
-  { french: "Qui est ton prof de français?", dutch: "Wie is je leraar Frans?", section: "E" },
-  { french: "C'est monsieur Duval.", dutch: "Het is meneer Duval.", section: "E" },
-  { french: "Il est sévère?", dutch: "Is hij streng?", section: "E" },
-  { french: "Non, il est sympa.", dutch: "Nee, hij is aardig.", section: "E" },
   // Section F
   { french: "faire", dutch: "maken / doen", section: "F" },
   { french: "aimer", dutch: "houden van", section: "F" },
@@ -276,11 +272,16 @@ const chapitre3Words: VocabItem[] = [
   { french: "bon/bonne", dutch: "goed", section: "F" },
   { french: "formidable", dutch: "fantastisch", section: "F" },
   { french: "intéressant(e)", dutch: "interessant", section: "F" },
-  { french: "Quelle est ta matière préférée?", dutch: "Wat is jouw lievelingsvak?", section: "F" },
-  { french: "Le français est ma matière préférée.", dutch: "Frans is mijn lievelingsvak.", section: "F" },
-  { french: "Tu aimes la géographie?", dutch: "Houd je van aardrijkskunde?", section: "F" },
-  { french: "Oui, j'aime la géographie.", dutch: "Ja, ik houd van aardrijkskunde.", section: "F" },
-  { french: "Non, je n'aime pas la géographie.", dutch: "Nee, ik houd niet van aardrijkskunde.", section: "F" },
+  // Section G – Parler des matières et des profs (zinnen)
+  { french: "Tu aimes la géographie?", dutch: "Houd je van aardrijkskunde?", section: "G" },
+  { french: "Oui, j'aime la géographie.", dutch: "Ja, ik houd van aardrijkskunde.", section: "G" },
+  { french: "Non, je n'aime pas la géographie.", dutch: "Nee, ik houd niet van aardrijkskunde.", section: "G" },
+  { french: "Quelle est ta matière préférée?", dutch: "Wat is jouw lievelingsvak?", section: "G" },
+  { french: "Le français est ma matière préférée.", dutch: "Frans is mijn lievelingsvak.", section: "G" },
+  { french: "Qui est ton prof de français?", dutch: "Wie is je leraar Frans?", section: "G" },
+  { french: "C'est monsieur Duval.", dutch: "Het is meneer Duval.", section: "G" },
+  { french: "Il est sévère?", dutch: "Is hij streng?", section: "G" },
+  { french: "Non, il est sympa.", dutch: "Nee, hij is aardig.", section: "G" },
 ];
 
 const chapitre5Words: VocabItem[] = [
