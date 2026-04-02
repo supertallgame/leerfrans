@@ -81,7 +81,7 @@ const FlagEN = ({ className = "w-5 h-3.5" }: { className?: string }) => (
 
 const Index = () => {
   const navigate = useNavigate();
-  const { chapterId, setChapterId, activeVocabulary, language, setLanguage } = useChapter();
+  const { chapterId, setChapterId, activeVocabulary, language, setLanguage, selectedSections, setSelectedSections, availableSections } = useChapter();
   const [activeGame, setActiveGame] = useState<Game>("menu");
   const [showSettings, setShowSettings] = useState(false);
   const [showChapterPicker, setShowChapterPicker] = useState(false);
