@@ -1646,7 +1646,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
           <Card className="border-2">
             <CardContent className="p-8 text-center">
               <p className="text-sm text-muted-foreground mb-2">
-                {language === "nask"
+                {quizLanguage === "nask"
                   ? (room.direction === "nl_to_fr" ? m.conceptToDesc : m.descToConcept)
                   : (room.direction === "nl_to_fr" ? m.nlToTranslation : m.translationToNl)}
               </p>
