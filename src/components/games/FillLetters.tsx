@@ -47,8 +47,7 @@ export default function FillLetters({ onBack }: Props) {
   const { activeVocabulary, language, chapterId } = useChapter();
   const locale = useLocale();
   const i = t(locale);
-  const foreignShort = (i.foreignShort as any)[language];
-  const nlShort = (i.nlShort as any)[language];
+  const foreignShort = (i.foreignShort as any)[language]; // unused but kept for type reference
   const words = useMemo(() => {
     const singles = activeVocabulary.filter((v) => isSingleWord(v.french));
     return shuffle(singles);
