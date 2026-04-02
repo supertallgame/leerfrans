@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, Users, Copy, Check, Trophy, LogOut, Zap, Clock, Shuffle, UserPlus, Globe, Lock, Search, Dice5, Trash2 } from "lucide-react";
+import { ArrowLeft, Users, Copy, Check, Trophy, LogOut, Zap, Clock, Shuffle, UserPlus, Globe, Lock, Search, Dice5, Trash2, BookOpen } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import {
