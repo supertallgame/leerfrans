@@ -203,7 +203,7 @@ interface MultiplayerProps {
   onBack: () => void;
 }
 
-type Phase = "setup" | "mode-select" | "team-select" | "lobby" | "playing" | "results";
+type Phase = "setup" | "mode-select" | "team-select" | "content-select" | "lobby" | "playing" | "results";
 type GameMode = "normal" | "kahoot";
 type TeamMode = "solo" | "teams";
 
