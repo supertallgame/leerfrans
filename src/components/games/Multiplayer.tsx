@@ -941,8 +941,14 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
         team_names: roomData.team_names || [],
         team_emojis: roomData.team_emojis || ["🔵", "🔴", "🟢", "🟡"],
         kahoot_timer: roomData.kahoot_timer ?? 5,
+        quiz_language: roomData.quiz_language ?? "french",
+        quiz_chapter_id: roomData.quiz_chapter_id ?? "",
+        quiz_sections: roomData.quiz_sections ?? [],
       } as Room);
       if (roomData.team_emojis?.length > 0) setTeamEmojis(roomData.team_emojis);
+      if (roomData.quiz_language) setQuizLanguage(roomData.quiz_language as Language);
+      if (roomData.quiz_chapter_id) setQuizChapterId(roomData.quiz_chapter_id);
+      if (roomData.quiz_sections) setQuizSections(roomData.quiz_sections);
       setMyPlayerId(playerData?.id ?? null);
       setMyPlayerToken((playerData as any)?.player_token ?? null);
       setIsHost(false);
