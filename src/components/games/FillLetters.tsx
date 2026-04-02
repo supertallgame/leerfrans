@@ -58,11 +58,10 @@ export default function FillLetters({ onBack }: Props) {
   const [userInput, setUserInput] = useState("");
   const [showResult, setShowResult] = useState(false);
   const [score, setScore] = useState(0);
-  const [direction, setDirection] = useState<"nl_to_fr" | "fr_to_nl">("nl_to_fr");
 
   const current = words[index];
-  const targetWord = direction === "nl_to_fr" ? current?.french : current?.dutch;
-  const hintWord = direction === "nl_to_fr" ? current?.dutch : current?.french;
+  const targetWord = current?.french;
+  const hintWord = current?.dutch;
   const puzzle = useMemo(
     () => (targetWord ? removeSomeLetters(targetWord) : { display: "", removed: [] }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -122,24 +121,7 @@ export default function FillLetters({ onBack }: Props) {
         <Button variant="ghost" onClick={onBack} className="gap-2 text-sm">
           <ArrowLeft className="h-4 w-4" /> {i.back}
         </Button>
-        <div className="flex gap-1.5 md:gap-2">
-          <Button
-            size="sm"
-            variant={direction === "nl_to_fr" ? "default" : "outline"}
-            onClick={() => { setDirection("nl_to_fr"); restart(); }}
-            className="text-xs md:text-sm px-2 md:px-3"
-          >
-            {nlShort}→{foreignShort}
-          </Button>
-          <Button
-            size="sm"
-            variant={direction === "fr_to_nl" ? "default" : "outline"}
-            onClick={() => { setDirection("fr_to_nl"); restart(); }}
-            className="text-xs md:text-sm px-2 md:px-3"
-          >
-            {foreignShort}→{nlShort}
-          </Button>
-        </div>
+        <span className="text-xs md:text-sm text-muted-foreground">{i.score}: {score}/{total}</span>
       </div>
 
       <div className="flex items-center justify-between text-xs md:text-sm text-muted-foreground">
