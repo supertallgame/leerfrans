@@ -365,7 +365,6 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
             id: newRoom.id,
             code: newRoom.code,
             host_name: newRoom.host_name,
-            
             status: newRoom.status,
             current_question_index: newRoom.current_question_index,
             total_questions: newRoom.total_questions,
@@ -376,6 +375,9 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
             team_names: newRoom.team_names || [],
             team_emojis: newRoom.team_emojis || ["🔵", "🔴", "🟢", "🟡"],
             kahoot_timer: newRoom.kahoot_timer ?? 5,
+            quiz_language: newRoom.quiz_language ?? room?.quiz_language ?? "french",
+            quiz_chapter_id: newRoom.quiz_chapter_id ?? room?.quiz_chapter_id ?? "",
+            quiz_sections: newRoom.quiz_sections ?? room?.quiz_sections ?? [],
           };
           setRoom(updatedRoom);
           if (updatedRoom.team_names?.length > 0) setTeamNames(updatedRoom.team_names);
@@ -385,9 +387,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
             setSelectedAnswer(null);
             setShowResult(false);
             setCorrectAnswer("");
-            if (myPlayerId && myPlayerToken) {
-              fetchQuestion(updatedRoom.id, myPlayerId, myPlayerToken);
-            }
+            // fetchQuestion is handled by the useEffect on current_question_index
           }
            if (newRoom.status === "finished") {
             setPhase("results");
@@ -651,7 +651,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
 
     const { data: roomData, error } = await (supabase
       .from("game_rooms_public" as any)
-      .select("id, code, host_name, status, current_question_index, total_questions, direction, game_mode, team_mode, num_teams, team_names, team_emojis, kahoot_timer")
+      .select("id, code, host_name, status, current_question_index, total_questions, direction, game_mode, team_mode, num_teams, team_names, team_emojis, kahoot_timer, quiz_language, quiz_chapter_id, quiz_sections")
       .eq("code", roomCode.toUpperCase().trim())
       .eq("status", "waiting")
       .maybeSingle() as any);
