@@ -206,7 +206,7 @@ export default function Admin() {
       return;
     }
     setObamaEnabled(newValue);
-    toast.success(newValue ? "🇺🇸 Obama easter egg ingeschakeld" : "Obama easter egg uitgeschakeld");
+    toast.success(newValue ? "Obama easter egg ingeschakeld" : "Obama easter egg uitgeschakeld");
   };
   const handleMuteUser = async () => {
     if (!muteEmail.trim()) return toast.error("Vul een e-mailadres in");
