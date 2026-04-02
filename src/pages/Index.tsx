@@ -400,15 +400,18 @@ const Index = () => {
           <p className="text-sm text-muted-foreground">Selecteer één of meerdere secties, of laat alles uit voor alle woorden.</p>
           <div className="space-y-1.5">
             {availableSections.map((section) => {
-              const isSelected = selectedSections.includes(section);
+              const effectiveSections = selectedSections.length === 0 ? availableSections : selectedSections;
+              const isSelected = effectiveSections.includes(section);
               return (
                 <button
                   key={section}
                   onClick={() => {
+                    const current = selectedSections.length === 0 ? [...availableSections] : [...selectedSections];
                     if (isSelected) {
-                      setSelectedSections(selectedSections.filter((s) => s !== section));
+                      const updated = current.filter((s) => s !== section);
+                      setSelectedSections(updated.length === 0 ? [] : updated);
                     } else {
-                      setSelectedSections([...selectedSections, section]);
+                      setSelectedSections([...current, section]);
                     }
                   }}
                   className={`w-full text-left px-3 py-2.5 rounded-lg border text-sm transition-all ${
@@ -430,7 +433,7 @@ const Index = () => {
               variant="outline"
               size="sm"
               className="flex-1"
-              onClick={() => { setSelectedSections([...availableSections]); }}
+              onClick={() => { setSelectedSections([]); }}
             >
               Alles
             </Button>
