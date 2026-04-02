@@ -193,6 +193,7 @@ const mp = {
     teamRanking: "🏆 Poradie tímov",
     individualScores: "Individuálne skóre",
     backToMenu: "Späť do menu",
+    playAgain: "🔄 Hrať znova",
     hostLeft: "Host opustil hru.",
     couldNotClose: "Nepodarilo sa zatvoriť izbu",
     roomClosed: "Izba zatvorená",
