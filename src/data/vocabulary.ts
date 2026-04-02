@@ -1,6 +1,7 @@
 export interface VocabItem {
   french: string;
   dutch: string;
+  section?: string;
 }
 
 export type Language = "french" | "english" | "nask" | "biology";
