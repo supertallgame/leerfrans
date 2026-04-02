@@ -122,11 +122,6 @@ const chapitre2Words: VocabItem[] = [
   { french: "le chocolat", dutch: "de chocola(de)", section: "A" },
   { french: "le thé", dutch: "de thee", section: "A" },
   { french: "le coca", dutch: "de cola", section: "A" },
-  { french: "La carte, s'il vous plaît.", dutch: "De kaart alstublieft.", section: "A" },
-  { french: "Voilà.", dutch: "Alstublieft. (Als je iets geeft.)", section: "A" },
-  { french: "Un coca et une crêpe, s'il vous plaît.", dutch: "Een cola en een pannenkoek alstublieft.", section: "A" },
-  { french: "Tu aimes le coca?", dutch: "Houd je van cola?", section: "A" },
-  { french: "Oui, j'adore le coca!", dutch: "Ja, ik ben dol op cola!", section: "A" },
   // Section B
   { french: "avec", dutch: "met", section: "B" },
   { french: "après", dutch: "na / daarna", section: "B" },
@@ -144,9 +139,15 @@ const chapitre2Words: VocabItem[] = [
   { french: "l'œuf (m)", dutch: "het ei", section: "B" },
   { french: "le légume", dutch: "de groente", section: "B" },
   { french: "la viande", dutch: "het vlees", section: "B" },
-  { french: "C'est quoi?", dutch: "Wat is dat?", section: "B" },
-  { french: "C'est une quiche.", dutch: "Dat is een hartige taart.", section: "B" },
-  { french: "Bon appétit!", dutch: "Eet smakelijk!", section: "B" },
+  // Section C – À une terrasse (zinnen)
+  { french: "La carte, s'il vous plaît.", dutch: "De kaart alstublieft.", section: "C" },
+  { french: "Un coca et une crêpe, s'il vous plaît.", dutch: "Een cola en een pannenkoek alstublieft.", section: "C" },
+  { french: "Tu aimes le coca?", dutch: "Houd je van cola?", section: "C" },
+  { french: "Oui, j'adore le coca!", dutch: "Ja, ik ben dol op cola!", section: "C" },
+  { french: "C'est quoi?", dutch: "Wat is dat?", section: "C" },
+  { french: "C'est une quiche.", dutch: "Dat is een hartige taart.", section: "C" },
+  { french: "Voilà.", dutch: "Alstublieft. (Als je iets geeft.)", section: "C" },
+  { french: "Bon appétit!", dutch: "Eet smakelijk!", section: "C" },
   // Section E
   { french: "l'enfant (m/v)", dutch: "het kind", section: "E" },
   { french: "le (super)marché", dutch: "de (super)markt", section: "E" },
@@ -164,11 +165,6 @@ const chapitre2Words: VocabItem[] = [
   { french: "toujours", dutch: "altijd", section: "E" },
   { french: "combien", dutch: "hoeveel", section: "E" },
   { french: "j'ai besoin de", dutch: "ik heb nodig", section: "E" },
-  { french: "Je voudrais une baguette.", dutch: "Ik wil graag een stokbrood.", section: "E" },
-  { french: "Voilà.", dutch: "Alstublieft.", section: "E" },
-  { french: "Je ne comprends pas.", dutch: "Ik begrijp het niet.", section: "E" },
-  { french: "Merci.", dutch: "Bedankt.", section: "E" },
-  { french: "Au revoir!", dutch: "Tot ziens!", section: "E" },
   // Section F
   { french: "demander", dutch: "vragen", section: "F" },
   { french: "parler", dutch: "praten", section: "F" },
@@ -186,10 +182,16 @@ const chapitre2Words: VocabItem[] = [
   { french: "le pain au chocolat", dutch: "het chocoladebroodje", section: "F" },
   { french: "la baguette", dutch: "het stokbrood", section: "F" },
   { french: "fou/folle de", dutch: "gek op", section: "F" },
-  { french: "Vous avez deux croissants?", dutch: "Heeft u twee croissants?", section: "F" },
-  { french: "Oui, voilà.", dutch: "Ja, alstublieft.", section: "F" },
-  { french: "Ça coute combien?", dutch: "Hoeveel kost het?", section: "F" },
-  { french: "Ça coute trois euros cinquante.", dutch: "Dat kost drie euro vijftig.", section: "F" },
+  // Section G – Acheter quelque chose (zinnen)
+  { french: "Vous avez deux croissants?", dutch: "Heeft u twee croissants?", section: "G" },
+  { french: "Oui, voilà.", dutch: "Ja, alstublieft.", section: "G" },
+  { french: "Je voudrais une baguette.", dutch: "Ik wil graag een stokbrood.", section: "G" },
+  { french: "Ça coute combien?", dutch: "Hoeveel kost het?", section: "G" },
+  { french: "Ça coute trois euros cinquante.", dutch: "Dat kost drie euro vijftig.", section: "G" },
+  { french: "Je ne comprends pas.", dutch: "Ik begrijp het niet.", section: "G" },
+  { french: "Trois euros cinquante.", dutch: "Drie euro vijftig.", section: "G" },
+  { french: "Merci.", dutch: "Bedankt.", section: "G" },
+  { french: "Au revoir!", dutch: "Tot ziens!", section: "G" },
 ];
 
 const chapitre3Words: VocabItem[] = [
