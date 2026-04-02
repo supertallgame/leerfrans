@@ -387,9 +387,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
             setSelectedAnswer(null);
             setShowResult(false);
             setCorrectAnswer("");
-            if (myPlayerId && myPlayerToken) {
-              fetchQuestion(updatedRoom.id, myPlayerId, myPlayerToken);
-            }
+            // fetchQuestion is handled by the useEffect on current_question_index
           }
            if (newRoom.status === "finished") {
             setPhase("results");
