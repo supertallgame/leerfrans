@@ -86,6 +86,7 @@ const Index = () => {
   const [showSettings, setShowSettings] = useState(false);
   const [showChapterPicker, setShowChapterPicker] = useState(false);
   const [showLanguagePicker, setShowLanguagePicker] = useState(false);
+  const [showSectionPicker, setShowSectionPicker] = useState(false);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [authLoading, setAuthLoading] = useState(true);
