@@ -486,7 +486,7 @@ const Index = () => {
                 onClick={() => { setShowSettings(false); setShowSectionPicker(true); }}
                 className="text-sm font-medium px-3 py-1 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
               >
-                {selectedSections.length === 0 ? "Alle" : selectedSections.sort().join(", ")}
+                {selectedSections.length === 0 || selectedSections.length === availableSections.length ? "Alle" : selectedSections.sort().join(", ")}
               </button>
             </div>
           )}
