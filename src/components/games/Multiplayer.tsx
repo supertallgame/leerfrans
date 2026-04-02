@@ -1390,6 +1390,14 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
             <p className="text-sm text-muted-foreground">
               {isTeamMode ? `Teams modus (${room?.num_teams} teams)` : m.shareCode}
             </p>
+            {/* Quiz content info */}
+            <div className="inline-flex items-center gap-1.5 bg-primary/10 text-primary rounded-full px-3 py-1 text-xs font-medium">
+              <BookOpen className="h-3 w-3" />
+              {({ french: m.french, english: m.english, nask: m.nask, biology: m.biology } as Record<string, string>)[quizLanguage] || quizLanguage}
+              {" · "}
+              {getChaptersForLanguage(quizLanguage).find(c => c.id === quizChapterId)?.title ?? ""}
+              {quizSections.length > 0 && ` · ${quizSections.join(", ")}`}
+            </div>
           </div>
 
           {countdown !== null && (
