@@ -60,43 +60,91 @@ function ClockFace({ hour, minute, size = 120 }: { hour: number; minute: number;
   const cy = size / 2;
   const r = size / 2 - 8;
 
-  const hourAngle = ((hour % 12) + minute / 60) * 30 - 90;
-  const hourRad = (hourAngle * Math.PI) / 180;
-  const hourLen = r * 0.5;
-  const hx = cx + Math.cos(hourRad) * hourLen;
-  const hy = cy + Math.sin(hourRad) * hourLen;
+  // Hand helper: creates a tapered polygon for a clock hand
+  function handPoints(angleDeg: number, length: number, baseWidth: number, tailLength: number = 0): string {
+    const rad = (angleDeg - 90) * Math.PI / 180;
+    const perpRad = rad + Math.PI / 2;
+    // Tip
+    const tx = cx + Math.cos(rad) * length;
+    const ty = cy + Math.sin(rad) * length;
+    // Base left/right
+    const blx = cx + Math.cos(perpRad) * baseWidth;
+    const bly = cy + Math.sin(perpRad) * baseWidth;
+    const brx = cx - Math.cos(perpRad) * baseWidth;
+    const bry = cy - Math.sin(perpRad) * baseWidth;
+    // Tail
+    const tlx = cx - Math.cos(rad) * tailLength;
+    const tly = cy - Math.sin(rad) * tailLength;
+    return `${tx},${ty} ${blx},${bly} ${tlx},${tly} ${brx},${bry}`;
+  }
 
-  const minAngle = minute * 6 - 90;
-  const minRad = (minAngle * Math.PI) / 180;
-  const minLen = r * 0.75;
-  const mx = cx + Math.cos(minRad) * minLen;
-  const my = cy + Math.sin(minRad) * minLen;
+  const hourAngle = ((hour % 12) + minute / 60) * 30;
+  const minAngle = minute * 6;
 
   return (
     <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="drop-shadow-md">
-      <circle cx={cx} cy={cy} r={r} fill="hsl(var(--card))" stroke="hsl(var(--border))" strokeWidth="3" />
-      {Array.from({ length: 12 }).map((_, i) => {
-        const angle = (i * 30 - 90) * Math.PI / 180;
-        const x1 = cx + Math.cos(angle) * (r - 6);
-        const y1 = cy + Math.sin(angle) * (r - 6);
-        const x2 = cx + Math.cos(angle) * (r - 14);
-        const y2 = cy + Math.sin(angle) * (r - 14);
-        return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="hsl(var(--foreground))" strokeWidth="2" strokeLinecap="round" />;
-      })}
-      {Array.from({ length: 12 }).map((_, i) => {
-        const num = i === 0 ? 12 : i;
-        const angle = (i * 30 - 60) * Math.PI / 180;
-        const tx = cx + Math.cos(angle) * (r - 24);
-        const ty = cy + Math.sin(angle) * (r - 24);
+      {/* Outer ring */}
+      <circle cx={cx} cy={cy} r={r + 2} fill="none" stroke="hsl(var(--border))" strokeWidth="1.5" />
+      {/* Clock face */}
+      <circle cx={cx} cy={cy} r={r} fill="hsl(var(--card))" stroke="hsl(var(--border))" strokeWidth="2.5" />
+
+      {/* Minute tick marks */}
+      {Array.from({ length: 60 }).map((_, idx) => {
+        const isHour = idx % 5 === 0;
+        const angle = (idx * 6 - 90) * Math.PI / 180;
+        const outerR = r - 3;
+        const innerR = isHour ? r - 14 : r - 8;
+        const x1 = cx + Math.cos(angle) * outerR;
+        const y1 = cy + Math.sin(angle) * outerR;
+        const x2 = cx + Math.cos(angle) * innerR;
+        const y2 = cy + Math.sin(angle) * innerR;
         return (
-          <text key={`n${i}`} x={tx} y={ty} textAnchor="middle" dominantBaseline="central" fontSize={size * 0.1} fontWeight="600" fill="hsl(var(--foreground))">
+          <line key={idx} x1={x1} y1={y1} x2={x2} y2={y2}
+            stroke="hsl(var(--foreground))"
+            strokeWidth={isHour ? 2.5 : 0.8}
+            strokeLinecap="round"
+            opacity={isHour ? 1 : 0.4}
+          />
+        );
+      })}
+
+      {/* Numbers */}
+      {Array.from({ length: 12 }).map((_, idx) => {
+        const num = idx === 0 ? 12 : idx;
+        const angle = (idx * 30 - 60) * Math.PI / 180;
+        const tx = cx + Math.cos(angle) * (r - 26);
+        const ty = cy + Math.sin(angle) * (r - 26);
+        return (
+          <text key={`n${idx}`} x={tx} y={ty} textAnchor="middle" dominantBaseline="central"
+            fontSize={size * 0.11} fontWeight="700" fill="hsl(var(--foreground))"
+            style={{ fontFamily: "system-ui, sans-serif" }}
+          >
             {num}
           </text>
         );
       })}
-      <line x1={cx} y1={cy} x2={hx} y2={hy} stroke="hsl(var(--foreground))" strokeWidth="3.5" strokeLinecap="round" />
-      <line x1={cx} y1={cy} x2={mx} y2={my} stroke="hsl(var(--primary))" strokeWidth="2.5" strokeLinecap="round" />
-      <circle cx={cx} cy={cy} r="4" fill="hsl(var(--primary))" />
+
+      {/* Hour hand - thick, short, dark */}
+      <polygon
+        points={handPoints(hourAngle, r * 0.48, size * 0.035, size * 0.06)}
+        fill="hsl(var(--foreground))"
+        stroke="hsl(var(--foreground))"
+        strokeWidth="1"
+        strokeLinejoin="round"
+      />
+
+      {/* Minute hand - thinner, longer, primary color */}
+      <polygon
+        points={handPoints(minAngle, r * 0.78, size * 0.022, size * 0.08)}
+        fill="hsl(var(--primary))"
+        stroke="hsl(var(--primary))"
+        strokeWidth="0.8"
+        strokeLinejoin="round"
+      />
+
+      {/* Center cap */}
+      <circle cx={cx} cy={cy} r={size * 0.04} fill="hsl(var(--primary))" />
+      <circle cx={cx} cy={cy} r={size * 0.02} fill="hsl(var(--primary-foreground))" />
     </svg>
   );
 }
