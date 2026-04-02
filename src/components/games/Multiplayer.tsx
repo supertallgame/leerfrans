@@ -93,6 +93,7 @@ const mp = {
     teamRanking: "🏆 Team Ranking",
     individualScores: "Individuele scores",
     backToMenu: "Terug naar menu",
+    playAgain: "🔄 Opnieuw spelen",
     hostLeft: "De host heeft het spel verlaten.",
     couldNotClose: "Kon kamer niet sluiten",
     roomClosed: "Kamer gesloten",
@@ -192,6 +193,7 @@ const mp = {
     teamRanking: "🏆 Poradie tímov",
     individualScores: "Individuálne skóre",
     backToMenu: "Späť do menu",
+    playAgain: "🔄 Hrať znova",
     hostLeft: "Host opustil hru.",
     couldNotClose: "Nepodarilo sa zatvoriť izbu",
     roomClosed: "Izba zatvorená",
@@ -1904,7 +1906,34 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
             </CardContent>
           </Card>
 
-          <Button onClick={onBack} className="w-full h-12 text-lg" size="lg">{m.backToMenu}</Button>
+          {isHost && (
+            <Button onClick={async () => {
+              // Clean up old room
+              if (room && myPlayerId && myPlayerToken) {
+                await supabase.functions.invoke("game-action", {
+                  body: { action: "delete-room", roomId: room.id, playerId: myPlayerId, playerToken: myPlayerToken },
+                });
+              }
+              // Reset state but keep quiz settings
+              setRoom(null);
+              setMyPlayerId(null);
+              setMyPlayerToken(null);
+              setPlayers([]);
+              setSelectedAnswer(null);
+              setShowResult(false);
+              setCorrectAnswer("");
+              setShowKahootScoreboard(false);
+              setKahootCountdown(null);
+              setPendingCorrect(null);
+              setRecentlyLeft([]);
+              victoryFiredForIndex.current = null;
+              // Go to content-select with existing settings preserved
+              setPhase("content-select");
+            }} className="w-full h-12 text-lg" size="lg">
+              {m.playAgain}
+            </Button>
+          )}
+          <Button onClick={onBack} variant={isHost ? "outline" : "default"} className="w-full h-12 text-lg" size="lg">{m.backToMenu}</Button>
         </div>
       </div>
     );
