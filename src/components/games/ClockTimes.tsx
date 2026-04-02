@@ -5,13 +5,15 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight, Check, X, Clock } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import { useLocale } from "@/contexts/LocaleContext";
+import { t } from "@/lib/i18n";
 
 interface Props {
   onBack: () => void;
 }
 
 interface ClockQuestion {
-  time: string; // e.g. "14:00"
+  time: string;
   french: string;
   dutch: string;
   hour: number;
@@ -58,14 +60,12 @@ function ClockFace({ hour, minute, size = 120 }: { hour: number; minute: number;
   const cy = size / 2;
   const r = size / 2 - 8;
 
-  // Hour hand
   const hourAngle = ((hour % 12) + minute / 60) * 30 - 90;
   const hourRad = (hourAngle * Math.PI) / 180;
   const hourLen = r * 0.5;
   const hx = cx + Math.cos(hourRad) * hourLen;
   const hy = cy + Math.sin(hourRad) * hourLen;
 
-  // Minute hand
   const minAngle = minute * 6 - 90;
   const minRad = (minAngle * Math.PI) / 180;
   const minLen = r * 0.75;
@@ -74,9 +74,7 @@ function ClockFace({ hour, minute, size = 120 }: { hour: number; minute: number;
 
   return (
     <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="drop-shadow-md">
-      {/* Clock face */}
       <circle cx={cx} cy={cy} r={r} fill="hsl(var(--card))" stroke="hsl(var(--border))" strokeWidth="3" />
-      {/* Hour markers */}
       {Array.from({ length: 12 }).map((_, i) => {
         const angle = (i * 30 - 90) * Math.PI / 180;
         const x1 = cx + Math.cos(angle) * (r - 6);
@@ -85,7 +83,6 @@ function ClockFace({ hour, minute, size = 120 }: { hour: number; minute: number;
         const y2 = cy + Math.sin(angle) * (r - 14);
         return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="hsl(var(--foreground))" strokeWidth="2" strokeLinecap="round" />;
       })}
-      {/* Numbers */}
       {Array.from({ length: 12 }).map((_, i) => {
         const num = i === 0 ? 12 : i;
         const angle = (i * 30 - 60) * Math.PI / 180;
@@ -97,17 +94,16 @@ function ClockFace({ hour, minute, size = 120 }: { hour: number; minute: number;
           </text>
         );
       })}
-      {/* Hour hand */}
       <line x1={cx} y1={cy} x2={hx} y2={hy} stroke="hsl(var(--foreground))" strokeWidth="3.5" strokeLinecap="round" />
-      {/* Minute hand */}
       <line x1={cx} y1={cy} x2={mx} y2={my} stroke="hsl(var(--primary))" strokeWidth="2.5" strokeLinecap="round" />
-      {/* Center dot */}
       <circle cx={cx} cy={cy} r="4" fill="hsl(var(--primary))" />
     </svg>
   );
 }
 
 export default function ClockTimes({ onBack }: Props) {
+  const locale = useLocale();
+  const i = t(locale);
   const [questions] = useState(() => shuffle(clockData).slice(0, 15));
   const [qIndex, setQIndex] = useState(0);
   const [selected, setSelected] = useState<string | null>(null);
@@ -143,16 +139,16 @@ export default function ClockTimes({ onBack }: Props) {
     return (
       <div className="flex flex-col items-center gap-6 max-w-lg mx-auto">
         <Button variant="ghost" onClick={onBack} className="self-start gap-2">
-          <ArrowLeft className="h-4 w-4" /> Terug
+          <ArrowLeft className="h-4 w-4" /> {i.back}
         </Button>
         <Card className="w-full">
           <CardContent className="flex flex-col items-center p-8 gap-4">
             <p className="text-5xl font-bold">🎉</p>
-            <h2 className="text-2xl font-bold">Klaar!</h2>
+            <h2 className="text-2xl font-bold">{i.done}</h2>
             <p className="text-lg">
-              Score: <span className="font-bold text-primary">{score}</span> / {questions.length}
+              {i.score}: <span className="font-bold text-primary">{score}</span> / {questions.length}
             </p>
-            <Button onClick={() => { setQIndex(0); setScore(0); setSelected(null); }}>Opnieuw spelen</Button>
+            <Button onClick={() => { setQIndex(0); setScore(0); setSelected(null); }}>{i.playAgain}</Button>
           </CardContent>
         </Card>
       </div>
@@ -163,10 +159,10 @@ export default function ClockTimes({ onBack }: Props) {
     <div className="flex flex-col items-center gap-4 md:gap-6 w-full max-w-lg mx-auto">
       <div className="flex items-center justify-between w-full">
         <Button variant="ghost" onClick={onBack} className="gap-2 text-sm">
-          <ArrowLeft className="h-4 w-4" /> Terug
+          <ArrowLeft className="h-4 w-4" /> {i.back}
         </Button>
         <span className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
-          <Clock className="h-4 w-4" /> Kloktijden
+          <Clock className="h-4 w-4" /> {i.clockTimes}
         </span>
       </div>
 
@@ -174,7 +170,7 @@ export default function ClockTimes({ onBack }: Props) {
 
       <Card className="w-full">
         <CardContent className="p-4 md:p-6 flex flex-col items-center gap-3">
-          <p className="text-xs uppercase tracking-widest text-muted-foreground">Hoe laat is het?</p>
+          <p className="text-xs uppercase tracking-widest text-muted-foreground">{i.whatTimeIsIt}</p>
           <ClockFace hour={current.hour} minute={current.minute} size={140} />
           <p className="text-sm text-muted-foreground">{current.dutch}</p>
         </CardContent>
@@ -208,7 +204,7 @@ export default function ClockTimes({ onBack }: Props) {
 
       {selected && (
         <Button onClick={handleNext} className="w-full gap-2">
-          Volgende <ArrowRight className="h-4 w-4" />
+          {i.next} <ArrowRight className="h-4 w-4" />
         </Button>
       )}
     </div>

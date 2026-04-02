@@ -75,6 +75,16 @@ export const translations = {
     typeBoneName: "Typ de naam van het bot...",
     skip: "Skip",
     skeleton: "Menselijk skelet",
+    // Clock times
+    clockTimes: "Kloktijden",
+    whatTimeIsIt: "Hoe laat is het?",
+    // Être conjugation
+    etreTitle: "Être (zijn)",
+    etreFillForm: "Vul de juiste vorm van être in",
+    etreWhatMeans: "Wat betekent dit in het Nederlands?",
+    etreWhichForm: "Welke vorm van être hoort hierbij?",
+    etreTranslate: "Vertaal naar het Frans",
+    howDoYouSay: 'Hoe zeg je "{text}" in het Frans?',
     // Language labels
     nlLabel: { french: "Nederlands", english: "Nederlands", nask: "Begrip", biology: "Begrip" },
     foreignLabel: { french: "Frans", english: "Engels", nask: "Omschrijving", biology: "Omschrijving" },
@@ -156,6 +166,16 @@ export const translations = {
     typeBoneName: "Napíš názov kosti...",
     skip: "Preskočiť",
     skeleton: "Ľudská kostra",
+    // Clock times
+    clockTimes: "Časy",
+    whatTimeIsIt: "Koľko je hodín?",
+    // Être conjugation
+    etreTitle: "Être (byť)",
+    etreFillForm: "Doplň správny tvar être",
+    etreWhatMeans: "Čo to znamená po slovensky?",
+    etreWhichForm: "Aký tvar être sem patrí?",
+    etreTranslate: "Prelož do francúzštiny",
+    howDoYouSay: 'Ako povieš "{text}" po francúzsky?',
     // Language labels
     nlLabel: { french: "Slovenčina", english: "Slovenčina", nask: "Pojem", biology: "Pojem" },
     foreignLabel: { french: "Francúzština", english: "Angličtina", nask: "Popis", biology: "Popis" },
