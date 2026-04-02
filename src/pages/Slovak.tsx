@@ -165,7 +165,8 @@ function SlovakContent() {
   if (activeGame === "skeleton") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6"><SkeletonLabel onBack={() => setActiveGame("menu")} /></div></Suspense>;
   if (activeGame === "multiplayer") return <Suspense fallback={gameLoader}><Multiplayer onBack={() => setActiveGame("menu")} /></Suspense>;
 
-  const games = language === "biology" ? biologyGames : language === "nask" ? naskGames : languageGames;
+  const hasSentences = activeVocabulary.some((v) => v.french.includes(" ") && v.french.length > 15);
+  const games = language === "biology" ? biologyGames : language === "nask" ? naskGames : languageGames.filter((g) => g.id !== "sentence" || hasSentences);
 
   return (
     <main className="min-h-screen flex flex-col items-center px-3 py-6 md:px-4 md:py-12">
