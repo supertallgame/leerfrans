@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, Users, Copy, Check, Trophy, LogOut, Zap, Clock, Shuffle, UserPlus, Globe, Lock, Search, Dice5, Trash2 } from "lucide-react";
+import { ArrowLeft, Users, Copy, Check, Trophy, LogOut, Zap, Clock, Shuffle, UserPlus, Globe, Lock, Search, Dice5, Trash2, BookOpen } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import {
@@ -17,7 +17,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { supabase } from "@/integrations/supabase/client";
-import { shuffle } from "@/data/vocabulary";
+import { shuffle, getChaptersForLanguage, getSectionsForChapter, getChapter, Language } from "@/data/vocabulary";
 import { useChapter } from "@/contexts/ChapterContext";
 import { useLocale } from "@/contexts/LocaleContext";
 import { toast } from "sonner";
@@ -110,6 +110,19 @@ const mp = {
     scoreboardTime: "Scorebord tijd",
     instant: "Direct",
     seconds: "sec",
+    chooseContent: "Kies je woordjes",
+    chooseContentDesc: "Welk vak en hoofdstuk wil je oefenen?",
+    subject: "Vak",
+    chapter: "Hoofdstuk",
+    sections: "Woordjes",
+    allWords: "Alle woorden",
+    wordsSelected: "woorden geselecteerd",
+    startQuiz: "🚀 Start quiz",
+    tooFewWords: "Kies minimaal 8 woorden",
+    french: "Frans",
+    english: "Engels",
+    nask: "NaSk",
+    biology: "Biologie",
   },
   sk: {
     back: "Späť",
@@ -196,6 +209,19 @@ const mp = {
     scoreboardTime: "Čas výsledkovej tabule",
     instant: "Okamžite",
     seconds: "sek",
+    chooseContent: "Vyber slovíčka",
+    chooseContentDesc: "Aký predmet a kapitolu chceš precvičovať?",
+    subject: "Predmet",
+    chapter: "Kapitola",
+    sections: "Slovíčka",
+    allWords: "Všetky slová",
+    wordsSelected: "slov vybraných",
+    startQuiz: "🚀 Spustiť kvíz",
+    tooFewWords: "Vyber aspoň 8 slov",
+    french: "Francúzština",
+    english: "Angličtina",
+    nask: "NaSk",
+    biology: "Biológia",
   },
 } as const;
 
@@ -203,7 +229,7 @@ interface MultiplayerProps {
   onBack: () => void;
 }
 
-type Phase = "setup" | "mode-select" | "team-select" | "lobby" | "playing" | "results";
+type Phase = "setup" | "mode-select" | "team-select" | "content-select" | "lobby" | "playing" | "results";
 type GameMode = "normal" | "kahoot";
 type TeamMode = "solo" | "teams";
 
@@ -300,6 +326,11 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
   const [isAdminUser, setIsAdminUser] = useState(false);
   const victoryFiredForIndex = useRef<number | null>(null);
   const [recentlyLeft, setRecentlyLeft] = useState<{ name: string; id: string }[]>([]);
+  const [quizLanguage, setQuizLanguage] = useState<Language>(language);
+  const [quizChapterId, setQuizChapterId] = useState<string>(() => getChaptersForLanguage(language)[0]?.id ?? "");
+  const [quizSections, setQuizSections] = useState<string[]>([]);
+  const [pendingTeamMode, setPendingTeamMode] = useState<TeamMode>("solo");
+  const [pendingNumTeams, setPendingNumTeams] = useState(2);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -521,17 +552,42 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
     setPhase("team-select");
   };
 
-  const startWithSettings = async (tm: TeamMode, teams: number = 2) => {
+  const startWithSettings = (tm: TeamMode, teams: number = 2) => {
+    setPendingTeamMode(tm);
+    setPendingNumTeams(teams);
     setTeamMode(tm);
     setNumTeams(teams);
+    // Reset quiz selections to current context defaults
+    setQuizLanguage(language);
+    setQuizChapterId(getChaptersForLanguage(language)[0]?.id ?? "");
+    setQuizSections([]);
+    setPhase("content-select");
+  };
+
+  const getQuizVocabulary = () => {
+    const chapter = getChapter(quizChapterId);
+    if (!chapter) return [];
+    const words = chapter.words;
+    const availSections = getSectionsForChapter(quizChapterId);
+    if (quizSections.length === 0 || availSections.length === 0) return words;
+    return words.filter((w) => w.section && quizSections.includes(w.section));
+  };
+
+  const startWithContent = async () => {
+    const vocab = getQuizVocabulary();
+    if (vocab.length < 8) return toast.error(m.tooFewWords);
+
+    const tm = pendingTeamMode;
+    const teams = pendingNumTeams;
     const code = generateCode();
-    const questions = shuffle(activeVocabulary).slice(0, 20).map((v: any) => ({ french: v.french, dutch: v.dutch }));
+    const numQ = Math.min(20, vocab.length);
+    const questions = shuffle(vocab).slice(0, numQ).map((v: any) => ({ french: v.french, dutch: v.dutch }));
 
     const { data: roomData, error: roomError } = await supabase
       .rpc("create_game_room" as any, {
         p_code: code,
         p_host_name: playerName,
-        p_total_questions: 20,
+        p_total_questions: numQ,
         p_game_mode: gameMode,
         p_team_mode: tm,
         p_num_teams: teams,
@@ -1195,7 +1251,126 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
     );
   }
 
-  // LOBBY PHASE
+  // CONTENT SELECT PHASE
+  if (phase === "content-select") {
+    const availableLanguages: Language[] = ["french", "english", "nask", "biology"];
+    const langLabels: Record<Language, string> = { french: m.french, english: m.english, nask: m.nask, biology: m.biology };
+    const quizChapters = getChaptersForLanguage(quizLanguage);
+    const quizAvailSections = getSectionsForChapter(quizChapterId);
+    const quizVocab = getQuizVocabulary();
+
+    return (
+      <div className="min-h-screen flex flex-col items-center px-3 py-6 md:px-4 md:py-12">
+        <div className="max-w-md w-full space-y-4 md:space-y-6">
+          <Button variant="ghost" onClick={() => setPhase("team-select")} className="gap-2 text-sm">
+            <ArrowLeft className="h-4 w-4" /> {m.back}
+          </Button>
+          <div className="text-center space-y-2">
+            <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto">
+              <BookOpen className="h-7 w-7 text-primary" />
+            </div>
+            <h1 className="text-2xl md:text-3xl font-bold">{m.chooseContent}</h1>
+            <p className="text-sm md:text-base text-muted-foreground">{m.chooseContentDesc}</p>
+          </div>
+
+          {/* Subject */}
+          <Card>
+            <CardContent className="p-4 space-y-2">
+              <label className="text-sm font-medium">{m.subject}</label>
+              <div className="grid grid-cols-2 gap-2">
+                {availableLanguages.map((lang) => (
+                  <Button
+                    key={lang}
+                    variant={quizLanguage === lang ? "default" : "outline"}
+                    size="sm"
+                    className="text-sm"
+                    onClick={() => {
+                      setQuizLanguage(lang);
+                      const chapters = getChaptersForLanguage(lang);
+                      setQuizChapterId(chapters[0]?.id ?? "");
+                      setQuizSections([]);
+                    }}
+                  >
+                    {langLabels[lang]}
+                  </Button>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Chapter */}
+          <Card>
+            <CardContent className="p-4 space-y-2">
+              <label className="text-sm font-medium">{m.chapter}</label>
+              <div className="grid grid-cols-2 gap-2">
+                {quizChapters.map((ch) => (
+                  <Button
+                    key={ch.id}
+                    variant={quizChapterId === ch.id ? "default" : "outline"}
+                    size="sm"
+                    className="text-xs h-auto py-2 flex flex-col items-start text-left"
+                    onClick={() => { setQuizChapterId(ch.id); setQuizSections([]); }}
+                  >
+                    <span className="font-semibold">{ch.title}</span>
+                    <span className="text-[10px] opacity-70 font-normal">{ch.description}</span>
+                  </Button>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Sections */}
+          {quizAvailSections.length > 0 && (
+            <Card>
+              <CardContent className="p-4 space-y-2">
+                <label className="text-sm font-medium">{m.sections}</label>
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    variant={quizSections.length === 0 ? "default" : "outline"}
+                    size="sm"
+                    className="text-sm"
+                    onClick={() => setQuizSections([])}
+                  >
+                    {m.allWords}
+                  </Button>
+                  {quizAvailSections.map((s) => (
+                    <Button
+                      key={s}
+                      variant={quizSections.includes(s) ? "default" : "outline"}
+                      size="sm"
+                      className="text-sm w-10"
+                      onClick={() => {
+                        setQuizSections((prev) =>
+                          prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s]
+                        );
+                      }}
+                    >
+                      {s}
+                    </Button>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Word count & start */}
+          <div className="text-center text-sm text-muted-foreground">
+            {quizVocab.length} {m.wordsSelected}
+          </div>
+          <Button
+            onClick={startWithContent}
+            className="w-full text-base md:text-lg h-11 md:h-12"
+            size="lg"
+            disabled={quizVocab.length < 8}
+          >
+            {m.startQuiz}
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+
   if (phase === "lobby") {
     const isTeamMode = room?.team_mode === "teams";
     const unassignedPlayers = isTeamMode ? players.filter((p) => !p.team_number) : [];
