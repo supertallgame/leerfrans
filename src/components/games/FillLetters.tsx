@@ -58,11 +58,10 @@ export default function FillLetters({ onBack }: Props) {
   const [userInput, setUserInput] = useState("");
   const [showResult, setShowResult] = useState(false);
   const [score, setScore] = useState(0);
-  const [direction, setDirection] = useState<"nl_to_fr" | "fr_to_nl">("nl_to_fr");
 
   const current = words[index];
-  const targetWord = direction === "nl_to_fr" ? current?.french : current?.dutch;
-  const hintWord = direction === "nl_to_fr" ? current?.dutch : current?.french;
+  const targetWord = current?.french;
+  const hintWord = current?.dutch;
   const puzzle = useMemo(
     () => (targetWord ? removeSomeLetters(targetWord) : { display: "", removed: [] }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
