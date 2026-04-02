@@ -727,6 +727,12 @@ export function getActiveVocabulary(chapterId: string): VocabItem[] {
   return getChapter(chapterId)?.words ?? chapitre3Words;
 }
 
+export function getSectionsForChapter(chapterId: string): string[] {
+  const words = getChapter(chapterId)?.words ?? [];
+  const sections = new Set(words.map((w) => w.section).filter(Boolean) as string[]);
+  return Array.from(sections).sort();
+}
+
 // Backward compatibility
 export const vocabulary: VocabItem[] = chapitre3Words;
 
