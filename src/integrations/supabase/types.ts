@@ -181,6 +181,9 @@ export type Database = {
           kahoot_timer: number
           max_players: number
           num_teams: number
+          quiz_chapter_id: string
+          quiz_language: string
+          quiz_sections: Json
           status: string
           team_emojis: Json
           team_mode: string
@@ -200,6 +203,9 @@ export type Database = {
           kahoot_timer?: number
           max_players?: number
           num_teams?: number
+          quiz_chapter_id?: string
+          quiz_language?: string
+          quiz_sections?: Json
           status?: string
           team_emojis?: Json
           team_mode?: string
@@ -219,6 +225,9 @@ export type Database = {
           kahoot_timer?: number
           max_players?: number
           num_teams?: number
+          quiz_chapter_id?: string
+          quiz_language?: string
+          quiz_sections?: Json
           status?: string
           team_emojis?: Json
           team_mode?: string
@@ -414,6 +423,9 @@ export type Database = {
           is_public: boolean | null
           kahoot_timer: number | null
           num_teams: number | null
+          quiz_chapter_id: string | null
+          quiz_language: string | null
+          quiz_sections: Json | null
           status: string | null
           team_emojis: Json | null
           team_mode: string | null
@@ -431,6 +443,9 @@ export type Database = {
           is_public?: boolean | null
           kahoot_timer?: number | null
           num_teams?: number | null
+          quiz_chapter_id?: string | null
+          quiz_language?: string | null
+          quiz_sections?: Json | null
           status?: string | null
           team_emojis?: Json | null
           team_mode?: string | null
@@ -448,6 +463,9 @@ export type Database = {
           is_public?: boolean | null
           kahoot_timer?: number | null
           num_teams?: number | null
+          quiz_chapter_id?: string | null
+          quiz_language?: string | null
+          quiz_sections?: Json | null
           status?: string | null
           team_emojis?: Json | null
           team_mode?: string | null
@@ -526,6 +544,25 @@ export type Database = {
               p_kahoot_timer?: number
               p_max_players?: number
               p_num_teams?: number
+              p_team_emojis?: Json
+              p_team_mode?: string
+              p_team_names?: Json
+              p_total_questions?: number
+            }
+            Returns: Json
+          }
+        | {
+            Args: {
+              p_code: string
+              p_game_mode?: string
+              p_host_name: string
+              p_is_public?: boolean
+              p_kahoot_timer?: number
+              p_max_players?: number
+              p_num_teams?: number
+              p_quiz_chapter_id?: string
+              p_quiz_language?: string
+              p_quiz_sections?: Json
               p_team_emojis?: Json
               p_team_mode?: string
               p_team_names?: Json

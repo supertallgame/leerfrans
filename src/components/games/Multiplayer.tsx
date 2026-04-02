@@ -248,6 +248,9 @@ interface Room {
   team_emojis: string[];
   is_public?: boolean;
   kahoot_timer: number;
+  quiz_language?: string;
+  quiz_chapter_id?: string;
+  quiz_sections?: string[];
 }
 
 interface PublicRoom {
@@ -595,6 +598,9 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
         p_team_emojis: teamEmojis.slice(0, teams),
         p_is_public: isPublic,
         p_kahoot_timer: gameMode === "kahoot" ? kahootTimerSetting : 5,
+        p_quiz_language: quizLanguage,
+        p_quiz_chapter_id: quizChapterId,
+        p_quiz_sections: quizSections,
       });
 
     if (roomError || !roomData) return toast.error("Room error");
@@ -619,6 +625,9 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
       team_names: teamNames.slice(0, teams),
       team_emojis: teamEmojis.slice(0, teams),
       kahoot_timer: roomData.kahoot_timer ?? kahootTimerSetting,
+      quiz_language: roomData.quiz_language ?? quizLanguage,
+      quiz_chapter_id: roomData.quiz_chapter_id ?? quizChapterId,
+      quiz_sections: roomData.quiz_sections ?? quizSections,
     });
     setMyPlayerId(pid);
     setMyPlayerToken(ptoken);
@@ -660,8 +669,14 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
       team_names: roomData.team_names || [],
       team_emojis: roomData.team_emojis || ["🔵", "🔴", "🟢", "🟡"],
       kahoot_timer: roomData.kahoot_timer ?? 5,
+      quiz_language: roomData.quiz_language ?? "french",
+      quiz_chapter_id: roomData.quiz_chapter_id ?? "",
+      quiz_sections: roomData.quiz_sections ?? [],
     } as Room);
     if (roomData.team_emojis?.length > 0) setTeamEmojis(roomData.team_emojis);
+    if (roomData.quiz_language) setQuizLanguage(roomData.quiz_language as Language);
+    if (roomData.quiz_chapter_id) setQuizChapterId(roomData.quiz_chapter_id);
+    if (roomData.quiz_sections) setQuizSections(roomData.quiz_sections);
     setMyPlayerId(playerData?.id ?? null);
     setMyPlayerToken((playerData as any)?.player_token ?? null);
     setIsHost(false);
@@ -883,8 +898,14 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
         team_names: roomData.team_names || [],
         team_emojis: roomData.team_emojis || ["🔵", "🔴", "🟢", "🟡"],
         kahoot_timer: roomData.kahoot_timer ?? 5,
+        quiz_language: roomData.quiz_language ?? "french",
+        quiz_chapter_id: roomData.quiz_chapter_id ?? "",
+        quiz_sections: roomData.quiz_sections ?? [],
       } as Room);
       if (roomData.team_emojis?.length > 0) setTeamEmojis(roomData.team_emojis);
+      if (roomData.quiz_language) setQuizLanguage(roomData.quiz_language as Language);
+      if (roomData.quiz_chapter_id) setQuizChapterId(roomData.quiz_chapter_id);
+      if (roomData.quiz_sections) setQuizSections(roomData.quiz_sections);
       setMyPlayerId(playerData?.id ?? null);
       setMyPlayerToken((playerData as any)?.player_token ?? null);
       setIsHost(false);
@@ -920,8 +941,14 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
         team_names: roomData.team_names || [],
         team_emojis: roomData.team_emojis || ["🔵", "🔴", "🟢", "🟡"],
         kahoot_timer: roomData.kahoot_timer ?? 5,
+        quiz_language: roomData.quiz_language ?? "french",
+        quiz_chapter_id: roomData.quiz_chapter_id ?? "",
+        quiz_sections: roomData.quiz_sections ?? [],
       } as Room);
       if (roomData.team_emojis?.length > 0) setTeamEmojis(roomData.team_emojis);
+      if (roomData.quiz_language) setQuizLanguage(roomData.quiz_language as Language);
+      if (roomData.quiz_chapter_id) setQuizChapterId(roomData.quiz_chapter_id);
+      if (roomData.quiz_sections) setQuizSections(roomData.quiz_sections);
       setMyPlayerId(playerData?.id ?? null);
       setMyPlayerToken((playerData as any)?.player_token ?? null);
       setIsHost(false);
