@@ -166,6 +166,16 @@ export const translations = {
     typeBoneName: "Napíš názov kosti...",
     skip: "Preskočiť",
     skeleton: "Ľudská kostra",
+    // Clock times
+    clockTimes: "Časy",
+    whatTimeIsIt: "Koľko je hodín?",
+    // Être conjugation
+    etreTitle: "Être (byť)",
+    etreFillForm: "Doplň správny tvar être",
+    etreWhatMeans: "Čo to znamená po slovensky?",
+    etreWhichForm: "Aký tvar être sem patrí?",
+    etreTranslate: "Prelož do francúzštiny",
+    howDoYouSay: 'Ako povieš "{text}" po francúzsky?',
     // Language labels
     nlLabel: { french: "Slovenčina", english: "Slovenčina", nask: "Pojem", biology: "Pojem" },
     foreignLabel: { french: "Francúzština", english: "Angličtina", nask: "Popis", biology: "Popis" },
