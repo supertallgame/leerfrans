@@ -625,6 +625,9 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
       team_names: teamNames.slice(0, teams),
       team_emojis: teamEmojis.slice(0, teams),
       kahoot_timer: roomData.kahoot_timer ?? kahootTimerSetting,
+      quiz_language: roomData.quiz_language ?? quizLanguage,
+      quiz_chapter_id: roomData.quiz_chapter_id ?? quizChapterId,
+      quiz_sections: roomData.quiz_sections ?? quizSections,
     });
     setMyPlayerId(pid);
     setMyPlayerToken(ptoken);
