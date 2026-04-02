@@ -1572,7 +1572,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
                 </div>
               ) : (
                 <div className="space-y-1">
-                  {players.map((p, i) => (
+                  {[...players].sort((a, b) => b.score - a.score).map((p, i) => (
                     <div key={p.id} className="flex justify-between items-center text-sm">
                       <span className={p.id === myPlayerId ? "font-bold text-primary" : ""}>
                         {i === 0 && "🥇 "}{i === 1 && "🥈 "}{i === 2 && "🥉 "}{p.player_name}
