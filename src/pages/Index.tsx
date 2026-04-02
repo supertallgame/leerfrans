@@ -81,11 +81,12 @@ const FlagEN = ({ className = "w-5 h-3.5" }: { className?: string }) => (
 
 const Index = () => {
   const navigate = useNavigate();
-  const { chapterId, setChapterId, activeVocabulary, language, setLanguage } = useChapter();
+  const { chapterId, setChapterId, activeVocabulary, language, setLanguage, selectedSections, setSelectedSections, availableSections } = useChapter();
   const [activeGame, setActiveGame] = useState<Game>("menu");
   const [showSettings, setShowSettings] = useState(false);
   const [showChapterPicker, setShowChapterPicker] = useState(false);
   const [showLanguagePicker, setShowLanguagePicker] = useState(false);
+  const [showSectionPicker, setShowSectionPicker] = useState(false);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [authLoading, setAuthLoading] = useState(true);
@@ -252,6 +253,15 @@ const Index = () => {
               <BookMarked className="h-3.5 w-3.5" />
               {getChapter(chapterId)?.title ?? "Chapitre 3"}
             </button>
+            {availableSections.length > 0 && (
+              <button
+                onClick={() => setShowSectionPicker(true)}
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors cursor-pointer"
+              >
+                <BookOpen className="h-3.5 w-3.5" />
+                {selectedSections.length === 0 ? "Alle woorden" : selectedSections.sort().join(", ")}
+              </button>
+            )}
           </div>
         </div>
 
@@ -381,6 +391,60 @@ const Index = () => {
         </DialogContent>
       </Dialog>
 
+      {/* Section picker dialog */}
+      <Dialog open={showSectionPicker} onOpenChange={setShowSectionPicker}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Kies woorden</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">Selecteer één of meerdere secties, of laat alles uit voor alle woorden.</p>
+          <div className="space-y-1.5">
+            {availableSections.map((section) => {
+              const isSelected = selectedSections.includes(section);
+              return (
+                <button
+                  key={section}
+                  onClick={() => {
+                    if (isSelected) {
+                      setSelectedSections(selectedSections.filter((s) => s !== section));
+                    } else {
+                      setSelectedSections([...selectedSections, section]);
+                    }
+                  }}
+                  className={`w-full text-left px-3 py-2.5 rounded-lg border text-sm transition-all ${
+                    isSelected
+                      ? "border-primary bg-primary/10 font-medium"
+                      : "border-border hover:border-primary/50 hover:bg-primary/5 cursor-pointer"
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium">Sectie {section}</span>
+                    {isSelected && <span className="text-primary text-xs">✓</span>}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+          <div className="flex gap-2 pt-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-1"
+              onClick={() => { setSelectedSections([]); }}
+            >
+              Alles
+            </Button>
+            <Button
+              size="sm"
+              className="flex-1"
+              onClick={() => setShowSectionPicker(false)}
+            >
+              Klaar
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <ObamaPopup />
       <AuthDialog open={showLoginPrompt} onOpenChange={setShowLoginPrompt} />
 
@@ -409,6 +473,20 @@ const Index = () => {
               {getChapter(chapterId)?.title ?? "Chapitre 3"}
             </button>
           </div>
+          {availableSections.length > 0 && (
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <BookOpen className="h-4 w-4" />
+                <span className="text-sm font-medium">Woorden</span>
+              </div>
+              <button
+                onClick={() => { setShowSettings(false); setShowSectionPicker(true); }}
+                className="text-sm font-medium px-3 py-1 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+              >
+                {selectedSections.length === 0 ? "Alle" : selectedSections.sort().join(", ")}
+              </button>
+            </div>
+          )}
       </SettingsDialog>
      </main>
   );
