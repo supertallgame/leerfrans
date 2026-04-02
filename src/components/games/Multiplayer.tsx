@@ -822,6 +822,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
         num_teams: roomData.num_teams || 2,
         team_names: roomData.team_names || [],
         team_emojis: roomData.team_emojis || ["🔵", "🔴", "🟢", "🟡"],
+        kahoot_timer: roomData.kahoot_timer ?? 5,
       } as Room);
       if (roomData.team_emojis?.length > 0) setTeamEmojis(roomData.team_emojis);
       setMyPlayerId(playerData?.id ?? null);
@@ -829,7 +830,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
       setIsHost(false);
       setPhase("lobby");
       fetchPlayers(roomData.id);
-      toast.success(`Je bent toegevoegd aan de kamer van ${randomRoom.host_name}!`);
+      toast.success(locale === "sk" ? `Pripojený k izbe od ${randomRoom.host_name}!` : `Je bent toegevoegd aan de kamer van ${randomRoom.host_name}!`);
     } catch {
       toast.error(locale === "sk" ? "Niečo sa pokazilo." : "Er ging iets mis bij het joinen.");
     } finally {
