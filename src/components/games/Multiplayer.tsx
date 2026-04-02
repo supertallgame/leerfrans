@@ -17,7 +17,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { supabase } from "@/integrations/supabase/client";
-import { shuffle } from "@/data/vocabulary";
+import { shuffle, getChaptersForLanguage, getSectionsForChapter, getChapter, Language } from "@/data/vocabulary";
 import { useChapter } from "@/contexts/ChapterContext";
 import { useLocale } from "@/contexts/LocaleContext";
 import { toast } from "sonner";
