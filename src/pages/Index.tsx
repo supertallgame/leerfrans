@@ -430,7 +430,7 @@ const Index = () => {
               variant="outline"
               size="sm"
               className="flex-1"
-              onClick={() => { setSelectedSections([]); }}
+              onClick={() => { setSelectedSections([...availableSections]); }}
             >
               Alles
             </Button>
