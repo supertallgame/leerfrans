@@ -248,6 +248,9 @@ interface Room {
   team_emojis: string[];
   is_public?: boolean;
   kahoot_timer: number;
+  quiz_language?: string;
+  quiz_chapter_id?: string;
+  quiz_sections?: string[];
 }
 
 interface PublicRoom {
