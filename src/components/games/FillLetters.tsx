@@ -121,24 +121,7 @@ export default function FillLetters({ onBack }: Props) {
         <Button variant="ghost" onClick={onBack} className="gap-2 text-sm">
           <ArrowLeft className="h-4 w-4" /> {i.back}
         </Button>
-        <div className="flex gap-1.5 md:gap-2">
-          <Button
-            size="sm"
-            variant={direction === "nl_to_fr" ? "default" : "outline"}
-            onClick={() => { setDirection("nl_to_fr"); restart(); }}
-            className="text-xs md:text-sm px-2 md:px-3"
-          >
-            {nlShort}→{foreignShort}
-          </Button>
-          <Button
-            size="sm"
-            variant={direction === "fr_to_nl" ? "default" : "outline"}
-            onClick={() => { setDirection("fr_to_nl"); restart(); }}
-            className="text-xs md:text-sm px-2 md:px-3"
-          >
-            {foreignShort}→{nlShort}
-          </Button>
-        </div>
+        <span className="text-xs md:text-sm text-muted-foreground">{i.score}: {score}/{total}</span>
       </div>
 
       <div className="flex items-center justify-between text-xs md:text-sm text-muted-foreground">
