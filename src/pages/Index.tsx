@@ -253,6 +253,15 @@ const Index = () => {
               <BookMarked className="h-3.5 w-3.5" />
               {getChapter(chapterId)?.title ?? "Chapitre 3"}
             </button>
+            {availableSections.length > 0 && (
+              <button
+                onClick={() => setShowSectionPicker(true)}
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors cursor-pointer"
+              >
+                <BookOpen className="h-3.5 w-3.5" />
+                {selectedSections.length === 0 ? "Alle woorden" : selectedSections.sort().join(", ")}
+              </button>
+            )}
           </div>
         </div>
 
