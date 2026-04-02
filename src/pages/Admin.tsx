@@ -448,7 +448,12 @@ export default function Admin() {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-lg font-semibold flex items-center gap-2">
-                🇺🇸 Obama Easter Egg
+                <svg viewBox="0 0 640 480" className="w-5 h-3.5 rounded-sm shrink-0" aria-label="US">
+                  <rect width="640" height="480" fill="#bd3d44" />
+                  {[0,1,2,3,4,5,6].map(i => <rect key={i} y={i * 73.85} width="640" height={36.92} fill={i % 2 === 0 ? "#bd3d44" : "#fff"} />)}
+                  <rect width="256" height="258.9" fill="#192f5d" />
+                </svg>
+                Obama Easter Egg
               </h2>
               <p className="text-sm text-muted-foreground mt-1">
                 {obamaEnabled
