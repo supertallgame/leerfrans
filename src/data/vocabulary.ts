@@ -302,10 +302,6 @@ const chapitre5Words: VocabItem[] = [
   { french: "qui", dutch: "wie", section: "A" },
   { french: "pourquoi", dutch: "waarom", section: "A" },
   { french: "chez", dutch: "bij", section: "A" },
-  { french: "Tu as passé un bon weekend?", dutch: "Heb je een leuk weekend gehad?", section: "A" },
-  { french: "Oui, j'ai regardé un film avec Simon.", dutch: "Ja, ik heb een film gekeken met Simon.", section: "A" },
-  { french: "C'est qui, Simon?", dutch: "Wie is dat, Simon?", section: "A" },
-  { french: "C'est mon copain.", dutch: "Het is mijn vriend.", section: "A" },
   // Section B
   { french: "janvier", dutch: "januari", section: "B" },
   { french: "février", dutch: "februari", section: "B" },
@@ -327,9 +323,14 @@ const chapitre5Words: VocabItem[] = [
   { french: "je peux", dutch: "ik kan", section: "B" },
   { french: "l'argent (m)", dutch: "het geld", section: "B" },
   { french: "le jardin", dutch: "de tuin", section: "B" },
-  { french: "Tu as quel âge?", dutch: "Hoe oud ben jij?", section: "B" },
-  { french: "J'ai treize ans.", dutch: "Ik ben dertien jaar.", section: "B" },
-  { french: "Mon anniversaire, c'est le 11 mars.", dutch: "Ik ben op 11 maart jarig.", section: "B" },
+  // Section C – Parler de ses activités
+  { french: "Tu as passé un bon weekend?", dutch: "Heb je een leuk weekend gehad?", section: "C" },
+  { french: "Oui, j'ai regardé un film avec Simon.", dutch: "Ja, ik heb een film gekeken met Simon.", section: "C" },
+  { french: "C'est qui, Simon?", dutch: "Wie is dat, Simon?", section: "C" },
+  { french: "C'est mon copain.", dutch: "Het is mijn vriend.", section: "C" },
+  { french: "Tu as quel âge?", dutch: "Hoe oud ben jij?", section: "C" },
+  { french: "J'ai treize ans.", dutch: "Ik ben dertien jaar.", section: "C" },
+  { french: "Mon anniversaire, c'est le 11 mars.", dutch: "Ik ben op 11 maart jarig.", section: "C" },
   // Section E
   { french: "le frère", dutch: "de broer", section: "E" },
   { french: "la sœur", dutch: "de zus", section: "E" },
@@ -347,12 +348,6 @@ const chapitre5Words: VocabItem[] = [
   { french: "les yeux (m mv)", dutch: "de ogen", section: "E" },
   { french: "les cheveux (m mv)", dutch: "het haar", section: "E" },
   { french: "les lunettes (v mv)", dutch: "de bril", section: "E" },
-  { french: "Ton frère est comment?", dutch: "Hoe is je broer?", section: "E" },
-  { french: "Mon frère a les cheveux bruns.", dutch: "Mijn broer heeft bruin haar.", section: "E" },
-  { french: "Il a les yeux bleus.", dutch: "Hij heeft blauwe ogen.", section: "E" },
-  { french: "Il porte des lunettes.", dutch: "Hij draagt een bril.", section: "E" },
-  { french: "Il est grand?", dutch: "Is hij groot?", section: "E" },
-  { french: "Non, il est petit.", dutch: "Nee, hij is klein.", section: "E" },
   // Section F
   { french: "la question", dutch: "de vraag", section: "F" },
   { french: "le jour", dutch: "de dag", section: "F" },
@@ -370,10 +365,17 @@ const chapitre5Words: VocabItem[] = [
   { french: "timide", dutch: "verlegen", section: "F" },
   { french: "meilleur(e)", dutch: "beste", section: "F" },
   { french: "un peu", dutch: "een beetje", section: "F" },
-  { french: "Il est sympa?", dutch: "Is hij aardig?", section: "F" },
-  { french: "Oui, et il est drôle.", dutch: "Ja, en hij is grappig.", section: "F" },
-  { french: "Il aime le sport?", dutch: "Houdt hij van sport?", section: "F" },
-  { french: "Oui, il aime le foot.", dutch: "Ja, hij houdt van voetbal.", section: "F" },
+  // Section G – Décrire quelqu'un
+  { french: "Ton frère est comment?", dutch: "Hoe is je broer?", section: "G" },
+  { french: "Mon frère a les cheveux bruns.", dutch: "Mijn broer heeft bruin haar.", section: "G" },
+  { french: "Il a les yeux bleus.", dutch: "Hij heeft blauwe ogen.", section: "G" },
+  { french: "Il porte des lunettes.", dutch: "Hij draagt een bril.", section: "G" },
+  { french: "Il est grand?", dutch: "Is hij groot?", section: "G" },
+  { french: "Non, il est petit.", dutch: "Nee, hij is klein.", section: "G" },
+  { french: "Il est sympa?", dutch: "Is hij aardig?", section: "G" },
+  { french: "Oui, et il est drôle.", dutch: "Ja, en hij is grappig.", section: "G" },
+  { french: "Il aime le sport?", dutch: "Houdt hij van sport?", section: "G" },
+  { french: "Oui, il aime le foot.", dutch: "Ja, hij houdt van voetbal.", section: "G" },
 ];
 
 // ─── English chapters (uses `french` field for English words) ───
