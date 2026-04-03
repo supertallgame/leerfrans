@@ -165,7 +165,7 @@
 }
 
 @media print {
-  body > * { visibility: hidden !important; }
+  body > * { display: none !important; }
+  .print-puzzle { display: block !important; position: static; }
   .print-puzzle, .print-puzzle * { visibility: visible !important; }
-  .print-puzzle { position: absolute; left: 0; top: 0; }
 }
