@@ -178,8 +178,8 @@ export default function Woordenzoeker() {
   const allFound = grid && placedWords.length > 0 && foundWords.size === placedWords.length;
 
   const ANSWER_COLORS = [
-    "#7c3aed40", "#2dd4bf40", "#f59e0b50", "#ef444440",
-    "#3b82f640", "#a855f740", "#f9731640", "#14b8a640",
+    "#c4b5fd", "#99f6e4", "#fde68a", "#fca5a5",
+    "#93c5fd", "#d8b4fe", "#fdba74", "#5eead4",
   ];
 
   const answerCellSet = new Map<string, string>();
