@@ -240,8 +240,9 @@ export default function Woordenzoeker() {
     generate();
   }, []);
 
+  const PRINT_GRID_W = 500;
   const renderPrintGrid = (g: string[][], size: number, highlights?: Map<string, string>) => (
-    <div style={{ display: "grid", gridTemplateColumns: `repeat(${size}, 1fr)`, border: "2px solid #333", width: 700 }}>
+    <div style={{ display: "grid", gridTemplateColumns: `repeat(${size}, 1fr)`, border: "2px solid #333", width: PRINT_GRID_W }}>
       {g.map((row, r) =>
         row.map((letter, c) => {
           const k = `${r},${c}`;
@@ -249,8 +250,8 @@ export default function Woordenzoeker() {
           return (
             <div key={k} style={{
               display: "flex", alignItems: "center", justifyContent: "center",
-              width: 700 / size, height: 700 / size,
-              fontSize: Math.max(12, (700 / size) * 0.6),
+              width: PRINT_GRID_W / size, height: PRINT_GRID_W / size,
+              fontSize: Math.max(10, (PRINT_GRID_W / size) * 0.6),
               fontWeight: 700, fontFamily: "monospace",
               border: "0.5px solid #ddd", color: "#222",
               backgroundColor: bg || undefined,
