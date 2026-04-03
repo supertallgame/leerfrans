@@ -18,6 +18,7 @@ const SlovakFeedback = lazyRetry(() => import("./pages/SlovakFeedback.tsx"));
 const Juf = lazyRetry(() => import("./pages/Juf.tsx"));
 const Coderen = lazyRetry(() => import("./pages/Coderen.tsx"));
 const Woordenzoeker = lazyRetry(() => import("./pages/Woordenzoeker.tsx"));
+const Kruiswoordpuzzel = lazyRetry(() => import("./pages/Kruiswoordpuzzel.tsx"));
 const NotFound = lazyRetry(() => import("./pages/NotFound.tsx"));
 
 const queryClient = new QueryClient();
@@ -42,6 +43,7 @@ const App = () => (
               <Route path="/juf" element={<Juf />} />
               <Route path="/coderen" element={<Coderen />} />
               <Route path="/woordenzoeker" element={<Woordenzoeker />} />
+              <Route path="/kruiswoordpuzzel" element={<Kruiswoordpuzzel />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
