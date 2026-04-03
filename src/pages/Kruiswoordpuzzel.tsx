@@ -307,27 +307,32 @@ export default function Kruiswoordpuzzel() {
     const maxDim = Math.max(cols, rows);
     const cs = Math.floor(Math.min(56, 480 / maxDim));
     return (
-      <div style={{ display: "inline-grid", gridTemplateColumns: `repeat(${cols}, ${cs}px)`, margin: "0 auto" }}>
-        {g.flatMap((row, r) =>
-          row.map((cell, c) => {
-            const key = `${r},${c}`;
-            const num = numberMap.get(key);
-            const isCell = cell !== null;
-            return (
-              <div key={key} style={{
-                width: cs, height: cs, position: "relative",
-                border: isCell ? "2px solid #000" : "none",
-                backgroundColor: isCell ? "#fff" : "transparent",
-                textAlign: "center", lineHeight: `${cs}px`,
-                fontSize: cs * 0.5, fontWeight: 700, fontFamily: "Arial, sans-serif", color: "#222",
-              }}>
-                {num && <span style={{ position: "absolute", top: 1, left: 2, fontSize: Math.max(8, cs * 0.28), fontWeight: 600, color: "#444", lineHeight: 1 }}>{num}</span>}
-                {showAnswers && cell ? cell : ""}
-              </div>
-            );
-          })
-        )}
-      </div>
+      <table style={{ borderCollapse: "collapse", margin: "0 auto", lineHeight: 1 }} cellSpacing={0} cellPadding={0}>
+        <tbody>
+          {g.map((row, r) => (
+            <tr key={r} style={{ height: cs }}>
+              {row.map((cell, c) => {
+                const key = `${r},${c}`;
+                const num = numberMap.get(key);
+                const isCell = cell !== null;
+                return (
+                  <td key={key} style={{
+                    width: cs, height: cs, padding: 0, margin: 0,
+                    border: isCell ? "1.5px solid #000" : "none",
+                    backgroundColor: isCell ? "#fff" : "transparent",
+                    position: "relative", textAlign: "center", verticalAlign: "middle",
+                    fontSize: cs * 0.5, fontWeight: 700, fontFamily: "Arial, sans-serif", color: "#222",
+                    lineHeight: `${cs}px`,
+                  }}>
+                    {num && <span style={{ position: "absolute", top: 0, left: 2, fontSize: Math.max(8, cs * 0.28), fontWeight: 600, color: "#444", lineHeight: 1 }}>{num}</span>}
+                    {showAnswers && cell ? cell : ""}
+                  </td>
+                );
+              })}
+            </tr>
+          ))}
+        </tbody>
+      </table>
     );
   };
 
