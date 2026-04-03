@@ -409,6 +409,30 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          role?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       game_rooms_public: {
@@ -570,6 +594,8 @@ export type Database = {
             }
             Returns: Json
           }
+      find_user_by_email: { Args: { p_email: string }; Returns: string }
+      get_admin_emails: { Args: never; Returns: string[] }
       get_my_mute_status: {
         Args: never
         Returns: {
