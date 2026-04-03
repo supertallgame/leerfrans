@@ -142,10 +142,20 @@ export default function Admin() {
 
   const checkAdmin = async () => {
     const { data: { session } } = await supabase.auth.getSession();
-    if (!session?.user?.email || !ADMIN_EMAILS.includes(session.user.email)) {
+    if (!session?.user?.email) {
       setIsAdmin(false);
       setLoading(false);
       return;
+    }
+    // Check hardcoded list first, then dynamic admin list
+    const email = session.user.email;
+    if (!ADMIN_EMAILS.includes(email)) {
+      const { data: adminEmails } = await supabase.rpc("get_admin_emails");
+      if (!adminEmails || !adminEmails.includes(email)) {
+        setIsAdmin(false);
+        setLoading(false);
+        return;
+      }
     }
     setIsAdmin(true);
     // Load disabled subjects + reviews in parallel
