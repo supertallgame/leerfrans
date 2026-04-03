@@ -375,48 +375,19 @@ export default function Woordenzoeker() {
                 )}
               </div>
 
-              {/* Hidden printable version */}
+              {/* Hidden printable puzzle */}
               <div className="fixed -left-[9999px] top-0">
                 <div ref={printRef} style={{ padding: 32, width: 800, background: "#fff", fontFamily: "Arial, sans-serif" }}>
                   <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8 }}>🔍 Woordenzoeker</h2>
-                  <div
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: `repeat(${gridSize}, 1fr)`,
-                      gap: 0,
-                      border: "2px solid #333",
-                      width: 700,
-                    }}
-                  >
-                    {grid.map((row, r) =>
-                      row.map((letter, c) => (
-                        <div
-                          key={`${r},${c}`}
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            width: 700 / gridSize,
-                            height: 700 / gridSize,
-                            fontSize: Math.max(12, 700 / gridSize * 0.6),
-                            fontWeight: 700,
-                            fontFamily: "monospace",
-                            border: "0.5px solid #ddd",
-                            color: "#222",
-                          }}
-                        >
-                          {letter}
-                        </div>
-                      ))
-                    )}
-                  </div>
-                  <div style={{ marginTop: 16, display: "flex", flexWrap: "wrap", gap: 8 }}>
-                    {placedWords.map((pw) => (
-                      <span key={pw.word} style={{ background: "#f0f0f0", padding: "4px 12px", borderRadius: 12, fontSize: 14, fontWeight: 600 }}>
-                        {pw.word}
-                      </span>
-                    ))}
-                  </div>
+                  {renderPrintGrid(grid, gridSize)}
+                  {renderWordList(placedWords)}
+                </div>
+
+                {/* Answer key */}
+                <div ref={answerRef} style={{ padding: 32, width: 800, background: "#fff", fontFamily: "Arial, sans-serif" }}>
+                  <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8 }}>🔍 Antwoordblad</h2>
+                  {renderPrintGrid(grid, gridSize, answerCellSet)}
+                  {renderWordList(placedWords, true)}
                 </div>
               </div>
             </div>
