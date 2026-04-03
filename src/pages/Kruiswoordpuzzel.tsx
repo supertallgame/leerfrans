@@ -260,7 +260,7 @@ export default function Kruiswoordpuzzel() {
     pdf.save("kruiswoordpuzzel.pdf");
   };
 
-  const handlePrint = (mode: "puzzle" | "answers" | "both") => {
+  const handlePrint = async (mode: "puzzle" | "answers" | "both") => {
     const refs: HTMLDivElement[] = [];
     if ((mode === "puzzle" || mode === "both") && printRef.current) refs.push(printRef.current);
     if ((mode === "answers" || mode === "both") && answerRef.current) refs.push(answerRef.current);
@@ -268,11 +268,35 @@ export default function Kruiswoordpuzzel() {
 
     const printWindow = window.open("", "_blank", "width=900,height=700");
     if (!printWindow) return;
-    const content = refs.map((r) => `<div style="page-break-after: always;">${r.innerHTML}</div>`).join("");
-    printWindow.document.write(`<!doctype html><html><head><title>Kruiswoordpuzzel</title><style>@page{margin:10mm;size:portrait}*{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact}body{margin:0;padding:20px;background:#fff;font-family:Arial,sans-serif}div:last-child{page-break-after:auto}table{border-collapse:collapse}td{padding:0}</style></head><body>${content}</body></html>`);
+
+    printWindow.document.write(`<!doctype html><html><head><title>Kruiswoordpuzzel</title><style>@page{margin:10mm;size:portrait}*{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact}body{margin:0;padding:0;background:#fff;font-family:Arial,sans-serif}.page{display:flex;align-items:center;justify-content:center;min-height:100vh;page-break-after:always;padding:12mm}img{display:block;max-width:100%;width:100%;height:auto}.page:last-child{page-break-after:auto}</style></head><body><div style="padding:24px;text-align:center">Print voorbereiden...</div></body></html>`);
+    printWindow.document.close();
+
+    const { default: html2canvas } = await import("html2canvas");
+    const pages: string[] = [];
+
+    for (const ref of refs) {
+      const canvas = await html2canvas(ref, {
+        scale: 3,
+        backgroundColor: "#ffffff",
+        useCORS: true,
+        logging: false,
+      });
+      pages.push(canvas.toDataURL("image/png", 1.0));
+    }
+
+    const content = pages
+      .map((src, index) => `<div class="page"${index === pages.length - 1 ? ' style="page-break-after:auto"' : ""}><img src="${src}" alt="Kruiswoordpuzzel printpagina ${index + 1}" /></div>`)
+      .join("");
+
+    printWindow.document.open();
+    printWindow.document.write(`<!doctype html><html><head><title>Kruiswoordpuzzel</title><style>@page{margin:10mm;size:portrait}*{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact}body{margin:0;padding:0;background:#fff;font-family:Arial,sans-serif}.page{display:flex;align-items:center;justify-content:center;min-height:100vh;page-break-after:always;padding:12mm}img{display:block;max-width:100%;width:100%;height:auto}.page:last-child{page-break-after:auto}</style></head><body>${content}</body></html>`);
     printWindow.document.close();
     printWindow.focus();
-    setTimeout(() => { printWindow.print(); printWindow.close(); }, 300);
+    setTimeout(() => {
+      printWindow.print();
+      printWindow.close();
+    }, 300);
   };
 
   const cellSize = grid ? Math.min(40, 600 / Math.max(grid.length, grid[0]?.length || 1)) : 40;
