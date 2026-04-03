@@ -65,7 +65,7 @@ interface GameRoom {
   max_players: number;
 }
 
-const ADMIN_EMAILS = ["brankovantland@gmail.com", "branko18vantland@gmail.com", "tamoopdam@gmail.com", "jack.ouwerkerk@vsodaafgeluk.nl"];
+const ADMIN_EMAILS = ["brankovantland@gmail.com", "branko18vantland@gmail.com"];
 
 const FlagEN = ({ className = "w-5 h-3.5" }: { className?: string }) => (
   <svg viewBox="0 0 640 480" className={className} aria-label="English">

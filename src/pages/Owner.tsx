@@ -8,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 const OWNER_EMAILS = ["brankovantland@gmail.com", "branko18vantland@gmail.com"];
-const HARDCODED_ADMINS = ["brankovantland@gmail.com", "branko18vantland@gmail.com", "tamoopdam@gmail.com", "jack.ouwerkerk@vsodaafgeluk.nl"];
+const HARDCODED_ADMINS = ["brankovantland@gmail.com", "branko18vantland@gmail.com"];
 
 interface UserRole {
   id: string;
