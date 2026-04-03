@@ -227,6 +227,40 @@ export default function Woordenzoeker() {
     generate();
   }, []);
 
+  const renderPrintGrid = (g: string[][], size: number, highlights?: Map<string, string>) => (
+    <div style={{ display: "grid", gridTemplateColumns: `repeat(${size}, 1fr)`, border: "2px solid #333", width: 700 }}>
+      {g.map((row, r) =>
+        row.map((letter, c) => {
+          const k = `${r},${c}`;
+          const bg = highlights?.get(k);
+          return (
+            <div key={k} style={{
+              display: "flex", alignItems: "center", justifyContent: "center",
+              width: 700 / size, height: 700 / size,
+              fontSize: Math.max(12, (700 / size) * 0.6),
+              fontWeight: 700, fontFamily: "monospace",
+              border: "0.5px solid #ddd", color: "#222",
+              backgroundColor: bg || undefined,
+            }}>{letter}</div>
+          );
+        })
+      )}
+    </div>
+  );
+
+  const renderWordList = (pws: PlacedWord[], checked = false) => (
+    <div style={{ marginTop: 16, display: "flex", flexWrap: "wrap", gap: 8 }}>
+      {pws.map((pw) => (
+        <span key={pw.word} style={{
+          background: "#f0f0f0", padding: "4px 12px", borderRadius: 12, fontSize: 14, fontWeight: 600,
+          textDecoration: checked ? "line-through" : undefined,
+        }}>
+          {checked ? "✅ " : ""}{pw.word}
+        </span>
+      ))}
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-background p-4 md:p-8">
       <div className="max-w-6xl mx-auto space-y-6">
