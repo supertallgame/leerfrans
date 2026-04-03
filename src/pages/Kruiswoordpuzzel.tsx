@@ -306,46 +306,95 @@ export default function Kruiswoordpuzzel() {
     const rows = g.length;
     const maxDim = Math.max(cols, rows);
     const cs = Math.floor(Math.min(56, 480 / maxDim));
-    // Use a single outer border + inner grid lines approach via SVG-like precision:
-    // Each cell draws only its RIGHT and BOTTOM border. The table draws the TOP and LEFT outer edge.
-    // This guarantees every line is exactly 1px with no doubling.
+    const stroke = 2;
+    const width = cols * cs;
+    const height = rows * cs;
+    const fills: JSX.Element[] = [];
+    const lines: JSX.Element[] = [];
+    const labels: JSX.Element[] = [];
+
+    g.forEach((row, r) => {
+      row.forEach((cell, c) => {
+        if (cell === null) return;
+
+        const key = `${r},${c}`;
+        const num = numberMap.get(key);
+        const x = c * cs;
+        const y = r * cs;
+        const aboveFilled = g[r - 1]?.[c] !== null;
+        const leftFilled = g[r]?.[c - 1] !== null;
+
+        fills.push(
+          <rect key={`fill-${key}`} x={x} y={y} width={cs} height={cs} fill="#ffffff" />
+        );
+
+        if (!aboveFilled) {
+          lines.push(
+            <line key={`top-${key}`} x1={x} y1={y} x2={x + cs} y2={y} stroke="#000000" strokeWidth={stroke} shapeRendering="crispEdges" />
+          );
+        }
+
+        if (!leftFilled) {
+          lines.push(
+            <line key={`left-${key}`} x1={x} y1={y} x2={x} y2={y + cs} stroke="#000000" strokeWidth={stroke} shapeRendering="crispEdges" />
+          );
+        }
+
+        lines.push(
+          <line key={`right-${key}`} x1={x + cs} y1={y} x2={x + cs} y2={y + cs} stroke="#000000" strokeWidth={stroke} shapeRendering="crispEdges" />,
+          <line key={`bottom-${key}`} x1={x} y1={y + cs} x2={x + cs} y2={y + cs} stroke="#000000" strokeWidth={stroke} shapeRendering="crispEdges" />
+        );
+
+        if (num) {
+          labels.push(
+            <text
+              key={`num-${key}`}
+              x={x + 3}
+              y={y + Math.max(8, cs * 0.26)}
+              fontSize={Math.max(8, cs * 0.26)}
+              fontWeight={600}
+              fontFamily="Arial, sans-serif"
+              fill="#444444"
+            >
+              {num}
+            </text>
+          );
+        }
+
+        if (showAnswers) {
+          labels.push(
+            <text
+              key={`letter-${key}`}
+              x={x + cs / 2}
+              y={y + cs / 2}
+              textAnchor="middle"
+              dominantBaseline="middle"
+              fontSize={cs * 0.5}
+              fontWeight={700}
+              fontFamily="Arial, sans-serif"
+              fill="#222222"
+            >
+              {cell}
+            </text>
+          );
+        }
+      });
+    });
+
     return (
-      <table style={{ borderCollapse: "collapse", margin: "0 auto", lineHeight: 1, borderSpacing: 0 }} cellSpacing={0} cellPadding={0}>
-        <tbody>
-          {g.map((row, r) => (
-            <tr key={r}>
-              {row.map((cell, c) => {
-                const key = `${r},${c}`;
-                const num = numberMap.get(key);
-                const isCell = cell !== null;
-                // Check neighbors to determine which borders to draw
-                const hasTop = isCell && (r === 0 || g[r - 1]?.[c] !== null);
-                const hasLeft = isCell && (c === 0 || g[r]?.[c - 1] !== null);
-                const hasBottom = isCell && (r === rows - 1 || g[r + 1]?.[c] !== null);
-                const hasRight = isCell && (c === cols - 1 || g[r]?.[c + 1] !== null);
-                const bw = "2px solid #000";
-                const bn = "2px solid transparent";
-                return (
-                  <td key={key} style={{
-                    width: cs, height: cs, padding: 0, margin: 0,
-                    borderTop: isCell ? bw : bn,
-                    borderLeft: isCell ? bw : bn,
-                    borderBottom: isCell ? bw : bn,
-                    borderRight: isCell ? bw : bn,
-                    backgroundColor: isCell ? "#fff" : "transparent",
-                    position: "relative", textAlign: "center", verticalAlign: "middle",
-                    fontSize: cs * 0.5, fontWeight: 700, fontFamily: "Arial, sans-serif", color: "#222",
-                    lineHeight: `${cs}px`,
-                  }}>
-                    {num && <span style={{ position: "absolute", top: 0, left: 2, fontSize: Math.max(8, cs * 0.28), fontWeight: 600, color: "#444", lineHeight: 1 }}>{num}</span>}
-                    {showAnswers && cell ? cell : ""}
-                  </td>
-                );
-              })}
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <div style={{ display: "flex", justifyContent: "center" }}>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width={width}
+          height={height}
+          viewBox={`0 0 ${width} ${height}`}
+          style={{ display: "block", overflow: "visible" }}
+        >
+          {fills}
+          {lines}
+          {labels}
+        </svg>
+      </div>
     );
   };
 
