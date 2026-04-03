@@ -275,21 +275,25 @@ export default function Kruiswoordpuzzel() {
   const cellSize = grid ? Math.min(40, 600 / Math.max(grid.length, grid[0]?.length || 1)) : 40;
 
   const renderPrintGrid = (g: (string | null)[][], showAnswers: boolean) => {
-    const cs = Math.min(36, 600 / Math.max(g.length, g[0]?.length || 1));
+    const cols = g[0]?.length || 1;
+    const rows = g.length;
+    const maxDim = Math.max(cols, rows);
+    const cs = Math.min(32, 480 / maxDim);
     return (
-      <div style={{ display: "inline-grid", gridTemplateColumns: `repeat(${g[0]?.length || 0}, ${cs}px)`, border: "2px solid #333" }}>
+      <div style={{ display: "inline-grid", gridTemplateColumns: `repeat(${cols}, ${cs}px)` }}>
         {g.map((row, r) =>
           row.map((cell, c) => {
             const key = `${r},${c}`;
             const num = numberMap.get(key);
             return (
               <div key={key} style={{
-                width: cs, height: cs, border: cell !== null ? "1px solid #333" : "none",
-                backgroundColor: cell === null ? "#222" : "#fff",
+                width: cs, height: cs,
+                border: cell !== null ? "1.5px solid #333" : "none",
+                backgroundColor: cell === null ? "#000" : "#fff",
                 position: "relative", display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: cs * 0.5, fontWeight: 700, fontFamily: "Arial",
+                fontSize: cs * 0.5, fontWeight: 700, fontFamily: "Arial", color: "#222",
               }}>
-                {num && <span style={{ position: "absolute", top: 1, left: 2, fontSize: cs * 0.25, fontWeight: 400 }}>{num}</span>}
+                {num && <span style={{ position: "absolute", top: 1, left: 2, fontSize: Math.max(7, cs * 0.28), fontWeight: 500, color: "#555" }}>{num}</span>}
                 {showAnswers && cell ? cell : ""}
               </div>
             );
