@@ -488,7 +488,7 @@ export default function Kruiswoordpuzzel() {
                   </div>
                 </div>
                 <div ref={answerRef} style={{ padding: 20, width: 560, background: "#fff", fontFamily: "Arial, sans-serif" }}>
-                  <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 10 }}>✏️ Antwoordblad</h2>
+                  <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 10 }}>✏️ {title || "Kruiswoordpuzzel"} — Antwoordblad</h2>
                   {renderPrintGrid(grid, true)}
                   <div style={{ display: "flex", gap: 24, marginTop: 14 }}>
                     <div style={{ flex: 1 }}>{renderClues("across")}</div>
