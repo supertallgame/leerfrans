@@ -299,12 +299,20 @@ export default function Woordenzoeker() {
                     <Download className="h-4 w-4" /> Download
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="grid grid-cols-2 gap-2">
-                  <Button variant="outline" size="sm" onClick={downloadAsPDF}>PDF</Button>
-                  <Button variant="outline" size="sm" onClick={() => downloadAsImage("png")}>PNG</Button>
-                  <Button variant="outline" size="sm" onClick={() => downloadAsImage("jpeg")}>JPG</Button>
-                  <Button variant="outline" size="sm" onClick={() => downloadAsImage("webp")}>WebP</Button>
-                  <Button variant="outline" size="sm" className="col-span-2 gap-1" onClick={() => window.print()}>
+                <CardContent className="space-y-2">
+                  <p className="text-xs text-muted-foreground">Puzzel + antwoordblad</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button variant="outline" size="sm" onClick={downloadAsPDF}>PDF</Button>
+                    <Button variant="outline" size="sm" onClick={() => downloadAsImage("png")}>PNG</Button>
+                    <Button variant="outline" size="sm" onClick={() => downloadAsImage("jpeg")}>JPG</Button>
+                    <Button variant="outline" size="sm" onClick={() => downloadAsImage("webp")}>WebP</Button>
+                  </div>
+                  <p className="text-xs text-muted-foreground pt-1">Alleen antwoordblad</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button variant="outline" size="sm" onClick={() => downloadAsImage("png", true)}>PNG</Button>
+                    <Button variant="outline" size="sm" onClick={() => downloadAsImage("jpeg", true)}>JPG</Button>
+                  </div>
+                  <Button variant="outline" size="sm" className="w-full gap-1" onClick={() => window.print()}>
                     <Printer className="h-3.5 w-3.5" /> Printen
                   </Button>
                 </CardContent>
