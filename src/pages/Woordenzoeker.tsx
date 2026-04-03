@@ -177,28 +177,49 @@ export default function Woordenzoeker() {
 
   const allFound = grid && placedWords.length > 0 && foundWords.size === placedWords.length;
 
+  const ANSWER_COLORS = [
+    "#7c3aed40", "#2dd4bf40", "#f59e0b50", "#ef444440",
+    "#3b82f640", "#a855f740", "#f9731640", "#14b8a640",
+  ];
+
+  const answerCellSet = new Map<string, string>();
+  placedWords.forEach((pw, idx) => {
+    const color = ANSWER_COLORS[idx % ANSWER_COLORS.length];
+    getCellsForWord(pw).forEach((c) => answerCellSet.set(c, color));
+  });
+
   // Download as image
-  const downloadAsImage = async (format: "png" | "jpeg" | "webp") => {
-    if (!printRef.current) return;
+  const downloadAsImage = async (format: "png" | "jpeg" | "webp", withAnswers = false) => {
+    const ref = withAnswers ? answerRef.current : printRef.current;
+    if (!ref) return;
     const { default: html2canvas } = await import("html2canvas");
-    const canvas = await html2canvas(printRef.current, { scale: 3, backgroundColor: "#ffffff" });
+    const canvas = await html2canvas(ref, { scale: 3, backgroundColor: "#ffffff" });
     const link = document.createElement("a");
-    link.download = `woordenzoeker.${format === "jpeg" ? "jpg" : format}`;
+    const suffix = withAnswers ? "_antwoorden" : "";
+    link.download = `woordenzoeker${suffix}.${format === "jpeg" ? "jpg" : format}`;
     link.href = canvas.toDataURL(`image/${format}`, 1.0);
     link.click();
   };
 
-  // Download as PDF
+  // Download as PDF (puzzle + answer key)
   const downloadAsPDF = async () => {
-    if (!printRef.current) return;
+    if (!printRef.current || !answerRef.current) return;
     const { default: html2canvas } = await import("html2canvas");
     const { jsPDF } = await import("jspdf");
-    const canvas = await html2canvas(printRef.current, { scale: 3, backgroundColor: "#ffffff" });
-    const imgData = canvas.toDataURL("image/png");
     const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
     const pdfW = pdf.internal.pageSize.getWidth() - 20;
-    const pdfH = (canvas.height / canvas.width) * pdfW;
-    pdf.addImage(imgData, "PNG", 10, 10, pdfW, pdfH);
+
+    // Page 1: puzzle
+    const c1 = await html2canvas(printRef.current, { scale: 3, backgroundColor: "#ffffff" });
+    const h1 = (c1.height / c1.width) * pdfW;
+    pdf.addImage(c1.toDataURL("image/png"), "PNG", 10, 10, pdfW, h1);
+
+    // Page 2: answer key
+    pdf.addPage();
+    const c2 = await html2canvas(answerRef.current, { scale: 3, backgroundColor: "#ffffff" });
+    const h2 = (c2.height / c2.width) * pdfW;
+    pdf.addImage(c2.toDataURL("image/png"), "PNG", 10, 10, pdfW, h2);
+
     pdf.save("woordenzoeker.pdf");
   };
 
