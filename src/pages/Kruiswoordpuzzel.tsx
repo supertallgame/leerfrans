@@ -380,9 +380,18 @@ export default function Kruiswoordpuzzel() {
                     <Button variant="outline" size="sm" onClick={() => downloadAsImage("png", true)}>PNG</Button>
                     <Button variant="outline" size="sm" onClick={() => downloadAsImage("jpeg", true)}>JPG</Button>
                   </div>
-                  <Button variant="outline" size="sm" className="w-full gap-1" onClick={() => window.print()}>
-                    <Printer className="h-3.5 w-3.5" /> Printen
-                  </Button>
+                  <p className="text-xs text-muted-foreground pt-1">Printen</p>
+                  <div className="grid grid-cols-3 gap-2">
+                    <Button variant="outline" size="sm" className="gap-1" onClick={() => handlePrint("puzzle")}>
+                      <Printer className="h-3 w-3" /> Puzzel
+                    </Button>
+                    <Button variant="outline" size="sm" className="gap-1" onClick={() => handlePrint("answers")}>
+                      <Printer className="h-3 w-3" /> Antw.
+                    </Button>
+                    <Button variant="outline" size="sm" className="gap-1" onClick={() => handlePrint("both")}>
+                      <Printer className="h-3 w-3" /> Beide
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             )}
