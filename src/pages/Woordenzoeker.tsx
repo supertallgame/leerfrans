@@ -201,6 +201,38 @@ export default function Woordenzoeker() {
     link.click();
   };
 
+  const handlePrintPuzzle = () => {
+    if (!printRef.current) return;
+    const printWindow = window.open("", "_blank", "width=900,height=700");
+    if (!printWindow) return;
+
+    printWindow.document.write(`
+      <!doctype html>
+      <html>
+        <head>
+          <title>Woordenzoeker</title>
+          <style>
+            @page { margin: 12mm; }
+            body {
+              margin: 0;
+              background: white;
+              font-family: Arial, sans-serif;
+              display: flex;
+              justify-content: center;
+            }
+          </style>
+        </head>
+        <body>${printRef.current.innerHTML}</body>
+      </html>
+    `);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.onload = () => {
+      printWindow.print();
+      printWindow.close();
+    };
+  };
+
   // Download as PDF (puzzle + answer key)
   const downloadAsPDF = async () => {
     if (!printRef.current || !answerRef.current) return;
@@ -209,12 +241,10 @@ export default function Woordenzoeker() {
     const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
     const pdfW = pdf.internal.pageSize.getWidth() - 20;
 
-    // Page 1: puzzle
     const c1 = await html2canvas(printRef.current, { scale: 3, backgroundColor: "#ffffff" });
     const h1 = (c1.height / c1.width) * pdfW;
     pdf.addImage(c1.toDataURL("image/png"), "PNG", 10, 10, pdfW, h1);
 
-    // Page 2: answer key
     pdf.addPage();
     const c2 = await html2canvas(answerRef.current, { scale: 3, backgroundColor: "#ffffff" });
     const h2 = (c2.height / c2.width) * pdfW;
