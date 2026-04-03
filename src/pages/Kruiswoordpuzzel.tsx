@@ -1,9 +1,11 @@
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Download, Plus, Trash2, Shuffle, Check, Printer } from "lucide-react";
+import { ArrowLeft, Download, Plus, Trash2, Shuffle, Check, Printer, BookOpen } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { getChaptersForLanguage, type Language, type Chapter } from "@/data/vocabulary";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 type PlacedWord = { word: string; clue: string; row: number; col: number; direction: "across" | "down"; number: number };
 
@@ -362,6 +364,51 @@ export default function Kruiswoordpuzzel() {
                 <Button className="w-full gap-2" onClick={generate}>
                   <Shuffle className="h-4 w-4" /> Genereer
                 </Button>
+
+                {/* Import from chapter */}
+                <div className="border-t pt-3 space-y-2">
+                  <p className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                    <BookOpen className="h-3 w-3" /> Importeer uit hoofdstuk
+                  </p>
+                  <Select onValueChange={(val) => {
+                    const [lang, chapId] = val.split("::") as [Language, string];
+                    const chapters = getChaptersForLanguage(lang);
+                    const chapter = chapters.find((c) => c.id === chapId);
+                    if (!chapter) return;
+                    // Filter words: only single words without spaces, min 2 chars
+                    const imported = chapter.words
+                      .filter((w) => {
+                        const dutch = w.dutch.replace(/^(de|het|een) /i, "").trim();
+                        return /^[a-zA-ZÀ-ÿ]+$/.test(dutch) && dutch.length >= 2 && dutch.length <= 15;
+                      })
+                      .map((w) => ({
+                        word: w.dutch.replace(/^(de|het|een) /i, "").trim().toUpperCase(),
+                        clue: w.french,
+                      }));
+                    // Remove duplicates
+                    const unique = imported.filter((e, i, arr) => arr.findIndex((x) => x.word === e.word) === i);
+                    // Take max 15 random words
+                    const shuffled = unique.sort(() => Math.random() - 0.5).slice(0, 15);
+                    if (shuffled.length === 0) return;
+                    setEntries(shuffled);
+                    setTitle(`${chapter.title}`);
+                  }}>
+                    <SelectTrigger className="text-xs h-8">
+                      <SelectValue placeholder="Kies een hoofdstuk..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {(["french", "english", "biology", "nask"] as Language[]).map((lang) => {
+                        const chapters = getChaptersForLanguage(lang);
+                        const label = lang === "french" ? "🇫🇷 Frans" : lang === "english" ? "🇬🇧 Engels" : lang === "biology" ? "🧬 Biologie" : "⚡ NaSk";
+                        return chapters.map((ch) => (
+                          <SelectItem key={ch.id} value={`${lang}::${ch.id}`} className="text-xs">
+                            {label} — {ch.title}
+                          </SelectItem>
+                        ));
+                      })}
+                    </SelectContent>
+                  </Select>
+                </div>
               </CardContent>
             </Card>
 
