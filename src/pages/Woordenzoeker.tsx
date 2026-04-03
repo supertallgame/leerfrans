@@ -377,9 +377,8 @@ export default function Woordenzoeker() {
                 ref={gridRef}
                 className="inline-grid border border-border rounded-lg overflow-hidden select-none touch-none bg-card shadow-sm"
                 style={{
-                  gridTemplateColumns: `repeat(${gridSize}, minmax(0, 1fr))`,
-                  maxWidth: "100%",
-                  aspectRatio: "1",
+                  gridTemplateColumns: `repeat(${gridSize}, minmax(24px, 36px))`,
+                  width: "fit-content",
                 }}
                 onPointerUp={handlePointerUp}
                 onPointerLeave={handlePointerUp}
@@ -392,11 +391,10 @@ export default function Woordenzoeker() {
                     return (
                       <div
                         key={key}
-                        className={`flex items-center justify-center font-mono font-bold text-foreground transition-colors duration-100 cursor-pointer border-[0.5px] border-border/30 ${
+                        className={`flex items-center justify-center aspect-square font-mono font-bold text-foreground transition-colors duration-100 cursor-pointer border-[0.5px] border-border/30 text-xs sm:text-sm ${
                           isSelected ? "bg-primary/30 scale-105" : ""
                         }`}
                         style={{
-                          fontSize: `clamp(10px, ${60 / gridSize}vw, 20px)`,
                           backgroundColor: isSelected ? undefined : highlightColor || undefined,
                         }}
                         onPointerDown={() => handlePointerDown(r, c)}
