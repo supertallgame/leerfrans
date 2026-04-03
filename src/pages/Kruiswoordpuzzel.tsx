@@ -307,11 +307,10 @@ export default function Kruiswoordpuzzel() {
     const maxDim = Math.max(cols, rows);
     const cs = Math.floor(Math.min(56, 480 / maxDim));
     const stroke = 2;
-    const width = cols * cs;
-    const height = rows * cs;
-    const fills: JSX.Element[] = [];
-    const lines: JSX.Element[] = [];
-    const labels: JSX.Element[] = [];
+    const pad = stroke; // padding so edge strokes aren't clipped
+    const width = cols * cs + pad * 2;
+    const height = rows * cs + pad * 2;
+    const elements: JSX.Element[] = [];
 
     g.forEach((row, r) => {
       row.forEach((cell, c) => {
@@ -319,63 +318,31 @@ export default function Kruiswoordpuzzel() {
 
         const key = `${r},${c}`;
         const num = numberMap.get(key);
-        const x = c * cs;
-        const y = r * cs;
-        const aboveFilled = r > 0 && g[r - 1][c] !== null;
-        const leftFilled = c > 0 && g[r][c - 1] !== null;
+        const x = pad + c * cs;
+        const y = pad + r * cs;
 
-        fills.push(
-          <rect key={`fill-${key}`} x={x} y={y} width={cs} height={cs} fill="#ffffff" />
-        );
-
-        if (!aboveFilled) {
-          lines.push(
-            <line key={`top-${key}`} x1={x} y1={y} x2={x + cs} y2={y} stroke="#000000" strokeWidth={stroke} shapeRendering="crispEdges" />
-          );
-        }
-
-        if (!leftFilled) {
-          lines.push(
-            <line key={`left-${key}`} x1={x} y1={y} x2={x} y2={y + cs} stroke="#000000" strokeWidth={stroke} shapeRendering="crispEdges" />
-          );
-        }
-
-        lines.push(
-          <line key={`right-${key}`} x1={x + cs} y1={y} x2={x + cs} y2={y + cs} stroke="#000000" strokeWidth={stroke} shapeRendering="crispEdges" />,
-          <line key={`bottom-${key}`} x1={x} y1={y + cs} x2={x + cs} y2={y + cs} stroke="#000000" strokeWidth={stroke} shapeRendering="crispEdges" />
+        // Draw each cell as a stroked rect — border-collapse effect comes from
+        // overlapping strokes being identical color, so they look merged.
+        elements.push(
+          <rect key={`cell-${key}`} x={x} y={y} width={cs} height={cs}
+            fill="#ffffff" stroke="#000000" strokeWidth={stroke}
+            shapeRendering="crispEdges" />
         );
 
         if (num) {
-          labels.push(
-            <text
-              key={`num-${key}`}
-              x={x + 3}
-              y={y + Math.max(8, cs * 0.26)}
-              fontSize={Math.max(8, cs * 0.26)}
-              fontWeight={600}
-              fontFamily="Arial, sans-serif"
-              fill="#444444"
-            >
-              {num}
-            </text>
+          elements.push(
+            <text key={`num-${key}`} x={x + 3} y={y + Math.max(9, cs * 0.28)}
+              fontSize={Math.max(8, cs * 0.28)} fontWeight={600}
+              fontFamily="Arial, sans-serif" fill="#444444">{num}</text>
           );
         }
 
-        if (showAnswers) {
-          labels.push(
-            <text
-              key={`letter-${key}`}
-              x={x + cs / 2}
-              y={y + cs / 2}
-              textAnchor="middle"
-              dominantBaseline="middle"
-              fontSize={cs * 0.5}
-              fontWeight={700}
-              fontFamily="Arial, sans-serif"
-              fill="#222222"
-            >
-              {cell}
-            </text>
+        if (showAnswers && cell) {
+          elements.push(
+            <text key={`letter-${key}`} x={x + cs / 2} y={y + cs / 2}
+              textAnchor="middle" dominantBaseline="central"
+              fontSize={cs * 0.5} fontWeight={700}
+              fontFamily="Arial, sans-serif" fill="#222222">{cell}</text>
           );
         }
       });
@@ -383,16 +350,9 @@ export default function Kruiswoordpuzzel() {
 
     return (
       <div style={{ display: "flex", justifyContent: "center" }}>
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width={width}
-          height={height}
-          viewBox={`0 0 ${width} ${height}`}
-          style={{ display: "block", overflow: "visible" }}
-        >
-          {fills}
-          {lines}
-          {labels}
+        <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height}
+          viewBox={`0 0 ${width} ${height}`} style={{ display: "block" }}>
+          {elements}
         </svg>
       </div>
     );
