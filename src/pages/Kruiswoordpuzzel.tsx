@@ -266,7 +266,7 @@ export default function Kruiswoordpuzzel() {
     const printWindow = window.open("", "_blank", "width=900,height=700");
     if (!printWindow) return;
     const content = refs.map((r) => `<div style="page-break-after: always;">${r.innerHTML}</div>`).join("");
-    printWindow.document.write(`<!doctype html><html><head><title>Kruiswoordpuzzel</title><style>@page{margin:12mm}body{margin:0;background:#fff;font-family:Arial,sans-serif}div:last-child{page-break-after:auto}</style></head><body>${content}</body></html>`);
+    printWindow.document.write(`<!doctype html><html><head><title>Kruiswoordpuzzel</title><style>@page{margin:10mm}*{box-sizing:border-box}body{margin:0;padding:0;background:#fff;font-family:Arial,sans-serif}div:last-child{page-break-after:auto}</style></head><body>${content}</body></html>`);
     printWindow.document.close();
     printWindow.focus();
     printWindow.onload = () => { printWindow.print(); printWindow.close(); };
@@ -275,21 +275,25 @@ export default function Kruiswoordpuzzel() {
   const cellSize = grid ? Math.min(40, 600 / Math.max(grid.length, grid[0]?.length || 1)) : 40;
 
   const renderPrintGrid = (g: (string | null)[][], showAnswers: boolean) => {
-    const cs = Math.min(36, 600 / Math.max(g.length, g[0]?.length || 1));
+    const cols = g[0]?.length || 1;
+    const rows = g.length;
+    const maxDim = Math.max(cols, rows);
+    const cs = Math.min(32, 480 / maxDim);
     return (
-      <div style={{ display: "inline-grid", gridTemplateColumns: `repeat(${g[0]?.length || 0}, ${cs}px)`, border: "2px solid #333" }}>
+      <div style={{ display: "inline-grid", gridTemplateColumns: `repeat(${cols}, ${cs}px)` }}>
         {g.map((row, r) =>
           row.map((cell, c) => {
             const key = `${r},${c}`;
             const num = numberMap.get(key);
             return (
               <div key={key} style={{
-                width: cs, height: cs, border: cell !== null ? "1px solid #333" : "none",
-                backgroundColor: cell === null ? "#222" : "#fff",
+                width: cs, height: cs,
+                border: cell !== null ? "1.5px solid #333" : "none",
+                backgroundColor: cell === null ? "#000" : "#fff",
                 position: "relative", display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: cs * 0.5, fontWeight: 700, fontFamily: "Arial",
+                fontSize: cs * 0.5, fontWeight: 700, fontFamily: "Arial", color: "#222",
               }}>
-                {num && <span style={{ position: "absolute", top: 1, left: 2, fontSize: cs * 0.25, fontWeight: 400 }}>{num}</span>}
+                {num && <span style={{ position: "absolute", top: 1, left: 2, fontSize: Math.max(7, cs * 0.28), fontWeight: 500, color: "#555" }}>{num}</span>}
                 {showAnswers && cell ? cell : ""}
               </div>
             );
@@ -474,18 +478,18 @@ export default function Kruiswoordpuzzel() {
 
               {/* Hidden print versions */}
               <div className="fixed -left-[9999px] top-0">
-                <div ref={printRef} style={{ padding: 32, width: 800, background: "#fff", fontFamily: "Arial, sans-serif" }}>
-                  <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 12 }}>✏️ Kruiswoordpuzzel</h2>
+                <div ref={printRef} style={{ padding: 20, width: 560, background: "#fff", fontFamily: "Arial, sans-serif" }}>
+                  <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 10 }}>✏️ Kruiswoordpuzzel</h2>
                   {renderPrintGrid(grid, false)}
-                  <div style={{ display: "flex", gap: 32, marginTop: 16 }}>
+                  <div style={{ display: "flex", gap: 24, marginTop: 14 }}>
                     <div style={{ flex: 1 }}>{renderClues("across")}</div>
                     <div style={{ flex: 1 }}>{renderClues("down")}</div>
                   </div>
                 </div>
-                <div ref={answerRef} style={{ padding: 32, width: 800, background: "#fff", fontFamily: "Arial, sans-serif" }}>
-                  <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 12 }}>✏️ Antwoordblad</h2>
+                <div ref={answerRef} style={{ padding: 20, width: 560, background: "#fff", fontFamily: "Arial, sans-serif" }}>
+                  <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 10 }}>✏️ Antwoordblad</h2>
                   {renderPrintGrid(grid, true)}
-                  <div style={{ display: "flex", gap: 32, marginTop: 16 }}>
+                  <div style={{ display: "flex", gap: 24, marginTop: 14 }}>
                     <div style={{ flex: 1 }}>{renderClues("across")}</div>
                     <div style={{ flex: 1 }}>{renderClues("down")}</div>
                   </div>
