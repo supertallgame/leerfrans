@@ -283,26 +283,30 @@ export default function Kruiswoordpuzzel() {
     const maxDim = Math.max(cols, rows);
     const cs = Math.min(44, 520 / maxDim);
     return (
-      <div style={{ display: "inline-grid", gridTemplateColumns: `repeat(${cols}, ${cs}px)`, margin: "0 auto" }}>
-        {g.map((row, r) =>
-          row.map((cell, c) => {
-            const key = `${r},${c}`;
-            const num = numberMap.get(key);
-            return (
-              <div key={key} style={{
-                width: cs, height: cs,
-                border: cell !== null ? "1.5px solid #333" : "none",
-                backgroundColor: cell === null ? "#000" : "#fff",
-                position: "relative", display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: cs * 0.5, fontWeight: 700, fontFamily: "Arial", color: "#222",
-              }}>
-                {num && <span style={{ position: "absolute", top: 1, left: 2, fontSize: Math.max(7, cs * 0.28), fontWeight: 500, color: "#555" }}>{num}</span>}
-                {showAnswers && cell ? cell : ""}
-              </div>
-            );
-          })
-        )}
-      </div>
+      <table style={{ borderCollapse: "collapse", margin: "0 auto" }}>
+        <tbody>
+          {g.map((row, r) => (
+            <tr key={r}>
+              {row.map((cell, c) => {
+                const key = `${r},${c}`;
+                const num = numberMap.get(key);
+                return (
+                  <td key={key} style={{
+                    width: cs, height: cs, padding: 0,
+                    border: cell !== null ? "1.5px solid #333" : "none",
+                    backgroundColor: cell === null ? "transparent" : "#fff",
+                    position: "relative", textAlign: "center", verticalAlign: "middle",
+                    fontSize: cs * 0.5, fontWeight: 700, fontFamily: "Arial", color: "#222",
+                  }}>
+                    {num && <span style={{ position: "absolute", top: 1, left: 2, fontSize: Math.max(7, cs * 0.28), fontWeight: 500, color: "#555", lineHeight: 1 }}>{num}</span>}
+                    {showAnswers && cell ? cell : ""}
+                  </td>
+                );
+              })}
+            </tr>
+          ))}
+        </tbody>
+      </table>
     );
   };
 
