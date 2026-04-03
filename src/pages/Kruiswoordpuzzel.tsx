@@ -2,8 +2,10 @@ import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Download, Plus, Trash2, Shuffle, Check, Printer } from "lucide-react";
+import { ArrowLeft, Download, Plus, Trash2, Shuffle, Check, Printer, BookOpen } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { getChaptersForLanguage, type Language } from "@/data/vocabulary";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 type PlacedWord = { word: string; clue: string; row: number; col: number; direction: "across" | "down"; number: number };
 
