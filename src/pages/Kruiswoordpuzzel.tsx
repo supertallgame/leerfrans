@@ -537,8 +537,8 @@ export default function Kruiswoordpuzzel() {
                   </div>
                 </div>
                 <div ref={answerRef} style={{ padding: 20, width: 560, background: "#fff", fontFamily: "Arial, sans-serif" }}>
-                  <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 10 }}>✏️ {title || "Kruiswoordpuzzel"} — Antwoordblad</h2>
-                  {renderPrintGrid(grid, true)}
+                  <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 10, textAlign: "center" }}>✏️ {title || "Kruiswoordpuzzel"} — Antwoordblad</h2>
+                  <div style={{ display: "flex", justifyContent: "center" }}>{renderPrintGrid(grid, true)}</div>
                   <div style={{ display: "flex", gap: 24, marginTop: 14 }}>
                     <div style={{ flex: 1 }}>{renderClues("across")}</div>
                     <div style={{ flex: 1 }}>{renderClues("down")}</div>
