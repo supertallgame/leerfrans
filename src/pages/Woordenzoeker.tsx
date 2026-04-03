@@ -210,7 +210,7 @@ export default function Woordenzoeker() {
     const printWindow = window.open("", "_blank", "width=900,height=700");
     if (!printWindow) return;
     const content = refs.map((r) => `<div style="page-break-after: always;">${r.innerHTML}</div>`).join("");
-    printWindow.document.write(`<!doctype html><html><head><title>Woordenzoeker</title><style>@page{margin:12mm}body{margin:0;background:#fff;font-family:Arial,sans-serif}div:last-child{page-break-after:auto}</style></head><body>${content}</body></html>`);
+    printWindow.document.write(`<!doctype html><html><head><title>Woordenzoeker</title><style>@page{margin:10mm}*{box-sizing:border-box}body{margin:0;padding:0;background:#fff;font-family:Arial,sans-serif}div:last-child{page-break-after:auto}</style></head><body>${content}</body></html>`);
     printWindow.document.close();
     printWindow.focus();
     printWindow.onload = () => { printWindow.print(); printWindow.close(); };
@@ -240,8 +240,9 @@ export default function Woordenzoeker() {
     generate();
   }, []);
 
+  const PRINT_GRID_W = 500;
   const renderPrintGrid = (g: string[][], size: number, highlights?: Map<string, string>) => (
-    <div style={{ display: "grid", gridTemplateColumns: `repeat(${size}, 1fr)`, border: "2px solid #333", width: 700 }}>
+    <div style={{ display: "grid", gridTemplateColumns: `repeat(${size}, 1fr)`, border: "2px solid #333", width: PRINT_GRID_W }}>
       {g.map((row, r) =>
         row.map((letter, c) => {
           const k = `${r},${c}`;
@@ -249,8 +250,8 @@ export default function Woordenzoeker() {
           return (
             <div key={k} style={{
               display: "flex", alignItems: "center", justifyContent: "center",
-              width: 700 / size, height: 700 / size,
-              fontSize: Math.max(12, (700 / size) * 0.6),
+              width: PRINT_GRID_W / size, height: PRINT_GRID_W / size,
+              fontSize: Math.max(10, (PRINT_GRID_W / size) * 0.6),
               fontWeight: 700, fontFamily: "monospace",
               border: "0.5px solid #ddd", color: "#222",
               backgroundColor: bg || undefined,
@@ -434,13 +435,13 @@ export default function Woordenzoeker() {
 
               {/* Offscreen for image/PDF export */}
               <div className="fixed -left-[9999px] top-0 print:hidden">
-                <div ref={printRef} style={{ padding: 32, width: 800, background: "#fff", fontFamily: "Arial, sans-serif" }}>
-                  <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8 }}>🔍 Woordenzoeker</h2>
+                <div ref={printRef} style={{ padding: 20, width: 560, background: "#fff", fontFamily: "Arial, sans-serif" }}>
+                  <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 8 }}>🔍 Woordenzoeker</h2>
                   {renderPrintGrid(grid, gridSize)}
                   {renderWordList(placedWords)}
                 </div>
-                <div ref={answerRef} style={{ padding: 32, width: 800, background: "#fff", fontFamily: "Arial, sans-serif" }}>
-                  <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8 }}>🔍 Antwoordblad</h2>
+                <div ref={answerRef} style={{ padding: 20, width: 560, background: "#fff", fontFamily: "Arial, sans-serif" }}>
+                  <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 8 }}>🔍 Antwoordblad</h2>
                   {renderPrintGrid(grid, gridSize, answerCellSet)}
                   {renderWordList(placedWords, true)}
                 </div>
