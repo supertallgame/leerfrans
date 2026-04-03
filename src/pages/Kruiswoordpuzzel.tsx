@@ -453,6 +453,44 @@ export default function Kruiswoordpuzzel() {
                   <Shuffle className="h-4 w-4" /> Genereer
                 </Button>
 
+                {/* Import from chapter */}
+                <div className="border-t pt-3 space-y-2">
+                  <p className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                    <BookOpen className="h-3 w-3" /> Importeer uit hoofdstuk
+                  </p>
+                  <Select value={selectedChapter || undefined} onValueChange={(val) => {
+                    setSelectedChapter(val);
+                    const fresh = getRandomWordsFromChapter(val);
+                    if (fresh && fresh.length > 0) {
+                      setEntries(fresh);
+                      const [lang, chapId] = val.split("::") as [Language, string];
+                      const chapters = getChaptersForLanguage(lang);
+                      const chapter = chapters.find((c) => c.id === chapId);
+                      if (chapter) setTitle(chapter.title);
+                    }
+                  }}>
+                    <SelectTrigger className="text-xs h-8">
+                      <SelectValue placeholder="Kies een hoofdstuk..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {(["french", "english", "biology", "nask"] as Language[]).map((lang) => {
+                        const chapters = getChaptersForLanguage(lang);
+                        const label = lang === "french" ? "🇫🇷 Frans" : lang === "english" ? "🇬🇧 Engels" : lang === "biology" ? "🧬 Biologie" : "⚡ NaSk";
+                        return chapters.map((ch) => (
+                          <SelectItem key={ch.id} value={`${lang}::${ch.id}`} className="text-xs">
+                            {label} — {ch.title}
+                          </SelectItem>
+                        ));
+                      })}
+                    </SelectContent>
+                  </Select>
+                  {selectedChapter && (
+                    <p className="text-xs text-muted-foreground italic">
+                      Elke keer dat je op "Genereer" klikt krijg je nieuwe willekeurige woorden uit dit hoofdstuk.
+                    </p>
+                  )}
+                </div>
+
               </CardContent>
             </Card>
 
