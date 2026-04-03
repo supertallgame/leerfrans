@@ -283,18 +283,19 @@ export default function Kruiswoordpuzzel() {
     const maxDim = Math.max(cols, rows);
     const cs = Math.min(44, 520 / maxDim);
     return (
-      <table style={{ borderCollapse: "collapse", margin: "0 auto" }}>
+      <table style={{ borderCollapse: "separate", borderSpacing: 0, margin: "0 auto" }}>
         <tbody>
           {g.map((row, r) => (
             <tr key={r}>
               {row.map((cell, c) => {
                 const key = `${r},${c}`;
                 const num = numberMap.get(key);
+                const isCell = cell !== null;
                 return (
                   <td key={key} style={{
-                    width: cs, height: cs, padding: 0,
-                    border: cell !== null ? "1.5px solid #333" : "none",
-                    backgroundColor: cell === null ? "transparent" : "#fff",
+                    width: cs, height: cs, minWidth: cs, minHeight: cs, padding: 0,
+                    border: isCell ? "1px solid #333" : "none",
+                    backgroundColor: isCell ? "#fff" : "transparent",
                     position: "relative", textAlign: "center", verticalAlign: "middle",
                     fontSize: cs * 0.5, fontWeight: 700, fontFamily: "Arial", color: "#222",
                   }}>
