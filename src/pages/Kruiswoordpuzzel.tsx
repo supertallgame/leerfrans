@@ -279,9 +279,11 @@ export default function Kruiswoordpuzzel() {
 
   const renderPrintGrid = (g: (string | null)[][], showAnswers: boolean) => {
     const cols = g[0]?.length || 1;
-    const cs = Math.min(36, 520 / cols);
+    const rows = g.length;
+    const maxDim = Math.max(cols, rows);
+    const cs = Math.min(44, 520 / maxDim);
     return (
-      <div style={{ display: "inline-grid", gridTemplateColumns: `repeat(${cols}, ${cs}px)` }}>
+      <div style={{ display: "inline-grid", gridTemplateColumns: `repeat(${cols}, ${cs}px)`, margin: "0 auto" }}>
         {g.map((row, r) =>
           row.map((cell, c) => {
             const key = `${r},${c}`;
