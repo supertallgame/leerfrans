@@ -283,34 +283,38 @@ export default function Kruiswoordpuzzel() {
     const maxDim = Math.max(cols, rows);
     const cs = Math.min(44, 520 / maxDim);
     return (
-      <div style={{ display: "inline-grid", gridTemplateColumns: `repeat(${cols}, ${cs}px)`, margin: "0 auto" }}>
-        {g.map((row, r) =>
-          row.map((cell, c) => {
-            const key = `${r},${c}`;
-            const num = numberMap.get(key);
-            return (
-              <div key={key} style={{
-                width: cs, height: cs,
-                border: cell !== null ? "1.5px solid #333" : "none",
-                backgroundColor: cell === null ? "#000" : "#fff",
-                position: "relative", display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: cs * 0.5, fontWeight: 700, fontFamily: "Arial", color: "#222",
-              }}>
-                {num && <span style={{ position: "absolute", top: 1, left: 2, fontSize: Math.max(7, cs * 0.28), fontWeight: 500, color: "#555" }}>{num}</span>}
-                {showAnswers && cell ? cell : ""}
-              </div>
-            );
-          })
-        )}
-      </div>
+      <table style={{ borderCollapse: "collapse", margin: "0 auto" }}>
+        <tbody>
+          {g.map((row, r) => (
+            <tr key={r}>
+              {row.map((cell, c) => {
+                const key = `${r},${c}`;
+                const num = numberMap.get(key);
+                return (
+                  <td key={key} style={{
+                    width: cs, height: cs, padding: 0,
+                    border: cell !== null ? "1.5px solid #333" : "none",
+                    backgroundColor: cell === null ? "transparent" : "#fff",
+                    position: "relative", textAlign: "center", verticalAlign: "middle",
+                    fontSize: cs * 0.5, fontWeight: 700, fontFamily: "Arial", color: "#222",
+                  }}>
+                    {num && <span style={{ position: "absolute", top: 1, left: 2, fontSize: Math.max(7, cs * 0.28), fontWeight: 500, color: "#555", lineHeight: 1 }}>{num}</span>}
+                    {showAnswers && cell ? cell : ""}
+                  </td>
+                );
+              })}
+            </tr>
+          ))}
+        </tbody>
+      </table>
     );
   };
 
   const renderClues = (dir: "across" | "down") => {
     const clues = placedWords.filter((pw) => pw.direction === dir);
     return (
-      <div style={{ marginTop: 8 }}>
-        <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 4 }}>{dir === "across" ? "Horizontaal →" : "Verticaal ↓"}</h3>
+      <div>
+        <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: 4, color: "#222" }}>{dir === "across" ? "Horizontaal →" : "Verticaal ↓"}</h3>
         {clues.map((pw) => (
           <div key={pw.word} style={{ fontSize: 13, marginBottom: 2 }}>
             <strong>{pw.number}.</strong> {pw.clue}
@@ -531,7 +535,7 @@ export default function Kruiswoordpuzzel() {
                 <div ref={printRef} style={{ padding: 20, width: 560, background: "#fff", fontFamily: "Arial, sans-serif" }}>
                   <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 10, textAlign: "center" }}>✏️ {title || "Kruiswoordpuzzel"}</h2>
                   <div style={{ display: "flex", justifyContent: "center" }}>{renderPrintGrid(grid, false)}</div>
-                  <div style={{ display: "flex", gap: 24, marginTop: 14 }}>
+                  <div style={{ display: "flex", gap: 32, marginTop: 24 }}>
                     <div style={{ flex: 1 }}>{renderClues("across")}</div>
                     <div style={{ flex: 1 }}>{renderClues("down")}</div>
                   </div>
@@ -539,7 +543,7 @@ export default function Kruiswoordpuzzel() {
                 <div ref={answerRef} style={{ padding: 20, width: 560, background: "#fff", fontFamily: "Arial, sans-serif" }}>
                   <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 10, textAlign: "center" }}>✏️ {title || "Kruiswoordpuzzel"} — Antwoordblad</h2>
                   <div style={{ display: "flex", justifyContent: "center" }}>{renderPrintGrid(grid, true)}</div>
-                  <div style={{ display: "flex", gap: 24, marginTop: 14 }}>
+                  <div style={{ display: "flex", gap: 32, marginTop: 24 }}>
                     <div style={{ flex: 1 }}>{renderClues("across")}</div>
                     <div style={{ flex: 1 }}>{renderClues("down")}</div>
                   </div>
