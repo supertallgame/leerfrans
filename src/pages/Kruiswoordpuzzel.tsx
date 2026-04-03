@@ -154,6 +154,7 @@ export default function Kruiswoordpuzzel() {
     { word: "KLAS", clue: "Groep leerlingen" },
     { word: "LEREN", clue: "Kennis opdoen" },
   ]);
+  const [title, setTitle] = useState("Kruiswoordpuzzel");
   const [newWord, setNewWord] = useState("");
   const [newClue, setNewClue] = useState("");
   const [grid, setGrid] = useState<(string | null)[][] | null>(null);
@@ -333,6 +334,8 @@ export default function Kruiswoordpuzzel() {
                 <CardTitle className="text-lg">Woorden & hints</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
+                <Input value={title} onChange={(e) => setTitle(e.target.value)}
+                  placeholder="Titel van de puzzel..." className="text-sm font-semibold" />
                 <Input value={newWord} onChange={(e) => setNewWord(e.target.value.toUpperCase())}
                   placeholder="Woord..." className="text-sm" />
                 <Input value={newClue} onChange={(e) => setNewClue(e.target.value)}
@@ -477,7 +480,7 @@ export default function Kruiswoordpuzzel() {
               {/* Hidden print versions */}
               <div className="fixed -left-[9999px] top-0">
                 <div ref={printRef} style={{ padding: 20, width: 560, background: "#fff", fontFamily: "Arial, sans-serif" }}>
-                  <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 10 }}>✏️ Kruiswoordpuzzel</h2>
+                  <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 10 }}>✏️ {title || "Kruiswoordpuzzel"}</h2>
                   {renderPrintGrid(grid, false)}
                   <div style={{ display: "flex", gap: 24, marginTop: 14 }}>
                     <div style={{ flex: 1 }}>{renderClues("across")}</div>
@@ -485,7 +488,7 @@ export default function Kruiswoordpuzzel() {
                   </div>
                 </div>
                 <div ref={answerRef} style={{ padding: 20, width: 560, background: "#fff", fontFamily: "Arial, sans-serif" }}>
-                  <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 10 }}>✏️ Antwoordblad</h2>
+                  <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 10 }}>✏️ {title || "Kruiswoordpuzzel"} — Antwoordblad</h2>
                   {renderPrintGrid(grid, true)}
                   <div style={{ display: "flex", gap: 24, marginTop: 14 }}>
                     <div style={{ flex: 1 }}>{renderClues("across")}</div>
