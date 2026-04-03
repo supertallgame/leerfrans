@@ -201,36 +201,19 @@ export default function Woordenzoeker() {
     link.click();
   };
 
-  const handlePrintPuzzle = () => {
-    if (!printRef.current) return;
+  const handlePrint = (mode: "puzzle" | "answers" | "both") => {
+    const refs: HTMLDivElement[] = [];
+    if ((mode === "puzzle" || mode === "both") && printRef.current) refs.push(printRef.current);
+    if ((mode === "answers" || mode === "both") && answerRef.current) refs.push(answerRef.current);
+    if (refs.length === 0) return;
+
     const printWindow = window.open("", "_blank", "width=900,height=700");
     if (!printWindow) return;
-
-    printWindow.document.write(`
-      <!doctype html>
-      <html>
-        <head>
-          <title>Woordenzoeker</title>
-          <style>
-            @page { margin: 12mm; }
-            body {
-              margin: 0;
-              background: white;
-              font-family: Arial, sans-serif;
-              display: flex;
-              justify-content: center;
-            }
-          </style>
-        </head>
-        <body>${printRef.current.innerHTML}</body>
-      </html>
-    `);
+    const content = refs.map((r) => `<div style="page-break-after: always;">${r.innerHTML}</div>`).join("");
+    printWindow.document.write(`<!doctype html><html><head><title>Woordenzoeker</title><style>@page{margin:12mm}body{margin:0;background:#fff;font-family:Arial,sans-serif}div:last-child{page-break-after:auto}</style></head><body>${content}</body></html>`);
     printWindow.document.close();
     printWindow.focus();
-    printWindow.onload = () => {
-      printWindow.print();
-      printWindow.close();
-    };
+    printWindow.onload = () => { printWindow.print(); printWindow.close(); };
   };
 
   // Download as PDF (puzzle + answer key)
