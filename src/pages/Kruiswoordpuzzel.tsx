@@ -257,6 +257,21 @@ export default function Kruiswoordpuzzel() {
     pdf.save("kruiswoordpuzzel.pdf");
   };
 
+  const handlePrint = (mode: "puzzle" | "answers" | "both") => {
+    const refs: HTMLDivElement[] = [];
+    if ((mode === "puzzle" || mode === "both") && printRef.current) refs.push(printRef.current);
+    if ((mode === "answers" || mode === "both") && answerRef.current) refs.push(answerRef.current);
+    if (refs.length === 0) return;
+
+    const printWindow = window.open("", "_blank", "width=900,height=700");
+    if (!printWindow) return;
+    const content = refs.map((r) => `<div style="page-break-after: always;">${r.innerHTML}</div>`).join("");
+    printWindow.document.write(`<!doctype html><html><head><title>Kruiswoordpuzzel</title><style>@page{margin:12mm}body{margin:0;background:#fff;font-family:Arial,sans-serif}div:last-child{page-break-after:auto}</style></head><body>${content}</body></html>`);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.onload = () => { printWindow.print(); printWindow.close(); };
+  };
+
   const cellSize = grid ? Math.min(40, 600 / Math.max(grid.length, grid[0]?.length || 1)) : 40;
 
   const renderPrintGrid = (g: (string | null)[][], showAnswers: boolean) => {
@@ -365,9 +380,18 @@ export default function Kruiswoordpuzzel() {
                     <Button variant="outline" size="sm" onClick={() => downloadAsImage("png", true)}>PNG</Button>
                     <Button variant="outline" size="sm" onClick={() => downloadAsImage("jpeg", true)}>JPG</Button>
                   </div>
-                  <Button variant="outline" size="sm" className="w-full gap-1" onClick={() => window.print()}>
-                    <Printer className="h-3.5 w-3.5" /> Printen
-                  </Button>
+                  <p className="text-xs text-muted-foreground pt-1">Printen</p>
+                  <div className="grid grid-cols-3 gap-2">
+                    <Button variant="outline" size="sm" className="gap-1" onClick={() => handlePrint("puzzle")}>
+                      <Printer className="h-3 w-3" /> Puzzel
+                    </Button>
+                    <Button variant="outline" size="sm" className="gap-1" onClick={() => handlePrint("answers")}>
+                      <Printer className="h-3 w-3" /> Antw.
+                    </Button>
+                    <Button variant="outline" size="sm" className="gap-1" onClick={() => handlePrint("both")}>
+                      <Printer className="h-3 w-3" /> Beide
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             )}

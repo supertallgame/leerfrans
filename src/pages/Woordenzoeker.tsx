@@ -201,36 +201,19 @@ export default function Woordenzoeker() {
     link.click();
   };
 
-  const handlePrintPuzzle = () => {
-    if (!printRef.current) return;
+  const handlePrint = (mode: "puzzle" | "answers" | "both") => {
+    const refs: HTMLDivElement[] = [];
+    if ((mode === "puzzle" || mode === "both") && printRef.current) refs.push(printRef.current);
+    if ((mode === "answers" || mode === "both") && answerRef.current) refs.push(answerRef.current);
+    if (refs.length === 0) return;
+
     const printWindow = window.open("", "_blank", "width=900,height=700");
     if (!printWindow) return;
-
-    printWindow.document.write(`
-      <!doctype html>
-      <html>
-        <head>
-          <title>Woordenzoeker</title>
-          <style>
-            @page { margin: 12mm; }
-            body {
-              margin: 0;
-              background: white;
-              font-family: Arial, sans-serif;
-              display: flex;
-              justify-content: center;
-            }
-          </style>
-        </head>
-        <body>${printRef.current.innerHTML}</body>
-      </html>
-    `);
+    const content = refs.map((r) => `<div style="page-break-after: always;">${r.innerHTML}</div>`).join("");
+    printWindow.document.write(`<!doctype html><html><head><title>Woordenzoeker</title><style>@page{margin:12mm}body{margin:0;background:#fff;font-family:Arial,sans-serif}div:last-child{page-break-after:auto}</style></head><body>${content}</body></html>`);
     printWindow.document.close();
     printWindow.focus();
-    printWindow.onload = () => {
-      printWindow.print();
-      printWindow.close();
-    };
+    printWindow.onload = () => { printWindow.print(); printWindow.close(); };
   };
 
   // Download as PDF (puzzle + answer key)
@@ -376,9 +359,18 @@ export default function Woordenzoeker() {
                     <Button variant="outline" size="sm" onClick={() => downloadAsImage("png", true)}>PNG</Button>
                     <Button variant="outline" size="sm" onClick={() => downloadAsImage("jpeg", true)}>JPG</Button>
                   </div>
-                  <Button variant="outline" size="sm" className="w-full gap-1" onClick={handlePrintPuzzle}>
-                    <Printer className="h-3.5 w-3.5" /> Printen
-                  </Button>
+                  <p className="text-xs text-muted-foreground pt-1">Printen</p>
+                  <div className="grid grid-cols-3 gap-2">
+                    <Button variant="outline" size="sm" className="gap-1" onClick={() => handlePrint("puzzle")}>
+                      <Printer className="h-3 w-3" /> Puzzel
+                    </Button>
+                    <Button variant="outline" size="sm" className="gap-1" onClick={() => handlePrint("answers")}>
+                      <Printer className="h-3 w-3" /> Antw.
+                    </Button>
+                    <Button variant="outline" size="sm" className="gap-1" onClick={() => handlePrint("both")}>
+                      <Printer className="h-3 w-3" /> Beide
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             )}
@@ -437,14 +429,8 @@ export default function Woordenzoeker() {
                 )}
               </div>
 
-              {/* Print-only: shows only puzzle on paper */}
-              <div className="hidden print:block print-puzzle">
-                <div style={{ padding: 32, width: 800, background: "#fff", fontFamily: "Arial, sans-serif" }}>
-                  <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8 }}>🔍 Woordenzoeker</h2>
-                  {renderPrintGrid(grid, gridSize)}
-                  {renderWordList(placedWords)}
-                </div>
-              </div>
+
+
 
               {/* Offscreen for image/PDF export */}
               <div className="fixed -left-[9999px] top-0 print:hidden">
