@@ -323,8 +323,8 @@ export default function Kruiswoordpuzzel() {
                 const hasLeft = isCell && (c === 0 || g[r]?.[c - 1] !== null);
                 const hasBottom = isCell && (r === rows - 1 || g[r + 1]?.[c] !== null);
                 const hasRight = isCell && (c === cols - 1 || g[r]?.[c + 1] !== null);
-                const bw = "1px solid #000";
-                const bn = "1px solid transparent";
+                const bw = "2px solid #000";
+                const bn = "2px solid transparent";
                 return (
                   <td key={key} style={{
                     width: cs, height: cs, padding: 0, margin: 0,
