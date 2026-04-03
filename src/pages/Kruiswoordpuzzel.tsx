@@ -269,10 +269,10 @@ export default function Kruiswoordpuzzel() {
     const printWindow = window.open("", "_blank", "width=900,height=700");
     if (!printWindow) return;
     const content = refs.map((r) => `<div style="page-break-after: always;">${r.innerHTML}</div>`).join("");
-    printWindow.document.write(`<!doctype html><html><head><title>Kruiswoordpuzzel</title><style>@page{margin:10mm}*{box-sizing:border-box}body{margin:0;padding:0;background:#fff;font-family:Arial,sans-serif}div:last-child{page-break-after:auto}</style></head><body>${content}</body></html>`);
+    printWindow.document.write(`<!doctype html><html><head><title>Kruiswoordpuzzel</title><style>@page{margin:10mm}*{box-sizing:border-box}body{margin:0;padding:20px;background:#fff;font-family:Arial,sans-serif}div:last-child{page-break-after:auto}table{border-collapse:collapse}td{padding:0}</style></head><body>${content}</body></html>`);
     printWindow.document.close();
     printWindow.focus();
-    printWindow.onload = () => { printWindow.print(); printWindow.close(); };
+    setTimeout(() => { printWindow.print(); printWindow.close(); }, 300);
   };
 
   const cellSize = grid ? Math.min(40, 600 / Math.max(grid.length, grid[0]?.length || 1)) : 40;
