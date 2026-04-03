@@ -321,8 +321,8 @@ export default function Kruiswoordpuzzel() {
         const num = numberMap.get(key);
         const x = c * cs;
         const y = r * cs;
-        const aboveFilled = g[r - 1]?.[c] !== null;
-        const leftFilled = g[r]?.[c - 1] !== null;
+        const aboveFilled = r > 0 && g[r - 1][c] !== null;
+        const leftFilled = c > 0 && g[r][c - 1] !== null;
 
         fills.push(
           <rect key={`fill-${key}`} x={x} y={y} width={cs} height={cs} fill="#ffffff" />
