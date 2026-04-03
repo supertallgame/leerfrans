@@ -154,6 +154,7 @@ export default function Kruiswoordpuzzel() {
     { word: "KLAS", clue: "Groep leerlingen" },
     { word: "LEREN", clue: "Kennis opdoen" },
   ]);
+  const [title, setTitle] = useState("Kruiswoordpuzzel");
   const [newWord, setNewWord] = useState("");
   const [newClue, setNewClue] = useState("");
   const [grid, setGrid] = useState<(string | null)[][] | null>(null);
