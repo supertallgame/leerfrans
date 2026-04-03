@@ -283,7 +283,7 @@ export default function Kruiswoordpuzzel() {
     const maxDim = Math.max(cols, rows);
     const cs = Math.min(44, 520 / maxDim);
     return (
-      <table style={{ borderCollapse: "separate", borderSpacing: 0, margin: "0 auto" }}>
+      <table style={{ borderCollapse: "collapse", margin: "0 auto" }}>
         <tbody>
           {g.map((row, r) => (
             <tr key={r}>
@@ -294,7 +294,7 @@ export default function Kruiswoordpuzzel() {
                 return (
                   <td key={key} style={{
                     width: cs, height: cs, minWidth: cs, minHeight: cs, padding: 0,
-                    border: isCell ? "1px solid #333" : "none",
+                    border: isCell ? "1.5px solid #333" : "1.5px solid transparent",
                     backgroundColor: isCell ? "#fff" : "transparent",
                     position: "relative", textAlign: "center", verticalAlign: "middle",
                     fontSize: cs * 0.5, fontWeight: 700, fontFamily: "Arial", color: "#222",
