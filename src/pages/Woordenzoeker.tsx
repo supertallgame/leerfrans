@@ -87,6 +87,7 @@ export default function Woordenzoeker() {
   const [highlightedCells, setHighlightedCells] = useState<Map<string, string>>(new Map());
   const gridRef = useRef<HTMLDivElement>(null);
   const printRef = useRef<HTMLDivElement>(null);
+  const answerRef = useRef<HTMLDivElement>(null);
 
   const FOUND_COLORS = [
     "hsl(262 60% 55% / 0.25)", "hsl(160 50% 45% / 0.25)", "hsl(45 80% 65% / 0.35)",
@@ -176,34 +177,89 @@ export default function Woordenzoeker() {
 
   const allFound = grid && placedWords.length > 0 && foundWords.size === placedWords.length;
 
+  const ANSWER_COLORS = [
+    "#7c3aed40", "#2dd4bf40", "#f59e0b50", "#ef444440",
+    "#3b82f640", "#a855f740", "#f9731640", "#14b8a640",
+  ];
+
+  const answerCellSet = new Map<string, string>();
+  placedWords.forEach((pw, idx) => {
+    const color = ANSWER_COLORS[idx % ANSWER_COLORS.length];
+    getCellsForWord(pw).forEach((c) => answerCellSet.set(c, color));
+  });
+
   // Download as image
-  const downloadAsImage = async (format: "png" | "jpeg" | "webp") => {
-    if (!printRef.current) return;
+  const downloadAsImage = async (format: "png" | "jpeg" | "webp", withAnswers = false) => {
+    const ref = withAnswers ? answerRef.current : printRef.current;
+    if (!ref) return;
     const { default: html2canvas } = await import("html2canvas");
-    const canvas = await html2canvas(printRef.current, { scale: 3, backgroundColor: "#ffffff" });
+    const canvas = await html2canvas(ref, { scale: 3, backgroundColor: "#ffffff" });
     const link = document.createElement("a");
-    link.download = `woordenzoeker.${format === "jpeg" ? "jpg" : format}`;
+    const suffix = withAnswers ? "_antwoorden" : "";
+    link.download = `woordenzoeker${suffix}.${format === "jpeg" ? "jpg" : format}`;
     link.href = canvas.toDataURL(`image/${format}`, 1.0);
     link.click();
   };
 
-  // Download as PDF
+  // Download as PDF (puzzle + answer key)
   const downloadAsPDF = async () => {
-    if (!printRef.current) return;
+    if (!printRef.current || !answerRef.current) return;
     const { default: html2canvas } = await import("html2canvas");
     const { jsPDF } = await import("jspdf");
-    const canvas = await html2canvas(printRef.current, { scale: 3, backgroundColor: "#ffffff" });
-    const imgData = canvas.toDataURL("image/png");
     const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
     const pdfW = pdf.internal.pageSize.getWidth() - 20;
-    const pdfH = (canvas.height / canvas.width) * pdfW;
-    pdf.addImage(imgData, "PNG", 10, 10, pdfW, pdfH);
+
+    // Page 1: puzzle
+    const c1 = await html2canvas(printRef.current, { scale: 3, backgroundColor: "#ffffff" });
+    const h1 = (c1.height / c1.width) * pdfW;
+    pdf.addImage(c1.toDataURL("image/png"), "PNG", 10, 10, pdfW, h1);
+
+    // Page 2: answer key
+    pdf.addPage();
+    const c2 = await html2canvas(answerRef.current, { scale: 3, backgroundColor: "#ffffff" });
+    const h2 = (c2.height / c2.width) * pdfW;
+    pdf.addImage(c2.toDataURL("image/png"), "PNG", 10, 10, pdfW, h2);
+
     pdf.save("woordenzoeker.pdf");
   };
 
   useEffect(() => {
     generate();
   }, []);
+
+  const renderPrintGrid = (g: string[][], size: number, highlights?: Map<string, string>) => (
+    <div style={{ display: "grid", gridTemplateColumns: `repeat(${size}, 1fr)`, border: "2px solid #333", width: 700 }}>
+      {g.map((row, r) =>
+        row.map((letter, c) => {
+          const k = `${r},${c}`;
+          const bg = highlights?.get(k);
+          return (
+            <div key={k} style={{
+              display: "flex", alignItems: "center", justifyContent: "center",
+              width: 700 / size, height: 700 / size,
+              fontSize: Math.max(12, (700 / size) * 0.6),
+              fontWeight: 700, fontFamily: "monospace",
+              border: "0.5px solid #ddd", color: "#222",
+              backgroundColor: bg || undefined,
+            }}>{letter}</div>
+          );
+        })
+      )}
+    </div>
+  );
+
+  const renderWordList = (pws: PlacedWord[], checked = false) => (
+    <div style={{ marginTop: 16, display: "flex", flexWrap: "wrap", gap: 8 }}>
+      {pws.map((pw) => (
+        <span key={pw.word} style={{
+          background: "#f0f0f0", padding: "4px 12px", borderRadius: 12, fontSize: 14, fontWeight: 600,
+          textDecoration: checked ? "line-through" : undefined,
+        }}>
+          {checked ? "✅ " : ""}{pw.word}
+        </span>
+      ))}
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-background p-4 md:p-8">
@@ -277,12 +333,20 @@ export default function Woordenzoeker() {
                     <Download className="h-4 w-4" /> Download
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="grid grid-cols-2 gap-2">
-                  <Button variant="outline" size="sm" onClick={downloadAsPDF}>PDF</Button>
-                  <Button variant="outline" size="sm" onClick={() => downloadAsImage("png")}>PNG</Button>
-                  <Button variant="outline" size="sm" onClick={() => downloadAsImage("jpeg")}>JPG</Button>
-                  <Button variant="outline" size="sm" onClick={() => downloadAsImage("webp")}>WebP</Button>
-                  <Button variant="outline" size="sm" className="col-span-2 gap-1" onClick={() => window.print()}>
+                <CardContent className="space-y-2">
+                  <p className="text-xs text-muted-foreground">Puzzel + antwoordblad</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button variant="outline" size="sm" onClick={downloadAsPDF}>PDF</Button>
+                    <Button variant="outline" size="sm" onClick={() => downloadAsImage("png")}>PNG</Button>
+                    <Button variant="outline" size="sm" onClick={() => downloadAsImage("jpeg")}>JPG</Button>
+                    <Button variant="outline" size="sm" onClick={() => downloadAsImage("webp")}>WebP</Button>
+                  </div>
+                  <p className="text-xs text-muted-foreground pt-1">Alleen antwoordblad</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button variant="outline" size="sm" onClick={() => downloadAsImage("png", true)}>PNG</Button>
+                    <Button variant="outline" size="sm" onClick={() => downloadAsImage("jpeg", true)}>JPG</Button>
+                  </div>
+                  <Button variant="outline" size="sm" className="w-full gap-1" onClick={() => window.print()}>
                     <Printer className="h-3.5 w-3.5" /> Printen
                   </Button>
                 </CardContent>
@@ -345,48 +409,19 @@ export default function Woordenzoeker() {
                 )}
               </div>
 
-              {/* Hidden printable version */}
+              {/* Hidden printable puzzle */}
               <div className="fixed -left-[9999px] top-0">
                 <div ref={printRef} style={{ padding: 32, width: 800, background: "#fff", fontFamily: "Arial, sans-serif" }}>
                   <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8 }}>🔍 Woordenzoeker</h2>
-                  <div
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: `repeat(${gridSize}, 1fr)`,
-                      gap: 0,
-                      border: "2px solid #333",
-                      width: 700,
-                    }}
-                  >
-                    {grid.map((row, r) =>
-                      row.map((letter, c) => (
-                        <div
-                          key={`${r},${c}`}
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            width: 700 / gridSize,
-                            height: 700 / gridSize,
-                            fontSize: Math.max(12, 700 / gridSize * 0.6),
-                            fontWeight: 700,
-                            fontFamily: "monospace",
-                            border: "0.5px solid #ddd",
-                            color: "#222",
-                          }}
-                        >
-                          {letter}
-                        </div>
-                      ))
-                    )}
-                  </div>
-                  <div style={{ marginTop: 16, display: "flex", flexWrap: "wrap", gap: 8 }}>
-                    {placedWords.map((pw) => (
-                      <span key={pw.word} style={{ background: "#f0f0f0", padding: "4px 12px", borderRadius: 12, fontSize: 14, fontWeight: 600 }}>
-                        {pw.word}
-                      </span>
-                    ))}
-                  </div>
+                  {renderPrintGrid(grid, gridSize)}
+                  {renderWordList(placedWords)}
+                </div>
+
+                {/* Answer key */}
+                <div ref={answerRef} style={{ padding: 32, width: 800, background: "#fff", fontFamily: "Arial, sans-serif" }}>
+                  <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8 }}>🔍 Antwoordblad</h2>
+                  {renderPrintGrid(grid, gridSize, answerCellSet)}
+                  {renderWordList(placedWords, true)}
                 </div>
               </div>
             </div>
