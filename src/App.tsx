@@ -43,6 +43,7 @@ const App = () => (
               <Route path="/juf" element={<Juf />} />
               <Route path="/coderen" element={<Coderen />} />
               <Route path="/woordenzoeker" element={<Woordenzoeker />} />
+              <Route path="/kruiswoordpuzzel" element={<Kruiswoordpuzzel />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
