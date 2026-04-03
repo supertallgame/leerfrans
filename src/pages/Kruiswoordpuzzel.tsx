@@ -306,19 +306,32 @@ export default function Kruiswoordpuzzel() {
     const rows = g.length;
     const maxDim = Math.max(cols, rows);
     const cs = Math.floor(Math.min(56, 480 / maxDim));
+    // Use a single outer border + inner grid lines approach via SVG-like precision:
+    // Each cell draws only its RIGHT and BOTTOM border. The table draws the TOP and LEFT outer edge.
+    // This guarantees every line is exactly 1px with no doubling.
     return (
-      <table style={{ borderCollapse: "collapse", margin: "0 auto", lineHeight: 1 }} cellSpacing={0} cellPadding={0}>
+      <table style={{ borderCollapse: "collapse", margin: "0 auto", lineHeight: 1, borderSpacing: 0 }} cellSpacing={0} cellPadding={0}>
         <tbody>
           {g.map((row, r) => (
-            <tr key={r} style={{ height: cs }}>
+            <tr key={r}>
               {row.map((cell, c) => {
                 const key = `${r},${c}`;
                 const num = numberMap.get(key);
                 const isCell = cell !== null;
+                // Check neighbors to determine which borders to draw
+                const hasTop = isCell && (r === 0 || g[r - 1]?.[c] !== null);
+                const hasLeft = isCell && (c === 0 || g[r]?.[c - 1] !== null);
+                const hasBottom = isCell && (r === rows - 1 || g[r + 1]?.[c] !== null);
+                const hasRight = isCell && (c === cols - 1 || g[r]?.[c + 1] !== null);
+                const bw = "1px solid #000";
+                const bn = "1px solid transparent";
                 return (
                   <td key={key} style={{
                     width: cs, height: cs, padding: 0, margin: 0,
-                    border: isCell ? "1.5px solid #000" : "none",
+                    borderTop: isCell ? bw : bn,
+                    borderLeft: isCell ? bw : bn,
+                    borderBottom: isCell ? bw : bn,
+                    borderRight: isCell ? bw : bn,
                     backgroundColor: isCell ? "#fff" : "transparent",
                     position: "relative", textAlign: "center", verticalAlign: "middle",
                     fontSize: cs * 0.5, fontWeight: 700, fontFamily: "Arial, sans-serif", color: "#222",
