@@ -313,8 +313,8 @@ export default function Kruiswoordpuzzel() {
   const renderClues = (dir: "across" | "down") => {
     const clues = placedWords.filter((pw) => pw.direction === dir);
     return (
-      <div style={{ marginTop: 8 }}>
-        <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 4 }}>{dir === "across" ? "Horizontaal →" : "Verticaal ↓"}</h3>
+      <div>
+        <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: 4, color: "#222" }}>{dir === "across" ? "Horizontaal →" : "Verticaal ↓"}</h3>
         {clues.map((pw) => (
           <div key={pw.word} style={{ fontSize: 13, marginBottom: 2 }}>
             <strong>{pw.number}.</strong> {pw.clue}
