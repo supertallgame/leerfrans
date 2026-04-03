@@ -163,3 +163,9 @@
     transform: scale(1);
   }
 }
+
+@media print {
+  body > * { visibility: hidden !important; }
+  .print-puzzle, .print-puzzle * { visibility: visible !important; }
+  .print-puzzle { position: absolute; left: 0; top: 0; }
+}

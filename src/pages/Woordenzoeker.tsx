@@ -407,15 +407,22 @@ export default function Woordenzoeker() {
                 )}
               </div>
 
-              {/* Hidden printable puzzle */}
-              <div className="fixed -left-[9999px] top-0">
+              {/* Print-only: shows only puzzle on paper */}
+              <div className="hidden print:block print-puzzle">
+                <div style={{ padding: 32, width: 800, background: "#fff", fontFamily: "Arial, sans-serif" }}>
+                  <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8 }}>🔍 Woordenzoeker</h2>
+                  {renderPrintGrid(grid, gridSize)}
+                  {renderWordList(placedWords)}
+                </div>
+              </div>
+
+              {/* Offscreen for image/PDF export */}
+              <div className="fixed -left-[9999px] top-0 print:hidden">
                 <div ref={printRef} style={{ padding: 32, width: 800, background: "#fff", fontFamily: "Arial, sans-serif" }}>
                   <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8 }}>🔍 Woordenzoeker</h2>
                   {renderPrintGrid(grid, gridSize)}
                   {renderWordList(placedWords)}
                 </div>
-
-                {/* Answer key */}
                 <div ref={answerRef} style={{ padding: 32, width: 800, background: "#fff", fontFamily: "Arial, sans-serif" }}>
                   <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8 }}>🔍 Antwoordblad</h2>
                   {renderPrintGrid(grid, gridSize, answerCellSet)}
