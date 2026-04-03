@@ -3,12 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Shield, Home, Plus, Trash2, Crown, Users } from "lucide-react";
+import { Shield, Home, Crown, Users, ShieldPlus, ShieldMinus, Search } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 const OWNER_EMAILS = ["brankovantland@gmail.com", "branko18vantland@gmail.com"];
-const HARDCODED_ADMINS = ["brankovantland@gmail.com", "branko18vantland@gmail.com"];
 
 interface UserRole {
   id: string;
@@ -18,13 +17,20 @@ interface UserRole {
   created_at: string;
 }
 
+interface AppUser {
+  id: string;
+  email: string;
+  created_at: string;
+}
+
 export default function Owner() {
   const navigate = useNavigate();
   const [isOwner, setIsOwner] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
   const [roles, setRoles] = useState<UserRole[]>([]);
-  const [newEmail, setNewEmail] = useState("");
-  const [adding, setAdding] = useState(false);
+  const [allUsers, setAllUsers] = useState<AppUser[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [promoting, setPromoting] = useState<string | null>(null);
 
   useEffect(() => {
     checkOwner();
@@ -38,7 +44,7 @@ export default function Owner() {
       return;
     }
     setIsOwner(true);
-    await loadRoles();
+    await Promise.all([loadRoles(), loadUsers()]);
     setLoading(false);
   };
 
@@ -51,46 +57,38 @@ export default function Owner() {
     if (!error && data) setRoles(data);
   };
 
-  const addAdmin = async () => {
-    const email = newEmail.trim().toLowerCase();
-    if (!email || !email.includes("@")) {
-      toast.error("Voer een geldig e-mailadres in");
+  const loadUsers = async () => {
+    const { data, error } = await supabase.rpc("list_all_users");
+    if (!error && data) setAllUsers(data as AppUser[]);
+  };
+
+  const promoteUser = async (user: AppUser) => {
+    if (OWNER_EMAILS.includes(user.email) || roles.some(r => r.email === user.email)) {
+      toast.error("Deze gebruiker is al admin");
       return;
     }
-    if (HARDCODED_ADMINS.includes(email) || roles.some(r => r.email === email)) {
-      toast.error("Dit e-mailadres is al admin");
-      return;
-    }
-    setAdding(true);
+    setPromoting(user.id);
     try {
-      // Find user_id by email
-      const { data: userId, error: findErr } = await supabase.rpc("find_user_by_email", { p_email: email });
-      if (findErr || !userId) {
-        toast.error("Gebruiker niet gevonden. Ze moeten eerst een account aanmaken.");
-        setAdding(false);
-        return;
-      }
       const { error } = await supabase.from("user_roles").insert({
-        user_id: userId,
-        email,
+        user_id: user.id,
+        email: user.email,
         role: "admin",
       });
       if (error) throw error;
-      toast.success(`${email} is nu admin`);
-      setNewEmail("");
+      toast.success(`${user.email} is nu admin`);
       await loadRoles();
     } catch (e: any) {
       console.error(e);
-      toast.error("Kon admin niet toevoegen");
+      toast.error("Kon niet promoveren");
     } finally {
-      setAdding(false);
+      setPromoting(null);
     }
   };
 
-  const removeAdmin = async (role: UserRole) => {
+  const demoteAdmin = async (role: UserRole) => {
     const { error } = await supabase.from("user_roles").delete().eq("id", role.id);
     if (error) {
-      toast.error("Kon admin niet verwijderen");
+      toast.error("Kon admin niet degraderen");
       return;
     }
     toast.success(`${role.email} is geen admin meer`);
@@ -119,6 +117,12 @@ export default function Owner() {
     );
   }
 
+  const adminEmails = new Set([...OWNER_EMAILS, ...roles.map(r => r.email)]);
+  const normalUsers = allUsers.filter(u => !adminEmails.has(u.email));
+  const filteredUsers = searchQuery
+    ? normalUsers.filter(u => u.email.toLowerCase().includes(searchQuery.toLowerCase()))
+    : normalUsers;
+
   return (
     <div className="min-h-screen bg-background p-4 md:p-8">
       <div className="max-w-2xl mx-auto space-y-6">
@@ -132,83 +136,104 @@ export default function Owner() {
           </Button>
         </div>
 
-        {/* Add new admin */}
+        {/* Owners */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
-              <Plus className="h-5 w-5" /> Admin toevoegen
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex gap-2">
-              <Input
-                placeholder="email@voorbeeld.nl"
-                value={newEmail}
-                onChange={(e) => setNewEmail(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && addAdmin()}
-                type="email"
-              />
-              <Button onClick={addAdmin} disabled={adding} className="gap-2 shrink-0">
-                <Shield className="h-4 w-4" />
-                {adding ? "Bezig..." : "Toevoegen"}
-              </Button>
-            </div>
-            <p className="text-xs text-muted-foreground mt-2">
-              De gebruiker moet eerst een account hebben aangemaakt.
-            </p>
-          </CardContent>
-        </Card>
-
-        {/* Hardcoded admins */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <Crown className="h-5 w-5 text-amber-500" /> Vaste admins
+              <Crown className="h-5 w-5 text-primary" /> Owners
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
-            {HARDCODED_ADMINS.map((email) => (
+            {OWNER_EMAILS.map((email) => (
               <div key={email} className="flex items-center justify-between rounded-lg border p-3">
                 <div className="flex items-center gap-2">
-                  <Users className="h-4 w-4 text-muted-foreground" />
+                  <Crown className="h-4 w-4 text-primary" />
                   <span className="text-sm font-medium">{email}</span>
                 </div>
-                <span className="text-xs bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300 px-2 py-1 rounded-full">
-                  {OWNER_EMAILS.includes(email) ? "Owner" : "Vast"}
+                <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full font-medium">
+                  Owner
                 </span>
               </div>
             ))}
           </CardContent>
         </Card>
 
-        {/* Dynamic admins */}
+        {/* Admins */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
-              <Shield className="h-5 w-5 text-primary" /> Toegevoegde admins
+              <Shield className="h-5 w-5 text-primary" /> Admins
+              <span className="text-sm font-normal text-muted-foreground">({roles.length})</span>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
             {roles.length === 0 ? (
-              <p className="text-sm text-muted-foreground">Nog geen extra admins toegevoegd.</p>
+              <p className="text-sm text-muted-foreground">Nog geen admins. Promoveer gebruikers hieronder.</p>
             ) : (
               roles.map((role) => (
                 <div key={role.id} className="flex items-center justify-between rounded-lg border p-3">
                   <div className="flex items-center gap-2">
-                    <Users className="h-4 w-4 text-muted-foreground" />
+                    <Shield className="h-4 w-4 text-primary" />
                     <span className="text-sm font-medium">{role.email}</span>
                   </div>
                   <Button
                     variant="ghost"
                     size="sm"
                     className="text-destructive hover:text-destructive hover:bg-destructive/10 gap-1"
-                    onClick={() => removeAdmin(role)}
+                    onClick={() => demoteAdmin(role)}
                   >
-                    <Trash2 className="h-4 w-4" /> Verwijderen
+                    <ShieldMinus className="h-4 w-4" /> Degraderen
                   </Button>
                 </div>
               ))
             )}
+          </CardContent>
+        </Card>
+
+        {/* Normal users */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <Users className="h-5 w-5 text-muted-foreground" /> Gebruikers
+              <span className="text-sm font-normal text-muted-foreground">({normalUsers.length})</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Zoek op e-mail..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+            <div className="space-y-2 max-h-80 overflow-y-auto">
+              {filteredUsers.length === 0 ? (
+                <p className="text-sm text-muted-foreground py-2">
+                  {searchQuery ? "Geen gebruikers gevonden." : "Geen gewone gebruikers."}
+                </p>
+              ) : (
+                filteredUsers.map((user) => (
+                  <div key={user.id} className="flex items-center justify-between rounded-lg border p-3">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <Users className="h-4 w-4 text-muted-foreground shrink-0" />
+                      <span className="text-sm font-medium truncate">{user.email}</span>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="gap-1 shrink-0 ml-2"
+                      disabled={promoting === user.id}
+                      onClick={() => promoteUser(user)}
+                    >
+                      <ShieldPlus className="h-4 w-4" />
+                      {promoting === user.id ? "Bezig..." : "Promoveren"}
+                    </Button>
+                  </div>
+                ))
+              )}
+            </div>
           </CardContent>
         </Card>
       </div>
