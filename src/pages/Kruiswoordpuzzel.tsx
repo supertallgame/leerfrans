@@ -334,6 +334,8 @@ export default function Kruiswoordpuzzel() {
                 <CardTitle className="text-lg">Woorden & hints</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
+                <Input value={title} onChange={(e) => setTitle(e.target.value)}
+                  placeholder="Titel van de puzzel..." className="text-sm font-semibold" />
                 <Input value={newWord} onChange={(e) => setNewWord(e.target.value.toUpperCase())}
                   placeholder="Woord..." className="text-sm" />
                 <Input value={newClue} onChange={(e) => setNewClue(e.target.value)}
