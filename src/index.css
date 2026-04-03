@@ -164,8 +164,3 @@
   }
 }
 
-@media print {
-  body > * { display: none !important; }
-  .print-puzzle { display: block !important; position: static; }
-  .print-puzzle, .print-puzzle * { visibility: visible !important; }
-}

@@ -376,7 +376,7 @@ export default function Woordenzoeker() {
                     <Button variant="outline" size="sm" onClick={() => downloadAsImage("png", true)}>PNG</Button>
                     <Button variant="outline" size="sm" onClick={() => downloadAsImage("jpeg", true)}>JPG</Button>
                   </div>
-                  <Button variant="outline" size="sm" className="w-full gap-1" onClick={() => window.print()}>
+                  <Button variant="outline" size="sm" className="w-full gap-1" onClick={handlePrintPuzzle}>
                     <Printer className="h-3.5 w-3.5" /> Printen
                   </Button>
                 </CardContent>
