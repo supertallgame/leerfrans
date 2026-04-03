@@ -652,6 +652,14 @@ export type Database = {
         Args: { p_player_name: string; p_room_id: string }
         Returns: Json
       }
+      list_all_users: {
+        Args: never
+        Returns: {
+          created_at: string
+          email: string
+          id: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
