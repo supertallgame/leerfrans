@@ -87,6 +87,7 @@ export default function Woordenzoeker() {
   const [highlightedCells, setHighlightedCells] = useState<Map<string, string>>(new Map());
   const gridRef = useRef<HTMLDivElement>(null);
   const printRef = useRef<HTMLDivElement>(null);
+  const answerRef = useRef<HTMLDivElement>(null);
 
   const FOUND_COLORS = [
     "hsl(262 60% 55% / 0.25)", "hsl(160 50% 45% / 0.25)", "hsl(45 80% 65% / 0.35)",
