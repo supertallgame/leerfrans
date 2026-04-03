@@ -164,11 +164,45 @@ export default function Kruiswoordpuzzel() {
   const [userGrid, setUserGrid] = useState<Map<string, string>>(new Map());
   const [revealedCells, setRevealedCells] = useState<Set<string>>(new Set());
   const [solvedWords, setSolvedWords] = useState<Set<string>>(new Set());
+  const [selectedChapter, setSelectedChapter] = useState<string | null>(null);
   const printRef = useRef<HTMLDivElement>(null);
   const answerRef = useRef<HTMLDivElement>(null);
 
+  const getRandomWordsFromChapter = useCallback((chapterKey: string): WordEntry[] | null => {
+    const [lang, chapId] = chapterKey.split("::") as [Language, string];
+    const chapters = getChaptersForLanguage(lang);
+    const chapter = chapters.find((c) => c.id === chapId);
+    if (!chapter) return null;
+    const imported = chapter.words
+      .filter((w) => {
+        const dutch = w.dutch.replace(/^(de|het|een) /i, "").trim();
+        return /^[a-zA-ZÀ-ÿ]+$/.test(dutch) && dutch.length >= 2 && dutch.length <= 15;
+      })
+      .map((w) => ({
+        word: w.dutch.replace(/^(de|het|een) /i, "").trim().toUpperCase(),
+        clue: w.french,
+      }));
+    const unique = imported.filter((e, i, arr) => arr.findIndex((x) => x.word === e.word) === i);
+    return unique.sort(() => Math.random() - 0.5).slice(0, 15);
+  }, []);
+
   const generate = useCallback(() => {
-    const valid = entries.filter((e) => e.word.trim().length > 0);
+    let wordEntries = entries;
+
+    // If a chapter is selected, pick fresh random words each time
+    if (selectedChapter) {
+      const fresh = getRandomWordsFromChapter(selectedChapter);
+      if (fresh && fresh.length > 0) {
+        wordEntries = fresh;
+        setEntries(fresh);
+        const [, chapId] = selectedChapter.split("::") as [Language, string];
+        const chapters = getChaptersForLanguage(selectedChapter.split("::")[0] as Language);
+        const chapter = chapters.find((c) => c.id === chapId);
+        if (chapter) setTitle(chapter.title);
+      }
+    }
+
+    const valid = wordEntries.filter((e) => e.word.trim().length > 0);
     if (valid.length === 0) return;
     const { grid: g, placed } = generateCrossword(valid, 20);
     setGrid(g);
@@ -176,7 +210,7 @@ export default function Kruiswoordpuzzel() {
     setUserGrid(new Map());
     setRevealedCells(new Set());
     setSolvedWords(new Set());
-  }, [entries]);
+  }, [entries, selectedChapter, getRandomWordsFromChapter]);
 
   const addEntry = () => {
     const w = newWord.trim().toUpperCase().replace(/[^A-Z]/g, "");
