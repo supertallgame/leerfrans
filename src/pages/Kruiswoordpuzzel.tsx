@@ -534,18 +534,18 @@ export default function Kruiswoordpuzzel() {
 
               {/* Hidden print versions */}
               <div className="fixed -left-[9999px] top-0">
-                <div ref={printRef} style={{ padding: 20, width: 560, background: "#fff", fontFamily: "Arial, sans-serif" }}>
-                  <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 10, textAlign: "center" }}>✏️ {title || "Kruiswoordpuzzel"}</h2>
+                <div ref={printRef} style={{ padding: 30, width: 700, background: "#fff", fontFamily: "Arial, sans-serif" }}>
+                  <h2 style={{ fontSize: 24, fontWeight: 700, marginBottom: 16, textAlign: "center" }}>✏️ {title || "Kruiswoordpuzzel"}</h2>
                   <div style={{ display: "flex", justifyContent: "center" }}>{renderPrintGrid(grid, false)}</div>
-                  <div style={{ display: "flex", gap: 32, marginTop: 24 }}>
+                  <div style={{ display: "flex", gap: 32, marginTop: 28 }}>
                     <div style={{ flex: 1 }}>{renderClues("across")}</div>
                     <div style={{ flex: 1 }}>{renderClues("down")}</div>
                   </div>
                 </div>
-                <div ref={answerRef} style={{ padding: 20, width: 560, background: "#fff", fontFamily: "Arial, sans-serif" }}>
-                  <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 10, textAlign: "center" }}>✏️ {title || "Kruiswoordpuzzel"} — Antwoordblad</h2>
+                <div ref={answerRef} style={{ padding: 30, width: 700, background: "#fff", fontFamily: "Arial, sans-serif" }}>
+                  <h2 style={{ fontSize: 24, fontWeight: 700, marginBottom: 16, textAlign: "center" }}>✏️ {title || "Kruiswoordpuzzel"} — Antwoordblad</h2>
                   <div style={{ display: "flex", justifyContent: "center" }}>{renderPrintGrid(grid, true)}</div>
-                  <div style={{ display: "flex", gap: 32, marginTop: 24 }}>
+                  <div style={{ display: "flex", gap: 32, marginTop: 28 }}>
                     <div style={{ flex: 1 }}>{renderClues("across")}</div>
                     <div style={{ flex: 1 }}>{renderClues("down")}</div>
                   </div>
