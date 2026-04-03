@@ -41,6 +41,7 @@ const App = () => (
               <Route path="/slovak/feedback" element={<SlovakFeedback />} />
               <Route path="/juf" element={<Juf />} />
               <Route path="/coderen" element={<Coderen />} />
+              <Route path="/woordenzoeker" element={<Woordenzoeker />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
