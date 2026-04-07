@@ -47,6 +47,7 @@ const languageGames = [
   { id: "ai" as Game, title: "AI Leraar", description: "Chat met een AI die je overhoort", icon: Bot, color: "bg-secondary/20 dark:bg-secondary/30 text-secondary-foreground" },
   { id: "clocktimes" as Game, title: "Kloktijden", description: "Leer hoe je de tijd zegt in het Frans", icon: Clock, color: "bg-[hsl(var(--success))]/10 text-[hsl(var(--success))]", frenchOnly: true },
   { id: "etre" as Game, title: "Être (zijn)", description: "Oefen de vervoeging van être", icon: BookType, color: "bg-destructive/10 text-destructive", frenchOnly: true },
+  { id: "explorer" as Game, title: "Verkenner", description: "Loop rond, beantwoord vragen en verzamel sterren", icon: Map, color: "bg-[hsl(var(--success))]/10 text-[hsl(var(--success))]", frenchOnly: true },
 ];
 
 const naskGames = [
@@ -176,6 +177,7 @@ const Index = () => {
   if (activeGame === "skeleton") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6"><SkeletonLabel onBack={() => setActiveGame("menu")} /></div></Suspense>;
   if (activeGame === "clocktimes") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6"><ClockTimes onBack={() => setActiveGame("menu")} /></div></Suspense>;
   if (activeGame === "etre") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6"><EtreConjugation onBack={() => setActiveGame("menu")} /></div></Suspense>;
+  if (activeGame === "explorer") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6"><FrenchExplorer onBack={() => setActiveGame("menu")} /></div></Suspense>;
 
   const hasSentences = activeVocabulary.some((v) => v.french.includes(" ") && v.french.length > 15);
   const games = language === "biology" ? biologyGames : (language === "nask") ? naskGames : languageGames.filter((g) => {
