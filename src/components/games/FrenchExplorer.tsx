@@ -11,7 +11,7 @@ import { ArrowLeft, RotateCcw, Zap, HelpCircle, Shield, MessageCircleQuestion } 
 import { Progress } from "@/components/ui/progress";
 import {
   WORLD_W, WORLD_H, VIEW_W, VIEW_H,
-  MAX_ENERGY, START_ENERGY, MOVE_COST, CORRECT_REWARD, STAR_COUNT,
+  MAX_ENERGY, START_ENERGY, MOVE_COST, JUMP_COST, CORRECT_REWARD, STAR_COUNT,
   Block, QuizState, EnergyMarker, isSolid, isItem,
   BLOCK_COLORS, getBiome,
   PLAYER_FRAMES, PLAYER_JUMP_FRAME, CASTLE_SPRITE, STAR_SPRITE, BOOST_SPRITE,
@@ -19,6 +19,7 @@ import {
   getBlockStyle,
 } from "./explorer/types";
 import { generateWorld, getSpawnPos } from "./explorer/worldGen";
+import { IdleAnimation, getRandomIdleAnimation } from "./explorer/idleAnimations";
 
 interface Props { onBack: () => void; }
 
@@ -115,6 +116,8 @@ export default function FrenchExplorer({ onBack }: Props) {
   const [energyMarkers, setEnergyMarkers] = useState<EnergyMarker[]>([]);
   const [animFrame, setAnimFrame] = useState<0 | 1>(0);
   const [isJumping, setIsJumping] = useState(false);
+  const [idleAnim, setIdleAnim] = useState<IdleAnimation | null>(null);
+  const lastInputRef = useRef(Date.now());
 
   const vocabQueue = useMemo(() => shuffle(activeVocabulary), []);
   const [vocabIndex, setVocabIndex] = useState(0);
@@ -126,6 +129,23 @@ export default function FrenchExplorer({ onBack }: Props) {
     const interval = setInterval(() => setAnimFrame((f) => (f === 0 ? 1 : 0) as 0 | 1), 350);
     return () => clearInterval(interval);
   }, []);
+
+  // Idle animation system - triggers after 5 minutes of no input
+  useEffect(() => {
+    if (finished || gameOver) return;
+    const IDLE_TIMEOUT = 5 * 60 * 1000; // 5 minutes
+
+    const interval = setInterval(() => {
+      const elapsed = Date.now() - lastInputRef.current;
+      if (elapsed >= IDLE_TIMEOUT && !idleAnim && !quiz) {
+        const anim = getRandomIdleAnimation();
+        setIdleAnim(anim);
+        setTimeout(() => setIdleAnim(null), anim.duration);
+      }
+    }, 10_000); // check every 10s
+
+    return () => clearInterval(interval);
+  }, [finished, gameOver, idleAnim, quiz]);
 
   const showFloat = (text: string) => {
     setFloatingText(text);
@@ -212,8 +232,9 @@ export default function FrenchExplorer({ onBack }: Props) {
 
     if (dr < 0) {
       if (!isOnGround(r, c, grid)) return;
+      // Jump max 2 blocks high instead of 3
       let jumpTarget = r;
-      for (let step = 1; step <= 3; step++) {
+      for (let step = 1; step <= 2; step++) {
         const nextR = r - step;
         if (!isWalkable(nextR, c, grid)) break;
         jumpTarget = nextR;
@@ -221,7 +242,18 @@ export default function FrenchExplorer({ onBack }: Props) {
 
       if (jumpTarget === r) return;
       setIsJumping(true);
-      commitMove(jumpTarget, c);
+      // Jump uses JUMP_COST instead of normal MOVE_COST
+      const jumpCostActual = shieldActive ? 0 : (speedActive ? Math.max(1, Math.floor(JUMP_COST / 2)) : JUMP_COST);
+      const newEnergy = energy - jumpCostActual;
+      if (newEnergy <= 0 && !shieldActive) {
+        setEnergy(0); setGameOver(true); return;
+      }
+      setEnergy(Math.max(0, newEnergy));
+      setPlayerPos([jumpTarget, c]);
+      setSteps((s) => s + 1);
+      if (shieldActive) { const nt = shieldTurns - 1; setShieldTurns(nt); if (nt <= 0) setShieldActive(false); }
+      if (speedActive) { const nt = speedTurns - 1; setSpeedTurns(nt); if (nt <= 0) setSpeedActive(false); }
+      handleCellEntry(jumpTarget, c);
       return;
     }
 
@@ -240,7 +272,7 @@ export default function FrenchExplorer({ onBack }: Props) {
       if (!isWalkable(nextR, c, grid)) return;
       commitMove(nextR, c);
     }
-  }, [playerPos, grid, quiz, finished, gameOver, commitMove]);
+  }, [playerPos, grid, quiz, finished, gameOver, commitMove, energy, shieldActive, speedActive, shieldTurns, speedTurns, handleCellEntry]);
 
   useEffect(() => {
     if (quiz || finished || gameOver) return;
@@ -278,6 +310,8 @@ export default function FrenchExplorer({ onBack }: Props) {
         e.preventDefault();
       }
       if (k === "q") { openQuestion(); return; }
+      lastInputRef.current = Date.now();
+      setIdleAnim(null);
       keysRef.current.add(k);
     };
     const up = (e: KeyboardEvent) => {
@@ -530,6 +564,19 @@ export default function FrenchExplorer({ onBack }: Props) {
               flip={direction === "left"}
               glow={shieldActive}
             />
+            {/* Idle animation speech bubble */}
+            {idleAnim && (
+              <div
+                className="absolute -top-10 left-1/2 -translate-x-1/2 whitespace-nowrap pointer-events-none z-20 animate-fade-in"
+                style={{ fontSize: "11px" }}
+              >
+                <span className="bg-card/95 backdrop-blur px-2 py-1 rounded-lg shadow-lg border border-border flex items-center gap-1">
+                  <span className="text-base">{idleAnim.emoji}</span>
+                  <span className="text-foreground font-medium">{idleAnim.text}</span>
+                </span>
+                <div className="w-2 h-2 bg-card/95 border-b border-r border-border rotate-45 mx-auto -mt-1" />
+              </div>
+            )}
           </div>
         </div>
 
