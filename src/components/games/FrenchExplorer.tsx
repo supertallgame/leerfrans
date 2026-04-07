@@ -277,7 +277,7 @@ export default function FrenchExplorer({ onBack }: Props) {
       if (["arrowup","arrowdown","arrowleft","arrowright","w","a","s","d"," ","q"].includes(k)) {
         e.preventDefault();
       }
-      if (k === "q" || k === " ") { openQuestion(); return; }
+      if (k === "q") { openQuestion(); return; }
       keysRef.current.add(k);
     };
     const up = (e: KeyboardEvent) => {
