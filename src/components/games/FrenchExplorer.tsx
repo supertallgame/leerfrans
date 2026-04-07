@@ -265,19 +265,63 @@ export default function FrenchExplorer({ onBack }: Props) {
 
   useEffect(() => { containerRef.current?.focus(); }, []);
 
-  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (e.key === "q" || e.key === "Q" || e.key === " ") {
-      e.preventDefault(); openQuestion(); return;
-    }
-    const map: Record<string, [number, number]> = {
-      ArrowUp: [-1, 0], w: [-1, 0], W: [-1, 0],
-      ArrowDown: [1, 0], s: [1, 0], S: [1, 0],
-      ArrowLeft: [0, -1], a: [0, -1], A: [0, -1],
-      ArrowRight: [0, 1], d: [0, 1], D: [0, 1],
+  // Track pressed keys for simultaneous input
+  const keysRef = useRef<Set<string>>(new Set());
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const down = (e: KeyboardEvent) => {
+      const k = e.key.toLowerCase();
+      if (["arrowup","arrowdown","arrowleft","arrowright","w","a","s","d"," ","q"].includes(k)) {
+        e.preventDefault();
+      }
+      if (k === "q" || k === " ") { openQuestion(); return; }
+      keysRef.current.add(k);
     };
-    const dir = map[e.key];
-    if (dir) { e.preventDefault(); tryMove(...dir); }
-  }, [tryMove, openQuestion]);
+    const up = (e: KeyboardEvent) => {
+      keysRef.current.delete(e.key.toLowerCase());
+    };
+    const blur = () => keysRef.current.clear();
+
+    el.addEventListener("keydown", down);
+    el.addEventListener("keyup", up);
+    el.addEventListener("blur", blur);
+    return () => {
+      el.removeEventListener("keydown", down);
+      el.removeEventListener("keyup", up);
+      el.removeEventListener("blur", blur);
+    };
+  }, [openQuestion]);
+
+  // Game loop: process held keys every 120ms
+  useEffect(() => {
+    if (quiz || finished || gameOver) return;
+
+    const interval = setInterval(() => {
+      const keys = keysRef.current;
+      const up = keys.has("w") || keys.has("arrowup");
+      const down = keys.has("s") || keys.has("arrowdown");
+      const left = keys.has("a") || keys.has("arrowleft");
+      const right = keys.has("d") || keys.has("arrowright");
+
+      // Jump first (can combine with horizontal)
+      if (up) tryMove(-1, 0);
+      // Then horizontal
+      if (right) tryMove(0, 1);
+      else if (left) tryMove(0, -1);
+      // Down
+      if (down && !up) tryMove(1, 0);
+    }, 120);
+
+    return () => clearInterval(interval);
+  }, [quiz, finished, gameOver, tryMove]);
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    // Handled by native listeners above; just prevent defaults
+    e.preventDefault();
+  }, []);
 
   const handleQuizAnswer = (answer: string) => {
     if (quizResult) return;
