@@ -39,10 +39,16 @@ function isOnGround(r: number, c: number, grid: Block[][]): boolean {
   return r >= WORLD_H - 1 || isSolid(grid[r + 1]?.[c]?.type);
 }
 
+function isWalkable(r: number, c: number, grid: Block[][]): boolean {
+  return r >= 0 && r < WORLD_H && c >= 0 && c < WORLD_W && !isSolid(grid[r]?.[c]?.type);
+}
+
 // Pixel art sprite renderer via CSS box-shadow
 function PixelSprite({ sprite, size = 28, flip = false, glow = false, animate = false }: {
   sprite: string; size?: number; flip?: boolean; glow?: boolean; animate?: boolean;
 }) {
+  const scale = size / 30;
+
   return (
     <div
       className="absolute inset-0 flex items-center justify-center pointer-events-none"
@@ -61,6 +67,8 @@ function PixelSprite({ sprite, size = 28, flip = false, glow = false, animate = 
           boxShadow: sprite,
           position: "absolute",
           top: 0, left: 0,
+          transform: `scale(${scale})`,
+          transformOrigin: "top left",
         }} />
       </div>
     </div>
@@ -137,6 +145,46 @@ export default function FrenchExplorer({ onBack }: Props) {
     setQuiz(getNextQuestion());
   }, [quiz, finished, gameOver, getNextQuestion]);
 
+  const handleCellEntry = useCallback((r: number, c: number) => {
+    const cell = grid[r]?.[c];
+    if (!cell || cell.collected || !isItem(cell.type)) return;
+
+    const newGrid = grid.map((row) => row.map((block) => ({ ...block })));
+    newGrid[r][c].collected = true;
+    applyPickup(cell.type, newGrid);
+  }, [grid, applyPickup]);
+
+  const commitMove = useCallback((r: number, c: number) => {
+    const moveCost = speedActive ? Math.max(1, Math.floor(MOVE_COST / 2)) : MOVE_COST;
+    const actualCost = shieldActive ? 0 : moveCost;
+    const newEnergy = energy - actualCost;
+
+    if (newEnergy <= 0 && !shieldActive) {
+      setEnergy(0);
+      setGameOver(true);
+      return false;
+    }
+
+    setEnergy(Math.max(0, newEnergy));
+    setPlayerPos([r, c]);
+    setSteps((s) => s + 1);
+
+    if (shieldActive) {
+      const nt = shieldTurns - 1;
+      setShieldTurns(nt);
+      if (nt <= 0) setShieldActive(false);
+    }
+
+    if (speedActive) {
+      const nt = speedTurns - 1;
+      setSpeedTurns(nt);
+      if (nt <= 0) setSpeedActive(false);
+    }
+
+    handleCellEntry(r, c);
+    return true;
+  }, [energy, shieldActive, speedActive, shieldTurns, speedTurns, handleCellEntry]);
+
   const applyPickup = useCallback((type: string, newGrid: Block[][]) => {
     switch (type) {
       case "star": setStarsCollected((s) => s + 1); showFloat("⭐ +1"); break;
@@ -160,66 +208,52 @@ export default function FrenchExplorer({ onBack }: Props) {
     if (quiz || finished || gameOver) return;
     const [r, c] = playerPos;
 
-    // Jump: must be on ground, jump 2 cells up so gravity lands you 1 above
     if (dr < 0) {
       if (!isOnGround(r, c, grid)) return;
-      // Try to jump 2 cells up
-      let jumpTarget = r - 2;
-      if (jumpTarget < 0) jumpTarget = 0;
-      // Check both cells above are free
-      if (isSolid(grid[r - 1]?.[c]?.type)) return;
-      if (jumpTarget < r - 1 && isSolid(grid[jumpTarget]?.[c]?.type)) jumpTarget = r - 1;
-      // Apply gravity from jump target
-      const landed = applyGravity(jumpTarget, c, grid);
-      if (landed === r) return; // Would land in same spot, no point
-      const moveCost = speedActive ? Math.max(1, Math.floor(MOVE_COST / 2)) : MOVE_COST;
-      const actualCost = shieldActive ? 0 : moveCost;
-      const newEnergy = energy - actualCost;
-      if (newEnergy <= 0 && !shieldActive) { setEnergy(0); setGameOver(true); return; }
-      setEnergy(Math.max(0, newEnergy));
-      setPlayerPos([landed, c]);
-      setSteps((s) => s + 1);
-      if (shieldActive) { const nt = shieldTurns - 1; setShieldTurns(nt); if (nt <= 0) setShieldActive(false); }
-      if (speedActive) { const nt = speedTurns - 1; setSpeedTurns(nt); if (nt <= 0) setSpeedActive(false); }
-      const cell = grid[landed][c];
-      if (!cell.collected && isItem(cell.type)) {
-        const ng = grid.map((row) => row.map((b) => ({ ...b })));
-        ng[landed][c].collected = true;
-        applyPickup(cell.type, ng);
+      let jumpTarget = r;
+      for (let step = 1; step <= 3; step++) {
+        const nextR = r - step;
+        if (!isWalkable(nextR, c, grid)) break;
+        jumpTarget = nextR;
       }
+
+      if (jumpTarget === r) return;
+      commitMove(jumpTarget, c);
       return;
     }
-
-    let nr = r + dr;
-    let nc = c + dc;
-    if (nr < 0 || nr >= WORLD_H || nc < 0 || nc >= WORLD_W) return;
 
     if (dc > 0) setDirection("right");
     else if (dc < 0) setDirection("left");
 
-    if (isSolid(grid[nr][nc].type)) return;
-    nr = applyGravity(nr, nc, grid);
-
-    const moveCost = speedActive ? Math.max(1, Math.floor(MOVE_COST / 2)) : MOVE_COST;
-    const actualCost = shieldActive ? 0 : moveCost;
-    const newEnergy = energy - actualCost;
-
-    if (newEnergy <= 0 && !shieldActive) {
-      setEnergy(0); setGameOver(true); return;
+    if (dc !== 0) {
+      const nextC = c + dc;
+      if (!isWalkable(r, nextC, grid)) return;
+      commitMove(r, nextC);
+      return;
     }
-    setEnergy(Math.max(0, newEnergy));
-    setPlayerPos([nr, nc]);
-    setSteps((s) => s + 1);
 
-    if (shieldActive) { const nt = shieldTurns - 1; setShieldTurns(nt); if (nt <= 0) setShieldActive(false); }
-    if (speedActive) { const nt = speedTurns - 1; setSpeedTurns(nt); if (nt <= 0) setSpeedActive(false); }
+    if (dr > 0) {
+      const nextR = r + 1;
+      if (!isWalkable(nextR, c, grid)) return;
+      commitMove(nextR, c);
+    }
+  }, [playerPos, grid, quiz, finished, gameOver, commitMove]);
 
-    const cell = grid[nr][nc];
-    if (cell.collected || !isItem(cell.type)) return;
-    const newGrid = grid.map((row) => row.map((b) => ({ ...b })));
-    newGrid[nr][nc].collected = true;
-    applyPickup(cell.type, newGrid);
-  }, [playerPos, grid, energy, quiz, finished, gameOver, shieldActive, shieldTurns, speedActive, speedTurns, worldData.heightmap, applyPickup]);
+  useEffect(() => {
+    if (quiz || finished || gameOver) return;
+
+    const [r, c] = playerPos;
+    if (isOnGround(r, c, grid)) return;
+
+    const timeout = window.setTimeout(() => {
+      const nextR = r + 1;
+      if (!isWalkable(nextR, c, grid)) return;
+      setPlayerPos([nextR, c]);
+      handleCellEntry(nextR, c);
+    }, 140);
+
+    return () => window.clearTimeout(timeout);
+  }, [playerPos, grid, quiz, finished, gameOver, handleCellEntry]);
 
   useEffect(() => { containerRef.current?.focus(); }, []);
 
@@ -398,14 +432,14 @@ export default function FrenchExplorer({ onBack }: Props) {
                     const dc = c - pc;
                     if (Math.abs(dr) + Math.abs(dc) === 1) tryMove(dr, dc);
                   }}
-                  className="relative flex items-center justify-center transition-none overflow-hidden"
-                  style={{ background: bg, aspectRatio: "1", ...borderStyle }}
+                  className="relative flex items-center justify-center transition-none"
+                  style={{ background: bg, aspectRatio: "1", overflow: isPlayer ? "visible" : "hidden", ...borderStyle }}
                 >
                   {/* Player pixel-art sprite (animated) */}
                   {isPlayer && (
                     <PixelSprite
                       sprite={PLAYER_FRAMES[animFrame]}
-                      size={30}
+                      size={60}
                       flip={direction === "left"}
                       glow={shieldActive}
                     />
