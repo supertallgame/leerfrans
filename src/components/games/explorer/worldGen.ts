@@ -5,7 +5,7 @@ function generateHeightmap(): number[] {
   let h = 3;
   for (let c = 0; c < WORLD_W; c++) {
     const r = Math.random();
-    if (r < 0.15) h = Math.min(5, h + 1);
+    if (r < 0.15) h = Math.min(4, h + 1);
     else if (r < 0.3) h = Math.max(2, h - 1);
     heights.push(h);
   }
@@ -53,6 +53,7 @@ export function generateWorld(): { grid: Block[][]; heightmap: number[] } {
     Array.from({ length: WORLD_W }, (_, c) => ({ type: "air" as BlockType, biome: getBiome(c) }))
   );
 
+  // Fill terrain
   for (let c = 0; c < WORLD_W; c++) {
     const groundHeight = heightmap[c];
     for (let h = 0; h < groundHeight; h++) {
@@ -62,19 +63,31 @@ export function generateWorld(): { grid: Block[][]; heightmap: number[] } {
     }
   }
 
-  for (let i = 0; i < 12; i++) {
-    const c = 4 + Math.floor(Math.random() * (WORLD_W - 8));
+  // Floating platforms: fewer, thinner (1 row), no overlap
+  const platformOccupied = new Set<string>();
+  for (let i = 0; i < 7; i++) {
+    const c = 5 + Math.floor(Math.random() * (WORLD_W - 10));
     const groundRow = WORLD_H - heightmap[c];
-    const r = groundRow - 3 - Math.floor(Math.random() * 2);
+    const r = groundRow - 3; // 3 rows above ground surface
     if (r < 1 || r >= WORLD_H) continue;
-    const len = 2 + Math.floor(Math.random() * 3);
+    // Check no overlap with existing platforms
+    const len = 2 + Math.floor(Math.random() * 2); // 2-3 wide only
+    let canPlace = true;
     for (let j = 0; j < len && c + j < WORLD_W; j++) {
-      if (grid[r][c + j].type === "air") {
-        grid[r][c + j] = { type: "platform", biome: getBiome(c + j) };
-      }
+      const key = `${r},${c + j}`;
+      if (platformOccupied.has(key) || grid[r][c + j].type !== "air") { canPlace = false; break; }
+      // Also check row above and below aren't platforms
+      if (r > 0 && grid[r - 1][c + j].type === "platform") { canPlace = false; break; }
+      if (r < WORLD_H - 1 && grid[r + 1][c + j].type === "platform") { canPlace = false; break; }
+    }
+    if (!canPlace) continue;
+    for (let j = 0; j < len && c + j < WORLD_W; j++) {
+      platformOccupied.add(`${r},${c + j}`);
+      grid[r][c + j] = { type: "platform", biome: getBiome(c + j) };
     }
   }
 
+  // Stone variation in dirt
   for (let c = 0; c < WORLD_W; c++) {
     for (let r = WORLD_H - 1; r >= 0; r--) {
       if (grid[r][c].type === "dirt" && Math.random() < 0.15) {
@@ -83,6 +96,7 @@ export function generateWorld(): { grid: Block[][]; heightmap: number[] } {
     }
   }
 
+  // Finish castle
   const finishR = WORLD_H - heightmap[WORLD_W - 2] - 1;
   grid[finishR][WORLD_W - 2] = { type: "finish", biome: getBiome(WORLD_W - 2) };
 
@@ -100,5 +114,7 @@ export function generateWorld(): { grid: Block[][]; heightmap: number[] } {
 }
 
 export function getSpawnPos(heightmap: number[]): [number, number] {
-  return [WORLD_H - heightmap[1] - 1, 1];
+  // Place player directly above the ground surface
+  const groundRow = WORLD_H - heightmap[1]; // top of ground (grass row)
+  return [groundRow - 1, 1]; // one above grass
 }
