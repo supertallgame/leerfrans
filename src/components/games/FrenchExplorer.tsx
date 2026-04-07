@@ -19,6 +19,7 @@ import {
   getBlockStyle,
 } from "./explorer/types";
 import { generateWorld, getSpawnPos } from "./explorer/worldGen";
+import { IdleAnimation, getRandomIdleAnimation } from "./explorer/idleAnimations";
 
 interface Props { onBack: () => void; }
 
