@@ -501,7 +501,8 @@ export default function FrenchExplorer({ onBack }: Props) {
               gridTemplateColumns: `repeat(${WORLD_W}, 1fr)`,
               gridTemplateRows: `repeat(${WORLD_H}, 1fr)`,
               transform: `translateX(-${(camC / WORLD_W) * 100}%)`,
-              transition: "transform 0.15s ease-out",
+              transition: "transform 0.1s linear",
+              willChange: "transform",
             }}
           >
             {Array.from({ length: WORLD_H }).map((_, r) =>
@@ -557,7 +558,8 @@ export default function FrenchExplorer({ onBack }: Props) {
               top: `${(playerPos[0] / VIEW_H) * 100}%`,
               width: `${100 / VIEW_W}%`,
               height: `${100 / VIEW_H}%`,
-              transition: "left 0.12s ease-out, top 0.12s ease-out",
+              transition: "left 0.1s linear, top 0.1s linear",
+              willChange: "left, top",
               zIndex: 10,
               overflow: "visible",
             }}
