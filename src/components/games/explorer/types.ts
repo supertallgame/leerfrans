@@ -1,3 +1,5 @@
+import type React from "react";
+
 export const WORLD_W = 60;
 export const WORLD_H = 10;
 export const VIEW_W = 16;

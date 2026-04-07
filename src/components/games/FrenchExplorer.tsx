@@ -253,7 +253,7 @@ export default function FrenchExplorer({ onBack }: Props) {
       if (!isWalkable(nextR, c, grid)) return;
       setPlayerPos([nextR, c]);
       handleCellEntry(nextR, c);
-    }, 140);
+    }, 80);
 
     return () => window.clearTimeout(timeout);
   }, [playerPos, grid, quiz, finished, gameOver, handleCellEntry]);
