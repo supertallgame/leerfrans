@@ -7,13 +7,14 @@ import { playCorrect, playWrong } from "@/lib/sounds";
 import { trackAnswer } from "@/lib/trackAnswer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowLeft, RotateCcw, Zap, HelpCircle, Shield } from "lucide-react";
+import { ArrowLeft, RotateCcw, Zap, HelpCircle, Shield, MessageCircleQuestion } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import {
   WORLD_W, WORLD_H, VIEW_W, VIEW_H,
   MAX_ENERGY, START_ENERGY, MOVE_COST, CORRECT_REWARD, STAR_COUNT,
-  Block, QuizState, isSolid, isItem,
+  Block, QuizState, EnergyMarker, isSolid, isItem,
   BLOCK_COLORS, ITEM_EMOJI, getBiome,
+  PLAYER_SPRITE, TREE_SPRITE, CASTLE_SPRITE,
 } from "./explorer/types";
 import { generateWorld, getSpawnPos } from "./explorer/worldGen";
 
@@ -29,15 +30,40 @@ function shuffleArray<T>(arr: T[]): T[] {
 }
 
 function applyGravity(r: number, c: number, grid: Block[][]): number {
-  while (r < WORLD_H - 1 && !isSolid(grid[r + 1]?.[c]?.type)) {
-    r++;
-  }
+  while (r < WORLD_H - 1 && !isSolid(grid[r + 1]?.[c]?.type)) r++;
   return r;
 }
 
 function isOnGround(r: number, c: number, grid: Block[][]): boolean {
   return r >= WORLD_H - 1 || isSolid(grid[r + 1]?.[c]?.type);
 }
+
+// Pixel art sprite component
+function PixelSprite({ sprite, size = 28, flip = false, glow = false }: {
+  sprite: string; size?: number; flip?: boolean; glow?: boolean;
+}) {
+  return (
+    <div
+      className="absolute inset-0 flex items-center justify-center pointer-events-none"
+      style={{ zIndex: 5 }}
+    >
+      <div style={{
+        width: size, height: size,
+        transform: flip ? "scaleX(-1)" : "none",
+        filter: glow ? "drop-shadow(0 0 6px gold)" : "none",
+      }}>
+        <div style={{
+          width: 1, height: 1,
+          boxShadow: sprite,
+          position: "absolute",
+          top: 0, left: 0,
+        }} />
+      </div>
+    </div>
+  );
+}
+
+let markerIdCounter = 0;
 
 export default function FrenchExplorer({ onBack }: Props) {
   const { activeVocabulary, language, chapterId } = useChapter();
@@ -63,11 +89,11 @@ export default function FrenchExplorer({ onBack }: Props) {
   const [floatingText, setFloatingText] = useState<string | null>(null);
   const [steps, setSteps] = useState(0);
   const [direction, setDirection] = useState<"right" | "left">("right");
+  const [energyMarkers, setEnergyMarkers] = useState<EnergyMarker[]>([]);
 
   const vocabQueue = useMemo(() => shuffle(activeVocabulary), []);
   const [vocabIndex, setVocabIndex] = useState(0);
 
-  // Camera: horizontal scroll, full height visible
   const camC = Math.max(0, Math.min(WORLD_W - VIEW_W, playerPos[1] - Math.floor(VIEW_W / 2)));
 
   const showFloat = (text: string) => {
@@ -85,13 +111,15 @@ export default function FrenchExplorer({ onBack }: Props) {
     return { term: item.dutch, correctAnswer: correct, options: shuffleArray([correct, ...others]) };
   }, [vocabIndex, vocabQueue, activeVocabulary]);
 
+  const openQuestion = useCallback(() => {
+    if (quiz || finished || gameOver) return;
+    setQuiz(getNextQuestion());
+  }, [quiz, finished, gameOver, getNextQuestion]);
+
   const tryMove = useCallback((dr: number, dc: number) => {
     if (quiz || finished || gameOver) return;
     const [r, c] = playerPos;
-
-    // Jump: only if on ground and moving up
     if (dr < 0 && !isOnGround(r, c, grid)) return;
-    // Can jump up 2 cells
     let nr = r + dr;
     let nc = c + dc;
     if (nr < 0 || nr >= WORLD_H || nc < 0 || nc >= WORLD_W) return;
@@ -99,10 +127,7 @@ export default function FrenchExplorer({ onBack }: Props) {
     if (dc > 0) setDirection("right");
     else if (dc < 0) setDirection("left");
 
-    // Check if target is solid (blocked)
     if (isSolid(grid[nr][nc].type)) return;
-
-    // Apply gravity after horizontal/upward move
     nr = applyGravity(nr, nc, grid);
 
     const moveCost = speedActive ? Math.max(1, Math.floor(MOVE_COST / 2)) : MOVE_COST;
@@ -110,52 +135,25 @@ export default function FrenchExplorer({ onBack }: Props) {
     const newEnergy = energy - actualCost;
 
     if (newEnergy <= 0 && !shieldActive) {
-      setEnergy(0);
-      setGameOver(true);
-      return;
+      setEnergy(0); setGameOver(true); return;
     }
     setEnergy(Math.max(0, newEnergy));
     setPlayerPos([nr, nc]);
     setSteps((s) => s + 1);
 
-    // Decrement power-up turns
-    if (shieldActive) {
-      const nt = shieldTurns - 1;
-      setShieldTurns(nt);
-      if (nt <= 0) setShieldActive(false);
-    }
-    if (speedActive) {
-      const nt = speedTurns - 1;
-      setSpeedTurns(nt);
-      if (nt <= 0) setSpeedActive(false);
-    }
+    if (shieldActive) { const nt = shieldTurns - 1; setShieldTurns(nt); if (nt <= 0) setShieldActive(false); }
+    if (speedActive) { const nt = speedTurns - 1; setSpeedTurns(nt); if (nt <= 0) setSpeedActive(false); }
 
     const cell = grid[nr][nc];
     if (cell.collected || !isItem(cell.type)) return;
-
     const newGrid = grid.map((row) => row.map((b) => ({ ...b })));
     newGrid[nr][nc].collected = true;
 
     switch (cell.type) {
-      case "question":
-        setQuiz(getNextQuestion());
-        break;
-      case "star":
-        setStarsCollected((s) => s + 1);
-        showFloat("⭐ +1");
-        break;
-      case "boost":
-        setEnergy((e) => Math.min(MAX_ENERGY, e + 25));
-        showFloat("⚡ +25!");
-        break;
-      case "shield":
-        setShieldActive(true); setShieldTurns(8);
-        showFloat("🛡️ Schild!");
-        break;
-      case "speed":
-        setSpeedActive(true); setSpeedTurns(10);
-        showFloat("👟 Snelheid!");
-        break;
+      case "star": setStarsCollected((s) => s + 1); showFloat("⭐ +1"); break;
+      case "boost": setEnergy((e) => Math.min(MAX_ENERGY, e + 25)); showFloat("⚡ +25!"); break;
+      case "shield": setShieldActive(true); setShieldTurns(8); showFloat("🛡️ Schild!"); break;
+      case "speed": setSpeedActive(true); setSpeedTurns(10); showFloat("👟 Snelheid!"); break;
       case "chest": {
         const rewards = ["energy", "shield", "speed"];
         const reward = rewards[Math.floor(Math.random() * rewards.length)];
@@ -164,16 +162,17 @@ export default function FrenchExplorer({ onBack }: Props) {
         else { setSpeedActive(true); setSpeedTurns(8); showFloat("🎁→👟"); }
         break;
       }
-      case "finish":
-        setFinished(true);
-        break;
+      case "finish": setFinished(true); break;
     }
     setWorldData({ grid: newGrid, heightmap: worldData.heightmap });
-  }, [playerPos, grid, energy, quiz, finished, gameOver, getNextQuestion, shieldActive, shieldTurns, speedActive, speedTurns, worldData.heightmap]);
+  }, [playerPos, grid, energy, quiz, finished, gameOver, shieldActive, shieldTurns, speedActive, speedTurns, worldData.heightmap]);
 
   useEffect(() => { containerRef.current?.focus(); }, []);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === "q" || e.key === "Q" || e.key === " ") {
+      e.preventDefault(); openQuestion(); return;
+    }
     const map: Record<string, [number, number]> = {
       ArrowUp: [-1, 0], w: [-1, 0], W: [-1, 0],
       ArrowDown: [1, 0], s: [1, 0], S: [1, 0],
@@ -182,7 +181,7 @@ export default function FrenchExplorer({ onBack }: Props) {
     };
     const dir = map[e.key];
     if (dir) { e.preventDefault(); tryMove(...dir); }
-  }, [tryMove]);
+  }, [tryMove, openQuestion]);
 
   const handleQuizAnswer = (answer: string) => {
     if (quizResult) return;
@@ -191,10 +190,27 @@ export default function FrenchExplorer({ onBack }: Props) {
     setQuestionsAnswered((q) => q + 1);
     if (correct) {
       setCorrectAnswers((c) => c + 1);
-      setEnergy((e) => Math.min(MAX_ENERGY, e + CORRECT_REWARD));
       playCorrect();
+      // Place energy marker at player position
+      const marker: EnergyMarker = {
+        r: playerPos[0], c: playerPos[1],
+        amount: CORRECT_REWARD, id: markerIdCounter++,
+      };
+      setEnergyMarkers((m) => [...m, marker]);
     } else { playWrong(); }
     trackAnswer({ gameType: "explorer", language, chapterId, question: quiz!.term, correctAnswer: quiz!.correctAnswer, givenAnswer: answer, isCorrect: correct });
+  };
+
+  const claimMarker = (markerId: number) => {
+    const marker = energyMarkers.find((m) => m.id === markerId);
+    if (!marker) return;
+    // Must be adjacent or on the marker
+    const [pr, pc] = playerPos;
+    const dist = Math.abs(marker.r - pr) + Math.abs(marker.c - pc);
+    if (dist > 1) return; // must be on or adjacent
+    setEnergy((e) => Math.min(MAX_ENERGY, e + marker.amount));
+    setEnergyMarkers((m) => m.filter((x) => x.id !== markerId));
+    showFloat(`✅ +${marker.amount} energie!`);
   };
 
   const dismissQuiz = () => { setQuiz(null); setQuizResult(null); };
@@ -210,9 +226,9 @@ export default function FrenchExplorer({ onBack }: Props) {
     setVocabIndex(0); setShieldActive(false); setShieldTurns(0);
     setSpeedActive(false); setSpeedTurns(0);
     setSteps(0); setDirection("right");
+    setEnergyMarkers([]);
   };
 
-  // End screen
   if (finished || gameOver) {
     return (
       <div className="flex flex-col items-center gap-6 max-w-lg mx-auto">
@@ -240,8 +256,6 @@ export default function FrenchExplorer({ onBack }: Props) {
       </div>
     );
   }
-
-  const currentBiome = getBiome(playerPos[1]);
 
   return (
     <div
@@ -279,7 +293,7 @@ export default function FrenchExplorer({ onBack }: Props) {
         <Progress value={(energy / MAX_ENERGY) * 100} className="w-full h-2" />
       </div>
 
-      {/* Game world - pixel art side view */}
+      {/* Game world */}
       <div className="relative w-full">
         <div
           className="w-full rounded-lg overflow-hidden border-2 border-border shadow-xl"
@@ -301,16 +315,10 @@ export default function FrenchExplorer({ onBack }: Props) {
               const isPlayer = playerPos[0] === r && playerPos[1] === c;
               const biomeColors = BLOCK_COLORS[cell.biome];
               const solid = isSolid(cell.type);
+              const marker = energyMarkers.find((m) => m.r === r && m.c === c);
 
-              // Determine cell background
-              let bg: string;
-              if (solid) {
-                bg = biomeColors[cell.type] || biomeColors.dirt;
-              } else {
-                bg = biomeColors.sky;
-              }
+              let bg = solid ? (biomeColors[cell.type] || biomeColors.dirt) : biomeColors.sky;
 
-              // Add subtle texture to ground
               const borderStyle = solid ? {
                 borderRight: `1px solid ${biomeColors.dirt}88`,
                 borderBottom: `1px solid ${biomeColors.dirt}66`,
@@ -320,41 +328,65 @@ export default function FrenchExplorer({ onBack }: Props) {
                 <button
                   key={`${vr}-${vc}`}
                   onClick={() => {
+                    // If there's a marker here, try claiming it
+                    if (marker) { claimMarker(marker.id); return; }
                     const [pr, pc] = playerPos;
                     const dr = r - pr;
                     const dc = c - pc;
                     if (Math.abs(dr) + Math.abs(dc) === 1) tryMove(dr, dc);
                   }}
                   className="relative flex items-center justify-center transition-none"
-                  style={{
-                    background: bg,
-                    aspectRatio: "1",
-                    ...borderStyle,
-                  }}
+                  style={{ background: bg, aspectRatio: "1", ...borderStyle }}
                 >
-                  {isPlayer ? (
-                    <span
-                      className="text-lg md:text-xl leading-none"
-                      style={{
-                        transform: direction === "left" ? "scaleX(-1)" : "none",
-                        filter: shieldActive ? "drop-shadow(0 0 4px gold)" : "none",
-                      }}
-                    >
-                      🧙
-                    </span>
-                  ) : (
-                    !solid && isItem(cell.type) && !cell.collected && (
-                      <span className="text-xs md:text-base leading-none animate-pulse">
-                        {ITEM_EMOJI[cell.type]}
-                      </span>
-                    )
-                  )}
-                  {/* Grass detail: small highlight on top of grass blocks */}
-                  {cell.type === "grass" && (
-                    <div
-                      className="absolute top-0 left-0 right-0 h-[3px]"
-                      style={{ background: `${biomeColors.grass}cc` }}
+                  {/* Player pixel-art sprite */}
+                  {isPlayer && (
+                    <PixelSprite
+                      sprite={PLAYER_SPRITE}
+                      flip={direction === "left"}
+                      glow={shieldActive}
                     />
+                  )}
+
+                  {/* Castle pixel-art sprite */}
+                  {!isPlayer && cell.type === "finish" && !cell.collected && (
+                    <PixelSprite sprite={CASTLE_SPRITE} size={24} />
+                  )}
+
+                  {/* Items (emoji) */}
+                  {!isPlayer && !solid && cell.type !== "finish" && isItem(cell.type) && !cell.collected && (
+                    <span className="text-xs md:text-sm leading-none z-[2] relative">
+                      {ITEM_EMOJI[cell.type]}
+                    </span>
+                  )}
+
+                  {/* Energy marker (cross to click) */}
+                  {marker && !isPlayer && (
+                    <div className="absolute inset-0 flex items-center justify-center z-10 cursor-pointer">
+                      <div className="relative w-6 h-6 md:w-8 md:h-8 animate-pulse">
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <span className="text-lg md:text-xl font-black text-amber-400 drop-shadow-[0_0_4px_rgba(0,0,0,0.5)]"
+                            style={{ textShadow: "0 0 8px #F59E0B, 0 0 2px #000" }}
+                          >✖</span>
+                        </div>
+                        <span className="absolute -top-1 -right-1 text-[8px] font-bold bg-amber-400 text-amber-900 rounded-full px-1 leading-tight">
+                          +{marker.amount}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Grass highlight */}
+                  {cell.type === "grass" && (
+                    <div className="absolute top-0 left-0 right-0 h-[3px]"
+                      style={{ background: `${biomeColors.grass}cc` }} />
+                  )}
+
+                  {/* Platform texture */}
+                  {cell.type === "platform" && (
+                    <>
+                      <div className="absolute top-0 left-0 right-0 h-[2px]" style={{ background: `${biomeColors.platform}ee` }} />
+                      <div className="absolute bottom-0 left-0 right-0 h-[1px]" style={{ background: `${biomeColors.platform}66` }} />
+                    </>
                   )}
                 </button>
               );
@@ -372,7 +404,7 @@ export default function FrenchExplorer({ onBack }: Props) {
         )}
       </div>
 
-      {/* Bottom: minimap + controls + legend */}
+      {/* Bottom: minimap + controls + question button */}
       <div className="w-full flex items-center gap-3">
         {/* Minimap */}
         <div
@@ -380,8 +412,8 @@ export default function FrenchExplorer({ onBack }: Props) {
           style={{
             display: "grid",
             gridTemplateColumns: `repeat(${WORLD_W}, 1fr)`,
-            width: "220px",
-            height: `${Math.round(220 * WORLD_H / WORLD_W)}px`,
+            width: "200px",
+            height: `${Math.round(200 * WORLD_H / WORLD_W)}px`,
           }}
         >
           {grid.map((row, r) =>
@@ -389,11 +421,13 @@ export default function FrenchExplorer({ onBack }: Props) {
               const isP = playerPos[0] === r && playerPos[1] === c;
               const solid = isSolid(cell.type);
               const inView = c >= camC && c < camC + VIEW_W;
+              const hasMarker = energyMarkers.some((m) => m.r === r && m.c === c);
               return (
                 <div
                   key={`m${r}-${c}`}
                   style={{
                     background: isP ? "hsl(var(--primary))"
+                      : hasMarker ? "#F59E0B"
                       : cell.type === "finish" ? "#D4A04A"
                       : cell.type === "star" && !cell.collected ? "#E8C840"
                       : solid ? BLOCK_COLORS[cell.biome].dirt
@@ -416,10 +450,22 @@ export default function FrenchExplorer({ onBack }: Props) {
           <Button size="sm" variant="outline" onClick={() => tryMove(0, 1)} className="h-9 w-9 text-base p-0">→</Button>
         </div>
 
+        {/* Question button */}
+        <Button
+          onClick={openQuestion}
+          variant="default"
+          className="gap-2 h-12 px-4 text-sm font-bold"
+          disabled={!!quiz}
+        >
+          <MessageCircleQuestion className="h-5 w-5" />
+          {locale === "sk" ? "Otázka" : "Vraag"}
+          <span className="text-[10px] opacity-70 ml-1">(Q)</span>
+        </Button>
+
         {/* Legend */}
-        <div className="flex-1 text-[10px] text-muted-foreground leading-relaxed hidden sm:block">
-          📜 vraag · ⚡ energie · 🛡️ schild<br />
-          👟 snelheid · 🎁 kist · 🏰 doel
+        <div className="flex-1 text-[10px] text-muted-foreground leading-relaxed hidden md:block">
+          ✖ = claim energie · ⚡ = boost<br />
+          🛡️ = schild · 👟 = snelheid · 🏰 = doel
         </div>
       </div>
 
@@ -456,7 +502,7 @@ export default function FrenchExplorer({ onBack }: Props) {
                 <div className="text-center space-y-2">
                   <p className={`font-medium text-sm ${quizResult === "correct" ? "text-[hsl(var(--success))]" : "text-destructive"}`}>
                     {quizResult === "correct"
-                      ? `✅ +${CORRECT_REWARD} energie!`
+                      ? `✅ Klik op ✖ om +${CORRECT_REWARD} energie te claimen!`
                       : `❌ ${locale === "sk" ? "Správna odpoveď" : "Juiste antwoord"}: ${quiz.correctAnswer}`}
                   </p>
                   <Button onClick={dismissQuiz} size="sm">{locale === "sk" ? "Ďalej" : "Verder"}</Button>
