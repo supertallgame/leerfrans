@@ -21,6 +21,7 @@ interface ClockQuestion {
 }
 
 const clockData: ClockQuestion[] = [
+  // Hele uren
   { time: "1:00", french: "Il est une heure.", dutch: "Het is één uur.", hour: 1, minute: 0 },
   { time: "2:00", french: "Il est deux heures.", dutch: "Het is twee uur.", hour: 2, minute: 0 },
   { time: "3:00", french: "Il est trois heures.", dutch: "Het is drie uur.", hour: 3, minute: 0 },
@@ -34,16 +35,45 @@ const clockData: ClockQuestion[] = [
   { time: "11:00", french: "Il est onze heures.", dutch: "Het is elf uur.", hour: 11, minute: 0 },
   { time: "12:00", french: "Il est midi.", dutch: "Het is twaalf uur 's middags.", hour: 12, minute: 0 },
   { time: "0:00", french: "Il est minuit.", dutch: "Het is twaalf uur 's nachts.", hour: 0, minute: 0 },
+  // Kwart over
+  { time: "1:15", french: "Il est une heure et quart.", dutch: "Het is kwart over één.", hour: 1, minute: 15 },
   { time: "2:15", french: "Il est deux heures et quart.", dutch: "Het is kwart over twee.", hour: 2, minute: 15 },
   { time: "3:15", french: "Il est trois heures et quart.", dutch: "Het is kwart over drie.", hour: 3, minute: 15 },
+  { time: "4:15", french: "Il est quatre heures et quart.", dutch: "Het is kwart over vier.", hour: 4, minute: 15 },
   { time: "5:15", french: "Il est cinq heures et quart.", dutch: "Het is kwart over vijf.", hour: 5, minute: 15 },
+  { time: "6:15", french: "Il est six heures et quart.", dutch: "Het is kwart over zes.", hour: 6, minute: 15 },
+  { time: "7:15", french: "Il est sept heures et quart.", dutch: "Het is kwart over zeven.", hour: 7, minute: 15 },
+  { time: "8:15", french: "Il est huit heures et quart.", dutch: "Het is kwart over acht.", hour: 8, minute: 15 },
+  { time: "9:15", french: "Il est neuf heures et quart.", dutch: "Het is kwart over negen.", hour: 9, minute: 15 },
+  { time: "10:15", french: "Il est dix heures et quart.", dutch: "Het is kwart over tien.", hour: 10, minute: 15 },
+  { time: "11:15", french: "Il est onze heures et quart.", dutch: "Het is kwart over elf.", hour: 11, minute: 15 },
+  { time: "12:15", french: "Il est midi et quart.", dutch: "Het is kwart over twaalf.", hour: 12, minute: 15 },
+  // Half
+  { time: "1:30", french: "Il est une heure et demie.", dutch: "Het is half twee.", hour: 1, minute: 30 },
   { time: "2:30", french: "Il est deux heures et demie.", dutch: "Het is half drie.", hour: 2, minute: 30 },
+  { time: "3:30", french: "Il est trois heures et demie.", dutch: "Het is half vier.", hour: 3, minute: 30 },
   { time: "4:30", french: "Il est quatre heures et demie.", dutch: "Het is half vijf.", hour: 4, minute: 30 },
+  { time: "5:30", french: "Il est cinq heures et demie.", dutch: "Het is half zes.", hour: 5, minute: 30 },
+  { time: "6:30", french: "Il est six heures et demie.", dutch: "Het is half zeven.", hour: 6, minute: 30 },
   { time: "7:30", french: "Il est sept heures et demie.", dutch: "Het is half acht.", hour: 7, minute: 30 },
+  { time: "8:30", french: "Il est huit heures et demie.", dutch: "Het is half negen.", hour: 8, minute: 30 },
+  { time: "9:30", french: "Il est neuf heures et demie.", dutch: "Het is half tien.", hour: 9, minute: 30 },
+  { time: "10:30", french: "Il est dix heures et demie.", dutch: "Het is half elf.", hour: 10, minute: 30 },
+  { time: "11:30", french: "Il est onze heures et demie.", dutch: "Het is half twaalf.", hour: 11, minute: 30 },
   { time: "12:30", french: "Il est midi et demi.", dutch: "Het is half één 's middags.", hour: 12, minute: 30 },
+  // Kwart voor
+  { time: "0:45", french: "Il est une heure moins le quart.", dutch: "Het is kwart voor één.", hour: 0, minute: 45 },
+  { time: "1:45", french: "Il est deux heures moins le quart.", dutch: "Het is kwart voor twee.", hour: 1, minute: 45 },
   { time: "2:45", french: "Il est trois heures moins le quart.", dutch: "Het is kwart voor drie.", hour: 2, minute: 45 },
+  { time: "3:45", french: "Il est quatre heures moins le quart.", dutch: "Het is kwart voor vier.", hour: 3, minute: 45 },
   { time: "4:45", french: "Il est cinq heures moins le quart.", dutch: "Het is kwart voor vijf.", hour: 4, minute: 45 },
+  { time: "5:45", french: "Il est six heures moins le quart.", dutch: "Het is kwart voor zes.", hour: 5, minute: 45 },
+  { time: "6:45", french: "Il est sept heures moins le quart.", dutch: "Het is kwart voor zeven.", hour: 6, minute: 45 },
+  { time: "7:45", french: "Il est huit heures moins le quart.", dutch: "Het is kwart voor acht.", hour: 7, minute: 45 },
   { time: "8:45", french: "Il est neuf heures moins le quart.", dutch: "Het is kwart voor negen.", hour: 8, minute: 45 },
+  { time: "9:45", french: "Il est dix heures moins le quart.", dutch: "Het is kwart voor tien.", hour: 9, minute: 45 },
+  { time: "10:45", french: "Il est onze heures moins le quart.", dutch: "Het is kwart voor elf.", hour: 10, minute: 45 },
+  { time: "11:45", french: "Il est midi moins le quart.", dutch: "Het is kwart voor twaalf.", hour: 11, minute: 45 },
 ];
 
 function shuffle<T>(arr: T[]): T[] {
