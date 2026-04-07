@@ -49,7 +49,6 @@ export function getBiome(c: number): Biome {
   return "desert";
 }
 
-// Pixel-art block colors per biome
 export const BLOCK_COLORS: Record<Biome, Record<string, string>> = {
   forest: {
     dirt: "#6B3A1F", grass: "#2D8B2D", stone: "#6B6B6B",
@@ -78,44 +77,161 @@ export const ITEM_EMOJI: Record<string, string> = {
   chest: "🎁",
 };
 
-// Pixel-art character sprites (CSS box-shadow pixel art)
-// Each "pixel" is 4x4px. Origin is top-left of a ~28x28 box.
-// Format: "offsetX offsetY 0 size color"
-const PX = 3; // pixel size
-
+// ─── Pixel-art sprite system ───
+// Each pixel is PX×PX CSS pixels via box-shadow.
+const PX = 2;
 function px(x: number, y: number, color: string) {
   return `${x * PX}px ${y * PX}px 0 ${PX}px ${color}`;
 }
 
-export const PLAYER_SPRITE = [
-  // Hat (purple wizard hat)
-  px(3, 0, "#6B21A8"), px(4, 0, "#6B21A8"),
-  px(2, 1, "#7C3AED"), px(3, 1, "#7C3AED"), px(4, 1, "#7C3AED"), px(5, 1, "#7C3AED"),
-  px(1, 2, "#8B5CF6"), px(2, 2, "#8B5CF6"), px(3, 2, "#8B5CF6"), px(4, 2, "#8B5CF6"), px(5, 2, "#8B5CF6"), px(6, 2, "#8B5CF6"),
-  // Face
-  px(2, 3, "#FBBF24"), px(3, 3, "#FDE68A"), px(4, 3, "#FDE68A"), px(5, 3, "#FBBF24"),
-  px(2, 4, "#FDE68A"), px(3, 4, "#1E1E1E"), px(4, 4, "#1E1E1E"), px(5, 4, "#FDE68A"),
-  px(2, 5, "#FDE68A"), px(3, 5, "#FDE68A"), px(4, 5, "#F87171"), px(5, 5, "#FDE68A"),
-  // Body (blue robe)
-  px(2, 6, "#2563EB"), px(3, 6, "#3B82F6"), px(4, 6, "#3B82F6"), px(5, 6, "#2563EB"),
-  px(1, 7, "#2563EB"), px(2, 7, "#3B82F6"), px(3, 7, "#3B82F6"), px(4, 7, "#3B82F6"), px(5, 7, "#3B82F6"), px(6, 7, "#2563EB"),
-  // Legs
-  px(2, 8, "#92400E"), px(3, 8, "#92400E"), px(4, 8, "#92400E"), px(5, 8, "#92400E"),
-].join(",");
+// ─── PLAYER: 12×14 pixel wizard ───
+function makeWizard(frame: 0 | 1): string {
+  const p: string[] = [];
+  // Hat tip
+  p.push(px(5, 0, "#4C1D95"), px(6, 0, "#4C1D95"));
+  // Hat mid
+  p.push(px(4, 1, "#6D28D9"), px(5, 1, "#7C3AED"), px(6, 1, "#7C3AED"), px(7, 1, "#6D28D9"));
+  // Hat brim
+  p.push(px(3, 2, "#8B5CF6"), px(4, 2, "#8B5CF6"), px(5, 2, "#A78BFA"), px(6, 2, "#A78BFA"), px(7, 2, "#8B5CF6"), px(8, 2, "#8B5CF6"));
+  // Hat star
+  p.push(px(6, 1, "#FBBF24"));
+  // Hair
+  p.push(px(3, 3, "#92400E"), px(4, 3, "#B45309"), px(7, 3, "#B45309"), px(8, 3, "#92400E"));
+  // Face row 1
+  p.push(px(4, 3, "#FDE68A"), px(5, 3, "#FDE68A"), px(6, 3, "#FDE68A"), px(7, 3, "#FDE68A"));
+  // Face row 2 - eyes
+  p.push(px(3, 4, "#FDE68A"), px(4, 4, "#FDE68A"), px(5, 4, "#1E293B"), px(6, 4, "#FDE68A"), px(7, 4, "#1E293B"), px(8, 4, "#FDE68A"));
+  // Face row 3 - beard/mouth
+  p.push(px(4, 5, "#FDE68A"), px(5, 5, "#FDE68A"), px(6, 5, "#EF4444"), px(7, 5, "#FDE68A"));
+  // Beard
+  p.push(px(4, 6, "#D1D5DB"), px(5, 6, "#E5E7EB"), px(6, 6, "#E5E7EB"), px(7, 6, "#D1D5DB"));
+  // Robe top
+  p.push(px(3, 7, "#1D4ED8"), px(4, 7, "#2563EB"), px(5, 7, "#3B82F6"), px(6, 7, "#3B82F6"), px(7, 7, "#2563EB"), px(8, 7, "#1D4ED8"));
+  // Belt
+  p.push(px(4, 8, "#92400E"), px(5, 8, "#B45309"), px(6, 8, "#FBBF24"), px(7, 8, "#B45309"));
+  // Robe bottom
+  p.push(px(3, 9, "#1E40AF"), px(4, 9, "#2563EB"), px(5, 9, "#3B82F6"), px(6, 9, "#3B82F6"), px(7, 9, "#2563EB"), px(8, 9, "#1E40AF"));
+  // Robe skirt
+  p.push(px(2, 10, "#1E3A8A"), px(3, 10, "#1D4ED8"), px(4, 10, "#2563EB"), px(5, 10, "#3B82F6"), px(6, 10, "#3B82F6"), px(7, 10, "#2563EB"), px(8, 10, "#1D4ED8"), px(9, 10, "#1E3A8A"));
+  // Staff (right side)
+  p.push(px(9, 5, "#78350F"), px(9, 6, "#78350F"), px(9, 7, "#92400E"), px(9, 8, "#92400E"), px(9, 9, "#78350F"), px(9, 10, "#78350F"));
+  // Staff orb
+  p.push(px(9, 4, "#22D3EE"), px(10, 4, "#06B6D4"), px(9, 3, "#67E8F9"));
+  // Boots (animated)
+  if (frame === 0) {
+    p.push(px(4, 11, "#78350F"), px(5, 11, "#92400E"), px(6, 11, "#92400E"), px(7, 11, "#78350F"));
+  } else {
+    p.push(px(3, 11, "#78350F"), px(4, 11, "#92400E"), px(7, 11, "#92400E"), px(8, 11, "#78350F"));
+  }
+  return p.join(",");
+}
 
-export const TREE_SPRITE = [
-  px(3, 0, "#166534"), px(4, 0, "#166534"),
-  px(2, 1, "#15803D"), px(3, 1, "#22C55E"), px(4, 1, "#22C55E"), px(5, 1, "#15803D"),
-  px(1, 2, "#15803D"), px(2, 2, "#22C55E"), px(3, 2, "#16A34A"), px(4, 2, "#22C55E"), px(5, 2, "#16A34A"), px(6, 2, "#15803D"),
-  px(1, 3, "#166534"), px(2, 3, "#22C55E"), px(3, 3, "#22C55E"), px(4, 3, "#16A34A"), px(5, 3, "#22C55E"), px(6, 3, "#166534"),
-  px(3, 4, "#92400E"), px(4, 4, "#92400E"),
-  px(3, 5, "#78350F"), px(4, 5, "#78350F"),
-].join(",");
+export const PLAYER_FRAMES = [makeWizard(0), makeWizard(1)];
 
-export const CASTLE_SPRITE = [
-  px(1, 0, "#78716C"), px(3, 0, "#78716C"), px(5, 0, "#78716C"),
-  px(0, 1, "#A8A29E"), px(1, 1, "#A8A29E"), px(2, 1, "#A8A29E"), px(3, 1, "#A8A29E"), px(4, 1, "#A8A29E"), px(5, 1, "#A8A29E"), px(6, 1, "#A8A29E"),
-  px(0, 2, "#D6D3D1"), px(1, 2, "#D6D3D1"), px(2, 2, "#D6D3D1"), px(3, 2, "#D6D3D1"), px(4, 2, "#D6D3D1"), px(5, 2, "#D6D3D1"), px(6, 2, "#D6D3D1"),
-  px(0, 3, "#D6D3D1"), px(1, 3, "#D6D3D1"), px(2, 3, "#D6D3D1"), px(3, 3, "#78350F"), px(4, 3, "#D6D3D1"), px(5, 3, "#D6D3D1"), px(6, 3, "#D6D3D1"),
-  px(0, 4, "#D6D3D1"), px(1, 4, "#D6D3D1"), px(2, 4, "#D6D3D1"), px(3, 4, "#78350F"), px(4, 4, "#D6D3D1"), px(5, 4, "#D6D3D1"), px(6, 4, "#D6D3D1"),
-].join(",");
+// ─── CASTLE: 12×12 pixel castle ───
+export const CASTLE_SPRITE = (() => {
+  const p: string[] = [];
+  // Towers (left & right)
+  [1, 10].forEach(tx => {
+    p.push(px(tx, 0, "#78716C"), px(tx, 1, "#A8A29E"));
+    // Flag
+    p.push(px(tx, -1, "#EF4444"), px(tx + 1, -1, "#EF4444"));
+  });
+  // Battlements
+  for (let x = 0; x < 12; x += 2) {
+    p.push(px(x, 2, "#A8A29E"));
+  }
+  // Wall
+  for (let x = 0; x < 12; x++) {
+    p.push(px(x, 3, "#D6D3D1"), px(x, 4, "#E7E5E4"), px(x, 5, "#D6D3D1"));
+    p.push(px(x, 6, "#D6D3D1"), px(x, 7, "#E7E5E4"));
+  }
+  // Windows
+  p.push(px(3, 4, "#1E293B"), px(4, 4, "#1E293B"), px(7, 4, "#1E293B"), px(8, 4, "#1E293B"));
+  // Door
+  p.push(px(5, 5, "#78350F"), px(6, 5, "#78350F"), px(5, 6, "#78350F"), px(6, 6, "#78350F"), px(5, 7, "#92400E"), px(6, 7, "#92400E"));
+  // Door handle
+  p.push(px(6, 6, "#FBBF24"));
+  // Base
+  for (let x = 0; x < 12; x++) {
+    p.push(px(x, 8, "#78716C"), px(x, 9, "#57534E"));
+  }
+  return p.join(",");
+})();
+
+// ─── STAR: 10×10 pixel star ───
+export const STAR_SPRITE = (() => {
+  const p: string[] = [];
+  const gold = "#FBBF24", light = "#FDE68A", dark = "#D97706";
+  p.push(px(4, 0, light), px(5, 0, light));
+  p.push(px(4, 1, gold), px(5, 1, gold));
+  p.push(px(3, 2, gold), px(4, 2, light), px(5, 2, light), px(6, 2, gold));
+  p.push(px(0, 3, dark), px(1, 3, gold), px(2, 3, gold), px(3, 3, light), px(4, 3, light), px(5, 3, light), px(6, 3, light), px(7, 3, gold), px(8, 3, gold), px(9, 3, dark));
+  p.push(px(1, 4, gold), px(2, 4, light), px(3, 4, light), px(4, 4, light), px(5, 4, light), px(6, 4, light), px(7, 4, light), px(8, 4, gold));
+  p.push(px(2, 5, gold), px(3, 5, gold), px(4, 5, light), px(5, 5, light), px(6, 5, gold), px(7, 5, gold));
+  p.push(px(3, 6, dark), px(4, 6, gold), px(5, 6, gold), px(6, 6, dark));
+  p.push(px(2, 7, dark), px(3, 7, gold), px(6, 7, gold), px(7, 7, dark));
+  p.push(px(1, 8, dark), px(2, 8, gold), px(7, 8, gold), px(8, 8, dark));
+  return p.join(",");
+})();
+
+// ─── BOOST: 10×10 pixel lightning bolt ───
+export const BOOST_SPRITE = (() => {
+  const p: string[] = [];
+  const y1 = "#FBBF24", y2 = "#F59E0B", y3 = "#D97706";
+  p.push(px(5, 0, y1), px(6, 0, y1));
+  p.push(px(4, 1, y1), px(5, 1, y2));
+  p.push(px(3, 2, y1), px(4, 2, y2), px(5, 2, y2));
+  p.push(px(2, 3, y2), px(3, 3, y2), px(4, 3, y1), px(5, 3, y1), px(6, 3, y1), px(7, 3, y1));
+  p.push(px(4, 4, y2), px(5, 4, y1), px(6, 4, y2));
+  p.push(px(3, 5, y2), px(4, 5, y1), px(5, 5, y3));
+  p.push(px(2, 6, y3), px(3, 6, y2));
+  p.push(px(1, 7, y3), px(2, 7, y2));
+  return p.join(",");
+})();
+
+// ─── SHIELD: 10×10 pixel shield ───
+export const SHIELD_SPRITE = (() => {
+  const p: string[] = [];
+  const b1 = "#3B82F6", b2 = "#2563EB", b3 = "#1D4ED8", g = "#FBBF24";
+  p.push(px(2, 0, b3), px(3, 0, b2), px(4, 0, b1), px(5, 0, b1), px(6, 0, b2), px(7, 0, b3));
+  p.push(px(1, 1, b3), px(2, 1, b2), px(3, 1, b1), px(4, 1, g), px(5, 1, g), px(6, 1, b1), px(7, 1, b2), px(8, 1, b3));
+  p.push(px(1, 2, b2), px(2, 2, b1), px(3, 2, g), px(4, 2, g), px(5, 2, g), px(6, 2, g), px(7, 2, b1), px(8, 2, b2));
+  p.push(px(1, 3, b2), px(2, 3, b1), px(3, 3, g), px(4, 3, b1), px(5, 3, b1), px(6, 3, g), px(7, 3, b1), px(8, 3, b2));
+  p.push(px(2, 4, b2), px(3, 4, b1), px(4, 4, b1), px(5, 4, b1), px(6, 4, b1), px(7, 4, b2));
+  p.push(px(2, 5, b3), px(3, 5, b2), px(4, 5, b1), px(5, 5, b1), px(6, 5, b2), px(7, 5, b3));
+  p.push(px(3, 6, b3), px(4, 6, b2), px(5, 6, b2), px(6, 6, b3));
+  p.push(px(4, 7, b3), px(5, 7, b3));
+  return p.join(",");
+})();
+
+// ─── CHEST: 10×10 pixel treasure chest ───
+export const CHEST_SPRITE = (() => {
+  const p: string[] = [];
+  const w1 = "#92400E", w2 = "#B45309", w3 = "#D97706", gold = "#FBBF24";
+  // Lid
+  p.push(px(2, 1, w1), px(3, 1, w2), px(4, 1, w2), px(5, 1, w2), px(6, 1, w2), px(7, 1, w1));
+  p.push(px(1, 2, w1), px(2, 2, w2), px(3, 2, w3), px(4, 2, w3), px(5, 2, w3), px(6, 2, w3), px(7, 2, w2), px(8, 2, w1));
+  // Lock band
+  p.push(px(1, 3, gold), px(2, 3, gold), px(3, 3, w2), px(4, 3, gold), px(5, 3, gold), px(6, 3, w2), px(7, 3, gold), px(8, 3, gold));
+  // Body
+  p.push(px(1, 4, w1), px(2, 4, w2), px(3, 4, w2), px(4, 4, w3), px(5, 4, w3), px(6, 4, w2), px(7, 4, w2), px(8, 4, w1));
+  p.push(px(1, 5, w1), px(2, 5, w2), px(3, 5, w2), px(4, 5, gold), px(5, 5, gold), px(6, 5, w2), px(7, 5, w2), px(8, 5, w1));
+  // Base
+  p.push(px(1, 6, w1), px(2, 6, w1), px(3, 6, w2), px(4, 6, w2), px(5, 6, w2), px(6, 6, w2), px(7, 6, w1), px(8, 6, w1));
+  return p.join(",");
+})();
+
+// ─── SPEED BOOT: 10×8 pixel boot ───
+export const SPEED_SPRITE = (() => {
+  const p: string[] = [];
+  const r1 = "#DC2626", r2 = "#EF4444", r3 = "#FCA5A5";
+  p.push(px(4, 0, r1), px(5, 0, r1));
+  p.push(px(3, 1, r1), px(4, 1, r2), px(5, 1, r2), px(6, 1, r1));
+  p.push(px(3, 2, r2), px(4, 2, r2), px(5, 2, r3), px(6, 2, r2));
+  p.push(px(3, 3, r2), px(4, 3, r3), px(5, 3, r2), px(6, 3, r1));
+  p.push(px(2, 4, r1), px(3, 4, r2), px(4, 4, r2), px(5, 4, r1));
+  p.push(px(1, 5, r1), px(2, 5, r2), px(3, 5, r2), px(4, 5, r1), px(5, 5, "#FBBF24"), px(6, 5, "#FBBF24"));
+  p.push(px(0, 6, r1), px(1, 6, r1), px(2, 6, r1), px(3, 6, r1), px(4, 6, r1));
+  return p.join(",");
+})();
