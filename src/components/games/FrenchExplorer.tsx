@@ -285,7 +285,7 @@ export default function FrenchExplorer({ onBack }: Props) {
       if (!isWalkable(nextR, c, grid)) return;
       setPlayerPos([nextR, c]);
       handleCellEntry(nextR, c);
-    }, 100); // match game loop tick rate for consistent feel
+    }, 75); // match game loop tick rate for consistent feel
 
     return () => window.clearTimeout(timeout);
   }, [playerPos, grid, quiz, finished, gameOver, handleCellEntry]);
@@ -334,7 +334,7 @@ export default function FrenchExplorer({ onBack }: Props) {
   useEffect(() => {
     if (quiz || finished || gameOver) return;
     let rafId: number;
-    const TICK_MS = 100; // one grid-step every 100ms
+    const TICK_MS = 75; // fast grid-steps, CSS interpolates smoothly at 60fps
 
     const loop = (now: number) => {
       if (now - lastTickRef.current >= TICK_MS) {
@@ -501,7 +501,7 @@ export default function FrenchExplorer({ onBack }: Props) {
               gridTemplateColumns: `repeat(${WORLD_W}, 1fr)`,
               gridTemplateRows: `repeat(${WORLD_H}, 1fr)`,
               transform: `translateX(-${(camC / WORLD_W) * 100}%)`,
-              transition: "transform 0.1s linear",
+              transition: "transform 75ms linear",
               willChange: "transform",
             }}
           >
@@ -558,7 +558,7 @@ export default function FrenchExplorer({ onBack }: Props) {
               top: `${(playerPos[0] / VIEW_H) * 100}%`,
               width: `${100 / VIEW_W}%`,
               height: `${100 / VIEW_H}%`,
-              transition: "left 0.1s linear, top 0.1s linear",
+              transition: "left 75ms linear, top 75ms linear",
               willChange: "left, top",
               zIndex: 10,
               overflow: "visible",
