@@ -14,16 +14,16 @@ interface Props {
   onBack: () => void;
 }
 
-// World config
-const GRID_W = 14;
-const GRID_H = 10;
-const VIEWPORT_W = 7;
+// World config – side-scrolling layout (wide & short)
+const GRID_W = 30;
+const GRID_H = 5;
+const VIEWPORT_W = 10;
 const VIEWPORT_H = 5;
 const MAX_ENERGY = 120;
 const START_ENERGY = 70;
 const MOVE_COST = 2;
 const CORRECT_REWARD = 18;
-const STAR_COUNT = 8;
+const STAR_COUNT = 10;
 
 type CellType = "empty" | "question" | "star" | "tree" | "finish" | "water" | "mountain" | "boost" | "shield" | "speed" | "chest";
 
@@ -39,11 +39,11 @@ interface QuizState {
   options: string[];
 }
 
-// Biome assignment based on grid region
+// Biome assignment based on horizontal position
 function getBiome(r: number, c: number): Cell["biome"] {
-  if (r < GRID_H / 2 && c < GRID_W / 2) return "forest";
-  if (r < GRID_H / 2 && c >= GRID_W / 2) return "snow";
-  if (r >= GRID_H / 2 && c < GRID_W / 2) return "swamp";
+  if (c < GRID_W * 0.25) return "forest";
+  if (c < GRID_W * 0.5) return "swamp";
+  if (c < GRID_W * 0.75) return "snow";
   return "desert";
 }
 
@@ -102,20 +102,20 @@ function generateMap(): Cell[][] {
   const occupied = new Set<string>(["0,0", `${GRID_H - 1},${GRID_W - 1}`]);
   grid[GRID_H - 1][GRID_W - 1] = { type: "finish", biome: getBiome(GRID_H - 1, GRID_W - 1) };
 
-  // Obstacles
-  placeRandom(grid, 10, "tree", occupied);
-  placeRandom(grid, 5, "water", occupied);
-  placeRandom(grid, 4, "mountain", occupied);
+  // Obstacles – fewer rows so use less
+  placeRandom(grid, 8, "tree", occupied);
+  placeRandom(grid, 4, "water", occupied);
+  placeRandom(grid, 3, "mountain", occupied);
 
   // Interactables
-  placeRandom(grid, 10, "question", occupied);
+  placeRandom(grid, 12, "question", occupied);
   placeRandom(grid, STAR_COUNT, "star", occupied);
 
   // Power-ups
-  placeRandom(grid, 3, "boost", occupied);
+  placeRandom(grid, 4, "boost", occupied);
   placeRandom(grid, 2, "shield", occupied);
   placeRandom(grid, 2, "speed", occupied);
-  placeRandom(grid, 2, "chest", occupied);
+  placeRandom(grid, 3, "chest", occupied);
 
   return grid;
 }
@@ -465,15 +465,15 @@ export default function FrenchExplorer({ onBack }: Props) {
         )}
       </div>
 
-      {/* Minimap */}
+      {/* Minimap – wide strip */}
       <div className="w-full flex items-center gap-3">
         <div
           className="border border-border rounded-md overflow-hidden shrink-0"
           style={{
             display: "grid",
             gridTemplateColumns: `repeat(${GRID_W}, 1fr)`,
-            width: "100px",
-            height: `${Math.round(100 * GRID_H / GRID_W)}px`,
+            width: "200px",
+            height: `${Math.round(200 * GRID_H / GRID_W)}px`,
           }}
         >
           {grid.map((row, r) =>
