@@ -310,6 +310,8 @@ export default function FrenchExplorer({ onBack }: Props) {
         e.preventDefault();
       }
       if (k === "q") { openQuestion(); return; }
+      lastInputRef.current = Date.now();
+      setIdleAnim(null);
       keysRef.current.add(k);
     };
     const up = (e: KeyboardEvent) => {
