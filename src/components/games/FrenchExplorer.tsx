@@ -564,6 +564,19 @@ export default function FrenchExplorer({ onBack }: Props) {
               flip={direction === "left"}
               glow={shieldActive}
             />
+            {/* Idle animation speech bubble */}
+            {idleAnim && (
+              <div
+                className="absolute -top-10 left-1/2 -translate-x-1/2 whitespace-nowrap pointer-events-none z-20 animate-fade-in"
+                style={{ fontSize: "11px" }}
+              >
+                <span className="bg-card/95 backdrop-blur px-2 py-1 rounded-lg shadow-lg border border-border flex items-center gap-1">
+                  <span className="text-base">{idleAnim.emoji}</span>
+                  <span className="text-foreground font-medium">{idleAnim.text}</span>
+                </span>
+                <div className="w-2 h-2 bg-card/95 border-b border-r border-border rotate-45 mx-auto -mt-1" />
+              </div>
+            )}
           </div>
         </div>
 
