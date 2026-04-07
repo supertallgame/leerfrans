@@ -334,7 +334,7 @@ export default function FrenchExplorer({ onBack }: Props) {
   useEffect(() => {
     if (quiz || finished || gameOver) return;
     let rafId: number;
-    const TICK_MS = 100; // one grid-step every 100ms
+    const TICK_MS = 75; // fast grid-steps, CSS interpolates smoothly at 60fps
 
     const loop = (now: number) => {
       if (now - lastTickRef.current >= TICK_MS) {
