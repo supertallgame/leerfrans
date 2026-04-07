@@ -252,7 +252,7 @@ export default function FrenchExplorer({ onBack }: Props) {
       if (!isWalkable(nextR, c, grid)) return;
       commitMove(nextR, c);
     }
-  }, [playerPos, grid, quiz, finished, gameOver, commitMove]);
+  }, [playerPos, grid, quiz, finished, gameOver, commitMove, energy, shieldActive, speedActive, shieldTurns, speedTurns, handleCellEntry]);
 
   useEffect(() => {
     if (quiz || finished || gameOver) return;
