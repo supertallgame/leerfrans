@@ -219,7 +219,7 @@ export default function FrenchExplorer({ onBack }: Props) {
     const newGrid = grid.map((row) => row.map((b) => ({ ...b })));
     newGrid[nr][nc].collected = true;
     applyPickup(cell.type, newGrid);
-  }, [playerPos, grid, energy, quiz, finished, gameOver, shieldActive, shieldTurns, speedActive, speedTurns, worldData.heightmap]);
+  }, [playerPos, grid, energy, quiz, finished, gameOver, shieldActive, shieldTurns, speedActive, speedTurns, worldData.heightmap, applyPickup]);
 
   useEffect(() => { containerRef.current?.focus(); }, []);
 
