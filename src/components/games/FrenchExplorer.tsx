@@ -137,10 +137,59 @@ export default function FrenchExplorer({ onBack }: Props) {
     setQuiz(getNextQuestion());
   }, [quiz, finished, gameOver, getNextQuestion]);
 
+  const applyPickup = useCallback((type: string, newGrid: Block[][]) => {
+    switch (type) {
+      case "star": setStarsCollected((s) => s + 1); showFloat("⭐ +1"); break;
+      case "boost": setEnergy((e) => Math.min(MAX_ENERGY, e + 25)); showFloat("⚡ +25!"); break;
+      case "shield": setShieldActive(true); setShieldTurns(8); showFloat("🛡️ Schild!"); break;
+      case "speed": setSpeedActive(true); setSpeedTurns(10); showFloat("👟 Snelheid!"); break;
+      case "chest": {
+        const rewards = ["energy", "shield", "speed"];
+        const reward = rewards[Math.floor(Math.random() * rewards.length)];
+        if (reward === "energy") { setEnergy((e) => Math.min(MAX_ENERGY, e + 30)); showFloat("🎁 +30!"); }
+        else if (reward === "shield") { setShieldActive(true); setShieldTurns(6); showFloat("🎁→🛡️"); }
+        else { setSpeedActive(true); setSpeedTurns(8); showFloat("🎁→👟"); }
+        break;
+      }
+      case "finish": setFinished(true); break;
+    }
+    setWorldData({ grid: newGrid, heightmap: worldData.heightmap });
+  }, [worldData.heightmap]);
+
   const tryMove = useCallback((dr: number, dc: number) => {
     if (quiz || finished || gameOver) return;
     const [r, c] = playerPos;
-    if (dr < 0 && !isOnGround(r, c, grid)) return;
+
+    // Jump: must be on ground, jump 2 cells up so gravity lands you 1 above
+    if (dr < 0) {
+      if (!isOnGround(r, c, grid)) return;
+      // Try to jump 2 cells up
+      let jumpTarget = r - 2;
+      if (jumpTarget < 0) jumpTarget = 0;
+      // Check both cells above are free
+      if (isSolid(grid[r - 1]?.[c]?.type)) return;
+      if (jumpTarget < r - 1 && isSolid(grid[jumpTarget]?.[c]?.type)) jumpTarget = r - 1;
+      // Apply gravity from jump target
+      const landed = applyGravity(jumpTarget, c, grid);
+      if (landed === r) return; // Would land in same spot, no point
+      const moveCost = speedActive ? Math.max(1, Math.floor(MOVE_COST / 2)) : MOVE_COST;
+      const actualCost = shieldActive ? 0 : moveCost;
+      const newEnergy = energy - actualCost;
+      if (newEnergy <= 0 && !shieldActive) { setEnergy(0); setGameOver(true); return; }
+      setEnergy(Math.max(0, newEnergy));
+      setPlayerPos([landed, c]);
+      setSteps((s) => s + 1);
+      if (shieldActive) { const nt = shieldTurns - 1; setShieldTurns(nt); if (nt <= 0) setShieldActive(false); }
+      if (speedActive) { const nt = speedTurns - 1; setSpeedTurns(nt); if (nt <= 0) setSpeedActive(false); }
+      const cell = grid[landed][c];
+      if (!cell.collected && isItem(cell.type)) {
+        const ng = grid.map((row) => row.map((b) => ({ ...b })));
+        ng[landed][c].collected = true;
+        applyPickup(cell.type, ng);
+      }
+      return;
+    }
+
     let nr = r + dr;
     let nc = c + dc;
     if (nr < 0 || nr >= WORLD_H || nc < 0 || nc >= WORLD_W) return;
@@ -169,24 +218,8 @@ export default function FrenchExplorer({ onBack }: Props) {
     if (cell.collected || !isItem(cell.type)) return;
     const newGrid = grid.map((row) => row.map((b) => ({ ...b })));
     newGrid[nr][nc].collected = true;
-
-    switch (cell.type) {
-      case "star": setStarsCollected((s) => s + 1); showFloat("⭐ +1"); break;
-      case "boost": setEnergy((e) => Math.min(MAX_ENERGY, e + 25)); showFloat("⚡ +25!"); break;
-      case "shield": setShieldActive(true); setShieldTurns(8); showFloat("🛡️ Schild!"); break;
-      case "speed": setSpeedActive(true); setSpeedTurns(10); showFloat("👟 Snelheid!"); break;
-      case "chest": {
-        const rewards = ["energy", "shield", "speed"];
-        const reward = rewards[Math.floor(Math.random() * rewards.length)];
-        if (reward === "energy") { setEnergy((e) => Math.min(MAX_ENERGY, e + 30)); showFloat("🎁 +30!"); }
-        else if (reward === "shield") { setShieldActive(true); setShieldTurns(6); showFloat("🎁→🛡️"); }
-        else { setSpeedActive(true); setSpeedTurns(8); showFloat("🎁→👟"); }
-        break;
-      }
-      case "finish": setFinished(true); break;
-    }
-    setWorldData({ grid: newGrid, heightmap: worldData.heightmap });
-  }, [playerPos, grid, energy, quiz, finished, gameOver, shieldActive, shieldTurns, speedActive, speedTurns, worldData.heightmap]);
+    applyPickup(cell.type, newGrid);
+  }, [playerPos, grid, energy, quiz, finished, gameOver, shieldActive, shieldTurns, speedActive, speedTurns, worldData.heightmap, applyPickup]);
 
   useEffect(() => { containerRef.current?.focus(); }, []);
 
