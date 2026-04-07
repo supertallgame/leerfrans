@@ -237,70 +237,72 @@ export default function FrenchExplorer({ onBack }: Props) {
   const tryMove = useCallback((dr: number, dc: number) => {
     if (quiz || finished || gameOver) return;
     const [r, c] = playerPos;
+    const js = jumpStateRef.current;
 
     if (dc > 0) setDirection("right");
     else if (dc < 0) setDirection("left");
 
+    // Jump initiation
     if (dr < 0) {
-      if (!isOnGround(r, c, grid)) return;
+      const onGround = isOnGround(r, c, grid);
+      const canJump = onGround || (!js.doubleJumpUsed && js.airborne);
 
-      let jumpTarget = r;
-      for (let step = 1; step <= 2; step++) {
-        const nextR = r - step;
-        if (!isWalkable(nextR, c, grid)) break;
-        jumpTarget = nextR;
-      }
+      if (!canJump) return;
 
-      if (jumpTarget === r) return;
-
-      const attemptedC = dc !== 0 ? c + dc : c;
-      const canMoveSidewaysWhileJumping =
-        attemptedC >= 0 &&
-        attemptedC < WORLD_W &&
-        isWalkable(jumpTarget, attemptedC, grid);
-
-      const targetC = canMoveSidewaysWhileJumping ? attemptedC : c;
-      const targetR = dc !== 0 ? applyGravity(jumpTarget, targetC, grid) : jumpTarget;
-
-      setIsJumping(targetR < r);
-      const jumpCostActual = shieldActive
-        ? 0
-        : speedActive
-          ? Math.max(1, Math.floor(JUMP_COST / 2))
-          : JUMP_COST;
+      // Pay jump cost
+      const jumpCostActual = shieldActive ? 0 : (speedActive ? Math.max(1, Math.floor(JUMP_COST / 2)) : JUMP_COST);
       const newEnergy = energy - jumpCostActual;
-
       if (newEnergy <= 0 && !shieldActive) {
-        setEnergy(0);
-        setGameOver(true);
-        return;
+        setEnergy(0); setGameOver(true); return;
+      }
+      setEnergy(Math.max(0, newEnergy));
+
+      if (!onGround) {
+        js.doubleJumpUsed = true;
       }
 
-      setEnergy(Math.max(0, newEnergy));
+      // Start jump with upward velocity
+      js.velocityY = -2; // jump power: 2 cells per tick initially
+      js.airborne = true;
+      js.apexHangTicks = 0;
+      setIsJumping(true);
+
+      // Apply first tick of jump immediately
+      let targetR = r;
+      const rise = Math.abs(js.velocityY);
+      for (let step = 1; step <= rise; step++) {
+        if (isWalkable(targetR - 1, c, grid)) targetR--;
+        else { js.velocityY = 0; break; }
+      }
+
+      // Also move horizontally if requested
+      let targetC = c;
+      if (dc !== 0) {
+        const nextC = c + dc;
+        if (isWalkable(targetR, nextC, grid)) targetC = nextC;
+      }
+
       setPlayerPos([targetR, targetC]);
       setSteps((s) => s + 1);
 
-      if (shieldActive) {
-        const nt = shieldTurns - 1;
-        setShieldTurns(nt);
-        if (nt <= 0) setShieldActive(false);
-      }
-
-      if (speedActive) {
-        const nt = speedTurns - 1;
-        setSpeedTurns(nt);
-        if (nt <= 0) setSpeedActive(false);
-      }
-
+      if (shieldActive) { const nt = shieldTurns - 1; setShieldTurns(nt); if (nt <= 0) setShieldActive(false); }
+      if (speedActive) { const nt = speedTurns - 1; setSpeedTurns(nt); if (nt <= 0) setSpeedActive(false); }
       handleCellEntry(targetR, targetC);
       return;
     }
 
+    // Horizontal movement (on ground or in air)
     if (dc !== 0) {
       const nextC = c + dc;
       if (!isWalkable(r, nextC, grid)) return;
-      const landR = applyGravity(r, nextC, grid);
-      commitMove(landR, nextC);
+      if (isOnGround(r, c, grid)) {
+        const landR = applyGravity(r, nextC, grid);
+        commitMove(landR, nextC);
+      } else {
+        // Air strafe: move sideways, gravity handles falling
+        setPlayerPos([r, nextC]);
+        handleCellEntry(r, nextC);
+      }
       return;
     }
 
@@ -311,26 +313,71 @@ export default function FrenchExplorer({ onBack }: Props) {
     }
   }, [playerPos, grid, quiz, finished, gameOver, commitMove, energy, shieldActive, speedActive, shieldTurns, speedTurns, handleCellEntry]);
 
+  // Physics-based gravity with apex hang and faster fall
   useEffect(() => {
     if (quiz || finished || gameOver) return;
 
     const [r, c] = playerPos;
-    if (isOnGround(r, c, grid)) return;
+    const js = jumpStateRef.current;
+
+    if (isOnGround(r, c, grid)) {
+      js.airborne = false;
+      js.doubleJumpUsed = false;
+      js.velocityY = 0;
+      js.apexHangTicks = 0;
+      setIsJumping(false);
+      return;
+    }
+
+    js.airborne = true;
 
     const timeout = window.setTimeout(() => {
-      const nextR = r + 1;
-      if (!isWalkable(nextR, c, grid)) return;
-      setPlayerPos([nextR, c]);
-      handleCellEntry(nextR, c);
-    }, 75); // match game loop tick rate for consistent feel
+      const [cr, cc] = playerPos;
+      if (isOnGround(cr, cc, grid)) return;
+
+      // Apex hang: if velocity is near 0, hang for a couple ticks
+      if (js.velocityY <= 0 && js.velocityY > -1) {
+        js.apexHangTicks++;
+        if (js.apexHangTicks <= 2) {
+          // Hang at apex — don't move vertically, just decelerate
+          js.velocityY = 0;
+          setPlayerPos([cr, cc]); // re-trigger effect
+          return;
+        }
+        // Start falling
+        js.velocityY = 1;
+      } else if (js.velocityY < 0) {
+        // Rising: decelerate
+        js.velocityY = Math.min(0, js.velocityY + 1);
+        const targetR = cr - 1;
+        if (isWalkable(targetR, cc, grid)) {
+          setPlayerPos([targetR, cc]);
+          handleCellEntry(targetR, cc);
+        } else {
+          js.velocityY = 0; // bonked head
+        }
+        return;
+      } else {
+        // Falling: accelerate (faster fall)
+        js.velocityY = Math.min(3, js.velocityY + 1);
+      }
+
+      // Apply downward velocity
+      let targetR = cr;
+      const fall = Math.max(1, js.velocityY);
+      for (let step = 0; step < fall; step++) {
+        if (isWalkable(targetR + 1, cc, grid)) targetR++;
+        else break;
+      }
+
+      if (targetR !== cr) {
+        setPlayerPos([targetR, cc]);
+        handleCellEntry(targetR, cc);
+      }
+    }, js.velocityY <= 0 && js.apexHangTicks <= 2 ? 110 : 55); // slower at apex, faster when falling
 
     return () => window.clearTimeout(timeout);
   }, [playerPos, grid, quiz, finished, gameOver, handleCellEntry]);
-
-  useEffect(() => {
-    const [r, c] = playerPos;
-    if (isOnGround(r, c, grid)) setIsJumping(false);
-  }, [playerPos, grid]);
 
   useEffect(() => { containerRef.current?.focus(); }, []);
 
