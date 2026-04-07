@@ -162,12 +162,11 @@ export default function FrenchExplorer({ onBack }: Props) {
       setSteps((s) => s + 1);
       if (shieldActive) { const nt = shieldTurns - 1; setShieldTurns(nt); if (nt <= 0) setShieldActive(false); }
       if (speedActive) { const nt = speedTurns - 1; setSpeedTurns(nt); if (nt <= 0) setSpeedActive(false); }
-      // Check cell at landing
       const cell = grid[landed][c];
       if (!cell.collected && isItem(cell.type)) {
-        const newGrid = grid.map((row) => row.map((b) => ({ ...b })));
-        newGrid[landed][c].collected = true;
-        handleCellPickup(cell, newGrid);
+        const ng = grid.map((row) => row.map((b) => ({ ...b })));
+        ng[landed][c].collected = true;
+        applyPickup(cell.type, ng);
       }
       return;
     }
@@ -180,7 +179,6 @@ export default function FrenchExplorer({ onBack }: Props) {
     else if (dc < 0) setDirection("left");
 
     if (isSolid(grid[nr][nc].type)) return;
-    // Apply gravity for horizontal/downward moves
     nr = applyGravity(nr, nc, grid);
 
     const moveCost = speedActive ? Math.max(1, Math.floor(MOVE_COST / 2)) : MOVE_COST;
@@ -201,23 +199,7 @@ export default function FrenchExplorer({ onBack }: Props) {
     if (cell.collected || !isItem(cell.type)) return;
     const newGrid = grid.map((row) => row.map((b) => ({ ...b })));
     newGrid[nr][nc].collected = true;
-
-    switch (cell.type) {
-      case "star": setStarsCollected((s) => s + 1); showFloat("⭐ +1"); break;
-      case "boost": setEnergy((e) => Math.min(MAX_ENERGY, e + 25)); showFloat("⚡ +25!"); break;
-      case "shield": setShieldActive(true); setShieldTurns(8); showFloat("🛡️ Schild!"); break;
-      case "speed": setSpeedActive(true); setSpeedTurns(10); showFloat("👟 Snelheid!"); break;
-      case "chest": {
-        const rewards = ["energy", "shield", "speed"];
-        const reward = rewards[Math.floor(Math.random() * rewards.length)];
-        if (reward === "energy") { setEnergy((e) => Math.min(MAX_ENERGY, e + 30)); showFloat("🎁 +30!"); }
-        else if (reward === "shield") { setShieldActive(true); setShieldTurns(6); showFloat("🎁→🛡️"); }
-        else { setSpeedActive(true); setSpeedTurns(8); showFloat("🎁→👟"); }
-        break;
-      }
-      case "finish": setFinished(true); break;
-    }
-    setWorldData({ grid: newGrid, heightmap: worldData.heightmap });
+    applyPickup(cell.type, newGrid);
   }, [playerPos, grid, energy, quiz, finished, gameOver, shieldActive, shieldTurns, speedActive, speedTurns, worldData.heightmap]);
 
   useEffect(() => { containerRef.current?.focus(); }, []);
