@@ -329,27 +329,31 @@ export default function FrenchExplorer({ onBack }: Props) {
     };
   }, [openQuestion]);
 
-  // Game loop: process held keys every 80ms for smoother movement
+  // Game loop: requestAnimationFrame with throttled ticks for smooth movement
+  const lastTickRef = useRef(0);
   useEffect(() => {
     if (quiz || finished || gameOver) return;
+    let rafId: number;
+    const TICK_MS = 100; // one grid-step every 100ms
 
-    const interval = setInterval(() => {
-      const keys = keysRef.current;
-      const up = keys.has("w") || keys.has("arrowup") || keys.has(" ");
-      const down = keys.has("s") || keys.has("arrowdown");
-      const left = keys.has("a") || keys.has("arrowleft");
-      const right = keys.has("d") || keys.has("arrowright");
+    const loop = (now: number) => {
+      if (now - lastTickRef.current >= TICK_MS) {
+        lastTickRef.current = now;
+        const keys = keysRef.current;
+        const up = keys.has("w") || keys.has("arrowup") || keys.has(" ");
+        const down = keys.has("s") || keys.has("arrowdown");
+        const left = keys.has("a") || keys.has("arrowleft");
+        const right = keys.has("d") || keys.has("arrowright");
 
-      // Jump first (can combine with horizontal)
-      if (up) tryMove(-1, 0);
-      // Then horizontal
-      if (right) tryMove(0, 1);
-      else if (left) tryMove(0, -1);
-      // Down
-      if (down && !up) tryMove(1, 0);
-    }, 80);
-
-    return () => clearInterval(interval);
+        if (up) tryMove(-1, 0);
+        if (right) tryMove(0, 1);
+        else if (left) tryMove(0, -1);
+        if (down && !up) tryMove(1, 0);
+      }
+      rafId = requestAnimationFrame(loop);
+    };
+    rafId = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(rafId);
   }, [quiz, finished, gameOver, tryMove]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
