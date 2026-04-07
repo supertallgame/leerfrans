@@ -263,7 +263,9 @@ export default function FrenchExplorer({ onBack }: Props) {
     if (dc !== 0) {
       const nextC = c + dc;
       if (!isWalkable(r, nextC, grid)) return;
-      commitMove(r, nextC);
+      // Apply gravity immediately after horizontal move
+      const landR = applyGravity(r, nextC, grid);
+      commitMove(landR, nextC);
       return;
     }
 
