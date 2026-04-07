@@ -145,6 +145,25 @@ export default function FrenchExplorer({ onBack }: Props) {
     setQuiz(getNextQuestion());
   }, [quiz, finished, gameOver, getNextQuestion]);
 
+  const applyPickup = useCallback((type: string, newGrid: Block[][]) => {
+    switch (type) {
+      case "star": setStarsCollected((s) => s + 1); showFloat("⭐ +1"); break;
+      case "boost": setEnergy((e) => Math.min(MAX_ENERGY, e + 25)); showFloat("⚡ +25!"); break;
+      case "shield": setShieldActive(true); setShieldTurns(8); showFloat("🛡️ Schild!"); break;
+      case "speed": setSpeedActive(true); setSpeedTurns(10); showFloat("👟 Snelheid!"); break;
+      case "chest": {
+        const rewards = ["energy", "shield", "speed"];
+        const reward = rewards[Math.floor(Math.random() * rewards.length)];
+        if (reward === "energy") { setEnergy((e) => Math.min(MAX_ENERGY, e + 30)); showFloat("🎁 +30!"); }
+        else if (reward === "shield") { setShieldActive(true); setShieldTurns(6); showFloat("🎁→🛡️"); }
+        else { setSpeedActive(true); setSpeedTurns(8); showFloat("🎁→👟"); }
+        break;
+      }
+      case "finish": setFinished(true); break;
+    }
+    setWorldData({ grid: newGrid, heightmap: worldData.heightmap });
+  }, [worldData.heightmap]);
+
   const handleCellEntry = useCallback((r: number, c: number) => {
     const cell = grid[r]?.[c];
     if (!cell || cell.collected || !isItem(cell.type)) return;
@@ -184,25 +203,6 @@ export default function FrenchExplorer({ onBack }: Props) {
     handleCellEntry(r, c);
     return true;
   }, [energy, shieldActive, speedActive, shieldTurns, speedTurns, handleCellEntry]);
-
-  const applyPickup = useCallback((type: string, newGrid: Block[][]) => {
-    switch (type) {
-      case "star": setStarsCollected((s) => s + 1); showFloat("⭐ +1"); break;
-      case "boost": setEnergy((e) => Math.min(MAX_ENERGY, e + 25)); showFloat("⚡ +25!"); break;
-      case "shield": setShieldActive(true); setShieldTurns(8); showFloat("🛡️ Schild!"); break;
-      case "speed": setSpeedActive(true); setSpeedTurns(10); showFloat("👟 Snelheid!"); break;
-      case "chest": {
-        const rewards = ["energy", "shield", "speed"];
-        const reward = rewards[Math.floor(Math.random() * rewards.length)];
-        if (reward === "energy") { setEnergy((e) => Math.min(MAX_ENERGY, e + 30)); showFloat("🎁 +30!"); }
-        else if (reward === "shield") { setShieldActive(true); setShieldTurns(6); showFloat("🎁→🛡️"); }
-        else { setSpeedActive(true); setSpeedTurns(8); showFloat("🎁→👟"); }
-        break;
-      }
-      case "finish": setFinished(true); break;
-    }
-    setWorldData({ grid: newGrid, heightmap: worldData.heightmap });
-  }, [worldData.heightmap]);
 
   const tryMove = useCallback((dr: number, dc: number) => {
     if (quiz || finished || gameOver) return;
