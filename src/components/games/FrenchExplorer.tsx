@@ -494,6 +494,7 @@ export default function FrenchExplorer({ onBack }: Props) {
     setSpeedActive(false); setSpeedTurns(0);
     setSteps(0); setDirection("right");
     setEnergyMarkers([]);
+    jumpStateRef.current = { velocityY: 0, airborne: false, doubleJumpUsed: false, apexHangTicks: 0 };
   };
 
   if (finished || gameOver) {
