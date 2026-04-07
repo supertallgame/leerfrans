@@ -14,16 +14,16 @@ interface Props {
   onBack: () => void;
 }
 
-// World config
-const GRID_W = 14;
-const GRID_H = 10;
-const VIEWPORT_W = 7;
+// World config – side-scrolling layout (wide & short)
+const GRID_W = 30;
+const GRID_H = 5;
+const VIEWPORT_W = 10;
 const VIEWPORT_H = 5;
 const MAX_ENERGY = 120;
 const START_ENERGY = 70;
 const MOVE_COST = 2;
 const CORRECT_REWARD = 18;
-const STAR_COUNT = 8;
+const STAR_COUNT = 10;
 
 type CellType = "empty" | "question" | "star" | "tree" | "finish" | "water" | "mountain" | "boost" | "shield" | "speed" | "chest";
 
