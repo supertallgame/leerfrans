@@ -133,6 +133,7 @@ export default function FrenchExplorer({ onBack }: Props) {
   const { activeVocabulary, language, chapterId } = useChapter();
   const locale = useLocale();
   const i = t(locale);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const [grid, setGrid] = useState<Cell[][]>(() => generateMap());
   const [playerPos, setPlayerPos] = useState<[number, number]>([0, 0]);
@@ -277,20 +278,20 @@ export default function FrenchExplorer({ onBack }: Props) {
     [playerPos, grid, energy, quiz, finished, gameOver, getNextQuestion, shieldActive, shieldTurns, speedActive, speedTurns]
   );
 
-  // Keyboard
+  // Auto-focus for keyboard input
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      const map: Record<string, [number, number]> = {
-        ArrowUp: [-1, 0], w: [-1, 0],
-        ArrowDown: [1, 0], s: [1, 0],
-        ArrowLeft: [0, -1], a: [0, -1],
-        ArrowRight: [0, 1], d: [0, 1],
-      };
-      const dir = map[e.key];
-      if (dir) { e.preventDefault(); tryMove(...dir); }
+    containerRef.current?.focus();
+  }, []);
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    const map: Record<string, [number, number]> = {
+      ArrowUp: [-1, 0], w: [-1, 0], W: [-1, 0],
+      ArrowDown: [1, 0], s: [1, 0], S: [1, 0],
+      ArrowLeft: [0, -1], a: [0, -1], A: [0, -1],
+      ArrowRight: [0, 1], d: [0, 1], D: [0, 1],
     };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
+    const dir = map[e.key];
+    if (dir) { e.preventDefault(); tryMove(...dir); }
   }, [tryMove]);
 
   const handleQuizAnswer = (answer: string) => {
@@ -367,7 +368,12 @@ export default function FrenchExplorer({ onBack }: Props) {
   const biomeLabel = { forest: "🌲 Bos", desert: "🏜️ Woestijn", snow: "❄️ Sneeuwbergen", swamp: "🌾 Moeras" };
 
   return (
-    <div className="flex flex-col items-center gap-2 w-full max-w-lg mx-auto">
+    <div
+      ref={containerRef}
+      tabIndex={0}
+      onKeyDown={handleKeyDown}
+      className="flex flex-col items-center gap-2 w-full max-w-2xl mx-auto outline-none"
+    >
       {/* Header */}
       <div className="flex items-center justify-between w-full">
         <Button variant="ghost" onClick={onBack} className="gap-2 text-sm">
