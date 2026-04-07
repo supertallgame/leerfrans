@@ -11,7 +11,7 @@ import { ArrowLeft, RotateCcw, Zap, HelpCircle, Shield, MessageCircleQuestion } 
 import { Progress } from "@/components/ui/progress";
 import {
   WORLD_W, WORLD_H, VIEW_W, VIEW_H,
-  MAX_ENERGY, START_ENERGY, MOVE_COST, CORRECT_REWARD, STAR_COUNT,
+  MAX_ENERGY, START_ENERGY, MOVE_COST, JUMP_COST, CORRECT_REWARD, STAR_COUNT,
   Block, QuizState, EnergyMarker, isSolid, isItem,
   BLOCK_COLORS, getBiome,
   PLAYER_FRAMES, PLAYER_JUMP_FRAME, CASTLE_SPRITE, STAR_SPRITE, BOOST_SPRITE,
