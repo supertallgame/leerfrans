@@ -331,26 +331,27 @@ export default function FrenchExplorer({ onBack }: Props) {
     };
   }, [openQuestion]);
 
-  // Game loop: requestAnimationFrame with throttled ticks for smooth movement
+  // Game loop: requestAnimationFrame with throttled ticks
   const lastTickRef = useRef(0);
   useEffect(() => {
     if (quiz || finished || gameOver) return;
     let rafId: number;
-    const TICK_MS = 75; // fast grid-steps, CSS interpolates smoothly at 60fps
+    const TICK_MS = 75;
 
     const loop = (now: number) => {
       if (now - lastTickRef.current >= TICK_MS) {
         lastTickRef.current = now;
         const keys = keysRef.current;
-        const up = keys.has("w") || keys.has("arrowup") || keys.has(" ");
+        const wantJump = keys.has("w") || keys.has("arrowup") || keys.has(" ");
         const down = keys.has("s") || keys.has("arrowdown");
         const left = keys.has("a") || keys.has("arrowleft");
         const right = keys.has("d") || keys.has("arrowright");
 
-        if (up) tryMove(-1, 0);
+        // Process jump first, then horizontal
+        if (wantJump) tryMove(-1, 0);
         if (right) tryMove(0, 1);
         else if (left) tryMove(0, -1);
-        if (down && !up) tryMove(1, 0);
+        if (down && !wantJump) tryMove(1, 0);
       }
       rafId = requestAnimationFrame(loop);
     };
