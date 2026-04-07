@@ -13,8 +13,9 @@ import {
   WORLD_W, WORLD_H, VIEW_W, VIEW_H,
   MAX_ENERGY, START_ENERGY, MOVE_COST, CORRECT_REWARD, STAR_COUNT,
   Block, QuizState, EnergyMarker, isSolid, isItem,
-  BLOCK_COLORS, ITEM_EMOJI, getBiome,
-  PLAYER_SPRITE, TREE_SPRITE, CASTLE_SPRITE,
+  BLOCK_COLORS, getBiome,
+  PLAYER_FRAMES, CASTLE_SPRITE, STAR_SPRITE, BOOST_SPRITE,
+  SHIELD_SPRITE, CHEST_SPRITE, SPEED_SPRITE,
 } from "./explorer/types";
 import { generateWorld, getSpawnPos } from "./explorer/worldGen";
 
@@ -38,20 +39,23 @@ function isOnGround(r: number, c: number, grid: Block[][]): boolean {
   return r >= WORLD_H - 1 || isSolid(grid[r + 1]?.[c]?.type);
 }
 
-// Pixel art sprite component
-function PixelSprite({ sprite, size = 28, flip = false, glow = false }: {
-  sprite: string; size?: number; flip?: boolean; glow?: boolean;
+// Pixel art sprite renderer via CSS box-shadow
+function PixelSprite({ sprite, size = 28, flip = false, glow = false, animate = false }: {
+  sprite: string; size?: number; flip?: boolean; glow?: boolean; animate?: boolean;
 }) {
   return (
     <div
       className="absolute inset-0 flex items-center justify-center pointer-events-none"
       style={{ zIndex: 5 }}
     >
-      <div style={{
-        width: size, height: size,
-        transform: flip ? "scaleX(-1)" : "none",
-        filter: glow ? "drop-shadow(0 0 6px gold)" : "none",
-      }}>
+      <div
+        className={animate ? "animate-[sprite-bob_0.6s_ease-in-out_infinite]" : ""}
+        style={{
+          width: size, height: size,
+          transform: flip ? "scaleX(-1)" : "none",
+          filter: glow ? "drop-shadow(0 0 6px gold) drop-shadow(0 0 12px rgba(250,204,21,0.4))" : "none",
+        }}
+      >
         <div style={{
           width: 1, height: 1,
           boxShadow: sprite,
@@ -62,6 +66,16 @@ function PixelSprite({ sprite, size = 28, flip = false, glow = false }: {
     </div>
   );
 }
+
+// Item sprite map
+const ITEM_SPRITES: Record<string, { sprite: string; size: number }> = {
+  star: { sprite: STAR_SPRITE, size: 22 },
+  boost: { sprite: BOOST_SPRITE, size: 20 },
+  shield: { sprite: SHIELD_SPRITE, size: 20 },
+  speed: { sprite: SPEED_SPRITE, size: 20 },
+  chest: { sprite: CHEST_SPRITE, size: 22 },
+  finish: { sprite: CASTLE_SPRITE, size: 28 },
+};
 
 let markerIdCounter = 0;
 
@@ -90,11 +104,18 @@ export default function FrenchExplorer({ onBack }: Props) {
   const [steps, setSteps] = useState(0);
   const [direction, setDirection] = useState<"right" | "left">("right");
   const [energyMarkers, setEnergyMarkers] = useState<EnergyMarker[]>([]);
+  const [animFrame, setAnimFrame] = useState<0 | 1>(0);
 
   const vocabQueue = useMemo(() => shuffle(activeVocabulary), []);
   const [vocabIndex, setVocabIndex] = useState(0);
 
   const camC = Math.max(0, Math.min(WORLD_W - VIEW_W, playerPos[1] - Math.floor(VIEW_W / 2)));
+
+  // Walking animation
+  useEffect(() => {
+    const interval = setInterval(() => setAnimFrame((f) => (f === 0 ? 1 : 0) as 0 | 1), 350);
+    return () => clearInterval(interval);
+  }, []);
 
   const showFloat = (text: string) => {
     setFloatingText(text);
@@ -191,7 +212,6 @@ export default function FrenchExplorer({ onBack }: Props) {
     if (correct) {
       setCorrectAnswers((c) => c + 1);
       playCorrect();
-      // Place energy marker at player position
       const marker: EnergyMarker = {
         r: playerPos[0], c: playerPos[1],
         amount: CORRECT_REWARD, id: markerIdCounter++,
@@ -204,10 +224,8 @@ export default function FrenchExplorer({ onBack }: Props) {
   const claimMarker = (markerId: number) => {
     const marker = energyMarkers.find((m) => m.id === markerId);
     if (!marker) return;
-    // Must be adjacent or on the marker
     const [pr, pc] = playerPos;
-    const dist = Math.abs(marker.r - pr) + Math.abs(marker.c - pc);
-    if (dist > 1) return; // must be on or adjacent
+    if (Math.abs(marker.r - pr) + Math.abs(marker.c - pc) > 1) return;
     setEnergy((e) => Math.min(MAX_ENERGY, e + marker.amount));
     setEnergyMarkers((m) => m.filter((x) => x.id !== markerId));
     showFloat(`✅ +${marker.amount} energie!`);
@@ -264,6 +282,18 @@ export default function FrenchExplorer({ onBack }: Props) {
       onKeyDown={handleKeyDown}
       className="flex flex-col items-center gap-2 w-full max-w-4xl mx-auto outline-none select-none"
     >
+      {/* Sprite animation keyframes */}
+      <style>{`
+        @keyframes sprite-bob {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-2px); }
+        }
+        @keyframes marker-glow {
+          0%, 100% { transform: scale(1); filter: brightness(1); }
+          50% { transform: scale(1.2); filter: brightness(1.3); }
+        }
+      `}</style>
+
       {/* Header */}
       <div className="flex items-center justify-between w-full">
         <Button variant="ghost" onClick={onBack} className="gap-2 text-sm">
@@ -316,6 +346,7 @@ export default function FrenchExplorer({ onBack }: Props) {
               const biomeColors = BLOCK_COLORS[cell.biome];
               const solid = isSolid(cell.type);
               const marker = energyMarkers.find((m) => m.r === r && m.c === c);
+              const itemSprite = ITEM_SPRITES[cell.type];
 
               let bg = solid ? (biomeColors[cell.type] || biomeColors.dirt) : biomeColors.sky;
 
@@ -328,64 +359,82 @@ export default function FrenchExplorer({ onBack }: Props) {
                 <button
                   key={`${vr}-${vc}`}
                   onClick={() => {
-                    // If there's a marker here, try claiming it
                     if (marker) { claimMarker(marker.id); return; }
                     const [pr, pc] = playerPos;
                     const dr = r - pr;
                     const dc = c - pc;
                     if (Math.abs(dr) + Math.abs(dc) === 1) tryMove(dr, dc);
                   }}
-                  className="relative flex items-center justify-center transition-none"
+                  className="relative flex items-center justify-center transition-none overflow-hidden"
                   style={{ background: bg, aspectRatio: "1", ...borderStyle }}
                 >
-                  {/* Player pixel-art sprite */}
+                  {/* Player pixel-art sprite (animated) */}
                   {isPlayer && (
                     <PixelSprite
-                      sprite={PLAYER_SPRITE}
+                      sprite={PLAYER_FRAMES[animFrame]}
+                      size={30}
                       flip={direction === "left"}
                       glow={shieldActive}
                     />
                   )}
 
-                  {/* Castle pixel-art sprite */}
-                  {!isPlayer && cell.type === "finish" && !cell.collected && (
-                    <PixelSprite sprite={CASTLE_SPRITE} size={24} />
-                  )}
-
-                  {/* Items (emoji) */}
-                  {!isPlayer && !solid && cell.type !== "finish" && isItem(cell.type) && !cell.collected && (
-                    <span className="text-xs md:text-sm leading-none z-[2] relative">
-                      {ITEM_EMOJI[cell.type]}
-                    </span>
+                  {/* Item pixel-art sprites */}
+                  {!isPlayer && !solid && isItem(cell.type) && !cell.collected && itemSprite && (
+                    <PixelSprite
+                      sprite={itemSprite.sprite}
+                      size={itemSprite.size}
+                      animate={cell.type === "star" || cell.type === "chest"}
+                    />
                   )}
 
                   {/* Energy marker (cross to click) */}
                   {marker && !isPlayer && (
                     <div className="absolute inset-0 flex items-center justify-center z-10 cursor-pointer">
-                      <div className="relative w-6 h-6 md:w-8 md:h-8 animate-pulse">
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <span className="text-lg md:text-xl font-black text-amber-400 drop-shadow-[0_0_4px_rgba(0,0,0,0.5)]"
-                            style={{ textShadow: "0 0 8px #F59E0B, 0 0 2px #000" }}
-                          >✖</span>
-                        </div>
-                        <span className="absolute -top-1 -right-1 text-[8px] font-bold bg-amber-400 text-amber-900 rounded-full px-1 leading-tight">
-                          +{marker.amount}
-                        </span>
+                      <div
+                        className="relative"
+                        style={{ animation: "marker-glow 1s ease-in-out infinite" }}
+                      >
+                        <span
+                          className="text-lg md:text-xl font-black"
+                          style={{
+                            color: "#F59E0B",
+                            textShadow: "0 0 8px #F59E0B, 0 0 2px #000",
+                          }}
+                        >✖</span>
+                        <span className="absolute -top-2 -right-3 text-[8px] font-bold px-1 rounded-full leading-tight"
+                          style={{ background: "#F59E0B", color: "#78350F" }}
+                        >+{marker.amount}</span>
                       </div>
                     </div>
                   )}
 
                   {/* Grass highlight */}
                   {cell.type === "grass" && (
-                    <div className="absolute top-0 left-0 right-0 h-[3px]"
-                      style={{ background: `${biomeColors.grass}cc` }} />
+                    <>
+                      <div className="absolute top-0 left-0 right-0 h-[3px]"
+                        style={{ background: `${biomeColors.grass}cc` }} />
+                      {/* Grass blades */}
+                      <div className="absolute top-[-2px] left-[20%] w-[2px] h-[4px]"
+                        style={{ background: biomeColors.grass }} />
+                      <div className="absolute top-[-3px] left-[60%] w-[2px] h-[5px]"
+                        style={{ background: biomeColors.grass }} />
+                    </>
                   )}
 
                   {/* Platform texture */}
                   {cell.type === "platform" && (
                     <>
                       <div className="absolute top-0 left-0 right-0 h-[2px]" style={{ background: `${biomeColors.platform}ee` }} />
+                      <div className="absolute top-[2px] left-[25%] w-[50%] h-[1px]" style={{ background: `${biomeColors.platform}88` }} />
                       <div className="absolute bottom-0 left-0 right-0 h-[1px]" style={{ background: `${biomeColors.platform}66` }} />
+                    </>
+                  )}
+
+                  {/* Stone texture */}
+                  {cell.type === "stone" && (
+                    <>
+                      <div className="absolute top-[30%] left-[20%] w-[3px] h-[3px] rounded-full" style={{ background: `${biomeColors.stone}88` }} />
+                      <div className="absolute top-[60%] left-[60%] w-[2px] h-[2px] rounded-full" style={{ background: `${biomeColors.stone}66` }} />
                     </>
                   )}
                 </button>
@@ -451,12 +500,7 @@ export default function FrenchExplorer({ onBack }: Props) {
         </div>
 
         {/* Question button */}
-        <Button
-          onClick={openQuestion}
-          variant="default"
-          className="gap-2 h-12 px-4 text-sm font-bold"
-          disabled={!!quiz}
-        >
+        <Button onClick={openQuestion} variant="default" className="gap-2 h-12 px-4 text-sm font-bold" disabled={!!quiz}>
           <MessageCircleQuestion className="h-5 w-5" />
           {locale === "sk" ? "Otázka" : "Vraag"}
           <span className="text-[10px] opacity-70 ml-1">(Q)</span>
@@ -464,8 +508,8 @@ export default function FrenchExplorer({ onBack }: Props) {
 
         {/* Legend */}
         <div className="flex-1 text-[10px] text-muted-foreground leading-relaxed hidden md:block">
-          ✖ = claim energie · ⚡ = boost<br />
-          🛡️ = schild · 👟 = snelheid · 🏰 = doel
+          ✖ claim energie · ⚡ boost<br />
+          🛡️ schild · 👟 snelheid · 🏰 doel
         </div>
       </div>
 
