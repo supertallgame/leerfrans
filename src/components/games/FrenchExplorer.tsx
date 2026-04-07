@@ -230,9 +230,12 @@ export default function FrenchExplorer({ onBack }: Props) {
     if (quiz || finished || gameOver) return;
     const [r, c] = playerPos;
 
+    if (dc > 0) setDirection("right");
+    else if (dc < 0) setDirection("left");
+
     if (dr < 0) {
       if (!isOnGround(r, c, grid)) return;
-      // Jump max 2 blocks high instead of 3
+
       let jumpTarget = r;
       for (let step = 1; step <= 2; step++) {
         const nextR = r - step;
@@ -241,29 +244,53 @@ export default function FrenchExplorer({ onBack }: Props) {
       }
 
       if (jumpTarget === r) return;
-      setIsJumping(true);
-      // Jump uses JUMP_COST instead of normal MOVE_COST
-      const jumpCostActual = shieldActive ? 0 : (speedActive ? Math.max(1, Math.floor(JUMP_COST / 2)) : JUMP_COST);
+
+      const attemptedC = dc !== 0 ? c + dc : c;
+      const canMoveSidewaysWhileJumping =
+        attemptedC >= 0 &&
+        attemptedC < WORLD_W &&
+        isWalkable(jumpTarget, attemptedC, grid);
+
+      const targetC = canMoveSidewaysWhileJumping ? attemptedC : c;
+      const targetR = dc !== 0 ? applyGravity(jumpTarget, targetC, grid) : jumpTarget;
+
+      setIsJumping(targetR < r);
+      const jumpCostActual = shieldActive
+        ? 0
+        : speedActive
+          ? Math.max(1, Math.floor(JUMP_COST / 2))
+          : JUMP_COST;
       const newEnergy = energy - jumpCostActual;
+
       if (newEnergy <= 0 && !shieldActive) {
-        setEnergy(0); setGameOver(true); return;
+        setEnergy(0);
+        setGameOver(true);
+        return;
       }
+
       setEnergy(Math.max(0, newEnergy));
-      setPlayerPos([jumpTarget, c]);
+      setPlayerPos([targetR, targetC]);
       setSteps((s) => s + 1);
-      if (shieldActive) { const nt = shieldTurns - 1; setShieldTurns(nt); if (nt <= 0) setShieldActive(false); }
-      if (speedActive) { const nt = speedTurns - 1; setSpeedTurns(nt); if (nt <= 0) setSpeedActive(false); }
-      handleCellEntry(jumpTarget, c);
+
+      if (shieldActive) {
+        const nt = shieldTurns - 1;
+        setShieldTurns(nt);
+        if (nt <= 0) setShieldActive(false);
+      }
+
+      if (speedActive) {
+        const nt = speedTurns - 1;
+        setSpeedTurns(nt);
+        if (nt <= 0) setSpeedActive(false);
+      }
+
+      handleCellEntry(targetR, targetC);
       return;
     }
-
-    if (dc > 0) setDirection("right");
-    else if (dc < 0) setDirection("left");
 
     if (dc !== 0) {
       const nextC = c + dc;
       if (!isWalkable(r, nextC, grid)) return;
-      // Apply gravity immediately after horizontal move
       const landR = applyGravity(r, nextC, grid);
       commitMove(landR, nextC);
       return;
@@ -344,14 +371,21 @@ export default function FrenchExplorer({ onBack }: Props) {
         const keys = keysRef.current;
         const wantJump = keys.has("w") || keys.has("arrowup") || keys.has(" ");
         const down = keys.has("s") || keys.has("arrowdown");
-        const left = keys.has("a") || keys.has("arrowleft");
-        const right = keys.has("d") || keys.has("arrowright");
+        const horizontal = keys.has("d") || keys.has("arrowright")
+          ? 1
+          : keys.has("a") || keys.has("arrowleft")
+            ? -1
+            : 0;
 
-        // Process jump first, then horizontal
-        if (wantJump) tryMove(-1, 0);
-        if (right) tryMove(0, 1);
-        else if (left) tryMove(0, -1);
-        if (down && !wantJump) tryMove(1, 0);
+        if (wantJump) {
+          tryMove(-1, horizontal);
+        } else if (horizontal !== 0) {
+          tryMove(0, horizontal);
+        }
+
+        if (down && !wantJump && horizontal === 0) {
+          tryMove(1, 0);
+        }
       }
       rafId = requestAnimationFrame(loop);
     };
