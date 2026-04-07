@@ -285,7 +285,7 @@ export default function FrenchExplorer({ onBack }: Props) {
       if (!isWalkable(nextR, c, grid)) return;
       setPlayerPos([nextR, c]);
       handleCellEntry(nextR, c);
-    }, 80);
+    }, 100); // match game loop tick rate for consistent feel
 
     return () => window.clearTimeout(timeout);
   }, [playerPos, grid, quiz, finished, gameOver, handleCellEntry]);
