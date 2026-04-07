@@ -650,7 +650,7 @@ export default function FrenchExplorer({ onBack }: Props) {
               top: `${(playerPos[0] / VIEW_H) * 100}%`,
               width: `${100 / VIEW_W}%`,
               height: `${100 / VIEW_H}%`,
-              transition: "left 75ms linear, top 75ms linear",
+              transition: `left 75ms linear, top ${isJumping ? '90ms ease-out' : '55ms ease-in'}`,
               willChange: "left, top",
               zIndex: 10,
               overflow: "visible",
