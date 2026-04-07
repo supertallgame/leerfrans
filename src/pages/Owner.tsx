@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Shield, Home, Crown, Users, ShieldPlus, ShieldMinus, Search } from "lucide-react";
+import { Shield, Home, Crown, Users, ShieldPlus, ShieldMinus, Search, Map } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -31,6 +32,7 @@ export default function Owner() {
   const [allUsers, setAllUsers] = useState<AppUser[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [promoting, setPromoting] = useState<string | null>(null);
+  const [explorerEnabled, setExplorerEnabled] = useState(true);
 
   useEffect(() => {
     checkOwner();
@@ -44,7 +46,7 @@ export default function Owner() {
       return;
     }
     setIsOwner(true);
-    await Promise.all([loadRoles(), loadUsers()]);
+    await Promise.all([loadRoles(), loadUsers(), loadExplorerSetting()]);
     setLoading(false);
   };
 
@@ -60,6 +62,27 @@ export default function Owner() {
   const loadUsers = async () => {
     const { data, error } = await supabase.rpc("list_all_users");
     if (!error && data) setAllUsers(data as AppUser[]);
+  };
+
+  const loadExplorerSetting = async () => {
+    const { data } = await supabase
+      .from("admin_settings")
+      .select("value")
+      .eq("key", "explorer_enabled")
+      .maybeSingle();
+    if (data) setExplorerEnabled(data.value !== false);
+  };
+
+  const toggleExplorer = async (checked: boolean) => {
+    const { error } = await supabase
+      .from("admin_settings")
+      .upsert({ key: "explorer_enabled", value: checked as any, updated_at: new Date().toISOString() } as any, { onConflict: "key" });
+    if (error) {
+      toast.error("Kon instelling niet opslaan");
+      return;
+    }
+    setExplorerEnabled(checked);
+    toast.success(checked ? "Verkenner ingeschakeld" : "Verkenner uitgeschakeld");
   };
 
   const promoteUser = async (user: AppUser) => {
@@ -187,6 +210,24 @@ export default function Owner() {
                 </div>
               ))
             )}
+          </CardContent>
+        </Card>
+
+        {/* Game settings */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <Map className="h-5 w-5 text-primary" /> Spellen
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Map className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-medium">Verkenner (Adventurer)</span>
+              </div>
+              <Switch checked={explorerEnabled} onCheckedChange={toggleExplorer} />
+            </div>
           </CardContent>
         </Card>
 
