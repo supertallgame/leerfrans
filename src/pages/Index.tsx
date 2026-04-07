@@ -93,6 +93,7 @@ const Index = () => {
   const [user, setUser] = useState<any>(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [disabledSubjects, setDisabledSubjects] = useState<string[]>([]);
+  const [explorerEnabled, setExplorerEnabled] = useState(true);
 
   const chaptersForLanguage = getChaptersForLanguage(language);
   const foreignLabel = getForeignLabel(language);
@@ -113,7 +114,15 @@ const Index = () => {
           }
         });
     };
+    const fetchExplorer = () => {
+      supabase
+        .rpc("get_public_setting", { p_key: "explorer_enabled" })
+        .then(({ data }) => {
+          setExplorerEnabled(data !== false);
+        });
+    };
     fetchDisabled();
+    fetchExplorer();
 
     const channel = supabase
       .channel("admin_settings_changes")
@@ -182,6 +191,7 @@ const Index = () => {
   const hasSentences = activeVocabulary.some((v) => v.french.includes(" ") && v.french.length > 15);
   const games = language === "biology" ? biologyGames : (language === "nask") ? naskGames : languageGames.filter((g) => {
     if ((g as any).frenchOnly && language !== "french") return false;
+    if (g.id === "explorer" && !explorerEnabled) return false;
     if (g.id === "sentence" && !hasSentences) return false;
     return true;
   });
