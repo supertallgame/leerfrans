@@ -447,7 +447,7 @@ export default function FrenchExplorer({ onBack }: Props) {
                   )}
 
                   {/* Energy marker (cross to click) */}
-                  {marker && !isPlayer && (
+                  {marker && (
                     <div className="absolute inset-0 flex items-center justify-center z-10 cursor-pointer">
                       <div
                         className="relative"
