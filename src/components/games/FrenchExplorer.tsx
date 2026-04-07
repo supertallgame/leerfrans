@@ -115,6 +115,8 @@ export default function FrenchExplorer({ onBack }: Props) {
   const [energyMarkers, setEnergyMarkers] = useState<EnergyMarker[]>([]);
   const [animFrame, setAnimFrame] = useState<0 | 1>(0);
   const [isJumping, setIsJumping] = useState(false);
+  const [idleAnim, setIdleAnim] = useState<IdleAnimation | null>(null);
+  const lastInputRef = useRef(Date.now());
 
   const vocabQueue = useMemo(() => shuffle(activeVocabulary), []);
   const [vocabIndex, setVocabIndex] = useState(0);
@@ -126,6 +128,23 @@ export default function FrenchExplorer({ onBack }: Props) {
     const interval = setInterval(() => setAnimFrame((f) => (f === 0 ? 1 : 0) as 0 | 1), 350);
     return () => clearInterval(interval);
   }, []);
+
+  // Idle animation system - triggers after 5 minutes of no input
+  useEffect(() => {
+    if (finished || gameOver) return;
+    const IDLE_TIMEOUT = 5 * 60 * 1000; // 5 minutes
+
+    const interval = setInterval(() => {
+      const elapsed = Date.now() - lastInputRef.current;
+      if (elapsed >= IDLE_TIMEOUT && !idleAnim && !quiz) {
+        const anim = getRandomIdleAnimation();
+        setIdleAnim(anim);
+        setTimeout(() => setIdleAnim(null), anim.duration);
+      }
+    }, 10_000); // check every 10s
+
+    return () => clearInterval(interval);
+  }, [finished, gameOver, idleAnim, quiz]);
 
   const showFloat = (text: string) => {
     setFloatingText(text);
