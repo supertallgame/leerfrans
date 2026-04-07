@@ -1,3 +1,5 @@
+import type React from "react";
+
 export const WORLD_W = 60;
 export const WORLD_H = 10;
 export const VIEW_W = 16;
@@ -126,7 +128,107 @@ function makeWizard(frame: 0 | 1): string {
   return p.join(",");
 }
 
+// ─── PLAYER JUMP: wizard with arms up, legs together ───
+function makeWizardJump(): string {
+  const p: string[] = [];
+  // Hat tip (higher)
+  p.push(px(5, 0, "#4C1D95"), px(6, 0, "#4C1D95"));
+  p.push(px(4, 1, "#6D28D9"), px(5, 1, "#7C3AED"), px(6, 1, "#7C3AED"), px(7, 1, "#6D28D9"));
+  p.push(px(3, 2, "#8B5CF6"), px(4, 2, "#8B5CF6"), px(5, 2, "#A78BFA"), px(6, 2, "#A78BFA"), px(7, 2, "#8B5CF6"), px(8, 2, "#8B5CF6"));
+  p.push(px(6, 1, "#FBBF24")); // hat star
+  // Face
+  p.push(px(3, 3, "#92400E"), px(4, 3, "#FDE68A"), px(5, 3, "#FDE68A"), px(6, 3, "#FDE68A"), px(7, 3, "#FDE68A"), px(8, 3, "#92400E"));
+  p.push(px(3, 4, "#FDE68A"), px(4, 4, "#FDE68A"), px(5, 4, "#1E293B"), px(6, 4, "#FDE68A"), px(7, 4, "#1E293B"), px(8, 4, "#FDE68A"));
+  p.push(px(4, 5, "#FDE68A"), px(5, 5, "#FDE68A"), px(6, 5, "#FDE68A"), px(7, 5, "#FDE68A"));
+  // Beard
+  p.push(px(4, 6, "#D1D5DB"), px(5, 6, "#E5E7EB"), px(6, 6, "#E5E7EB"), px(7, 6, "#D1D5DB"));
+  // Arms up!
+  p.push(px(1, 5, "#1D4ED8"), px(2, 4, "#2563EB"), px(10, 4, "#2563EB"), px(11, 5, "#1D4ED8"));
+  // Staff raised
+  p.push(px(11, 3, "#22D3EE"), px(12, 3, "#06B6D4"), px(11, 2, "#67E8F9"));
+  p.push(px(11, 4, "#78350F"), px(11, 5, "#78350F"), px(11, 6, "#92400E"));
+  // Robe (compact)
+  p.push(px(3, 7, "#1D4ED8"), px(4, 7, "#2563EB"), px(5, 7, "#3B82F6"), px(6, 7, "#3B82F6"), px(7, 7, "#2563EB"), px(8, 7, "#1D4ED8"));
+  p.push(px(4, 8, "#92400E"), px(5, 8, "#B45309"), px(6, 8, "#FBBF24"), px(7, 8, "#B45309"));
+  p.push(px(3, 9, "#1E40AF"), px(4, 9, "#2563EB"), px(5, 9, "#3B82F6"), px(6, 9, "#3B82F6"), px(7, 9, "#2563EB"), px(8, 9, "#1E40AF"));
+  p.push(px(3, 10, "#1E3A8A"), px(4, 10, "#1D4ED8"), px(5, 10, "#2563EB"), px(6, 10, "#2563EB"), px(7, 10, "#1D4ED8"), px(8, 10, "#1E3A8A"));
+  // Boots together
+  p.push(px(4, 11, "#78350F"), px(5, 11, "#92400E"), px(6, 11, "#92400E"), px(7, 11, "#78350F"));
+  return p.join(",");
+}
+
 export const PLAYER_FRAMES = [makeWizard(0), makeWizard(1)];
+export const PLAYER_JUMP_FRAME = makeWizardJump();
+
+// ─── Block texture patterns (CSS background for each block type per biome) ───
+export function getBlockStyle(type: string, biome: Biome): React.CSSProperties {
+  const colors = BLOCK_COLORS[biome];
+  const base = colors[type] || colors.dirt;
+
+  switch (type) {
+    case "grass": {
+      const dark = colors.dirt;
+      return {
+        background: `
+          linear-gradient(180deg,
+            ${base} 0%, ${base} 30%,
+            ${adjustColor(base, -15)} 30%, ${adjustColor(base, -15)} 35%,
+            ${dark} 35%, ${dark} 100%
+          )`,
+        boxShadow: `inset 0 1px 0 ${adjustColor(base, 20)}, inset 0 -1px 0 ${adjustColor(dark, -10)}`,
+      };
+    }
+    case "dirt": {
+      return {
+        background: `
+          radial-gradient(circle at 25% 40%, ${adjustColor(base, 12)} 2px, transparent 2px),
+          radial-gradient(circle at 70% 70%, ${adjustColor(base, -12)} 2px, transparent 2px),
+          radial-gradient(circle at 50% 20%, ${adjustColor(base, 8)} 1px, transparent 1px),
+          radial-gradient(circle at 80% 30%, ${adjustColor(base, -8)} 1px, transparent 1px),
+          linear-gradient(180deg, ${adjustColor(base, 5)} 0%, ${base} 50%, ${adjustColor(base, -8)} 100%)
+        `,
+        boxShadow: `inset 0 1px 0 ${adjustColor(base, 10)}, inset 0 -1px 0 ${adjustColor(base, -10)}`,
+      };
+    }
+    case "stone": {
+      return {
+        background: `
+          linear-gradient(135deg, ${adjustColor(base, 10)} 25%, transparent 25%),
+          linear-gradient(225deg, ${adjustColor(base, 5)} 25%, transparent 25%),
+          linear-gradient(315deg, ${adjustColor(base, -5)} 25%, transparent 25%),
+          linear-gradient(45deg, ${adjustColor(base, -10)} 25%, transparent 25%),
+          linear-gradient(180deg, ${adjustColor(base, 8)} 0%, ${base} 50%, ${adjustColor(base, -12)} 100%)
+        `,
+        backgroundSize: "50% 50%, 50% 50%, 50% 50%, 50% 50%, 100% 100%",
+        boxShadow: `inset 1px 1px 0 ${adjustColor(base, 15)}, inset -1px -1px 0 ${adjustColor(base, -15)}`,
+      };
+    }
+    case "platform": {
+      return {
+        background: `
+          repeating-linear-gradient(90deg,
+            ${base} 0px, ${base} 8px,
+            ${adjustColor(base, -12)} 8px, ${adjustColor(base, -12)} 9px,
+            ${adjustColor(base, 8)} 9px, ${adjustColor(base, 8)} 17px,
+            ${adjustColor(base, -8)} 17px, ${adjustColor(base, -8)} 18px
+          ),
+          linear-gradient(180deg, ${adjustColor(base, 15)} 0%, ${base} 40%, ${adjustColor(base, -10)} 100%)
+        `,
+        boxShadow: `inset 0 2px 0 ${adjustColor(base, 20)}, inset 0 -1px 0 ${adjustColor(base, -20)}, 0 2px 4px rgba(0,0,0,0.3)`,
+        borderRadius: "2px",
+      };
+    }
+    default:
+      return { background: base };
+  }
+}
+
+function adjustColor(hex: string, amount: number): string {
+  const r = Math.min(255, Math.max(0, parseInt(hex.slice(1, 3), 16) + amount));
+  const g = Math.min(255, Math.max(0, parseInt(hex.slice(3, 5), 16) + amount));
+  const b = Math.min(255, Math.max(0, parseInt(hex.slice(5, 7), 16) + amount));
+  return `#${r.toString(16).padStart(2, "0")}${g.toString(16).padStart(2, "0")}${b.toString(16).padStart(2, "0")}`;
+}
 
 // ─── CASTLE: 12×12 pixel castle ───
 export const CASTLE_SPRITE = (() => {

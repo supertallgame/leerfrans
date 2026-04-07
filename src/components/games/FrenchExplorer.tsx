@@ -14,8 +14,9 @@ import {
   MAX_ENERGY, START_ENERGY, MOVE_COST, CORRECT_REWARD, STAR_COUNT,
   Block, QuizState, EnergyMarker, isSolid, isItem,
   BLOCK_COLORS, getBiome,
-  PLAYER_FRAMES, CASTLE_SPRITE, STAR_SPRITE, BOOST_SPRITE,
+  PLAYER_FRAMES, PLAYER_JUMP_FRAME, CASTLE_SPRITE, STAR_SPRITE, BOOST_SPRITE,
   SHIELD_SPRITE, CHEST_SPRITE, SPEED_SPRITE,
+  getBlockStyle,
 } from "./explorer/types";
 import { generateWorld, getSpawnPos } from "./explorer/worldGen";
 
@@ -113,6 +114,7 @@ export default function FrenchExplorer({ onBack }: Props) {
   const [direction, setDirection] = useState<"right" | "left">("right");
   const [energyMarkers, setEnergyMarkers] = useState<EnergyMarker[]>([]);
   const [animFrame, setAnimFrame] = useState<0 | 1>(0);
+  const [isJumping, setIsJumping] = useState(false);
 
   const vocabQueue = useMemo(() => shuffle(activeVocabulary), []);
   const [vocabIndex, setVocabIndex] = useState(0);
@@ -218,6 +220,7 @@ export default function FrenchExplorer({ onBack }: Props) {
       }
 
       if (jumpTarget === r) return;
+      setIsJumping(true);
       commitMove(jumpTarget, c);
       return;
     }
@@ -250,10 +253,15 @@ export default function FrenchExplorer({ onBack }: Props) {
       if (!isWalkable(nextR, c, grid)) return;
       setPlayerPos([nextR, c]);
       handleCellEntry(nextR, c);
-    }, 140);
+    }, 80);
 
     return () => window.clearTimeout(timeout);
   }, [playerPos, grid, quiz, finished, gameOver, handleCellEntry]);
+
+  useEffect(() => {
+    const [r, c] = playerPos;
+    if (isOnGround(r, c, grid)) setIsJumping(false);
+  }, [playerPos, grid]);
 
   useEffect(() => { containerRef.current?.focus(); }, []);
 
@@ -415,12 +423,7 @@ export default function FrenchExplorer({ onBack }: Props) {
               const marker = energyMarkers.find((m) => m.r === r && m.c === c);
               const itemSprite = ITEM_SPRITES[cell.type];
 
-              let bg = solid ? (biomeColors[cell.type] || biomeColors.dirt) : biomeColors.sky;
-
-              const borderStyle = solid ? {
-                borderRight: `1px solid ${biomeColors.dirt}88`,
-                borderBottom: `1px solid ${biomeColors.dirt}66`,
-              } : {};
+              const blockStyle = solid ? getBlockStyle(cell.type, cell.biome) : { background: biomeColors.sky };
 
               return (
                 <button
@@ -433,12 +436,12 @@ export default function FrenchExplorer({ onBack }: Props) {
                     if (Math.abs(dr) + Math.abs(dc) === 1) tryMove(dr, dc);
                   }}
                   className="relative flex items-center justify-center transition-none"
-                  style={{ background: bg, aspectRatio: "1", overflow: isPlayer ? "visible" : "hidden", ...borderStyle }}
+                  style={{ aspectRatio: "1", overflow: isPlayer ? "visible" : "hidden", ...blockStyle }}
                 >
                   {/* Player pixel-art sprite (animated) */}
                   {isPlayer && (
                     <PixelSprite
-                      sprite={PLAYER_FRAMES[animFrame]}
+                      sprite={isJumping ? PLAYER_JUMP_FRAME : PLAYER_FRAMES[animFrame]}
                       size={60}
                       flip={direction === "left"}
                       glow={shieldActive}
@@ -475,35 +478,6 @@ export default function FrenchExplorer({ onBack }: Props) {
                     </div>
                   )}
 
-                  {/* Grass highlight */}
-                  {cell.type === "grass" && (
-                    <>
-                      <div className="absolute top-0 left-0 right-0 h-[3px]"
-                        style={{ background: `${biomeColors.grass}cc` }} />
-                      {/* Grass blades */}
-                      <div className="absolute top-[-2px] left-[20%] w-[2px] h-[4px]"
-                        style={{ background: biomeColors.grass }} />
-                      <div className="absolute top-[-3px] left-[60%] w-[2px] h-[5px]"
-                        style={{ background: biomeColors.grass }} />
-                    </>
-                  )}
-
-                  {/* Platform texture */}
-                  {cell.type === "platform" && (
-                    <>
-                      <div className="absolute top-0 left-0 right-0 h-[2px]" style={{ background: `${biomeColors.platform}ee` }} />
-                      <div className="absolute top-[2px] left-[25%] w-[50%] h-[1px]" style={{ background: `${biomeColors.platform}88` }} />
-                      <div className="absolute bottom-0 left-0 right-0 h-[1px]" style={{ background: `${biomeColors.platform}66` }} />
-                    </>
-                  )}
-
-                  {/* Stone texture */}
-                  {cell.type === "stone" && (
-                    <>
-                      <div className="absolute top-[30%] left-[20%] w-[3px] h-[3px] rounded-full" style={{ background: `${biomeColors.stone}88` }} />
-                      <div className="absolute top-[60%] left-[60%] w-[2px] h-[2px] rounded-full" style={{ background: `${biomeColors.stone}66` }} />
-                    </>
-                  )}
                 </button>
               );
             })
