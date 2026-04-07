@@ -7,118 +7,17 @@ import { playCorrect, playWrong } from "@/lib/sounds";
 import { trackAnswer } from "@/lib/trackAnswer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowLeft, RotateCcw, Zap, HelpCircle, Shield, Heart } from "lucide-react";
+import { ArrowLeft, RotateCcw, Zap, HelpCircle, Shield } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import {
+  WORLD_W, WORLD_H, VIEW_W, VIEW_H,
+  MAX_ENERGY, START_ENERGY, MOVE_COST, CORRECT_REWARD, STAR_COUNT,
+  Block, QuizState, isSolid, isItem,
+  BLOCK_COLORS, ITEM_EMOJI, getBiome,
+} from "./explorer/types";
+import { generateWorld, getSpawnPos } from "./explorer/worldGen";
 
-interface Props {
-  onBack: () => void;
-}
-
-// World config – side-scrolling layout (wide & short)
-const GRID_W = 30;
-const GRID_H = 5;
-const VIEWPORT_W = 10;
-const VIEWPORT_H = 5;
-const MAX_ENERGY = 120;
-const START_ENERGY = 70;
-const MOVE_COST = 2;
-const CORRECT_REWARD = 18;
-const STAR_COUNT = 10;
-
-type CellType = "empty" | "question" | "star" | "tree" | "finish" | "water" | "mountain" | "boost" | "shield" | "speed" | "chest";
-
-interface Cell {
-  type: CellType;
-  collected?: boolean;
-  biome: "forest" | "desert" | "snow" | "swamp";
-}
-
-interface QuizState {
-  term: string;
-  correctAnswer: string;
-  options: string[];
-}
-
-// Biome assignment based on horizontal position
-function getBiome(r: number, c: number): Cell["biome"] {
-  if (c < GRID_W * 0.25) return "forest";
-  if (c < GRID_W * 0.5) return "swamp";
-  if (c < GRID_W * 0.75) return "snow";
-  return "desert";
-}
-
-const BIOME_BG: Record<Cell["biome"], string> = {
-  forest: "bg-emerald-50 dark:bg-emerald-950/30",
-  desert: "bg-amber-50 dark:bg-amber-950/30",
-  snow: "bg-slate-100 dark:bg-slate-900/40",
-  swamp: "bg-teal-50 dark:bg-teal-950/30",
-};
-
-const BIOME_GROUND: Record<Cell["biome"], string> = {
-  forest: "🌿",
-  desert: "🏜️",
-  snow: "❄️",
-  swamp: "🌾",
-};
-
-const CELL_EMOJI: Record<CellType, string> = {
-  empty: "",
-  question: "📜",
-  star: "⭐",
-  tree: "🌲",
-  finish: "🏰",
-  water: "🌊",
-  mountain: "⛰️",
-  boost: "⚡",
-  shield: "🛡️",
-  speed: "👟",
-  chest: "🎁",
-};
-
-function isBlocked(type: CellType) {
-  return type === "tree" || type === "water" || type === "mountain";
-}
-
-function placeRandom(grid: Cell[][], count: number, type: CellType, occupied: Set<string>) {
-  let placed = 0;
-  let attempts = 0;
-  while (placed < count && attempts < 500) {
-    attempts++;
-    const r = Math.floor(Math.random() * GRID_H);
-    const c = Math.floor(Math.random() * GRID_W);
-    const key = `${r},${c}`;
-    if (occupied.has(key)) continue;
-    occupied.add(key);
-    grid[r][c] = { type, biome: getBiome(r, c) };
-    placed++;
-  }
-}
-
-function generateMap(): Cell[][] {
-  const grid: Cell[][] = Array.from({ length: GRID_H }, (_, r) =>
-    Array.from({ length: GRID_W }, (_, c) => ({ type: "empty" as CellType, biome: getBiome(r, c) }))
-  );
-
-  const occupied = new Set<string>(["0,0", `${GRID_H - 1},${GRID_W - 1}`]);
-  grid[GRID_H - 1][GRID_W - 1] = { type: "finish", biome: getBiome(GRID_H - 1, GRID_W - 1) };
-
-  // Obstacles – fewer rows so use less
-  placeRandom(grid, 8, "tree", occupied);
-  placeRandom(grid, 4, "water", occupied);
-  placeRandom(grid, 3, "mountain", occupied);
-
-  // Interactables
-  placeRandom(grid, 12, "question", occupied);
-  placeRandom(grid, STAR_COUNT, "star", occupied);
-
-  // Power-ups
-  placeRandom(grid, 4, "boost", occupied);
-  placeRandom(grid, 2, "shield", occupied);
-  placeRandom(grid, 2, "speed", occupied);
-  placeRandom(grid, 3, "chest", occupied);
-
-  return grid;
-}
+interface Props { onBack: () => void; }
 
 function shuffleArray<T>(arr: T[]): T[] {
   const a = [...arr];
@@ -129,14 +28,26 @@ function shuffleArray<T>(arr: T[]): T[] {
   return a;
 }
 
+function applyGravity(r: number, c: number, grid: Block[][]): number {
+  while (r < WORLD_H - 1 && !isSolid(grid[r + 1]?.[c]?.type)) {
+    r++;
+  }
+  return r;
+}
+
+function isOnGround(r: number, c: number, grid: Block[][]): boolean {
+  return r >= WORLD_H - 1 || isSolid(grid[r + 1]?.[c]?.type);
+}
+
 export default function FrenchExplorer({ onBack }: Props) {
   const { activeVocabulary, language, chapterId } = useChapter();
   const locale = useLocale();
   const i = t(locale);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const [grid, setGrid] = useState<Cell[][]>(() => generateMap());
-  const [playerPos, setPlayerPos] = useState<[number, number]>([0, 0]);
+  const [worldData, setWorldData] = useState(() => generateWorld());
+  const grid = worldData.grid;
+  const [playerPos, setPlayerPos] = useState<[number, number]>(() => getSpawnPos(worldData.heightmap));
   const [energy, setEnergy] = useState(START_ENERGY);
   const [starsCollected, setStarsCollected] = useState(0);
   const [quiz, setQuiz] = useState<QuizState | null>(null);
@@ -151,14 +62,13 @@ export default function FrenchExplorer({ onBack }: Props) {
   const [speedTurns, setSpeedTurns] = useState(0);
   const [floatingText, setFloatingText] = useState<string | null>(null);
   const [steps, setSteps] = useState(0);
-  const [direction, setDirection] = useState<"left" | "right">("right");
+  const [direction, setDirection] = useState<"right" | "left">("right");
 
   const vocabQueue = useMemo(() => shuffle(activeVocabulary), []);
   const [vocabIndex, setVocabIndex] = useState(0);
 
-  // Viewport camera (centered on player)
-  const camR = Math.max(0, Math.min(GRID_H - VIEWPORT_H, playerPos[0] - Math.floor(VIEWPORT_H / 2)));
-  const camC = Math.max(0, Math.min(GRID_W - VIEWPORT_W, playerPos[1] - Math.floor(VIEWPORT_W / 2)));
+  // Camera: horizontal scroll, full height visible
+  const camC = Math.max(0, Math.min(WORLD_W - VIEW_W, playerPos[1] - Math.floor(VIEW_W / 2)));
 
   const showFloat = (text: string) => {
     setFloatingText(text);
@@ -171,117 +81,97 @@ export default function FrenchExplorer({ onBack }: Props) {
     setVocabIndex((i) => i + 1);
     const correct = item.french;
     const others = shuffleArray(activeVocabulary.filter((v) => v.french !== correct))
-      .slice(0, 3)
-      .map((v) => v.french);
+      .slice(0, 3).map((v) => v.french);
     return { term: item.dutch, correctAnswer: correct, options: shuffleArray([correct, ...others]) };
   }, [vocabIndex, vocabQueue, activeVocabulary]);
 
-  const tryMove = useCallback(
-    (dr: number, dc: number) => {
-      if (quiz || finished || gameOver) return;
-      const [r, c] = playerPos;
-      const nr = r + dr;
-      const nc = c + dc;
-      if (nr < 0 || nr >= GRID_H || nc < 0 || nc >= GRID_W) return;
+  const tryMove = useCallback((dr: number, dc: number) => {
+    if (quiz || finished || gameOver) return;
+    const [r, c] = playerPos;
 
-      if (dc > 0) setDirection("right");
-      else if (dc < 0) setDirection("left");
+    // Jump: only if on ground and moving up
+    if (dr < 0 && !isOnGround(r, c, grid)) return;
+    // Can jump up 2 cells
+    let nr = r + dr;
+    let nc = c + dc;
+    if (nr < 0 || nr >= WORLD_H || nc < 0 || nc >= WORLD_W) return;
 
-      const cell = grid[nr][nc];
-      if (isBlocked(cell.type)) return;
+    if (dc > 0) setDirection("right");
+    else if (dc < 0) setDirection("left");
 
-      const moveCost = speedActive ? 1 : MOVE_COST;
-      const actualCost = shieldActive ? 0 : moveCost;
-      const newEnergy = energy - actualCost;
+    // Check if target is solid (blocked)
+    if (isSolid(grid[nr][nc].type)) return;
 
-      if (newEnergy <= 0 && !shieldActive) {
-        setEnergy(0);
-        setGameOver(true);
-        return;
+    // Apply gravity after horizontal/upward move
+    nr = applyGravity(nr, nc, grid);
+
+    const moveCost = speedActive ? Math.max(1, Math.floor(MOVE_COST / 2)) : MOVE_COST;
+    const actualCost = shieldActive ? 0 : moveCost;
+    const newEnergy = energy - actualCost;
+
+    if (newEnergy <= 0 && !shieldActive) {
+      setEnergy(0);
+      setGameOver(true);
+      return;
+    }
+    setEnergy(Math.max(0, newEnergy));
+    setPlayerPos([nr, nc]);
+    setSteps((s) => s + 1);
+
+    // Decrement power-up turns
+    if (shieldActive) {
+      const nt = shieldTurns - 1;
+      setShieldTurns(nt);
+      if (nt <= 0) setShieldActive(false);
+    }
+    if (speedActive) {
+      const nt = speedTurns - 1;
+      setSpeedTurns(nt);
+      if (nt <= 0) setSpeedActive(false);
+    }
+
+    const cell = grid[nr][nc];
+    if (cell.collected || !isItem(cell.type)) return;
+
+    const newGrid = grid.map((row) => row.map((b) => ({ ...b })));
+    newGrid[nr][nc].collected = true;
+
+    switch (cell.type) {
+      case "question":
+        setQuiz(getNextQuestion());
+        break;
+      case "star":
+        setStarsCollected((s) => s + 1);
+        showFloat("⭐ +1");
+        break;
+      case "boost":
+        setEnergy((e) => Math.min(MAX_ENERGY, e + 25));
+        showFloat("⚡ +25!");
+        break;
+      case "shield":
+        setShieldActive(true); setShieldTurns(8);
+        showFloat("🛡️ Schild!");
+        break;
+      case "speed":
+        setSpeedActive(true); setSpeedTurns(10);
+        showFloat("👟 Snelheid!");
+        break;
+      case "chest": {
+        const rewards = ["energy", "shield", "speed"];
+        const reward = rewards[Math.floor(Math.random() * rewards.length)];
+        if (reward === "energy") { setEnergy((e) => Math.min(MAX_ENERGY, e + 30)); showFloat("🎁 +30!"); }
+        else if (reward === "shield") { setShieldActive(true); setShieldTurns(6); showFloat("🎁→🛡️"); }
+        else { setSpeedActive(true); setSpeedTurns(8); showFloat("🎁→👟"); }
+        break;
       }
-      setEnergy(Math.max(0, newEnergy));
-      setPlayerPos([nr, nc]);
-      setSteps((s) => s + 1);
+      case "finish":
+        setFinished(true);
+        break;
+    }
+    setWorldData({ grid: newGrid, heightmap: worldData.heightmap });
+  }, [playerPos, grid, energy, quiz, finished, gameOver, getNextQuestion, shieldActive, shieldTurns, speedActive, speedTurns, worldData.heightmap]);
 
-      // Decrement power-up turns
-      if (shieldActive) {
-        const newTurns = shieldTurns - 1;
-        setShieldTurns(newTurns);
-        if (newTurns <= 0) setShieldActive(false);
-      }
-      if (speedActive) {
-        const newTurns = speedTurns - 1;
-        setSpeedTurns(newTurns);
-        if (newTurns <= 0) setSpeedActive(false);
-      }
-
-      if (cell.collected) return;
-      const newGrid = grid.map((row) => row.map((c) => ({ ...c })));
-
-      switch (cell.type) {
-        case "question":
-          setQuiz(getNextQuestion());
-          newGrid[nr][nc].collected = true;
-          setGrid(newGrid);
-          break;
-        case "star":
-          setStarsCollected((s) => s + 1);
-          newGrid[nr][nc].collected = true;
-          setGrid(newGrid);
-          showFloat("⭐ +1");
-          break;
-        case "boost":
-          setEnergy((e) => Math.min(MAX_ENERGY, e + 25));
-          newGrid[nr][nc].collected = true;
-          setGrid(newGrid);
-          showFloat("⚡ +25 energie!");
-          break;
-        case "shield":
-          setShieldActive(true);
-          setShieldTurns(8);
-          newGrid[nr][nc].collected = true;
-          setGrid(newGrid);
-          showFloat("🛡️ Schild (8 stappen)!");
-          break;
-        case "speed":
-          setSpeedActive(true);
-          setSpeedTurns(10);
-          newGrid[nr][nc].collected = true;
-          setGrid(newGrid);
-          showFloat("👟 Snelheid (10 stappen)!");
-          break;
-        case "chest": {
-          // Random reward
-          const rewards = ["energy", "shield", "speed"];
-          const reward = rewards[Math.floor(Math.random() * rewards.length)];
-          if (reward === "energy") {
-            setEnergy((e) => Math.min(MAX_ENERGY, e + 30));
-            showFloat("🎁 +30 energie!");
-          } else if (reward === "shield") {
-            setShieldActive(true);
-            setShieldTurns(6);
-            showFloat("🎁 → 🛡️ Schild!");
-          } else {
-            setSpeedActive(true);
-            setSpeedTurns(8);
-            showFloat("🎁 → 👟 Snelheid!");
-          }
-          newGrid[nr][nc].collected = true;
-          setGrid(newGrid);
-          break;
-        }
-        case "finish":
-          setFinished(true);
-          break;
-      }
-    },
-    [playerPos, grid, energy, quiz, finished, gameOver, getNextQuestion, shieldActive, shieldTurns, speedActive, speedTurns]
-  );
-
-  // Auto-focus for keyboard input
-  useEffect(() => {
-    containerRef.current?.focus();
-  }, []);
+  useEffect(() => { containerRef.current?.focus(); }, []);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     const map: Record<string, [number, number]> = {
@@ -303,32 +193,23 @@ export default function FrenchExplorer({ onBack }: Props) {
       setCorrectAnswers((c) => c + 1);
       setEnergy((e) => Math.min(MAX_ENERGY, e + CORRECT_REWARD));
       playCorrect();
-    } else {
-      playWrong();
-    }
+    } else { playWrong(); }
     trackAnswer({ gameType: "explorer", language, chapterId, question: quiz!.term, correctAnswer: quiz!.correctAnswer, givenAnswer: answer, isCorrect: correct });
   };
 
   const dismissQuiz = () => { setQuiz(null); setQuizResult(null); };
 
   const restart = () => {
-    setGrid(generateMap());
-    setPlayerPos([0, 0]);
-    setEnergy(START_ENERGY);
-    setStarsCollected(0);
-    setQuiz(null);
-    setQuizResult(null);
-    setFinished(false);
-    setGameOver(false);
-    setQuestionsAnswered(0);
-    setCorrectAnswers(0);
-    setVocabIndex(0);
-    setShieldActive(false);
-    setShieldTurns(0);
-    setSpeedActive(false);
-    setSpeedTurns(0);
-    setSteps(0);
-    setDirection("right");
+    const w = generateWorld();
+    setWorldData(w);
+    setPlayerPos(getSpawnPos(w.heightmap));
+    setEnergy(START_ENERGY); setStarsCollected(0);
+    setQuiz(null); setQuizResult(null);
+    setFinished(false); setGameOver(false);
+    setQuestionsAnswered(0); setCorrectAnswers(0);
+    setVocabIndex(0); setShieldActive(false); setShieldTurns(0);
+    setSpeedActive(false); setSpeedTurns(0);
+    setSteps(0); setDirection("right");
   };
 
   // End screen
@@ -342,17 +223,13 @@ export default function FrenchExplorer({ onBack }: Props) {
           <CardContent className="flex flex-col items-center p-8 gap-4">
             <p className="text-5xl font-bold">{finished ? "🏰" : "💀"}</p>
             <h2 className="text-2xl font-bold">
-              {finished ? (locale === "sk" ? "Výborne! Hrad dosiahnutý!" : "Het kasteel bereikt!") : (locale === "sk" ? "Koniec energie!" : "Geen energie meer!")}
+              {finished ? (locale === "sk" ? "Výborne!" : "Het kasteel bereikt!") : (locale === "sk" ? "Koniec energie!" : "Geen energie meer!")}
             </h2>
             <div className="text-center space-y-1.5">
               <p className="text-lg">⭐ {starsCollected}/{STAR_COUNT}</p>
               <p className="text-sm text-muted-foreground">
-                {locale === "sk" ? "Správne" : "Goed"}: {correctAnswers}/{questionsAnswered} •
-                {" "}{steps} {locale === "sk" ? "krokov" : "stappen"}
+                {locale === "sk" ? "Správne" : "Goed"}: {correctAnswers}/{questionsAnswered} • {steps} {locale === "sk" ? "krokov" : "stappen"}
               </p>
-              {finished && energy > 0 && (
-                <p className="text-sm text-muted-foreground">⚡ {energy} {locale === "sk" ? "energie zostáva" : "energie over"}</p>
-              )}
             </div>
             <div className="flex gap-3">
               <Button onClick={restart} variant="outline" className="gap-2"><RotateCcw className="h-4 w-4" /> {i.restart}</Button>
@@ -364,23 +241,31 @@ export default function FrenchExplorer({ onBack }: Props) {
     );
   }
 
-  const currentBiome = getBiome(playerPos[0], playerPos[1]);
-  const biomeLabel = { forest: "🌲 Bos", desert: "🏜️ Woestijn", snow: "❄️ Sneeuwbergen", swamp: "🌾 Moeras" };
+  const currentBiome = getBiome(playerPos[1]);
 
   return (
     <div
       ref={containerRef}
       tabIndex={0}
       onKeyDown={handleKeyDown}
-      className="flex flex-col items-center gap-2 w-full max-w-2xl mx-auto outline-none"
+      className="flex flex-col items-center gap-2 w-full max-w-4xl mx-auto outline-none select-none"
     >
       {/* Header */}
       <div className="flex items-center justify-between w-full">
         <Button variant="ghost" onClick={onBack} className="gap-2 text-sm">
           <ArrowLeft className="h-4 w-4" /> {i.back}
         </Button>
-        <span className="text-xs text-muted-foreground">{biomeLabel[currentBiome]}</span>
-        <div className="flex items-center gap-2 text-xs">
+        <div className="flex items-center gap-3 text-xs">
+          {shieldActive && (
+            <span className="inline-flex items-center gap-1 bg-primary/10 text-primary px-2 py-0.5 rounded-full">
+              <Shield className="h-3 w-3" /> {shieldTurns}
+            </span>
+          )}
+          {speedActive && (
+            <span className="inline-flex items-center gap-1 bg-accent/20 text-accent-foreground px-2 py-0.5 rounded-full">
+              👟 {speedTurns}
+            </span>
+          )}
           <span>⭐ {starsCollected}/{STAR_COUNT}</span>
           <span className="font-medium flex items-center gap-0.5">
             <Zap className="h-3.5 w-3.5 text-amber-500" /> {energy}
@@ -388,47 +273,48 @@ export default function FrenchExplorer({ onBack }: Props) {
         </div>
       </div>
 
-      {/* Energy + buffs */}
-      <div className="w-full space-y-1">
-        <div className="flex items-center gap-2">
-          <Zap className="h-3.5 w-3.5 text-amber-500 shrink-0" />
-          <Progress value={(energy / MAX_ENERGY) * 100} className="w-full h-2" />
-        </div>
-        {(shieldActive || speedActive) && (
-          <div className="flex gap-2">
-            {shieldActive && (
-              <span className="inline-flex items-center gap-1 text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full">
-                <Shield className="h-3 w-3" /> {shieldTurns}
-              </span>
-            )}
-            {speedActive && (
-              <span className="inline-flex items-center gap-1 text-[10px] bg-accent/20 text-accent-foreground px-2 py-0.5 rounded-full">
-                👟 {speedTurns}
-              </span>
-            )}
-          </div>
-        )}
+      {/* Energy bar */}
+      <div className="flex items-center gap-2 w-full">
+        <Zap className="h-3.5 w-3.5 text-amber-500 shrink-0" />
+        <Progress value={(energy / MAX_ENERGY) * 100} className="w-full h-2" />
       </div>
 
-      {/* World viewport */}
+      {/* Game world - pixel art side view */}
       <div className="relative w-full">
         <div
-          className="grid gap-px w-full rounded-xl overflow-hidden border-2 border-border shadow-lg"
+          className="w-full rounded-lg overflow-hidden border-2 border-border shadow-xl"
           style={{
-            gridTemplateColumns: `repeat(${VIEWPORT_W}, 1fr)`,
-            gridTemplateRows: `repeat(${VIEWPORT_H}, 1fr)`,
-            aspectRatio: `${VIEWPORT_W}/${VIEWPORT_H}`,
+            display: "grid",
+            gridTemplateColumns: `repeat(${VIEW_W}, 1fr)`,
+            gridTemplateRows: `repeat(${VIEW_H}, 1fr)`,
+            aspectRatio: `${VIEW_W} / ${VIEW_H}`,
+            imageRendering: "pixelated" as any,
           }}
         >
-          {Array.from({ length: VIEWPORT_H }).map((_, vr) =>
-            Array.from({ length: VIEWPORT_W }).map((_, vc) => {
-              const r = camR + vr;
+          {Array.from({ length: VIEW_H }).map((_, vr) =>
+            Array.from({ length: VIEW_W }).map((_, vc) => {
+              const r = vr;
               const c = camC + vc;
               const cell = grid[r]?.[c];
-              if (!cell) return <div key={`${vr}-${vc}`} className="bg-muted" />;
+              if (!cell) return <div key={`${vr}-${vc}`} style={{ background: "#333" }} />;
 
               const isPlayer = playerPos[0] === r && playerPos[1] === c;
-              const isCollected = cell.collected;
+              const biomeColors = BLOCK_COLORS[cell.biome];
+              const solid = isSolid(cell.type);
+
+              // Determine cell background
+              let bg: string;
+              if (solid) {
+                bg = biomeColors[cell.type] || biomeColors.dirt;
+              } else {
+                bg = biomeColors.sky;
+              }
+
+              // Add subtle texture to ground
+              const borderStyle = solid ? {
+                borderRight: `1px solid ${biomeColors.dirt}88`,
+                borderBottom: `1px solid ${biomeColors.dirt}66`,
+              } : {};
 
               return (
                 <button
@@ -439,21 +325,36 @@ export default function FrenchExplorer({ onBack }: Props) {
                     const dc = c - pc;
                     if (Math.abs(dr) + Math.abs(dc) === 1) tryMove(dr, dc);
                   }}
-                  className={`
-                    relative flex items-center justify-center transition-all select-none aspect-square
-                    ${BIOME_BG[cell.biome]}
-                    ${isPlayer ? "z-10" : ""}
-                    ${isBlocked(cell.type) ? "opacity-80" : "hover:brightness-95 dark:hover:brightness-110"}
-                  `}
+                  className="relative flex items-center justify-center transition-none"
+                  style={{
+                    background: bg,
+                    aspectRatio: "1",
+                    ...borderStyle,
+                  }}
                 >
                   {isPlayer ? (
-                    <span className={`text-lg md:text-2xl transition-transform ${direction === "left" ? "-scale-x-100" : ""} ${shieldActive ? "drop-shadow-[0_0_6px_hsl(var(--primary))]" : ""}`}>
+                    <span
+                      className="text-lg md:text-xl leading-none"
+                      style={{
+                        transform: direction === "left" ? "scaleX(-1)" : "none",
+                        filter: shieldActive ? "drop-shadow(0 0 4px gold)" : "none",
+                      }}
+                    >
                       🧙
                     </span>
-                  ) : isCollected ? (
-                    <span className="text-[10px] md:text-xs opacity-30">{BIOME_GROUND[cell.biome]}</span>
                   ) : (
-                    <span className="text-sm md:text-xl">{CELL_EMOJI[cell.type] || <span className="text-[10px] opacity-20">{BIOME_GROUND[cell.biome]}</span>}</span>
+                    !solid && isItem(cell.type) && !cell.collected && (
+                      <span className="text-xs md:text-base leading-none animate-pulse">
+                        {ITEM_EMOJI[cell.type]}
+                      </span>
+                    )
+                  )}
+                  {/* Grass detail: small highlight on top of grass blocks */}
+                  {cell.type === "grass" && (
+                    <div
+                      className="absolute top-0 left-0 right-0 h-[3px]"
+                      style={{ background: `${biomeColors.grass}cc` }}
+                    />
                   )}
                 </button>
               );
@@ -471,38 +372,42 @@ export default function FrenchExplorer({ onBack }: Props) {
         )}
       </div>
 
-      {/* Minimap – wide strip */}
+      {/* Bottom: minimap + controls + legend */}
       <div className="w-full flex items-center gap-3">
+        {/* Minimap */}
         <div
           className="border border-border rounded-md overflow-hidden shrink-0"
           style={{
             display: "grid",
-            gridTemplateColumns: `repeat(${GRID_W}, 1fr)`,
-            width: "200px",
-            height: `${Math.round(200 * GRID_H / GRID_W)}px`,
+            gridTemplateColumns: `repeat(${WORLD_W}, 1fr)`,
+            width: "220px",
+            height: `${Math.round(220 * WORLD_H / WORLD_W)}px`,
           }}
         >
           {grid.map((row, r) =>
             row.map((cell, c) => {
-              const isPlayer = playerPos[0] === r && playerPos[1] === c;
-              const inView = r >= camR && r < camR + VIEWPORT_H && c >= camC && c < camC + VIEWPORT_W;
+              const isP = playerPos[0] === r && playerPos[1] === c;
+              const solid = isSolid(cell.type);
+              const inView = c >= camC && c < camC + VIEW_W;
               return (
                 <div
                   key={`m${r}-${c}`}
-                  className={`
-                    ${isPlayer ? "bg-primary" : ""}
-                    ${!isPlayer && isBlocked(cell.type) ? "bg-foreground/20" : ""}
-                    ${!isPlayer && cell.type === "finish" ? "bg-amber-500" : ""}
-                    ${!isPlayer && cell.type === "star" && !cell.collected ? "bg-amber-300" : ""}
-                    ${!isPlayer && !isBlocked(cell.type) && cell.type !== "finish" && cell.type !== "star" ? "bg-card" : ""}
-                    ${inView ? "ring-[0.5px] ring-primary/30" : ""}
-                  `}
+                  style={{
+                    background: isP ? "hsl(var(--primary))"
+                      : cell.type === "finish" ? "#D4A04A"
+                      : cell.type === "star" && !cell.collected ? "#E8C840"
+                      : solid ? BLOCK_COLORS[cell.biome].dirt
+                      : BLOCK_COLORS[cell.biome].sky,
+                    outline: inView ? "0.5px solid hsl(var(--primary) / 0.3)" : "none",
+                  }}
                 />
               );
             })
           )}
         </div>
-        <div className="flex-1 grid grid-cols-3 gap-1 w-fit max-w-[130px]">
+
+        {/* D-pad */}
+        <div className="grid grid-cols-3 gap-1 w-fit">
           <div />
           <Button size="sm" variant="outline" onClick={() => tryMove(-1, 0)} className="h-9 w-9 text-base p-0">↑</Button>
           <div />
@@ -510,13 +415,11 @@ export default function FrenchExplorer({ onBack }: Props) {
           <Button size="sm" variant="outline" onClick={() => tryMove(1, 0)} className="h-9 w-9 text-base p-0">↓</Button>
           <Button size="sm" variant="outline" onClick={() => tryMove(0, 1)} className="h-9 w-9 text-base p-0">→</Button>
         </div>
-        <div className="flex-1 text-[10px] text-muted-foreground leading-relaxed">
-          📜 = vraag (+energie)<br />
-          ⚡ = energieboost<br />
-          🛡️ = schild (gratis lopen)<br />
-          👟 = snelheid (½ energie)<br />
-          🎁 = verrassingskist<br />
-          🏰 = doel
+
+        {/* Legend */}
+        <div className="flex-1 text-[10px] text-muted-foreground leading-relaxed hidden sm:block">
+          📜 vraag · ⚡ energie · 🛡️ schild<br />
+          👟 snelheid · 🎁 kist · 🏰 doel
         </div>
       </div>
 
