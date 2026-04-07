@@ -399,9 +399,9 @@ export default function FrenchExplorer({ onBack }: Props) {
       </div>
 
       {/* Game world */}
-      <div className="relative w-full">
+      <div className="relative w-full" style={{ contain: "layout" }}>
         <div
-          className="w-full rounded-lg overflow-hidden border-2 border-border shadow-xl"
+          className="w-full rounded-lg overflow-hidden border-2 border-border shadow-xl relative"
           style={{
             display: "grid",
             gridTemplateColumns: `repeat(${VIEW_W}, 1fr)`,
@@ -417,7 +417,6 @@ export default function FrenchExplorer({ onBack }: Props) {
               const cell = grid[r]?.[c];
               if (!cell) return <div key={`${vr}-${vc}`} style={{ background: "#333" }} />;
 
-              const isPlayer = playerPos[0] === r && playerPos[1] === c;
               const biomeColors = BLOCK_COLORS[cell.biome];
               const solid = isSolid(cell.type);
               const marker = energyMarkers.find((m) => m.r === r && m.c === c);
@@ -436,20 +435,10 @@ export default function FrenchExplorer({ onBack }: Props) {
                     if (Math.abs(dr) + Math.abs(dc) === 1) tryMove(dr, dc);
                   }}
                   className="relative flex items-center justify-center transition-none"
-                  style={{ aspectRatio: "1", overflow: isPlayer ? "visible" : "hidden", ...blockStyle }}
+                  style={{ aspectRatio: "1", overflow: "hidden", ...blockStyle }}
                 >
-                  {/* Player pixel-art sprite (animated) */}
-                  {isPlayer && (
-                    <PixelSprite
-                      sprite={isJumping ? PLAYER_JUMP_FRAME : PLAYER_FRAMES[animFrame]}
-                      size={60}
-                      flip={direction === "left"}
-                      glow={shieldActive}
-                    />
-                  )}
-
                   {/* Item pixel-art sprites */}
-                  {!isPlayer && !solid && isItem(cell.type) && !cell.collected && itemSprite && (
+                  {!solid && isItem(cell.type) && !cell.collected && itemSprite && (
                     <PixelSprite
                       sprite={itemSprite.sprite}
                       size={itemSprite.size}
@@ -458,7 +447,7 @@ export default function FrenchExplorer({ onBack }: Props) {
                   )}
 
                   {/* Energy marker (cross to click) */}
-                  {marker && !isPlayer && (
+                  {marker && (
                     <div className="absolute inset-0 flex items-center justify-center z-10 cursor-pointer">
                       <div
                         className="relative"
@@ -482,6 +471,27 @@ export default function FrenchExplorer({ onBack }: Props) {
               );
             })
           )}
+
+          {/* Player overlay with smooth transitions */}
+          <div
+            className="absolute pointer-events-none"
+            style={{
+              left: `${((playerPos[1] - camC) / VIEW_W) * 100}%`,
+              top: `${(playerPos[0] / VIEW_H) * 100}%`,
+              width: `${100 / VIEW_W}%`,
+              height: `${100 / VIEW_H}%`,
+              transition: "left 0.1s ease-out, top 0.12s ease-out",
+              zIndex: 10,
+              overflow: "visible",
+            }}
+          >
+            <PixelSprite
+              sprite={isJumping ? PLAYER_JUMP_FRAME : PLAYER_FRAMES[animFrame]}
+              size={60}
+              flip={direction === "left"}
+              glow={shieldActive}
+            />
+          </div>
         </div>
 
         {/* Floating text */}
