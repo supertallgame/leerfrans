@@ -140,7 +140,38 @@ export default function FrenchExplorer({ onBack }: Props) {
   const tryMove = useCallback((dr: number, dc: number) => {
     if (quiz || finished || gameOver) return;
     const [r, c] = playerPos;
-    if (dr < 0 && !isOnGround(r, c, grid)) return;
+
+    // Jump: must be on ground, jump 2 cells up so gravity lands you 1 above
+    if (dr < 0) {
+      if (!isOnGround(r, c, grid)) return;
+      // Try to jump 2 cells up
+      let jumpTarget = r - 2;
+      if (jumpTarget < 0) jumpTarget = 0;
+      // Check both cells above are free
+      if (isSolid(grid[r - 1]?.[c]?.type)) return;
+      if (jumpTarget < r - 1 && isSolid(grid[jumpTarget]?.[c]?.type)) jumpTarget = r - 1;
+      // Apply gravity from jump target
+      const landed = applyGravity(jumpTarget, c, grid);
+      if (landed === r) return; // Would land in same spot, no point
+      const moveCost = speedActive ? Math.max(1, Math.floor(MOVE_COST / 2)) : MOVE_COST;
+      const actualCost = shieldActive ? 0 : moveCost;
+      const newEnergy = energy - actualCost;
+      if (newEnergy <= 0 && !shieldActive) { setEnergy(0); setGameOver(true); return; }
+      setEnergy(Math.max(0, newEnergy));
+      setPlayerPos([landed, c]);
+      setSteps((s) => s + 1);
+      if (shieldActive) { const nt = shieldTurns - 1; setShieldTurns(nt); if (nt <= 0) setShieldActive(false); }
+      if (speedActive) { const nt = speedTurns - 1; setSpeedTurns(nt); if (nt <= 0) setSpeedActive(false); }
+      // Check cell at landing
+      const cell = grid[landed][c];
+      if (!cell.collected && isItem(cell.type)) {
+        const newGrid = grid.map((row) => row.map((b) => ({ ...b })));
+        newGrid[landed][c].collected = true;
+        handleCellPickup(cell, newGrid);
+      }
+      return;
+    }
+
     let nr = r + dr;
     let nc = c + dc;
     if (nr < 0 || nr >= WORLD_H || nc < 0 || nc >= WORLD_W) return;
@@ -149,6 +180,7 @@ export default function FrenchExplorer({ onBack }: Props) {
     else if (dc < 0) setDirection("left");
 
     if (isSolid(grid[nr][nc].type)) return;
+    // Apply gravity for horizontal/downward moves
     nr = applyGravity(nr, nc, grid);
 
     const moveCost = speedActive ? Math.max(1, Math.floor(MOVE_COST / 2)) : MOVE_COST;
