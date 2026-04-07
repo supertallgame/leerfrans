@@ -442,81 +442,76 @@ export default function FrenchExplorer({ onBack }: Props) {
         <Progress value={(energy / MAX_ENERGY) * 100} className="w-full h-2" />
       </div>
 
-      {/* Game world */}
+      {/* Game world - smooth scrolling */}
       <div className="relative w-full" style={{ contain: "layout" }}>
         <div
           className="w-full rounded-lg overflow-hidden border-2 border-border shadow-xl relative"
           style={{
-            display: "grid",
-            gridTemplateColumns: `repeat(${VIEW_W}, 1fr)`,
-            gridTemplateRows: `repeat(${VIEW_H}, 1fr)`,
             aspectRatio: `${VIEW_W} / ${VIEW_H}`,
             imageRendering: "pixelated" as any,
           }}
         >
-          {Array.from({ length: VIEW_H }).map((_, vr) =>
-            Array.from({ length: VIEW_W }).map((_, vc) => {
-              const r = vr;
-              const c = camC + vc;
-              const cell = grid[r]?.[c];
-              if (!cell) return <div key={`${vr}-${vc}`} style={{ background: "#333" }} />;
+          {/* Scrolling world strip */}
+          <div
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              width: `${(WORLD_W / VIEW_W) * 100}%`,
+              height: "100%",
+              display: "grid",
+              gridTemplateColumns: `repeat(${WORLD_W}, 1fr)`,
+              gridTemplateRows: `repeat(${WORLD_H}, 1fr)`,
+              transform: `translateX(-${(camC / WORLD_W) * 100}%)`,
+              transition: "transform 0.15s ease-out",
+            }}
+          >
+            {Array.from({ length: WORLD_H }).map((_, r) =>
+              Array.from({ length: WORLD_W }).map((_, c) => {
+                const cell = grid[r]?.[c];
+                if (!cell) return <div key={`${r}-${c}`} style={{ background: "#333" }} />;
 
-              const biomeColors = BLOCK_COLORS[cell.biome];
-              const solid = isSolid(cell.type);
-              const marker = energyMarkers.find((m) => m.r === r && m.c === c);
-              const itemSprite = ITEM_SPRITES[cell.type];
+                const biomeColors = BLOCK_COLORS[cell.biome];
+                const solid = isSolid(cell.type);
+                const marker = energyMarkers.find((m) => m.r === r && m.c === c);
+                const itemSprite = ITEM_SPRITES[cell.type];
+                const blockStyle = solid ? getBlockStyle(cell.type, cell.biome) : { background: biomeColors.sky };
 
-              const blockStyle = solid ? getBlockStyle(cell.type, cell.biome) : { background: biomeColors.sky };
-
-              return (
-                <button
-                  key={`${vr}-${vc}`}
-                  onClick={() => {
-                    if (marker) { claimMarker(marker.id); return; }
-                    const [pr, pc] = playerPos;
-                    const dr = r - pr;
-                    const dc = c - pc;
-                    if (Math.abs(dr) + Math.abs(dc) === 1) tryMove(dr, dc);
-                  }}
-                  className="relative flex items-center justify-center transition-none"
-                  style={{ aspectRatio: "1", overflow: "hidden", ...blockStyle }}
-                >
-                  {/* Item pixel-art sprites */}
-                  {!solid && isItem(cell.type) && !cell.collected && itemSprite && (
-                    <PixelSprite
-                      sprite={itemSprite.sprite}
-                      size={itemSprite.size}
-                      animate={cell.type === "star" || cell.type === "chest"}
-                    />
-                  )}
-
-                  {/* Energy marker (cross to click) */}
-                  {marker && (
-                    <div className="absolute inset-0 flex items-center justify-center z-10 cursor-pointer">
-                      <div
-                        className="relative"
-                        style={{ animation: "marker-glow 1s ease-in-out infinite" }}
-                      >
-                        <span
-                          className="text-lg md:text-xl font-black"
-                          style={{
-                            color: "#F59E0B",
-                            textShadow: "0 0 8px #F59E0B, 0 0 2px #000",
-                          }}
-                        >✖</span>
-                        <span className="absolute -top-2 -right-3 text-[8px] font-bold px-1 rounded-full leading-tight"
-                          style={{ background: "#F59E0B", color: "#78350F" }}
-                        >+{marker.amount}</span>
+                return (
+                  <button
+                    key={`${r}-${c}`}
+                    onClick={() => {
+                      if (marker) { claimMarker(marker.id); return; }
+                      const [pr, pc] = playerPos;
+                      const dr = r - pr;
+                      const dc = c - pc;
+                      if (Math.abs(dr) + Math.abs(dc) === 1) tryMove(dr, dc);
+                    }}
+                    className="relative flex items-center justify-center transition-none"
+                    style={{ aspectRatio: "1", overflow: "hidden", ...blockStyle }}
+                  >
+                    {!solid && isItem(cell.type) && !cell.collected && itemSprite && (
+                      <PixelSprite
+                        sprite={itemSprite.sprite}
+                        size={itemSprite.size}
+                        animate={cell.type === "star" || cell.type === "chest"}
+                      />
+                    )}
+                    {marker && (
+                      <div className="absolute inset-0 flex items-center justify-center z-10 cursor-pointer">
+                        <div style={{ animation: "marker-glow 1s ease-in-out infinite" }}>
+                          <span className="text-lg md:text-xl font-black" style={{ color: "#F59E0B", textShadow: "0 0 8px #F59E0B, 0 0 2px #000" }}>✖</span>
+                          <span className="absolute -top-2 -right-3 text-[8px] font-bold px-1 rounded-full leading-tight" style={{ background: "#F59E0B", color: "#78350F" }}>+{marker.amount}</span>
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
+                  </button>
+                );
+              })
+            )}
+          </div>
 
-                </button>
-              );
-            })
-          )}
-
-          {/* Player overlay with smooth transitions */}
+          {/* Player overlay - positioned relative to viewport, smooth transitions */}
           <div
             className="absolute pointer-events-none"
             style={{
@@ -524,7 +519,7 @@ export default function FrenchExplorer({ onBack }: Props) {
               top: `${(playerPos[0] / VIEW_H) * 100}%`,
               width: `${100 / VIEW_W}%`,
               height: `${100 / VIEW_H}%`,
-              transition: "left 0.1s ease-out, top 0.12s ease-out",
+              transition: "left 0.12s ease-out, top 0.12s ease-out",
               zIndex: 10,
               overflow: "visible",
             }}
