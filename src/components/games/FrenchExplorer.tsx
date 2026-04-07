@@ -285,7 +285,7 @@ export default function FrenchExplorer({ onBack }: Props) {
       if (!isWalkable(nextR, c, grid)) return;
       setPlayerPos([nextR, c]);
       handleCellEntry(nextR, c);
-    }, 80);
+    }, 100); // match game loop tick rate for consistent feel
 
     return () => window.clearTimeout(timeout);
   }, [playerPos, grid, quiz, finished, gameOver, handleCellEntry]);
@@ -329,27 +329,31 @@ export default function FrenchExplorer({ onBack }: Props) {
     };
   }, [openQuestion]);
 
-  // Game loop: process held keys every 80ms for smoother movement
+  // Game loop: requestAnimationFrame with throttled ticks for smooth movement
+  const lastTickRef = useRef(0);
   useEffect(() => {
     if (quiz || finished || gameOver) return;
+    let rafId: number;
+    const TICK_MS = 100; // one grid-step every 100ms
 
-    const interval = setInterval(() => {
-      const keys = keysRef.current;
-      const up = keys.has("w") || keys.has("arrowup") || keys.has(" ");
-      const down = keys.has("s") || keys.has("arrowdown");
-      const left = keys.has("a") || keys.has("arrowleft");
-      const right = keys.has("d") || keys.has("arrowright");
+    const loop = (now: number) => {
+      if (now - lastTickRef.current >= TICK_MS) {
+        lastTickRef.current = now;
+        const keys = keysRef.current;
+        const up = keys.has("w") || keys.has("arrowup") || keys.has(" ");
+        const down = keys.has("s") || keys.has("arrowdown");
+        const left = keys.has("a") || keys.has("arrowleft");
+        const right = keys.has("d") || keys.has("arrowright");
 
-      // Jump first (can combine with horizontal)
-      if (up) tryMove(-1, 0);
-      // Then horizontal
-      if (right) tryMove(0, 1);
-      else if (left) tryMove(0, -1);
-      // Down
-      if (down && !up) tryMove(1, 0);
-    }, 80);
-
-    return () => clearInterval(interval);
+        if (up) tryMove(-1, 0);
+        if (right) tryMove(0, 1);
+        else if (left) tryMove(0, -1);
+        if (down && !up) tryMove(1, 0);
+      }
+      rafId = requestAnimationFrame(loop);
+    };
+    rafId = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(rafId);
   }, [quiz, finished, gameOver, tryMove]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
@@ -497,7 +501,8 @@ export default function FrenchExplorer({ onBack }: Props) {
               gridTemplateColumns: `repeat(${WORLD_W}, 1fr)`,
               gridTemplateRows: `repeat(${WORLD_H}, 1fr)`,
               transform: `translateX(-${(camC / WORLD_W) * 100}%)`,
-              transition: "transform 0.15s ease-out",
+              transition: "transform 0.1s linear",
+              willChange: "transform",
             }}
           >
             {Array.from({ length: WORLD_H }).map((_, r) =>
@@ -553,7 +558,8 @@ export default function FrenchExplorer({ onBack }: Props) {
               top: `${(playerPos[0] / VIEW_H) * 100}%`,
               width: `${100 / VIEW_W}%`,
               height: `${100 / VIEW_H}%`,
-              transition: "left 0.12s ease-out, top 0.12s ease-out",
+              transition: "left 0.1s linear, top 0.1s linear",
+              willChange: "left, top",
               zIndex: 10,
               overflow: "visible",
             }}
