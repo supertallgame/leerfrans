@@ -295,13 +295,13 @@ export default function FrenchExplorer({ onBack }: Props) {
     };
   }, [openQuestion]);
 
-  // Game loop: process held keys every 120ms
+  // Game loop: process held keys every 80ms for smoother movement
   useEffect(() => {
     if (quiz || finished || gameOver) return;
 
     const interval = setInterval(() => {
       const keys = keysRef.current;
-      const up = keys.has("w") || keys.has("arrowup");
+      const up = keys.has("w") || keys.has("arrowup") || keys.has(" ");
       const down = keys.has("s") || keys.has("arrowdown");
       const left = keys.has("a") || keys.has("arrowleft");
       const right = keys.has("d") || keys.has("arrowright");
@@ -313,7 +313,7 @@ export default function FrenchExplorer({ onBack }: Props) {
       else if (left) tryMove(0, -1);
       // Down
       if (down && !up) tryMove(1, 0);
-    }, 120);
+    }, 80);
 
     return () => clearInterval(interval);
   }, [quiz, finished, gameOver, tryMove]);
