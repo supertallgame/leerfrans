@@ -119,6 +119,14 @@ export default function FrenchExplorer({ onBack }: Props) {
   const [idleAnim, setIdleAnim] = useState<IdleAnimation | null>(null);
   const lastInputRef = useRef(Date.now());
 
+  // Physics-based jump state
+  const jumpStateRef = useRef<{
+    velocityY: number;       // negative = going up, positive = going down
+    airborne: boolean;
+    doubleJumpUsed: boolean;
+    apexHangTicks: number;   // ticks spent at apex (slow hang)
+  }>({ velocityY: 0, airborne: false, doubleJumpUsed: false, apexHangTicks: 0 });
+
   const vocabQueue = useMemo(() => shuffle(activeVocabulary), []);
   const [vocabIndex, setVocabIndex] = useState(0);
 
