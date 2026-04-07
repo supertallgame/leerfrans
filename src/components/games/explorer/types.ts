@@ -4,10 +4,11 @@ export const WORLD_W = 60;
 export const WORLD_H = 10;
 export const VIEW_W = 16;
 export const VIEW_H = 10;
-export const MAX_ENERGY = 300;
-export const START_ENERGY = 200;
+export const MAX_ENERGY = 150;
+export const START_ENERGY = 100;
 export const MOVE_COST = 1;
-export const CORRECT_REWARD = 20;
+export const JUMP_COST = 5;
+export const CORRECT_REWARD = 10;
 export const STAR_COUNT = 12;
 
 export type BlockType =

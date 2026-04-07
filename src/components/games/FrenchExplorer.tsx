@@ -212,8 +212,9 @@ export default function FrenchExplorer({ onBack }: Props) {
 
     if (dr < 0) {
       if (!isOnGround(r, c, grid)) return;
+      // Jump max 2 blocks high instead of 3
       let jumpTarget = r;
-      for (let step = 1; step <= 3; step++) {
+      for (let step = 1; step <= 2; step++) {
         const nextR = r - step;
         if (!isWalkable(nextR, c, grid)) break;
         jumpTarget = nextR;
@@ -221,7 +222,18 @@ export default function FrenchExplorer({ onBack }: Props) {
 
       if (jumpTarget === r) return;
       setIsJumping(true);
-      commitMove(jumpTarget, c);
+      // Jump uses JUMP_COST instead of normal MOVE_COST
+      const jumpCostActual = shieldActive ? 0 : (speedActive ? Math.max(1, Math.floor(JUMP_COST / 2)) : JUMP_COST);
+      const newEnergy = energy - jumpCostActual;
+      if (newEnergy <= 0 && !shieldActive) {
+        setEnergy(0); setGameOver(true); return;
+      }
+      setEnergy(Math.max(0, newEnergy));
+      setPlayerPos([jumpTarget, c]);
+      setSteps((s) => s + 1);
+      if (shieldActive) { const nt = shieldTurns - 1; setShieldTurns(nt); if (nt <= 0) setShieldActive(false); }
+      if (speedActive) { const nt = speedTurns - 1; setSpeedTurns(nt); if (nt <= 0) setSpeedActive(false); }
+      handleCellEntry(jumpTarget, c);
       return;
     }
 
