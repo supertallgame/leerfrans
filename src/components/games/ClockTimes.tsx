@@ -111,7 +111,7 @@ function ClockFace({ hour, minute, size = 120 }: { hour: number; minute: number;
       {/* Numbers */}
       {Array.from({ length: 12 }).map((_, idx) => {
         const num = idx === 0 ? 12 : idx;
-        const angle = (idx * 30 - 60) * Math.PI / 180;
+        const angle = (idx * 30 - 90) * Math.PI / 180;
         const tx = cx + Math.cos(angle) * (r - 26);
         const ty = cy + Math.sin(angle) * (r - 26);
         return (
