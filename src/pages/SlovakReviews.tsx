@@ -120,6 +120,10 @@ function AdminBadge() {
   return <span className="text-[10px] font-bold text-blue-500 bg-blue-500/10 px-1.5 py-0.5 rounded-full">Admin</span>;
 }
 
+function HeadAdminBadge() {
+  return <span className="text-[10px] font-bold text-purple-500 bg-purple-500/10 px-1.5 py-0.5 rounded-full">Head Admin</span>;
+}
+
 interface Review {
   id: string;
   display_name: string;
@@ -317,7 +321,7 @@ function ReplySection({
           {reviewReplies.map((reply) => (
             <div key={reply.id} className="space-y-0.5">
               <div className="flex items-center justify-between">
-                <span className="font-medium text-xs flex items-center gap-1">{reply.display_name} {reply.user_id && ownerUserIds.has(reply.user_id) && <OwnerBadge />}{reply.user_id && !ownerUserIds.has(reply.user_id) && adminUserIds.has(reply.user_id) && <AdminBadge />}</span>
+                <span className="font-medium text-xs flex items-center gap-1">{reply.display_name} {reply.user_id && ownerUserIds.has(reply.user_id) && <OwnerBadge />}{reply.user_id && !ownerUserIds.has(reply.user_id) && headAdminUserIds.has(reply.user_id) && <HeadAdminBadge />}{reply.user_id && !ownerUserIds.has(reply.user_id) && !headAdminUserIds.has(reply.user_id) && adminUserIds.has(reply.user_id) && <AdminBadge />}</span>
                 <div className="flex items-center gap-1">
                   <span className="text-[10px] text-muted-foreground">{timeAgo(reply.created_at)}</span>
                   {isOperator && (
@@ -360,6 +364,7 @@ export default function SlovakReviews() {
   const [filterRating, setFilterRating] = useState<number | null>(null);
   const [ownerUserIds, setOwnerUserIds] = useState<Set<string>>(new Set());
   const [adminUserIds, setAdminUserIds] = useState<Set<string>>(new Set());
+  const [headAdminUserIds, setHeadAdminUserIds] = useState<Set<string>>(new Set());
   const [voteCounts, setVoteCounts] = useState<{[k:string]:{likes:number;dislikes:number}}>({});
   const [myVotes, setMyVotes] = useState<{[k:string]:"like"|"dislike"}>({});
   const [animatingVote, setAnimatingVote] = useState<string | null>(null);
@@ -440,7 +445,7 @@ export default function SlovakReviews() {
       setOwnerUserIds(ids);
     });
 
-    // Fetch admin user IDs
+    // Fetch admin and head admin user IDs
     supabase.rpc("get_admin_emails").then(({ data }) => {
       if (!data) return;
       const adminEmails = (data as string[]).filter(e => !OWNER_EMAILS_SK.includes(e));
@@ -451,6 +456,14 @@ export default function SlovakReviews() {
         results.forEach((r) => { if (r.data) ids.add(r.data as string); });
         setAdminUserIds(ids);
       });
+    });
+
+    // Fetch head admin user IDs specifically
+    (supabase.from("user_roles") as any).select("user_id").eq("role", "head_admin").then(({ data }: any) => {
+      if (!data) return;
+      const ids = new Set<string>();
+      data.forEach((r: any) => ids.add(r.user_id));
+      setHeadAdminUserIds(ids);
     });
 
     const refetchAll = async () => {
@@ -618,7 +631,7 @@ export default function SlovakReviews() {
                   <div className="flex gap-4">
                     <div className="flex-1 space-y-2">
                       <div className="flex items-center justify-between">
-                        <span className="font-semibold text-sm flex items-center gap-1.5">{review.display_name} {review.user_id && ownerUserIds.has(review.user_id) && <OwnerBadge />}{review.user_id && !ownerUserIds.has(review.user_id) && adminUserIds.has(review.user_id) && <AdminBadge />}</span>
+                        <span className="font-semibold text-sm flex items-center gap-1.5">{review.display_name} {review.user_id && ownerUserIds.has(review.user_id) && <OwnerBadge />}{review.user_id && !ownerUserIds.has(review.user_id) && headAdminUserIds.has(review.user_id) && <HeadAdminBadge />}{review.user_id && !ownerUserIds.has(review.user_id) && !headAdminUserIds.has(review.user_id) && adminUserIds.has(review.user_id) && <AdminBadge />}</span>
                         <div className="flex items-center gap-2">
                           <span className="text-xs text-muted-foreground">
                             {timeAgo(review.created_at)}
@@ -672,6 +685,7 @@ export default function SlovakReviews() {
                         isTranslating={isTranslating}
                         ownerUserIds={ownerUserIds}
                         adminUserIds={adminUserIds}
+                        headAdminUserIds={headAdminUserIds}
                       />
                     </div>
                     {review.image_url && (
