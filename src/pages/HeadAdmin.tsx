@@ -28,6 +28,7 @@ export default function HeadAdmin() {
   const [isHeadAdmin, setIsHeadAdmin] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
   const [adminRoles, setAdminRoles] = useState<UserRole[]>([]);
+  const [headAdminRoles, setHeadAdminRoles] = useState<UserRole[]>([]);
   const [allUsers, setAllUsers] = useState<AppUser[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [promoting, setPromoting] = useState<string | null>(null);
@@ -47,7 +48,7 @@ export default function HeadAdmin() {
     // Owners also have access
     if (OWNER_EMAILS.includes(session.user.email ?? "")) {
       setIsHeadAdmin(true);
-      await Promise.all([loadAdminRoles(), loadUsers()]);
+      await Promise.all([loadAllRoles(), loadUsers()]);
       setLoading(false);
       return;
     }
@@ -66,27 +67,38 @@ export default function HeadAdmin() {
     }
 
     setIsHeadAdmin(true);
-    await Promise.all([loadAdminRoles(), loadUsers()]);
+    await Promise.all([loadAllRoles(), loadUsers()]);
     setLoading(false);
   };
 
-  const loadAdminRoles = async () => {
+  const loadAllRoles = async () => {
     const { data, error } = await supabase
       .from("user_roles")
       .select("*")
-      .eq("role", "admin")
       .order("created_at", { ascending: true });
-    if (!error && data) setAdminRoles(data);
+    if (error) {
+      console.error("Error loading roles:", error);
+      return;
+    }
+    if (data) {
+      setAdminRoles(data.filter(r => r.role === "admin"));
+      setHeadAdminRoles(data.filter(r => r.role === "head_admin"));
+    }
   };
 
   const loadUsers = async () => {
     const { data, error } = await supabase.rpc("list_all_users");
-    if (!error && data) setAllUsers(data as AppUser[]);
+    if (error) {
+      console.error("Error loading users:", error);
+      return;
+    }
+    if (data) setAllUsers(data as AppUser[]);
   };
 
   const promoteUser = async (user: AppUser) => {
-    if (OWNER_EMAILS.includes(user.email) || adminRoles.some(r => r.email === user.email)) {
-      toast.error("Deze gebruiker is al admin");
+    const allRoleEmails = [...adminRoles, ...headAdminRoles].map(r => r.email);
+    if (OWNER_EMAILS.includes(user.email) || allRoleEmails.includes(user.email)) {
+      toast.error("Deze gebruiker heeft al een rol");
       return;
     }
     setPromoting(user.id);
@@ -98,10 +110,10 @@ export default function HeadAdmin() {
       });
       if (error) throw error;
       toast.success(`${user.email} is nu admin`);
-      await loadAdminRoles();
+      await loadAllRoles();
     } catch (e: any) {
-      console.error(e);
-      toast.error("Kon niet promoveren");
+      console.error("Promote error:", e);
+      toast.error(`Kon niet promoveren: ${e?.message || "onbekende fout"}`);
     } finally {
       setPromoting(null);
     }
@@ -110,11 +122,12 @@ export default function HeadAdmin() {
   const demoteAdmin = async (role: UserRole) => {
     const { error } = await supabase.from("user_roles").delete().eq("id", role.id);
     if (error) {
-      toast.error("Kon admin niet degraderen");
+      console.error("Demote error:", error);
+      toast.error(`Kon admin niet degraderen: ${error.message}`);
       return;
     }
     toast.success(`${role.email} is geen admin meer`);
-    setAdminRoles(prev => prev.filter(r => r.id !== role.id));
+    await loadAllRoles();
   };
 
   if (loading) {
@@ -139,8 +152,8 @@ export default function HeadAdmin() {
     );
   }
 
-  // Get all emails that are already admin, head_admin or owner
-  const excludedEmails = new Set([...OWNER_EMAILS, ...adminRoles.map(r => r.email)]);
+  // Exclude owners, admins, and head admins from the promotable list
+  const excludedEmails = new Set([...OWNER_EMAILS, ...adminRoles.map(r => r.email), ...headAdminRoles.map(r => r.email)]);
   const normalUsers = allUsers.filter(u => !excludedEmails.has(u.email));
   const filteredUsers = searchQuery
     ? normalUsers.filter(u => u.email.toLowerCase().includes(searchQuery.toLowerCase()))
