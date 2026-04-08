@@ -96,6 +96,7 @@ function ReplySection({
   onDeleteReply,
   ownerUserIds,
   adminUserIds,
+  headAdminUserIds,
 }: {
   reviewId: string;
   replies: ReviewReply[];
@@ -104,6 +105,7 @@ function ReplySection({
   onDeleteReply: (id: string) => void;
   ownerUserIds: Set<string>;
   adminUserIds: Set<string>;
+  headAdminUserIds: Set<string>;
 }) {
   const [expanded, setExpanded] = useState(false);
   const [showForm, setShowForm] = useState(false);
