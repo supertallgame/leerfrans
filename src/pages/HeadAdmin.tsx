@@ -44,9 +44,10 @@ export default function HeadAdmin() {
       return;
     }
 
-    // Owners should use /owner instead
+    // Owners also have access
     if (OWNER_EMAILS.includes(session.user.email ?? "")) {
-      setIsHeadAdmin(false);
+      setIsHeadAdmin(true);
+      await Promise.all([loadAdminRoles(), loadUsers()]);
       setLoading(false);
       return;
     }
