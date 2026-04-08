@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Shield, Home, Crown, Users, ShieldPlus, ShieldMinus, Search, Map } from "lucide-react";
+import { Shield, Home, Crown, Users, ShieldPlus, ShieldMinus, Search, Map, ShieldCheck, ArrowUpCircle, ArrowDownCircle } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -28,7 +28,8 @@ export default function Owner() {
   const navigate = useNavigate();
   const [isOwner, setIsOwner] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
-  const [roles, setRoles] = useState<UserRole[]>([]);
+  const [adminRoles, setAdminRoles] = useState<UserRole[]>([]);
+  const [headAdminRoles, setHeadAdminRoles] = useState<UserRole[]>([]);
   const [allUsers, setAllUsers] = useState<AppUser[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [promoting, setPromoting] = useState<string | null>(null);
@@ -54,9 +55,11 @@ export default function Owner() {
     const { data, error } = await supabase
       .from("user_roles")
       .select("*")
-      .eq("role", "admin")
       .order("created_at", { ascending: true });
-    if (!error && data) setRoles(data);
+    if (!error && data) {
+      setAdminRoles(data.filter(r => r.role === "admin"));
+      setHeadAdminRoles(data.filter(r => r.role === "head_admin"));
+    }
   };
 
   const loadUsers = async () => {
@@ -85,9 +88,10 @@ export default function Owner() {
     toast.success(checked ? "Verkenner ingeschakeld" : "Verkenner uitgeschakeld");
   };
 
-  const promoteUser = async (user: AppUser) => {
-    if (OWNER_EMAILS.includes(user.email) || roles.some(r => r.email === user.email)) {
-      toast.error("Deze gebruiker is al admin");
+  const promoteToAdmin = async (user: AppUser) => {
+    const allRoleEmails = [...adminRoles, ...headAdminRoles].map(r => r.email);
+    if (OWNER_EMAILS.includes(user.email) || allRoleEmails.includes(user.email)) {
+      toast.error("Deze gebruiker heeft al een rol");
       return;
     }
     setPromoting(user.id);
@@ -108,6 +112,41 @@ export default function Owner() {
     }
   };
 
+  const promoteToHeadAdmin = async (role: UserRole) => {
+    try {
+      // Delete admin role and insert head_admin role
+      await supabase.from("user_roles").delete().eq("id", role.id);
+      const { error } = await supabase.from("user_roles").insert({
+        user_id: role.user_id,
+        email: role.email,
+        role: "head_admin",
+      });
+      if (error) throw error;
+      toast.success(`${role.email} is nu head admin`);
+      await loadRoles();
+    } catch (e: any) {
+      console.error(e);
+      toast.error("Kon niet promoveren tot head admin");
+    }
+  };
+
+  const demoteHeadAdmin = async (role: UserRole) => {
+    try {
+      await supabase.from("user_roles").delete().eq("id", role.id);
+      const { error } = await supabase.from("user_roles").insert({
+        user_id: role.user_id,
+        email: role.email,
+        role: "admin",
+      });
+      if (error) throw error;
+      toast.success(`${role.email} is nu weer gewone admin`);
+      await loadRoles();
+    } catch (e: any) {
+      console.error(e);
+      toast.error("Kon niet degraderen");
+    }
+  };
+
   const demoteAdmin = async (role: UserRole) => {
     const { error } = await supabase.from("user_roles").delete().eq("id", role.id);
     if (error) {
@@ -115,7 +154,7 @@ export default function Owner() {
       return;
     }
     toast.success(`${role.email} is geen admin meer`);
-    setRoles(prev => prev.filter(r => r.id !== role.id));
+    await loadRoles();
   };
 
   if (loading) {
@@ -140,8 +179,8 @@ export default function Owner() {
     );
   }
 
-  const adminEmails = new Set([...OWNER_EMAILS, ...roles.map(r => r.email)]);
-  const normalUsers = allUsers.filter(u => !adminEmails.has(u.email));
+  const allRoleEmails = new Set([...OWNER_EMAILS, ...adminRoles.map(r => r.email), ...headAdminRoles.map(r => r.email)]);
+  const normalUsers = allUsers.filter(u => !allRoleEmails.has(u.email));
   const filteredUsers = searchQuery
     ? normalUsers.filter(u => u.email.toLowerCase().includes(searchQuery.toLowerCase()))
     : normalUsers;
@@ -181,32 +220,86 @@ export default function Owner() {
           </CardContent>
         </Card>
 
+        {/* Head Admins */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <ShieldCheck className="h-5 w-5 text-primary" /> Head Admins
+              <span className="text-sm font-normal text-muted-foreground">({headAdminRoles.length})</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {headAdminRoles.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Nog geen head admins. Promoveer admins hieronder via de ↑ knop.</p>
+            ) : (
+              headAdminRoles.map((role) => (
+                <div key={role.id} className="flex items-center justify-between rounded-lg border p-3">
+                  <div className="flex items-center gap-2">
+                    <ShieldCheck className="h-4 w-4 text-primary" />
+                    <span className="text-sm font-medium">{role.email}</span>
+                  </div>
+                  <div className="flex gap-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-muted-foreground hover:text-foreground gap-1"
+                      onClick={() => demoteHeadAdmin(role)}
+                      title="Degraderen naar admin"
+                    >
+                      <ArrowDownCircle className="h-4 w-4" /> Naar admin
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-destructive hover:text-destructive hover:bg-destructive/10 gap-1"
+                      onClick={() => demoteAdmin(role)}
+                    >
+                      <ShieldMinus className="h-4 w-4" /> Verwijderen
+                    </Button>
+                  </div>
+                </div>
+              ))
+            )}
+          </CardContent>
+        </Card>
+
         {/* Admins */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
               <Shield className="h-5 w-5 text-primary" /> Admins
-              <span className="text-sm font-normal text-muted-foreground">({roles.length})</span>
+              <span className="text-sm font-normal text-muted-foreground">({adminRoles.length})</span>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
-            {roles.length === 0 ? (
+            {adminRoles.length === 0 ? (
               <p className="text-sm text-muted-foreground">Nog geen admins. Promoveer gebruikers hieronder.</p>
             ) : (
-              roles.map((role) => (
+              adminRoles.map((role) => (
                 <div key={role.id} className="flex items-center justify-between rounded-lg border p-3">
                   <div className="flex items-center gap-2">
                     <Shield className="h-4 w-4 text-primary" />
                     <span className="text-sm font-medium">{role.email}</span>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-destructive hover:text-destructive hover:bg-destructive/10 gap-1"
-                    onClick={() => demoteAdmin(role)}
-                  >
-                    <ShieldMinus className="h-4 w-4" /> Degraderen
-                  </Button>
+                  <div className="flex gap-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-primary hover:text-primary hover:bg-primary/10 gap-1"
+                      onClick={() => promoteToHeadAdmin(role)}
+                      title="Promoveren naar head admin"
+                    >
+                      <ArrowUpCircle className="h-4 w-4" /> Head Admin
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-destructive hover:text-destructive hover:bg-destructive/10 gap-1"
+                      onClick={() => demoteAdmin(role)}
+                    >
+                      <ShieldMinus className="h-4 w-4" /> Degraderen
+                    </Button>
+                  </div>
                 </div>
               ))
             )}
@@ -266,7 +359,7 @@ export default function Owner() {
                       size="sm"
                       className="gap-1 shrink-0 ml-2"
                       disabled={promoting === user.id}
-                      onClick={() => promoteUser(user)}
+                      onClick={() => promoteToAdmin(user)}
                     >
                       <ShieldPlus className="h-4 w-4" />
                       {promoting === user.id ? "Bezig..." : "Promoveren"}
