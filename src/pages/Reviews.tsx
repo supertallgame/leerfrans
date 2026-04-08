@@ -35,6 +35,10 @@ function OwnerBadge() {
   return <span className="text-[10px] font-bold text-red-500 bg-red-500/10 px-1.5 py-0.5 rounded-full">Owner</span>;
 }
 
+function AdminBadge() {
+  return <span className="text-[10px] font-bold text-blue-500 bg-blue-500/10 px-1.5 py-0.5 rounded-full">Admin</span>;
+}
+
 interface Review {
   id: string;
   display_name: string;
@@ -87,6 +91,7 @@ function ReplySection({
   onReplyAdded,
   onDeleteReply,
   ownerUserIds,
+  adminUserIds,
 }: {
   reviewId: string;
   replies: ReviewReply[];
@@ -94,6 +99,7 @@ function ReplySection({
   onReplyAdded: (reply: ReviewReply) => void;
   onDeleteReply: (id: string) => void;
   ownerUserIds: Set<string>;
+  adminUserIds: Set<string>;
 }) {
   const [expanded, setExpanded] = useState(false);
   const [showForm, setShowForm] = useState(false);
@@ -230,7 +236,7 @@ function ReplySection({
           {reviewReplies.map((reply) => (
             <div key={reply.id} className="space-y-0.5">
               <div className="flex items-center justify-between">
-                <span className="font-medium text-xs flex items-center gap-1">{reply.display_name} {reply.user_id && ownerUserIds.has(reply.user_id) && <OwnerBadge />}</span>
+                <span className="font-medium text-xs flex items-center gap-1">{reply.display_name} {reply.user_id && ownerUserIds.has(reply.user_id) && <OwnerBadge />}{reply.user_id && !ownerUserIds.has(reply.user_id) && adminUserIds.has(reply.user_id) && <AdminBadge />}</span>
                 <div className="flex items-center gap-1">
                   <span className="text-[10px] text-muted-foreground">{timeAgo(reply.created_at)}</span>
                   {isOperator && (
@@ -268,6 +274,7 @@ export default function Reviews() {
   const [sortBy, setSortBy] = useState<"newest" | "rating" | "likes">("newest");
   const [filterRating, setFilterRating] = useState<number | null>(null);
   const [ownerUserIds, setOwnerUserIds] = useState<Set<string>>(new Set());
+  const [adminUserIds, setAdminUserIds] = useState<Set<string>>(new Set());
   const [voteCounts, setVoteCounts] = useState<VoteCounts>({});
   const [myVotes, setMyVotes] = useState<MyVotes>({});
   const [animatingVote, setAnimatingVote] = useState<string | null>(null);
@@ -340,6 +347,19 @@ export default function Reviews() {
       const ids = new Set<string>();
       results.forEach((r) => { if (r.data) ids.add(r.data as string); });
       setOwnerUserIds(ids);
+    });
+
+    // Fetch admin user IDs
+    supabase.rpc("get_admin_emails").then(({ data }) => {
+      if (!data) return;
+      const adminEmails = (data as string[]).filter(e => !OWNER_EMAILS.includes(e));
+      Promise.all(
+        adminEmails.map((email) => supabase.rpc("find_user_by_email", { p_email: email }))
+      ).then((results) => {
+        const ids = new Set<string>();
+        results.forEach((r) => { if (r.data) ids.add(r.data as string); });
+        setAdminUserIds(ids);
+      });
     });
 
     const refetchAll = async () => {
@@ -509,7 +529,7 @@ export default function Reviews() {
                   <div className="flex gap-4">
                     <div className="flex-1 space-y-2">
                       <div className="flex items-center justify-between">
-                        <span className="font-semibold text-sm flex items-center gap-1.5">{review.display_name} {review.user_id && ownerUserIds.has(review.user_id) && <OwnerBadge />}</span>
+                        <span className="font-semibold text-sm flex items-center gap-1.5">{review.display_name} {review.user_id && ownerUserIds.has(review.user_id) && <OwnerBadge />}{review.user_id && !ownerUserIds.has(review.user_id) && adminUserIds.has(review.user_id) && <AdminBadge />}</span>
                         <div className="flex items-center gap-2">
                           <span className="text-xs text-muted-foreground">
                             {timeAgo(review.created_at)}
@@ -553,6 +573,7 @@ export default function Reviews() {
                         onReplyAdded={(reply) => setReplies((prev) => [...prev, reply])}
                         onDeleteReply={(id) => setDeleteReplyId(id)}
                         ownerUserIds={ownerUserIds}
+                        adminUserIds={adminUserIds}
                       />
                     </div>
                     {review.image_url && (
