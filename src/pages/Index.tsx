@@ -131,6 +131,11 @@ const Index = () => {
         { event: "*", schema: "public", table: "admin_settings", filter: "key=eq.disabled_subjects" },
         () => fetchDisabled()
       )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "admin_settings", filter: "key=eq.explorer_enabled" },
+        () => fetchExplorer()
+      )
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
