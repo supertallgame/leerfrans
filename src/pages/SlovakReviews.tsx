@@ -171,6 +171,7 @@ function ReplySection({
   translatedMessages,
   isTranslating,
   ownerUserIds,
+  adminUserIds,
 }: {
   reviewId: string;
   replies: ReviewReply[];
@@ -180,6 +181,7 @@ function ReplySection({
   translatedMessages: Record<string, string>;
   isTranslating: boolean;
   ownerUserIds: Set<string>;
+  adminUserIds: Set<string>;
 }) {
   const [expanded, setExpanded] = useState(false);
   const [showForm, setShowForm] = useState(false);
