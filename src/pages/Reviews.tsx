@@ -26,6 +26,13 @@ interface ReviewReply {
   display_name: string;
   message: string;
   created_at: string;
+  user_id?: string | null;
+}
+
+const OWNER_EMAILS = ["brankovantland@gmail.com", "branko18vantland@gmail.com"];
+
+function OwnerBadge() {
+  return <span className="text-[10px] font-bold text-red-500 bg-red-500/10 px-1.5 py-0.5 rounded-full">Owner</span>;
 }
 
 interface Review {
@@ -79,12 +86,14 @@ function ReplySection({
   isOperator,
   onReplyAdded,
   onDeleteReply,
+  ownerUserIds,
 }: {
   reviewId: string;
   replies: ReviewReply[];
   isOperator: boolean;
   onReplyAdded: (reply: ReviewReply) => void;
   onDeleteReply: (id: string) => void;
+  ownerUserIds: Set<string>;
 }) {
   const [expanded, setExpanded] = useState(false);
   const [showForm, setShowForm] = useState(false);
@@ -221,7 +230,7 @@ function ReplySection({
           {reviewReplies.map((reply) => (
             <div key={reply.id} className="space-y-0.5">
               <div className="flex items-center justify-between">
-                <span className="font-medium text-xs">{reply.display_name}</span>
+                <span className="font-medium text-xs flex items-center gap-1">{reply.display_name} {reply.user_id && ownerUserIds.has(reply.user_id) && <OwnerBadge />}</span>
                 <div className="flex items-center gap-1">
                   <span className="text-[10px] text-muted-foreground">{timeAgo(reply.created_at)}</span>
                   {isOperator && (
@@ -258,6 +267,7 @@ export default function Reviews() {
   const [deleteReplyId, setDeleteReplyId] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<"newest" | "rating" | "likes">("newest");
   const [filterRating, setFilterRating] = useState<number | null>(null);
+  const [ownerUserIds, setOwnerUserIds] = useState<Set<string>>(new Set());
   const [voteCounts, setVoteCounts] = useState<VoteCounts>({});
   const [myVotes, setMyVotes] = useState<MyVotes>({});
   const [animatingVote, setAnimatingVote] = useState<string | null>(null);
@@ -321,6 +331,15 @@ export default function Reviews() {
       setIsOperator(OPERATOR_EMAILS.includes(session?.user?.email ?? ""));
       setCurrentUserId(uid);
       if (uid) fetchVotes(uid);
+    });
+
+    // Fetch owner user IDs
+    Promise.all(
+      OWNER_EMAILS.map((email) => supabase.rpc("find_user_by_email", { p_email: email }))
+    ).then((results) => {
+      const ids = new Set<string>();
+      results.forEach((r) => { if (r.data) ids.add(r.data as string); });
+      setOwnerUserIds(ids);
     });
 
     const refetchAll = async () => {
@@ -490,7 +509,7 @@ export default function Reviews() {
                   <div className="flex gap-4">
                     <div className="flex-1 space-y-2">
                       <div className="flex items-center justify-between">
-                        <span className="font-semibold text-sm">{review.display_name}</span>
+                        <span className="font-semibold text-sm flex items-center gap-1.5">{review.display_name} {review.user_id && ownerUserIds.has(review.user_id) && <OwnerBadge />}</span>
                         <div className="flex items-center gap-2">
                           <span className="text-xs text-muted-foreground">
                             {timeAgo(review.created_at)}
@@ -533,6 +552,7 @@ export default function Reviews() {
                         isOperator={isOperator}
                         onReplyAdded={(reply) => setReplies((prev) => [...prev, reply])}
                         onDeleteReply={(id) => setDeleteReplyId(id)}
+                        ownerUserIds={ownerUserIds}
                       />
                     </div>
                     {review.image_url && (
