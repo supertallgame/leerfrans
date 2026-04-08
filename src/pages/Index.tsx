@@ -3,7 +3,7 @@ import { useThemeSync } from "@/hooks/use-theme-sync";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { BookOpen, Brain, Puzzle, Keyboard, Users, PenTool, MessageSquare, Bot, Settings, Star, Lock, BookMarked, FlaskConical, CheckCircle, Layers, Microscope, Bone, Clock, BookType, Map } from "lucide-react";
+import { BookOpen, Brain, Puzzle, Keyboard, Users, PenTool, MessageSquare, Bot, Settings, Star, Lock, BookMarked, FlaskConical, CheckCircle, Layers, Microscope, Bone, Clock, BookType, Map, ShieldCheck } from "lucide-react";
 import { FlagNL, FlagFR } from "@/components/Flags";
 import { getChaptersForLanguage, getChapter, getForeignLabel, getForeignLabelNative, Language } from "@/data/vocabulary";
 import { useChapter } from "@/contexts/ChapterContext";
@@ -94,6 +94,7 @@ const Index = () => {
   const [authLoading, setAuthLoading] = useState(true);
   const [disabledSubjects, setDisabledSubjects] = useState<string[]>([]);
   const [explorerEnabled, setExplorerEnabled] = useState(true);
+  const [isHeadAdmin, setIsHeadAdmin] = useState(false);
 
   const chaptersForLanguage = getChaptersForLanguage(language);
   const foreignLabel = getForeignLabel(language);
@@ -156,13 +157,26 @@ const Index = () => {
   }, [disabledSubjects, language]);
 
   useEffect(() => {
+    const checkHeadAdmin = async (userId: string | undefined) => {
+      if (!userId) { setIsHeadAdmin(false); return; }
+      const OWNER_EMAILS = ["brankovantland@gmail.com", "branko18vantland@gmail.com"];
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user?.email && OWNER_EMAILS.includes(session.user.email)) {
+        setIsHeadAdmin(true);
+        return;
+      }
+      const { data } = await supabase.from("user_roles").select("role").eq("user_id", userId).eq("role", "head_admin") as any;
+      setIsHeadAdmin(data && data.length > 0);
+    };
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
       setAuthLoading(false);
+      checkHeadAdmin(session?.user?.id);
     });
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
       setAuthLoading(false);
+      checkHeadAdmin(session?.user?.id);
     });
     return () => subscription.unsubscribe();
   }, []);
@@ -232,6 +246,17 @@ const Index = () => {
             )}
           </div>
           <div className="flex items-center gap-0.5">
+            {isHeadAdmin && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-9 w-9"
+                onClick={() => navigate("/headadmin")}
+                aria-label="Head Admin"
+              >
+                <ShieldCheck className="h-5 w-5" />
+              </Button>
+            )}
             <Button
               variant="ghost"
               size="icon"
