@@ -76,6 +76,7 @@ function getCellsForWord(pw: PlacedWord): string[] {
 
 export default function Woordenzoeker() {
   const navigate = useNavigate();
+  useThemeSync();
   const [words, setWords] = useState<string[]>(["SCHOOL", "BOEK", "LERAAR", "KLAS", "LEREN"]);
   const [newWord, setNewWord] = useState("");
   const [gridSize, setGridSize] = useState(14);

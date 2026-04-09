@@ -150,6 +150,7 @@ function scorePlace(grid: (string | null)[][], word: string, row: number, col: n
 
 export default function Kruiswoordpuzzel() {
   const navigate = useNavigate();
+  useThemeSync();
   const [entries, setEntries] = useState<WordEntry[]>([
     { word: "SCHOOL", clue: "Gebouw waar je leert" },
     { word: "BOEK", clue: "Je leest erin" },
