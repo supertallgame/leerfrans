@@ -27,6 +27,7 @@ interface AppUser {
 
 export default function Owner() {
   const navigate = useNavigate();
+  useThemeSync();
   const [isOwner, setIsOwner] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
   const [adminRoles, setAdminRoles] = useState<UserRole[]>([]);

@@ -26,6 +26,7 @@ interface AppUser {
 
 export default function HeadAdmin() {
   const navigate = useNavigate();
+  useThemeSync();
   const [isHeadAdmin, setIsHeadAdmin] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
   const [adminRoles, setAdminRoles] = useState<UserRole[]>([]);

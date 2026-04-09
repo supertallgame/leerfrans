@@ -87,6 +87,7 @@ const ALL_SUBJECTS: { id: Language; label: string; icon: React.ReactNode }[] = [
 
 export default function Admin() {
   const navigate = useNavigate();
+  useThemeSync();
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null); // null = loading
   const [disabledSubjects, setDisabledSubjects] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
