@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useThemeSync } from "@/hooks/use-theme-sync";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,6 +27,7 @@ interface AppUser {
 
 export default function Owner() {
   const navigate = useNavigate();
+  useThemeSync();
   const [isOwner, setIsOwner] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
   const [adminRoles, setAdminRoles] = useState<UserRole[]>([]);

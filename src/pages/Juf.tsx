@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
+import { useThemeSync } from "@/hooks/use-theme-sync";
 import { supabase } from "@/integrations/supabase/client";
 import { getChaptersForLanguage, Language } from "@/data/vocabulary";
 import { Card, CardContent } from "@/components/ui/card";
@@ -89,6 +90,7 @@ function StatCard({ label, value, compareValue, color }: { label: string; value:
 
 const Juf = () => {
   const navigate = useNavigate();
+  useThemeSync();
   const [authorized, setAuthorized] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<AnalysisResult | null>(null);

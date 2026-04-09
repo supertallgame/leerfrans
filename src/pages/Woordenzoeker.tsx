@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from "react";
+import { useThemeSync } from "@/hooks/use-theme-sync";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -75,6 +76,7 @@ function getCellsForWord(pw: PlacedWord): string[] {
 
 export default function Woordenzoeker() {
   const navigate = useNavigate();
+  useThemeSync();
   const [words, setWords] = useState<string[]>(["SCHOOL", "BOEK", "LERAAR", "KLAS", "LEREN"]);
   const [newWord, setNewWord] = useState("");
   const [gridSize, setGridSize] = useState(14);

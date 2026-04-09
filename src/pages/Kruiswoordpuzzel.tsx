@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef, useEffect, useMemo } from "react";
+import { useThemeSync } from "@/hooks/use-theme-sync";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -149,6 +150,7 @@ function scorePlace(grid: (string | null)[][], word: string, row: number, col: n
 
 export default function Kruiswoordpuzzel() {
   const navigate = useNavigate();
+  useThemeSync();
   const [entries, setEntries] = useState<WordEntry[]>([
     { word: "SCHOOL", clue: "Gebouw waar je leert" },
     { word: "BOEK", clue: "Je leest erin" },

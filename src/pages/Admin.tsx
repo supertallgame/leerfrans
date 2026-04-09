@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useThemeSync } from "@/hooks/use-theme-sync";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -86,6 +87,7 @@ const ALL_SUBJECTS: { id: Language; label: string; icon: React.ReactNode }[] = [
 
 export default function Admin() {
   const navigate = useNavigate();
+  useThemeSync();
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null); // null = loading
   const [disabledSubjects, setDisabledSubjects] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
