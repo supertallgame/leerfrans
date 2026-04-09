@@ -90,6 +90,7 @@ function StatCard({ label, value, compareValue, color }: { label: string; value:
 
 const Juf = () => {
   const navigate = useNavigate();
+  useThemeSync();
   const [authorized, setAuthorized] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<AnalysisResult | null>(null);
