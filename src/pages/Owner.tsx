@@ -443,6 +443,187 @@ export default function Owner() {
           </CardContent>
         </Card>
 
+        {/* Poll Management */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <BarChart3 className="h-5 w-5 text-primary" /> Polls
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* Create new poll */}
+            <div className="space-y-2 rounded-lg border p-3">
+              <p className="text-sm font-medium">Nieuwe poll</p>
+              <Input
+                placeholder="Vraag (bijv. Wanneer komt de volgende update?)"
+                value={newPollQuestion}
+                onChange={(e) => setNewPollQuestion(e.target.value)}
+              />
+              {newPollOptions.map((opt, i) => (
+                <div key={i} className="flex gap-2">
+                  <Input
+                    placeholder={`Optie ${i + 1}`}
+                    value={opt}
+                    onChange={(e) => {
+                      const updated = [...newPollOptions];
+                      updated[i] = e.target.value;
+                      setNewPollOptions(updated);
+                    }}
+                  />
+                  {newPollOptions.length > 2 && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="shrink-0"
+                      onClick={() => setNewPollOptions(newPollOptions.filter((_, j) => j !== i))}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+              ))}
+              <div className="flex gap-2">
+                {newPollOptions.length < 6 && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setNewPollOptions([...newPollOptions, ""])}
+                    className="gap-1"
+                  >
+                    <Plus className="h-3.5 w-3.5" /> Optie
+                  </Button>
+                )}
+                <Button
+                  size="sm"
+                  onClick={createPoll}
+                  disabled={creatingPoll}
+                  className="gap-1"
+                >
+                  <BarChart3 className="h-3.5 w-3.5" /> {creatingPoll ? "Bezig..." : "Aanmaken"}
+                </Button>
+              </div>
+            </div>
+
+            {/* Existing polls */}
+            {polls.map((poll) => (
+              <div key={poll.id} className="rounded-lg border p-3 space-y-2">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-medium">{poll.question}</p>
+                  <span className={`text-xs px-2 py-0.5 rounded-full ${poll.is_active ? "bg-[hsl(var(--success))]/10 text-[hsl(var(--success))]" : "bg-muted text-muted-foreground"}`}>
+                    {poll.is_active ? "Actief" : "Gestopt"}
+                  </span>
+                </div>
+                <div className="flex flex-wrap gap-1">
+                  {(poll.options as string[]).map((opt: string) => (
+                    <span key={opt} className="text-xs bg-muted px-2 py-1 rounded">{opt}</span>
+                  ))}
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => togglePoll(poll.id, !poll.is_active)}
+                    className="gap-1"
+                  >
+                    {poll.is_active ? "Stoppen" : "Activeren"}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-destructive hover:text-destructive hover:bg-destructive/10 gap-1"
+                    onClick={() => deletePoll(poll.id)}
+                  >
+                    <Trash2 className="h-3.5 w-3.5" /> Verwijderen
+                  </Button>
+                </div>
+              </div>
+            ))}
+            {polls.length === 0 && (
+              <p className="text-sm text-muted-foreground">Nog geen polls aangemaakt.</p>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Announcement Management */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <Megaphone className="h-5 w-5 text-primary" /> Update-berichten
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* Create new announcement */}
+            <div className="space-y-2 rounded-lg border p-3">
+              <p className="text-sm font-medium">Nieuw bericht</p>
+              <Textarea
+                placeholder="Typ je update-bericht..."
+                value={newAnnouncementMsg}
+                onChange={(e) => setNewAnnouncementMsg(e.target.value)}
+                rows={3}
+              />
+              <div className="flex items-center gap-2">
+                <label className="flex items-center gap-1.5 text-xs text-muted-foreground cursor-pointer hover:text-foreground transition-colors">
+                  <ImageIcon className="h-3.5 w-3.5" />
+                  {newAnnouncementImg ? newAnnouncementImg.name : "Afbeelding (optioneel)"}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => setNewAnnouncementImg(e.target.files?.[0] ?? null)}
+                  />
+                </label>
+                {newAnnouncementImg && (
+                  <Button variant="ghost" size="sm" className="h-6 px-1" onClick={() => setNewAnnouncementImg(null)}>
+                    <X className="h-3 w-3" />
+                  </Button>
+                )}
+              </div>
+              <Button
+                size="sm"
+                onClick={createAnnouncement}
+                disabled={creatingAnnouncement}
+                className="gap-1"
+              >
+                <Megaphone className="h-3.5 w-3.5" /> {creatingAnnouncement ? "Bezig..." : "Plaatsen"}
+              </Button>
+            </div>
+
+            {/* Existing announcements */}
+            {announcements.map((ann) => (
+              <div key={ann.id} className="rounded-lg border p-3 space-y-2">
+                <div className="flex items-start justify-between gap-2">
+                  <p className="text-sm">{ann.message}</p>
+                  <span className={`text-xs px-2 py-0.5 rounded-full shrink-0 ${ann.is_active ? "bg-[hsl(var(--success))]/10 text-[hsl(var(--success))]" : "bg-muted text-muted-foreground"}`}>
+                    {ann.is_active ? "Actief" : "Verborgen"}
+                  </span>
+                </div>
+                {ann.image_url && (
+                  <img src={ann.image_url} alt="Update" className="rounded-md max-h-24 w-auto object-cover" />
+                )}
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => toggleAnnouncement(ann.id, !ann.is_active)}
+                    className="gap-1"
+                  >
+                    {ann.is_active ? "Verbergen" : "Activeren"}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-destructive hover:text-destructive hover:bg-destructive/10 gap-1"
+                    onClick={() => deleteAnnouncement(ann.id)}
+                  >
+                    <Trash2 className="h-3.5 w-3.5" /> Verwijderen
+                  </Button>
+                </div>
+              </div>
+            ))}
+            {announcements.length === 0 && (
+              <p className="text-sm text-muted-foreground">Nog geen berichten geplaatst.</p>
+            )}
+          </CardContent>
         {/* Normal users */}
         <Card>
           <CardHeader>
