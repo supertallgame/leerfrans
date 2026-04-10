@@ -19,6 +19,7 @@ import {
 import AuthDialog from "@/components/AuthDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import UpdateBanner from "@/components/UpdateBanner";
 
 const Flashcards = lazy(() => import("@/components/games/Flashcards"));
 const MultipleChoice = lazy(() => import("@/components/games/MultipleChoice"));
@@ -312,6 +313,8 @@ const Index = () => {
             )}
           </div>
         </div>
+
+        <UpdateBanner />
 
         <div className="grid grid-cols-2 sm:grid-cols-2 gap-2.5 md:gap-4 w-full">
           {games.map((game) => (
