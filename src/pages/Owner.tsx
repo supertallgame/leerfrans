@@ -624,6 +624,8 @@ export default function Owner() {
               <p className="text-sm text-muted-foreground">Nog geen berichten geplaatst.</p>
             )}
           </CardContent>
+        </Card>
+
         {/* Normal users */}
         <Card>
           <CardHeader>
