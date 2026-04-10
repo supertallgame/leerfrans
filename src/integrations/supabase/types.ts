@@ -292,6 +292,38 @@ export type Database = {
         }
         Relationships: []
       }
+      poll_votes: {
+        Row: {
+          created_at: string
+          id: string
+          poll_id: string
+          selected_option: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          poll_id: string
+          selected_option: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          poll_id?: string
+          selected_option?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "poll_votes_poll_id_fkey"
+            columns: ["poll_id"]
+            isOneToOne: false
+            referencedRelation: "update_polls"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       review_replies: {
         Row: {
           created_at: string
@@ -406,6 +438,60 @@ export type Database = {
           rating?: number
           user_email?: string | null
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      update_announcements: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          image_url: string | null
+          is_active: boolean
+          message: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          message: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          message?: string
+        }
+        Relationships: []
+      }
+      update_polls: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          is_active: boolean
+          options: Json
+          question: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          is_active?: boolean
+          options?: Json
+          question: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          is_active?: boolean
+          options?: Json
+          question?: string
         }
         Relationships: []
       }
