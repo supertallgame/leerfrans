@@ -1,32 +1,37 @@
 
 
-## Analyse
+## Plan: Poll-systeem + Update-banner + Skeleton Score Bug
 
-**Hoofdprobleem:** Je account is momenteel ingesteld met auto-confirm, waardoor verificatie-e-mails worden overgeslagen. De backend bevestigt accounts automatisch bij registratie (je account toont `email_confirmed_at` op exact dezelfde seconde als `created_at`).
+### 1. Skeleton Score Bug Fix
+De score-teller in het skelet-spel lijkt correct geïmplementeerd (`Object.values(results).filter(Boolean).length`). Het probleem kan zijn dat de vergelijking te strikt is, waardoor correcte antwoorden niet worden herkend. Fix: de `normalize`-functie verbeteren en een visuele bevestiging toevoegen (kort groen/rood kleuren van de score na elk antwoord) zodat het duidelijk is dat de score bijwerkt.
 
-**Code-status:**
-- `AuthDialog.tsx`: Signup en wachtwoord-reset code is correct — roept de juiste backend-methodes aan
-- `ResetPassword.tsx`: Reset-pagina en route (`/reset-password`) zijn correct ingesteld
-- Geen eigen e-maildomein geconfigureerd — standaard systeemmails worden gebruikt
+### 2. Poll-systeem
+**Database:**
+- Nieuwe tabel `update_polls` (id, question, options jsonb, created_by, is_active, created_at)
+- Nieuwe tabel `poll_votes` (id, poll_id, user_id, selected_option, created_at) met unique constraint op (poll_id, user_id)
+- RLS: iedereen kan actieve polls lezen, ingelogde users kunnen stemmen, admins/owners kunnen polls aanmaken/verwijderen
 
-## Plan
+**UI:**
+- In `SettingsDialog`: nieuwe knop "Stem op volgende update" die opent naar een poll-pagina/dialog
+- Poll toont de vraag + opties als knoppen, na stemmen zie je de resultaten (staafdiagram)
+- In Owner/Admin dashboard: sectie om polls te maken (vraag + opties invoeren) en te verwijderen/stoppen
 
-### Stap 1: Auto-confirm uitschakelen
-De backend-instelling voor automatische e-mailbevestiging moet worden uitgeschakeld. Dit zorgt ervoor dat:
-- Bij **registratie** een verificatie-e-mail wordt verstuurd
-- De gebruiker pas kan inloggen na bevestiging
+### 3. Update-banner op Homepage
+**Database:**
+- Nieuwe tabel `update_announcements` (id, message text, image_url text nullable, is_active boolean, created_by uuid, created_at)
+- RLS: iedereen kan actieve announcements lezen, owners kunnen CRUD
 
-### Stap 2: Wachtwoord-reset flow testen
-De wachtwoord-reset code gebruikt `supabase.auth.resetPasswordForEmail` met redirect naar `/reset-password` — dit is correct. Na stap 1 zou de reset-e-mail ook via de standaard e-mailservice verstuurd moeten worden.
+**Storage:**
+- Gebruik bestaande of nieuwe storage bucket voor announcement-afbeeldingen
 
-### Stap 3: Gebruikersfeedback verbeteren
-Een kleine verbetering: na het aanvragen van een wachtwoord-reset, de gebruiker expliciet informeren dat de e-mail in de **spam/ongewenste map** kan belanden (aangezien er geen eigen domein is).
+**UI:**
+- Op de homepage linksboven (desktop): compact kaartje met update-bericht + optionele afbeelding
+- Op mobiel: boven de game-knoppen als volledige breedte banner
+- In Owner dashboard: nieuwe sectie met tekstveld voor bericht, optionele afbeelding-upload, en aan/uit toggle
 
-### Belangrijk om te weten
-- Zonder eigen e-maildomein komen standaard systeemmails soms in de **spam-map** terecht. Dit is normaal gedrag.
-- De e-mails worden verstuurd vanuit een generiek adres — niet vanuit je eigen merk.
-
-### Technisch detail
-- Gebruik `configure_auth` tool om `auto_confirm_email: false` in te stellen
-- Kleine tekstwijziging in `AuthDialog.tsx` bij de forgot-password flow om spam-waarschuwing toe te voegen
+### Technische details
+- 2 database migraties (polls + announcements tabellen met RLS)
+- Nieuwe componenten: `PollDialog.tsx`, `UpdateBanner.tsx`
+- Aanpassingen aan: `SettingsDialog.tsx` (poll-knop), `Index.tsx` (banner), `Owner.tsx` (poll/banner beheer)
+- `SkeletonLabel.tsx`: verbeterde normalisatie + visuele score feedback
 
