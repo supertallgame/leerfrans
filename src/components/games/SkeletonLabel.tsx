@@ -75,7 +75,8 @@ export default function SkeletonLabel({ onBack }: Props) {
   }, [currentIndex, finished]);
 
   const normalize = (s: string) =>
-    s.toLowerCase().trim().replace(/[- ]/g, "").replace(/ë/g, "e").replace(/ï/g, "i");
+    s.toLowerCase().trim().replace(/[- ]/g, "").replace(/ë/g, "e").replace(/ï/g, "i").replace(/['']/g, "").replace(/\s+/g, "");
+  const [lastResult, setLastResult] = useState<"correct" | "wrong" | null>(null);
 
   const handleSubmit = () => {
     if (!currentBone || !inputValue.trim()) return;
@@ -86,6 +87,9 @@ export default function SkeletonLabel({ onBack }: Props) {
 
     if (isCorrect) playCorrect();
     else playWrong();
+
+    setLastResult(isCorrect ? "correct" : "wrong");
+    setTimeout(() => setLastResult(null), 800);
 
     setInputValue("");
     setHint("");
@@ -181,7 +185,10 @@ export default function SkeletonLabel({ onBack }: Props) {
         <Button variant="ghost" onClick={onBack} className="gap-2 text-sm shrink-0">
           <ArrowLeft className="h-4 w-4" /> {i.back}
         </Button>
-        <p className="text-xs text-muted-foreground whitespace-nowrap">
+        <p className={`text-xs whitespace-nowrap transition-colors duration-300 ${
+          lastResult === "correct" ? "text-[hsl(var(--success))] font-bold" :
+          lastResult === "wrong" ? "text-destructive font-bold" : "text-muted-foreground"
+        }`}>
           {answered}/{total} — {i.score}: {score} — {i.skip}: {skipped}
         </p>
       </div>
