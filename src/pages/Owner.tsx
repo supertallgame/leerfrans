@@ -4,7 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Shield, Home, Crown, Users, ShieldPlus, ShieldMinus, Search, Map, ShieldCheck, ArrowUpCircle, ArrowDownCircle } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Shield, Home, Crown, Users, ShieldPlus, ShieldMinus, Search, Map, ShieldCheck, ArrowUpCircle, ArrowDownCircle, BarChart3, Megaphone, Plus, Trash2, X, ImageIcon } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -37,6 +38,18 @@ export default function Owner() {
   const [promoting, setPromoting] = useState<string | null>(null);
   const [explorerEnabled, setExplorerEnabled] = useState(true);
 
+  // Poll management
+  const [polls, setPolls] = useState<any[]>([]);
+  const [newPollQuestion, setNewPollQuestion] = useState("");
+  const [newPollOptions, setNewPollOptions] = useState(["", ""]);
+  const [creatingPoll, setCreatingPoll] = useState(false);
+
+  // Announcement management
+  const [announcements, setAnnouncements] = useState<any[]>([]);
+  const [newAnnouncementMsg, setNewAnnouncementMsg] = useState("");
+  const [newAnnouncementImg, setNewAnnouncementImg] = useState<File | null>(null);
+  const [creatingAnnouncement, setCreatingAnnouncement] = useState(false);
+
   useEffect(() => {
     checkOwner();
   }, []);
@@ -49,8 +62,112 @@ export default function Owner() {
       return;
     }
     setIsOwner(true);
-    await Promise.all([loadRoles(), loadUsers(), loadExplorerSetting()]);
+    await Promise.all([loadRoles(), loadUsers(), loadExplorerSetting(), loadPolls(), loadAnnouncements()]);
     setLoading(false);
+  };
+
+  const loadPolls = async () => {
+    const { data } = await supabase
+      .from("update_polls")
+      .select("*")
+      .order("created_at", { ascending: false });
+    if (data) setPolls(data);
+  };
+
+  const loadAnnouncements = async () => {
+    const { data } = await supabase
+      .from("update_announcements")
+      .select("*")
+      .order("created_at", { ascending: false });
+    if (data) setAnnouncements(data);
+  };
+
+  const createPoll = async () => {
+    const opts = newPollOptions.filter(o => o.trim());
+    if (!newPollQuestion.trim() || opts.length < 2) {
+      toast.error("Vul een vraag en minstens 2 opties in");
+      return;
+    }
+    setCreatingPoll(true);
+    const { data: { session } } = await supabase.auth.getSession();
+    const { error } = await supabase.from("update_polls").insert({
+      question: newPollQuestion.trim(),
+      options: opts as any,
+      created_by: session!.user.id,
+    });
+    if (error) {
+      toast.error("Kon poll niet aanmaken");
+    } else {
+      toast.success("Poll aangemaakt!");
+      setNewPollQuestion("");
+      setNewPollOptions(["", ""]);
+      await loadPolls();
+    }
+    setCreatingPoll(false);
+  };
+
+  const togglePoll = async (pollId: string, active: boolean) => {
+    await supabase.from("update_polls").update({ is_active: active }).eq("id", pollId);
+    await loadPolls();
+    toast.success(active ? "Poll geactiveerd" : "Poll gestopt");
+  };
+
+  const deletePoll = async (pollId: string) => {
+    await supabase.from("update_polls").delete().eq("id", pollId);
+    await loadPolls();
+    toast.success("Poll verwijderd");
+  };
+
+  const createAnnouncement = async () => {
+    if (!newAnnouncementMsg.trim()) {
+      toast.error("Vul een bericht in");
+      return;
+    }
+    setCreatingAnnouncement(true);
+    const { data: { session } } = await supabase.auth.getSession();
+    let imageUrl: string | null = null;
+
+    if (newAnnouncementImg) {
+      const ext = newAnnouncementImg.name.split(".").pop();
+      const path = `${Date.now()}.${ext}`;
+      const { error: uploadError } = await supabase.storage
+        .from("announcement-images")
+        .upload(path, newAnnouncementImg);
+      if (uploadError) {
+        toast.error("Kon afbeelding niet uploaden");
+        setCreatingAnnouncement(false);
+        return;
+      }
+      const { data: urlData } = supabase.storage.from("announcement-images").getPublicUrl(path);
+      imageUrl = urlData.publicUrl;
+    }
+
+    const { error } = await supabase.from("update_announcements").insert({
+      message: newAnnouncementMsg.trim(),
+      image_url: imageUrl,
+      created_by: session!.user.id,
+    });
+    if (error) {
+      toast.error("Kon bericht niet plaatsen");
+    } else {
+      toast.success("Update-bericht geplaatst!");
+      setNewAnnouncementMsg("");
+      setNewAnnouncementImg(null);
+      await loadAnnouncements();
+    }
+    setCreatingAnnouncement(false);
+  };
+
+  const toggleAnnouncement = async (id: string, active: boolean) => {
+    await supabase.from("update_announcements").update({ is_active: active }).eq("id", id);
+    await loadAnnouncements();
+    toast.success(active ? "Bericht geactiveerd" : "Bericht verborgen");
+  };
+
+  const deleteAnnouncement = async (id: string) => {
+    await supabase.from("update_announcements").delete().eq("id", id);
+    await loadAnnouncements();
+    toast.success("Bericht verwijderd");
   };
 
   const loadRoles = async () => {
