@@ -7,11 +7,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Volume2, VolumeX, Sun, Moon, LogOut, Trash2, ImageIcon } from "lucide-react";
+import { Volume2, VolumeX, Sun, Moon, LogOut, Trash2, ImageIcon, BarChart3 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { isSoundEnabled, setSoundEnabled } from "@/lib/sounds";
 import { fireConfetti } from "@/lib/confetti";
 import { toast } from "sonner";
+import PollDialog from "@/components/PollDialog";
 
 interface SettingsDialogProps {
   open: boolean;
@@ -33,6 +34,17 @@ export default function SettingsDialog({ open, onOpenChange, user, children }: S
   const [deleteEmailInput, setDeleteEmailInput] = useState("");
   const [obamaUnlocked, setObamaUnlocked] = useState(() => localStorage.getItem("obama_unlocked") === "true");
   const [obamaMode, setObamaMode] = useState(() => localStorage.getItem("obama_mode") === "true");
+  const [showPoll, setShowPoll] = useState(false);
+  const [hasPoll, setHasPoll] = useState(false);
+
+  useEffect(() => {
+    supabase
+      .from("update_polls")
+      .select("id")
+      .eq("is_active", true)
+      .limit(1)
+      .then(({ data }) => setHasPoll(!!data && data.length > 0));
+  }, []);
 
   useEffect(() => {
     const handler = () => {
@@ -111,6 +123,17 @@ export default function SettingsDialog({ open, onOpenChange, user, children }: S
             </div>
           )}
 
+          {hasPoll && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full gap-2"
+              onClick={() => setShowPoll(true)}
+            >
+              <BarChart3 className="h-4 w-4" /> Stem op volgende update
+            </Button>
+          )}
+
           {children}
 
           {user && (
@@ -175,6 +198,7 @@ export default function SettingsDialog({ open, onOpenChange, user, children }: S
           )}
         </div>
       </DialogContent>
+      <PollDialog open={showPoll} onOpenChange={setShowPoll} user={user} />
     </Dialog>
   );
 }
