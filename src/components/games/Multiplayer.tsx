@@ -704,9 +704,9 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
     playCountdownTick();
     const timer = setTimeout(async () => {
       const next = countdown - 1;
-      setCountdown(next);
       if (next === 0) {
         playCountdownGo();
+        setCountdown(next);
         const { data } = await supabase.functions.invoke("game-action", {
           body: { action: "start-game", roomId: room!.id, playerId: myPlayerId, playerToken: myPlayerToken },
         });
@@ -714,7 +714,9 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
           toast.error(data.error === "Need at least 2 players" ? m.needMinPlayers : data.error);
           setCountdown(null);
         }
+        // countdown=0 will be cleaned up on next render
       } else {
+        setCountdown(next);
         playCountdownTick();
       }
     }, 1000);

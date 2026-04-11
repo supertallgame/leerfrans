@@ -64,29 +64,19 @@ export default function PollDialog({ open, onOpenChange, user }: PollDialogProps
     };
     setPoll(parsedPoll);
 
-    // Get all votes for this poll
-    const { data: allVotes } = await supabase
-      .from("poll_votes")
-      .select("selected_option")
-      .eq("poll_id", p.id);
+    // Get votes + my vote in parallel
+    const [votesRes, myVoteRes] = await Promise.all([
+      supabase.from("poll_votes").select("selected_option").eq("poll_id", p.id),
+      user ? supabase.from("poll_votes").select("selected_option").eq("poll_id", p.id).eq("user_id", user.id).maybeSingle() : Promise.resolve({ data: null }),
+    ]);
 
     const counts: Record<string, number> = {};
     parsedPoll.options.forEach(o => counts[o] = 0);
-    allVotes?.forEach(v => {
+    votesRes.data?.forEach(v => {
       counts[v.selected_option] = (counts[v.selected_option] || 0) + 1;
     });
     setVotes(Object.entries(counts).map(([option, count]) => ({ option, count })));
-
-    // Check my vote
-    if (user) {
-      const { data: myVoteData } = await supabase
-        .from("poll_votes")
-        .select("selected_option")
-        .eq("poll_id", p.id)
-        .eq("user_id", user.id)
-        .maybeSingle();
-      setMyVote(myVoteData?.selected_option ?? null);
-    }
+    setMyVote(myVoteRes.data?.selected_option ?? null);
     setLoading(false);
   };
 
