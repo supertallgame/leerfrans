@@ -26,6 +26,86 @@ interface AppUser {
   created_at: string;
 }
 
+function PollCard({ poll, onToggle, onDelete }: { poll: any; onToggle: (id: string, active: boolean) => void; onDelete: (id: string) => void }) {
+  const [votes, setVotes] = useState<Record<string, number>>({});
+  const [loadingVotes, setLoadingVotes] = useState(false);
+  const [showVotes, setShowVotes] = useState(false);
+
+  const loadVotes = async () => {
+    setLoadingVotes(true);
+    const { data } = await supabase
+      .from("poll_votes")
+      .select("selected_option")
+      .eq("poll_id", poll.id);
+    const counts: Record<string, number> = {};
+    (poll.options as string[]).forEach(o => counts[o] = 0);
+    data?.forEach((v: any) => { counts[v.selected_option] = (counts[v.selected_option] || 0) + 1; });
+    setVotes(counts);
+    setLoadingVotes(false);
+    setShowVotes(true);
+  };
+
+  const totalVotes = Object.values(votes).reduce((a, b) => a + b, 0);
+
+  return (
+    <div className="rounded-lg border p-3 space-y-2">
+      <div className="flex items-center justify-between">
+        <p className="text-sm font-medium">{poll.question}</p>
+        <span className={`text-xs px-2 py-0.5 rounded-full ${poll.is_active ? "bg-[hsl(var(--success))]/10 text-[hsl(var(--success))]" : "bg-muted text-muted-foreground"}`}>
+          {poll.is_active ? "Actief" : "Gestopt"}
+        </span>
+      </div>
+      {!showVotes ? (
+        <div className="flex flex-wrap gap-1">
+          {(poll.options as string[]).map((opt: string) => (
+            <span key={opt} className="text-xs bg-muted px-2 py-1 rounded">{opt}</span>
+          ))}
+        </div>
+      ) : (
+        <div className="space-y-1.5">
+          {(poll.options as string[]).map((opt: string) => {
+            const count = votes[opt] || 0;
+            const pct = totalVotes > 0 ? Math.round((count / totalVotes) * 100) : 0;
+            return (
+              <div key={opt} className="relative rounded-md overflow-hidden border p-2">
+                <div className="absolute inset-y-0 left-0 bg-primary/10" style={{ width: `${pct}%` }} />
+                <div className="relative flex items-center justify-between text-xs">
+                  <span className="font-medium">{opt}</span>
+                  <span className="text-muted-foreground">{pct}% ({count})</span>
+                </div>
+              </div>
+            );
+          })}
+          <p className="text-xs text-muted-foreground">{totalVotes} {totalVotes === 1 ? "stem" : "stemmen"}</p>
+        </div>
+      )}
+      <div className="flex gap-2">
+        {!showVotes && (
+          <Button variant="outline" size="sm" onClick={loadVotes} disabled={loadingVotes} className="gap-1">
+            <BarChart3 className="h-3.5 w-3.5" /> {loadingVotes ? "Laden..." : "Stemmen bekijken"}
+          </Button>
+        )}
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => onToggle(poll.id, !poll.is_active)}
+          className="gap-1"
+        >
+          {poll.is_active ? "Stoppen" : "Activeren"}
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="text-destructive hover:text-destructive hover:bg-destructive/10 gap-1"
+          onClick={() => onDelete(poll.id)}
+        >
+          <Trash2 className="h-3.5 w-3.5" /> Verwijderen
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 export default function Owner() {
   const navigate = useNavigate();
   useThemeSync();
@@ -506,37 +586,7 @@ export default function Owner() {
 
             {/* Existing polls */}
             {polls.map((poll) => (
-              <div key={poll.id} className="rounded-lg border p-3 space-y-2">
-                <div className="flex items-center justify-between">
-                  <p className="text-sm font-medium">{poll.question}</p>
-                  <span className={`text-xs px-2 py-0.5 rounded-full ${poll.is_active ? "bg-[hsl(var(--success))]/10 text-[hsl(var(--success))]" : "bg-muted text-muted-foreground"}`}>
-                    {poll.is_active ? "Actief" : "Gestopt"}
-                  </span>
-                </div>
-                <div className="flex flex-wrap gap-1">
-                  {(poll.options as string[]).map((opt: string) => (
-                    <span key={opt} className="text-xs bg-muted px-2 py-1 rounded">{opt}</span>
-                  ))}
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => togglePoll(poll.id, !poll.is_active)}
-                    className="gap-1"
-                  >
-                    {poll.is_active ? "Stoppen" : "Activeren"}
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-destructive hover:text-destructive hover:bg-destructive/10 gap-1"
-                    onClick={() => deletePoll(poll.id)}
-                  >
-                    <Trash2 className="h-3.5 w-3.5" /> Verwijderen
-                  </Button>
-                </div>
-              </div>
+              <PollCard key={poll.id} poll={poll} onToggle={togglePoll} onDelete={deletePoll} />
             ))}
             {polls.length === 0 && (
               <p className="text-sm text-muted-foreground">Nog geen polls aangemaakt.</p>
