@@ -142,7 +142,7 @@ Deno.serve(async (req) => {
         .from("game_questions")
         .select("id")
         .eq("room_id", roomId)
-        .single();
+        .maybeSingle();
       if (existing) {
         return jsonResponse({ error: "Questions already seeded" }, 409);
       }
