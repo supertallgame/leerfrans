@@ -5,6 +5,7 @@ export interface VocabItem {
 }
 
 export type Language = "french" | "english" | "nask" | "biology";
+export type Niveau = "vmbo-havo" | "havo-vwo";
 
 export interface Chapter {
   id: string;
