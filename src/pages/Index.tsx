@@ -84,12 +84,13 @@ const FlagEN = ({ className = "w-5 h-3.5" }: { className?: string }) => (
 
 const Index = () => {
   const navigate = useNavigate();
-  const { chapterId, setChapterId, activeVocabulary, language, setLanguage, selectedSections, setSelectedSections, availableSections } = useChapter();
+  const { chapterId, setChapterId, activeVocabulary, language, setLanguage, selectedSections, setSelectedSections, availableSections, niveau, setNiveau } = useChapter();
   const [activeGame, setActiveGame] = useState<Game>("menu");
   const [showSettings, setShowSettings] = useState(false);
   const [showChapterPicker, setShowChapterPicker] = useState(false);
   const [showLanguagePicker, setShowLanguagePicker] = useState(false);
   const [showSectionPicker, setShowSectionPicker] = useState(false);
+  const [showNiveauPicker, setShowNiveauPicker] = useState(false);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [authLoading, setAuthLoading] = useState(true);
@@ -97,7 +98,7 @@ const Index = () => {
   const [explorerEnabled, setExplorerEnabled] = useState(true);
   const [isHeadAdmin, setIsHeadAdmin] = useState(false);
 
-  const chaptersForLanguage = getChaptersForLanguage(language);
+  const chaptersForLanguage = getChaptersForLanguage(language, niveau);
   const foreignLabel = getForeignLabel(language);
   const foreignLabelNative = getForeignLabelNative(language);
 
