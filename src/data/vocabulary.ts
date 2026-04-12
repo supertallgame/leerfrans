@@ -926,15 +926,21 @@ const naskChapters: Chapter[] = [
   },
 ];
 
-export function getChaptersForLanguage(lang: Language): Chapter[] {
-  if (lang === "french") return frenchChapters;
+export function getChaptersForLanguage(lang: Language, niveau?: Niveau): Chapter[] {
+  if (lang === "french") {
+    if (niveau === "havo-vwo") return frenchChaptersHavoVwo;
+    return frenchChaptersVmboHavo;
+  }
   if (lang === "english") return englishChapters;
   if (lang === "biology") return biologyChapters;
   return naskChapters;
 }
 
-export function getDefaultChapterId(lang: Language): string {
-  if (lang === "french") return "chapitre3";
+export function getDefaultChapterId(lang: Language, niveau?: Niveau): string {
+  if (lang === "french") {
+    if (niveau === "havo-vwo") return "hv_chapitre1";
+    return "chapitre3";
+  }
   if (lang === "english") return "en_chapter1";
   if (lang === "biology") return "bio_chapter4";
   return "nask_chapter1";
@@ -946,7 +952,7 @@ export const chapters = frenchChapters;
 export const DEFAULT_CHAPTER_ID = "chapitre3";
 
 export function getChapter(id: string): Chapter | undefined {
-  return [...frenchChapters, ...englishChapters, ...naskChapters, ...biologyChapters].find((c) => c.id === id);
+  return [...frenchChaptersVmboHavo, ...frenchChaptersHavoVwo, ...englishChapters, ...naskChapters, ...biologyChapters].find((c) => c.id === id);
 }
 
 export function getActiveVocabulary(chapterId: string): VocabItem[] {
