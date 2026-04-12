@@ -512,6 +512,40 @@ const Index = () => {
         </DialogContent>
       </Dialog>
 
+      {/* Niveau picker dialog */}
+      <Dialog open={showNiveauPicker} onOpenChange={setShowNiveauPicker}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Kies je niveau</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-1.5">
+            {([
+              { id: "vmbo-havo" as Niveau, label: "VMBO-HAVO", desc: "Leerjaar 1 · Basisniveau" },
+              { id: "havo-vwo" as Niveau, label: "HAVO-VWO", desc: "Leerjaar 1 · Hoger niveau" },
+            ]).map((n) => {
+              const isActive = niveau === n.id;
+              return (
+                <button
+                  key={n.id}
+                  onClick={() => { setNiveau(n.id); setShowNiveauPicker(false); }}
+                  className={`w-full text-left px-3 py-2 rounded-lg border text-sm transition-all ${
+                    isActive
+                      ? "border-primary bg-primary/10 font-medium"
+                      : "border-border hover:border-primary/50 hover:bg-primary/5 cursor-pointer"
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <GraduationCap className="h-4 w-4" />
+                    <span className="font-medium">{n.label}</span>
+                  </div>
+                  <span className="text-xs text-muted-foreground">{n.desc}</span>
+                </button>
+              );
+            })}
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <ObamaPopup />
       <AuthDialog open={showLoginPrompt} onOpenChange={setShowLoginPrompt} />
 
