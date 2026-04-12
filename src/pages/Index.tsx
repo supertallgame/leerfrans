@@ -210,10 +210,13 @@ const Index = () => {
   if (activeGame === "explorer") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6"><FrenchExplorer onBack={() => setActiveGame("menu")} /></div></Suspense>;
 
   const hasSentences = activeVocabulary.some((v) => v.french.includes(" ") && v.french.length > 15);
+  const isVmboHavoCh3 = niveau === "vmbo-havo" && chapterId === "chapitre3";
   const games = language === "biology" ? biologyGames : (language === "nask") ? naskGames : languageGames.filter((g) => {
     if ((g as any).frenchOnly && language !== "french") return false;
     if (g.id === "explorer" && !explorerEnabled) return false;
     if (g.id === "sentence" && !hasSentences) return false;
+    // être and kloktijden only in vmbo-havo chapitre 3 french
+    if ((g.id === "etre" || g.id === "clocktimes") && !isVmboHavoCh3) return false;
     return true;
   });
 
