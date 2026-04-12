@@ -5,6 +5,7 @@ export interface VocabItem {
 }
 
 export type Language = "french" | "english" | "nask" | "biology";
+export type Niveau = "vmbo-havo" | "havo-vwo";
 
 export interface Chapter {
   id: string;
@@ -423,14 +424,168 @@ const englishChapter2Words: VocabItem[] = [
   { french: "umbrella", dutch: "paraplu" },
 ];
 
+// ─── Numbers 1-20 (shared by both niveaus) ───
+const numbers1to20: VocabItem[] = [
+  { french: "un", dutch: "1 (één)", section: "Nummers" },
+  { french: "deux", dutch: "2 (twee)", section: "Nummers" },
+  { french: "trois", dutch: "3 (drie)", section: "Nummers" },
+  { french: "quatre", dutch: "4 (vier)", section: "Nummers" },
+  { french: "cinq", dutch: "5 (vijf)", section: "Nummers" },
+  { french: "six", dutch: "6 (zes)", section: "Nummers" },
+  { french: "sept", dutch: "7 (zeven)", section: "Nummers" },
+  { french: "huit", dutch: "8 (acht)", section: "Nummers" },
+  { french: "neuf", dutch: "9 (negen)", section: "Nummers" },
+  { french: "dix", dutch: "10 (tien)", section: "Nummers" },
+  { french: "onze", dutch: "11 (elf)", section: "Nummers" },
+  { french: "douze", dutch: "12 (twaalf)", section: "Nummers" },
+  { french: "treize", dutch: "13 (dertien)", section: "Nummers" },
+  { french: "quatorze", dutch: "14 (veertien)", section: "Nummers" },
+  { french: "quinze", dutch: "15 (vijftien)", section: "Nummers" },
+  { french: "seize", dutch: "16 (zestien)", section: "Nummers" },
+  { french: "dix-sept", dutch: "17 (zeventien)", section: "Nummers" },
+  { french: "dix-huit", dutch: "18 (achttien)", section: "Nummers" },
+  { french: "dix-neuf", dutch: "19 (negentien)", section: "Nummers" },
+  { french: "vingt", dutch: "20 (twintig)", section: "Nummers" },
+];
+
+// ─── Havo-VWO Chapitre 1 ───
+const havoVwoChapitre1Words: VocabItem[] = [
+  // Section A – vocab
+  { french: "la France", dutch: "Frankrijk", section: "A" },
+  { french: "les vacances (v mv)", dutch: "de vakantie", section: "A" },
+  { french: "la piscine", dutch: "het zwembad", section: "A" },
+  { french: "un peu", dutch: "een beetje", section: "A" },
+  { french: "attention", dutch: "pas op", section: "A" },
+  { french: "je suis", dutch: "ik ben", section: "A" },
+  { french: "tu parles", dutch: "jij spreekt", section: "A" },
+  { french: "français", dutch: "Frans", section: "A" },
+  { french: "salut", dutch: "hoi", section: "A" },
+  { french: "bonjour", dutch: "hallo, goedendag", section: "A" },
+  { french: "petit(e)", dutch: "klein", section: "A" },
+  { french: "grand(e)", dutch: "groot", section: "A" },
+  { french: "d'accord", dutch: "oké", section: "A" },
+  { french: "mais", dutch: "maar", section: "A" },
+  { french: "pour", dutch: "voor", section: "A" },
+  { french: "et", dutch: "en", section: "A" },
+  { french: "bien", dutch: "goed", section: "A" },
+  { french: "j'aime", dutch: "ik vind (het) leuk", section: "A" },
+  { french: "on joue", dutch: "wij spelen", section: "A" },
+  { french: "j'habite", dutch: "ik woon", section: "A" },
+  // Section A – zinnen
+  { french: "Comment tu t'appelles?", dutch: "Hoe heet jij?", section: "A" },
+  { french: "Je m'appelle Roos.", dutch: "Ik heet Roos.", section: "A" },
+  { french: "Tu habites où?", dutch: "Waar woon jij?", section: "A" },
+  { french: "J'habite à Zwolle.", dutch: "Ik woon in Zwolle.", section: "A" },
+  // Section B – vocab
+  { french: "la famille", dutch: "de familie, het gezin", section: "B" },
+  { french: "le frère", dutch: "de broer", section: "B" },
+  { french: "la sœur", dutch: "de zus", section: "B" },
+  { french: "le chien", dutch: "de hond", section: "B" },
+  { french: "le chat", dutch: "de kat", section: "B" },
+  { french: "le poisson", dutch: "de vis", section: "B" },
+  { french: "le jour", dutch: "de dag", section: "B" },
+  { french: "la fille", dutch: "het meisje", section: "B" },
+  { french: "le garçon", dutch: "de jongen", section: "B" },
+  { french: "le copain", dutch: "de vriend", section: "B" },
+  { french: "la tente", dutch: "de tent", section: "B" },
+  { french: "il y a", dutch: "er is, er zijn", section: "B" },
+  { french: "ici", dutch: "hier", section: "B" },
+  { french: "aussi", dutch: "ook", section: "B" },
+  { french: "pourquoi", dutch: "waarom", section: "B" },
+  { french: "donc", dutch: "dus", section: "B" },
+  { french: "on reste", dutch: "wij blijven", section: "B" },
+  { french: "c'est", dutch: "het is", section: "B" },
+  { french: "bon appétit", dutch: "eet smakelijk", section: "B" },
+  { french: "et toi?", dutch: "en jij?", section: "B" },
+  // Section C – vocab
+  { french: "la plage", dutch: "het strand", section: "C" },
+  { french: "la mer", dutch: "de zee", section: "C" },
+  { french: "le problème", dutch: "het probleem", section: "C" },
+  { french: "le message", dutch: "het bericht", section: "C" },
+  { french: "le truc", dutch: "het ding", section: "C" },
+  { french: "regarde", dutch: "kijk", section: "C" },
+  { french: "aider", dutch: "helpen", section: "C" },
+  { french: "on adore", dutch: "wij zijn gek op", section: "C" },
+  { french: "merci", dutch: "bedankt", section: "C" },
+  { french: "de rien", dutch: "niets te danken", section: "C" },
+  { french: "aujourd'hui", dutch: "vandaag", section: "C" },
+  { french: "demain", dutch: "morgen", section: "C" },
+  { french: "voilà", dutch: "hier is, hier zijn", section: "C" },
+  { french: "alors", dutch: "dan", section: "C" },
+  { french: "peut-être", dutch: "misschien", section: "C" },
+  { french: "beaucoup", dutch: "veel", section: "C" },
+  { french: "dans", dutch: "in", section: "C" },
+  { french: "quelque chose", dutch: "iets", section: "C" },
+  { french: "beau", dutch: "mooi", section: "C" },
+  { french: "super", dutch: "super", section: "C" },
+  // Section C – zinnen
+  { french: "Quel est ton numéro de téléphone?", dutch: "Wat is jouw telefoonnummer?", section: "C" },
+  { french: "Mon numéro, c'est le 06-14 07 18 5.", dutch: "Mijn nummer is 06-14 07 18 5.", section: "C" },
+  { french: "Et toi, tu as quel âge?", dutch: "En jij, hoe oud ben jij?", section: "C" },
+  { french: "Moi, j'ai 12 ans.", dutch: "Ik ben 12 jaar.", section: "C" },
+  // Section D – vocab
+  { french: "le père", dutch: "de vader", section: "D" },
+  { french: "la mère", dutch: "de moeder", section: "D" },
+  { french: "le cousin", dutch: "de neef", section: "D" },
+  { french: "la cousine", dutch: "de nicht", section: "D" },
+  { french: "l'oncle (m)", dutch: "de oom", section: "D" },
+  { french: "la tante", dutch: "de tante", section: "D" },
+  { french: "le grand-père", dutch: "de grootvader", section: "D" },
+  { french: "la grand-mère", dutch: "de grootmoeder", section: "D" },
+  { french: "le jardin", dutch: "de tuin", section: "D" },
+  { french: "la photo", dutch: "de foto", section: "D" },
+  { french: "la musique", dutch: "de muziek", section: "D" },
+  { french: "le dessin", dutch: "de tekening", section: "D" },
+  { french: "le prix", dutch: "de prijs", section: "D" },
+  { french: "drôle", dutch: "grappig", section: "D" },
+  { french: "fou", dutch: "gek", section: "D" },
+  { french: "on rigole", dutch: "wij lachen", section: "D" },
+  { french: "souvent", dutch: "vaak", section: "D" },
+  { french: "toujours", dutch: "altijd", section: "D" },
+  { french: "avec", dutch: "met", section: "D" },
+  { french: "vraiment", dutch: "echt", section: "D" },
+  // Section D – zinnen
+  { french: "Tu as un frère?", dutch: "Heb je een broer?", section: "D" },
+  { french: "Oui, j'ai un frère, Romain.", dutch: "Ja, ik heb een broer, Romain.", section: "D" },
+  { french: "Il a quel âge?", dutch: "Hoe oud is hij?", section: "D" },
+  { french: "Il a 13 ans.", dutch: "Hij is 13 jaar.", section: "D" },
+  { french: "Au revoir.", dutch: "Tot ziens.", section: "D" },
+  { french: "À plus.", dutch: "Tot later.", section: "D" },
+  // Section E – Se présenter (zinnen)
+  { french: "Bonjour, ça va?", dutch: "Hallo, hoe gaat het?", section: "E" },
+  { french: "Ça va bien, et toi?", dutch: "Het gaat goed, en met jou?", section: "E" },
+  { french: "Comment tu t'appelles?", dutch: "Hoe heet jij?", section: "E" },
+  { french: "Je m'appelle Roos.", dutch: "Ik heet Roos.", section: "E" },
+  { french: "Tu habites où?", dutch: "Waar woon jij?", section: "E" },
+  { french: "J'habite à Zwolle.", dutch: "Ik woon in Zwolle.", section: "E" },
+  { french: "C'est quoi?", dutch: "Wat is dat?", section: "E" },
+  { french: "C'est un chien.", dutch: "Dat is een hond.", section: "E" },
+  // Section G – Parler de ta famille (zinnen)
+  { french: "Tu as un frère?", dutch: "Heb je een broer?", section: "G" },
+  { french: "Oui, j'ai un frère, Romain.", dutch: "Ja, ik heb een broer, Romain.", section: "G" },
+  { french: "Il a quel âge?", dutch: "Hoe oud is hij?", section: "G" },
+  { french: "Il a 13 ans.", dutch: "Hij is 13 jaar.", section: "G" },
+  { french: "Et toi, tu as quel âge?", dutch: "En jij, hoe oud ben jij?", section: "G" },
+  { french: "Moi, j'ai 12 ans.", dutch: "Ik ben 12 jaar.", section: "G" },
+  { french: "Quel est ton numéro de téléphone?", dutch: "Wat is jouw telefoonnummer?", section: "G" },
+  { french: "Mon numéro, c'est le 06-14 07 18 5.", dutch: "Mijn nummer is 06-14 07 18 5.", section: "G" },
+  { french: "Au revoir.", dutch: "Tot ziens.", section: "G" },
+  { french: "À plus.", dutch: "Tot later.", section: "G" },
+  // Nummers 1-20
+  ...numbers1to20,
+];
+
 // ─── Chapter lists per language ───
 
-export const frenchChapters: Chapter[] = [
+// vmbo-havo chapters (the original/existing ones) — add numbers to chapitre1
+const vmboHavoChapitre1WithNumbers = [...chapitre1Words, ...numbers1to20];
+
+export const frenchChaptersVmboHavo: Chapter[] = [
   {
     id: "chapitre1",
     title: "Chapitre 1",
     description: "Kennismaken, dieren & familie",
-    words: chapitre1Words,
+    words: vmboHavoChapitre1WithNumbers,
     requiresLogin: false,
   },
   {
@@ -455,6 +610,19 @@ export const frenchChapters: Chapter[] = [
     requiresLogin: false,
   },
 ];
+
+export const frenchChaptersHavoVwo: Chapter[] = [
+  {
+    id: "hv_chapitre1",
+    title: "Chapitre 1",
+    description: "Kennismaken, familie & dagelijks leven",
+    words: havoVwoChapitre1Words,
+    requiresLogin: false,
+  },
+];
+
+// Keep backward compat
+export const frenchChapters: Chapter[] = frenchChaptersVmboHavo;
 
 const englishChapter3Words: VocabItem[] = [
   { french: "car", dutch: "auto" },
@@ -758,15 +926,21 @@ const naskChapters: Chapter[] = [
   },
 ];
 
-export function getChaptersForLanguage(lang: Language): Chapter[] {
-  if (lang === "french") return frenchChapters;
+export function getChaptersForLanguage(lang: Language, niveau?: Niveau): Chapter[] {
+  if (lang === "french") {
+    if (niveau === "havo-vwo") return frenchChaptersHavoVwo;
+    return frenchChaptersVmboHavo;
+  }
   if (lang === "english") return englishChapters;
   if (lang === "biology") return biologyChapters;
   return naskChapters;
 }
 
-export function getDefaultChapterId(lang: Language): string {
-  if (lang === "french") return "chapitre3";
+export function getDefaultChapterId(lang: Language, niveau?: Niveau): string {
+  if (lang === "french") {
+    if (niveau === "havo-vwo") return "hv_chapitre1";
+    return "chapitre3";
+  }
   if (lang === "english") return "en_chapter1";
   if (lang === "biology") return "bio_chapter4";
   return "nask_chapter1";
@@ -778,7 +952,7 @@ export const chapters = frenchChapters;
 export const DEFAULT_CHAPTER_ID = "chapitre3";
 
 export function getChapter(id: string): Chapter | undefined {
-  return [...frenchChapters, ...englishChapters, ...naskChapters, ...biologyChapters].find((c) => c.id === id);
+  return [...frenchChaptersVmboHavo, ...frenchChaptersHavoVwo, ...englishChapters, ...naskChapters, ...biologyChapters].find((c) => c.id === id);
 }
 
 export function getActiveVocabulary(chapterId: string): VocabItem[] {

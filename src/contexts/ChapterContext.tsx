@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useMemo, ReactNode } from "react";
-import { DEFAULT_CHAPTER_ID, getActiveVocabulary, getDefaultChapterId, getChaptersForLanguage, getSectionsForChapter, VocabItem, Language } from "@/data/vocabulary";
+import { DEFAULT_CHAPTER_ID, getActiveVocabulary, getDefaultChapterId, getChaptersForLanguage, getSectionsForChapter, VocabItem, Language, Niveau } from "@/data/vocabulary";
 
 interface ChapterContextType {
   chapterId: string;
@@ -10,6 +10,8 @@ interface ChapterContextType {
   selectedSections: string[];
   setSelectedSections: (sections: string[]) => void;
   availableSections: string[];
+  niveau: Niveau;
+  setNiveau: (n: Niveau) => void;
 }
 
 const ChapterContext = createContext<ChapterContextType>({
@@ -21,6 +23,8 @@ const ChapterContext = createContext<ChapterContextType>({
   selectedSections: [],
   setSelectedSections: () => {},
   availableSections: [],
+  niveau: "vmbo-havo",
+  setNiveau: () => {},
 });
 
 export const useChapter = () => useContext(ChapterContext);
@@ -35,13 +39,17 @@ export const ChapterProvider = ({ children, vocabTransform }: ChapterProviderPro
     return (localStorage.getItem("selectedLanguage") as Language) || "french";
   });
 
+  const [niveau, setNiveauState] = useState<Niveau>(() => {
+    return (localStorage.getItem("selectedNiveau") as Niveau) || "vmbo-havo";
+  });
+
   const [chapterId, setChapterIdState] = useState(() => {
     const saved = localStorage.getItem("selectedChapter") || DEFAULT_CHAPTER_ID;
-    const validChapters = getChaptersForLanguage(
-      (localStorage.getItem("selectedLanguage") as Language) || "french"
-    );
+    const savedLang = (localStorage.getItem("selectedLanguage") as Language) || "french";
+    const savedNiveau = (localStorage.getItem("selectedNiveau") as Niveau) || "vmbo-havo";
+    const validChapters = getChaptersForLanguage(savedLang, savedNiveau);
     if (validChapters.some((c) => c.id === saved)) return saved;
-    return getDefaultChapterId((localStorage.getItem("selectedLanguage") as Language) || "french");
+    return getDefaultChapterId(savedLang, savedNiveau);
   });
 
   const [selectedSections, setSelectedSectionsState] = useState<string[]>(() => {
@@ -52,7 +60,6 @@ export const ChapterProvider = ({ children, vocabTransform }: ChapterProviderPro
   const handleSetChapter = (id: string) => {
     setChapterIdState(id);
     localStorage.setItem("selectedChapter", id);
-    // Reset sections when chapter changes
     setSelectedSectionsState([]);
     localStorage.removeItem("selectedSections");
   };
@@ -60,7 +67,18 @@ export const ChapterProvider = ({ children, vocabTransform }: ChapterProviderPro
   const handleSetLanguage = (lang: Language) => {
     setLanguageState(lang);
     localStorage.setItem("selectedLanguage", lang);
-    const defaultId = getDefaultChapterId(lang);
+    const defaultId = getDefaultChapterId(lang, niveau);
+    setChapterIdState(defaultId);
+    localStorage.setItem("selectedChapter", defaultId);
+    setSelectedSectionsState([]);
+    localStorage.removeItem("selectedSections");
+  };
+
+  const handleSetNiveau = (n: Niveau) => {
+    setNiveauState(n);
+    localStorage.setItem("selectedNiveau", n);
+    // Reset to default chapter for this niveau
+    const defaultId = getDefaultChapterId(language, n);
     setChapterIdState(defaultId);
     localStorage.setItem("selectedChapter", defaultId);
     setSelectedSectionsState([]);
@@ -78,7 +96,6 @@ export const ChapterProvider = ({ children, vocabTransform }: ChapterProviderPro
 
   const availableSections = useMemo(() => getSectionsForChapter(chapterId), [chapterId]);
 
-  // Validate saved sections against available ones
   const validSections = useMemo(() => {
     if (availableSections.length === 0) return [];
     return selectedSections.filter((s) => availableSections.includes(s));
@@ -106,6 +123,8 @@ export const ChapterProvider = ({ children, vocabTransform }: ChapterProviderPro
         selectedSections: validSections,
         setSelectedSections: handleSetSections,
         availableSections,
+        niveau,
+        setNiveau: handleSetNiveau,
       }}
     >
       {children}

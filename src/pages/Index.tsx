@@ -3,9 +3,9 @@ import { useThemeSync } from "@/hooks/use-theme-sync";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { BookOpen, Brain, Puzzle, Keyboard, Users, PenTool, MessageSquare, Bot, Settings, Star, Lock, BookMarked, FlaskConical, CheckCircle, Layers, Microscope, Bone, Clock, BookType, Map, ShieldCheck } from "lucide-react";
+import { BookOpen, Brain, Puzzle, Keyboard, Users, PenTool, MessageSquare, Bot, Settings, Star, Lock, BookMarked, FlaskConical, CheckCircle, Layers, Microscope, Bone, Clock, BookType, Map, ShieldCheck, GraduationCap, Hash } from "lucide-react";
 import { FlagNL, FlagFR } from "@/components/Flags";
-import { getChaptersForLanguage, getChapter, getForeignLabel, getForeignLabelNative, Language } from "@/data/vocabulary";
+import { getChaptersForLanguage, getChapter, getForeignLabel, getForeignLabelNative, Language, Niveau } from "@/data/vocabulary";
 import { useChapter } from "@/contexts/ChapterContext";
 import { Switch } from "@/components/ui/switch";
 import SettingsDialog from "@/components/SettingsDialog";
@@ -84,12 +84,13 @@ const FlagEN = ({ className = "w-5 h-3.5" }: { className?: string }) => (
 
 const Index = () => {
   const navigate = useNavigate();
-  const { chapterId, setChapterId, activeVocabulary, language, setLanguage, selectedSections, setSelectedSections, availableSections } = useChapter();
+  const { chapterId, setChapterId, activeVocabulary, language, setLanguage, selectedSections, setSelectedSections, availableSections, niveau, setNiveau } = useChapter();
   const [activeGame, setActiveGame] = useState<Game>("menu");
   const [showSettings, setShowSettings] = useState(false);
   const [showChapterPicker, setShowChapterPicker] = useState(false);
   const [showLanguagePicker, setShowLanguagePicker] = useState(false);
   const [showSectionPicker, setShowSectionPicker] = useState(false);
+  const [showNiveauPicker, setShowNiveauPicker] = useState(false);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [authLoading, setAuthLoading] = useState(true);
@@ -97,7 +98,7 @@ const Index = () => {
   const [explorerEnabled, setExplorerEnabled] = useState(true);
   const [isHeadAdmin, setIsHeadAdmin] = useState(false);
 
-  const chaptersForLanguage = getChaptersForLanguage(language);
+  const chaptersForLanguage = getChaptersForLanguage(language, niveau);
   const foreignLabel = getForeignLabel(language);
   const foreignLabelNative = getForeignLabelNative(language);
 
@@ -209,10 +210,13 @@ const Index = () => {
   if (activeGame === "explorer") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6"><FrenchExplorer onBack={() => setActiveGame("menu")} /></div></Suspense>;
 
   const hasSentences = activeVocabulary.some((v) => v.french.includes(" ") && v.french.length > 15);
+  const isVmboHavoCh3 = niveau === "vmbo-havo" && chapterId === "chapitre3";
   const games = language === "biology" ? biologyGames : (language === "nask") ? naskGames : languageGames.filter((g) => {
     if ((g as any).frenchOnly && language !== "french") return false;
     if (g.id === "explorer" && !explorerEnabled) return false;
     if (g.id === "sentence" && !hasSentences) return false;
+    // être and kloktijden only in vmbo-havo chapitre 3 french
+    if ((g.id === "etre" || g.id === "clocktimes") && !isVmboHavoCh3) return false;
     return true;
   });
 
@@ -286,8 +290,8 @@ const Index = () => {
             {(language === "nask" || language === "biology") ? "Kies een spel en oefen je begrippen" : "Kies een spel en oefen je woordenschat"}
           </p>
 
-          {/* Language & chapter badges */}
-          <div className="flex items-center justify-center gap-2">
+          {/* Language, niveau & chapter badges */}
+          <div className="flex items-center justify-center gap-2 flex-wrap">
             <button
               onClick={() => setShowLanguagePicker(true)}
               className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors cursor-pointer"
@@ -295,6 +299,15 @@ const Index = () => {
               {language === "nask" ? <FlaskConical className="h-3.5 w-3.5" /> : language === "biology" ? <Microscope className="h-3.5 w-3.5" /> : language === "french" ? <FlagFR className="w-4 h-3 rounded-sm" /> : <FlagEN className="w-4 h-3 rounded-sm" />}
               {language === "nask" ? "NASK" : language === "biology" ? "Biologie" : language === "french" ? "Frans" : "Engels"}
             </button>
+            {language === "french" && (
+              <button
+                onClick={() => setShowNiveauPicker(true)}
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors cursor-pointer"
+              >
+                <GraduationCap className="h-3.5 w-3.5" />
+                {niveau === "vmbo-havo" ? "VMBO-HAVO" : "HAVO-VWO"}
+              </button>
+            )}
             <button
               onClick={() => setShowChapterPicker(true)}
               className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors cursor-pointer"
@@ -472,7 +485,7 @@ const Index = () => {
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="font-medium">Sectie {section}</span>
+                    <span className="font-medium">{section === "Nummers" ? "🔢 Nummers 1-20" : `Sectie ${section}`}</span>
                     {isSelected && <span className="text-primary text-xs">✓</span>}
                   </div>
                 </button>
@@ -499,6 +512,40 @@ const Index = () => {
         </DialogContent>
       </Dialog>
 
+      {/* Niveau picker dialog */}
+      <Dialog open={showNiveauPicker} onOpenChange={setShowNiveauPicker}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Kies je niveau</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-1.5">
+            {([
+              { id: "vmbo-havo" as Niveau, label: "VMBO-HAVO", desc: "Leerjaar 1 · Basisniveau" },
+              { id: "havo-vwo" as Niveau, label: "HAVO-VWO", desc: "Leerjaar 1 · Hoger niveau" },
+            ]).map((n) => {
+              const isActive = niveau === n.id;
+              return (
+                <button
+                  key={n.id}
+                  onClick={() => { setNiveau(n.id); setShowNiveauPicker(false); }}
+                  className={`w-full text-left px-3 py-2 rounded-lg border text-sm transition-all ${
+                    isActive
+                      ? "border-primary bg-primary/10 font-medium"
+                      : "border-border hover:border-primary/50 hover:bg-primary/5 cursor-pointer"
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <GraduationCap className="h-4 w-4" />
+                    <span className="font-medium">{n.label}</span>
+                  </div>
+                  <span className="text-xs text-muted-foreground">{n.desc}</span>
+                </button>
+              );
+            })}
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <ObamaPopup />
       <AuthDialog open={showLoginPrompt} onOpenChange={setShowLoginPrompt} />
 
@@ -515,6 +562,20 @@ const Index = () => {
               <span className="inline-flex items-center gap-1.5">{language === "nask" ? <FlaskConical className="h-3.5 w-3.5" /> : language === "biology" ? <Microscope className="h-3.5 w-3.5" /> : language === "french" ? <FlagFR className="w-4 h-3 rounded-sm" /> : <FlagEN className="w-4 h-3 rounded-sm" />} {language === "nask" ? "NASK" : language === "biology" ? "Biologie" : language === "french" ? "Frans" : "Engels"}</span>
             </button>
           </div>
+          {language === "french" && (
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <GraduationCap className="h-4 w-4" />
+                <span className="text-sm font-medium">Niveau</span>
+              </div>
+              <button
+                onClick={() => { setShowSettings(false); setShowNiveauPicker(true); }}
+                className="text-sm font-medium px-3 py-1 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+              >
+                {niveau === "vmbo-havo" ? "VMBO-HAVO" : "HAVO-VWO"}
+              </button>
+            </div>
+          )}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <BookMarked className="h-4 w-4" />
