@@ -290,8 +290,8 @@ const Index = () => {
             {(language === "nask" || language === "biology") ? "Kies een spel en oefen je begrippen" : "Kies een spel en oefen je woordenschat"}
           </p>
 
-          {/* Language & chapter badges */}
-          <div className="flex items-center justify-center gap-2">
+          {/* Language, niveau & chapter badges */}
+          <div className="flex items-center justify-center gap-2 flex-wrap">
             <button
               onClick={() => setShowLanguagePicker(true)}
               className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors cursor-pointer"
@@ -299,6 +299,15 @@ const Index = () => {
               {language === "nask" ? <FlaskConical className="h-3.5 w-3.5" /> : language === "biology" ? <Microscope className="h-3.5 w-3.5" /> : language === "french" ? <FlagFR className="w-4 h-3 rounded-sm" /> : <FlagEN className="w-4 h-3 rounded-sm" />}
               {language === "nask" ? "NASK" : language === "biology" ? "Biologie" : language === "french" ? "Frans" : "Engels"}
             </button>
+            {language === "french" && (
+              <button
+                onClick={() => setShowNiveauPicker(true)}
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors cursor-pointer"
+              >
+                <GraduationCap className="h-3.5 w-3.5" />
+                {niveau === "vmbo-havo" ? "VMBO-HAVO" : "HAVO-VWO"}
+              </button>
+            )}
             <button
               onClick={() => setShowChapterPicker(true)}
               className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors cursor-pointer"
