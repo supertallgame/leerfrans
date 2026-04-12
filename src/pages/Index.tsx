@@ -562,6 +562,20 @@ const Index = () => {
               <span className="inline-flex items-center gap-1.5">{language === "nask" ? <FlaskConical className="h-3.5 w-3.5" /> : language === "biology" ? <Microscope className="h-3.5 w-3.5" /> : language === "french" ? <FlagFR className="w-4 h-3 rounded-sm" /> : <FlagEN className="w-4 h-3 rounded-sm" />} {language === "nask" ? "NASK" : language === "biology" ? "Biologie" : language === "french" ? "Frans" : "Engels"}</span>
             </button>
           </div>
+          {language === "french" && (
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <GraduationCap className="h-4 w-4" />
+                <span className="text-sm font-medium">Niveau</span>
+              </div>
+              <button
+                onClick={() => { setShowSettings(false); setShowNiveauPicker(true); }}
+                className="text-sm font-medium px-3 py-1 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+              >
+                {niveau === "vmbo-havo" ? "VMBO-HAVO" : "HAVO-VWO"}
+              </button>
+            </div>
+          )}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <BookMarked className="h-4 w-4" />
