@@ -95,8 +95,8 @@ const Index = () => {
   const [user, setUser] = useState<any>(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [disabledSubjects, setDisabledSubjects] = useState<string[]>([]);
-  const [explorerEnabled, setExplorerEnabled] = useState(true);
-  const [aiTeacherEnabled, setAiTeacherEnabled] = useState(true);
+  const [explorerEnabled, setExplorerEnabled] = useState(false);
+  const [aiTeacherEnabled, setAiTeacherEnabled] = useState(false);
   const [disabledNiveaus, setDisabledNiveaus] = useState<string[]>([]);
   const [isHeadAdmin, setIsHeadAdmin] = useState(false);
 
