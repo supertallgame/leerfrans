@@ -96,6 +96,8 @@ const Index = () => {
   const [authLoading, setAuthLoading] = useState(true);
   const [disabledSubjects, setDisabledSubjects] = useState<string[]>([]);
   const [explorerEnabled, setExplorerEnabled] = useState(true);
+  const [aiTeacherEnabled, setAiTeacherEnabled] = useState(true);
+  const [disabledNiveaus, setDisabledNiveaus] = useState<string[]>([]);
   const [isHeadAdmin, setIsHeadAdmin] = useState(false);
 
   const chaptersForLanguage = getChaptersForLanguage(language, niveau);
@@ -106,42 +108,25 @@ const Index = () => {
 
   const ALL_SUBJECT_IDS: Language[] = ["french", "english", "nask", "biology"];
 
-  // Fetch disabled subjects + realtime subscription for instant updates
+  // Fetch settings + polling for instant updates
   useEffect(() => {
-    const fetchDisabled = () => {
-      supabase
-        .rpc("get_public_setting", { p_key: "disabled_subjects" })
-        .then(({ data }) => {
-          if (data && Array.isArray(data)) {
-            setDisabledSubjects(data as string[]);
-          }
-        });
+    const fetchAll = () => {
+      supabase.rpc("get_public_setting", { p_key: "disabled_subjects" }).then(({ data }) => {
+        if (data && Array.isArray(data)) setDisabledSubjects(data as string[]);
+      });
+      supabase.rpc("get_public_setting", { p_key: "explorer_enabled" }).then(({ data }) => {
+        setExplorerEnabled(data !== false);
+      });
+      supabase.rpc("get_public_setting", { p_key: "ai_teacher_enabled" }).then(({ data }) => {
+        setAiTeacherEnabled(data !== false);
+      });
+      supabase.rpc("get_public_setting", { p_key: "disabled_niveaus" }).then(({ data }) => {
+        if (data && Array.isArray(data)) setDisabledNiveaus(data as string[]);
+      });
     };
-    const fetchExplorer = () => {
-      supabase
-        .rpc("get_public_setting", { p_key: "explorer_enabled" })
-        .then(({ data }) => {
-          setExplorerEnabled(data !== false);
-        });
-    };
-    fetchDisabled();
-    fetchExplorer();
-
-    const channel = supabase
-      .channel("admin_settings_changes")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "admin_settings", filter: "key=eq.disabled_subjects" },
-        () => fetchDisabled()
-      )
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "admin_settings", filter: "key=eq.explorer_enabled" },
-        () => fetchExplorer()
-      )
-      .subscribe();
-
-    return () => { supabase.removeChannel(channel); };
+    fetchAll();
+    const interval = setInterval(fetchAll, 15000);
+    return () => clearInterval(interval);
   }, []);
 
   // If language becomes disabled, redirect to first available and kick back to menu
@@ -211,11 +196,11 @@ const Index = () => {
 
   const hasSentences = activeVocabulary.some((v) => v.french.includes(" ") && v.french.length > 15);
   const isVmboHavoCh3 = niveau === "vmbo-havo" && chapterId === "chapitre3";
-  const games = language === "biology" ? biologyGames : (language === "nask") ? naskGames : languageGames.filter((g) => {
+  const filterAiTeacher = (list: typeof languageGames) => aiTeacherEnabled ? list : list.filter(g => g.id !== "ai");
+  const games = language === "biology" ? filterAiTeacher(biologyGames) : (language === "nask") ? filterAiTeacher(naskGames) : filterAiTeacher(languageGames).filter((g) => {
     if ((g as any).frenchOnly && language !== "french") return false;
     if (g.id === "explorer" && !explorerEnabled) return false;
     if (g.id === "sentence" && !hasSentences) return false;
-    // être and kloktijden only in vmbo-havo chapitre 3 french
     if ((g.id === "etre" || g.id === "clocktimes") && !isVmboHavoCh3) return false;
     return true;
   });
@@ -522,7 +507,7 @@ const Index = () => {
             {([
               { id: "vmbo-havo" as Niveau, label: "VMBO-HAVO", desc: "Leerjaar 1 · Basisniveau" },
               { id: "havo-vwo" as Niveau, label: "HAVO-VWO", desc: "Leerjaar 1 · Hoger niveau" },
-            ]).map((n) => {
+            ]).filter((n) => !disabledNiveaus.includes(n.id)).map((n) => {
               const isActive = niveau === n.id;
               return (
                 <button

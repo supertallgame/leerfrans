@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { Shield, Home, Crown, Users, ShieldPlus, ShieldMinus, Search, Map, ShieldCheck, ArrowUpCircle, ArrowDownCircle, BarChart3, Megaphone, Plus, Trash2, X, ImageIcon } from "lucide-react";
+import { Shield, Home, Crown, Users, ShieldPlus, ShieldMinus, Search, Map, ShieldCheck, ArrowUpCircle, ArrowDownCircle, BarChart3, Megaphone, Plus, Trash2, X, ImageIcon, Bot, GraduationCap } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -117,6 +117,8 @@ export default function Owner() {
   const [searchQuery, setSearchQuery] = useState("");
   const [promoting, setPromoting] = useState<string | null>(null);
   const [explorerEnabled, setExplorerEnabled] = useState(true);
+  const [aiTeacherEnabled, setAiTeacherEnabled] = useState(true);
+  const [disabledNiveaus, setDisabledNiveaus] = useState<string[]>([]);
 
   // Poll management
   const [polls, setPolls] = useState<any[]>([]);
@@ -142,7 +144,7 @@ export default function Owner() {
       return;
     }
     setIsOwner(true);
-    await Promise.all([loadRoles(), loadUsers(), loadExplorerSetting(), loadPolls(), loadAnnouncements()]);
+    await Promise.all([loadRoles(), loadUsers(), loadExplorerSetting(), loadAiTeacherSetting(), loadNiveauSetting(), loadPolls(), loadAnnouncements()]);
     setLoading(false);
   };
 
@@ -267,24 +269,42 @@ export default function Owner() {
   };
 
   const loadExplorerSetting = async () => {
-    const { data } = await supabase
-      .from("admin_settings")
-      .select("value")
-      .eq("key", "explorer_enabled")
-      .maybeSingle();
+    const { data } = await supabase.from("admin_settings").select("value").eq("key", "explorer_enabled").maybeSingle();
     if (data) setExplorerEnabled(data.value !== false);
   };
 
+  const loadAiTeacherSetting = async () => {
+    const { data } = await supabase.from("admin_settings").select("value").eq("key", "ai_teacher_enabled").maybeSingle();
+    if (data) setAiTeacherEnabled(data.value !== false);
+  };
+
+  const loadNiveauSetting = async () => {
+    const { data } = await supabase.from("admin_settings").select("value").eq("key", "disabled_niveaus").maybeSingle();
+    if (data && Array.isArray(data.value)) setDisabledNiveaus(data.value as string[]);
+  };
+
   const toggleExplorer = async (checked: boolean) => {
-    const { error } = await supabase
-      .from("admin_settings")
-      .upsert({ key: "explorer_enabled", value: checked as any, updated_at: new Date().toISOString() } as any, { onConflict: "key" });
-    if (error) {
-      toast.error("Kon instelling niet opslaan");
-      return;
-    }
+    const { error } = await supabase.from("admin_settings").upsert({ key: "explorer_enabled", value: checked as any, updated_at: new Date().toISOString() } as any, { onConflict: "key" });
+    if (error) { toast.error("Kon instelling niet opslaan"); return; }
     setExplorerEnabled(checked);
     toast.success(checked ? "Verkenner ingeschakeld" : "Verkenner uitgeschakeld");
+  };
+
+  const toggleAiTeacher = async (checked: boolean) => {
+    const { error } = await supabase.from("admin_settings").upsert({ key: "ai_teacher_enabled", value: checked as any, updated_at: new Date().toISOString() } as any, { onConflict: "key" });
+    if (error) { toast.error("Kon instelling niet opslaan"); return; }
+    setAiTeacherEnabled(checked);
+    toast.success(checked ? "AI Leraar ingeschakeld" : "AI Leraar uitgeschakeld");
+  };
+
+  const toggleNiveau = async (niveauId: string, enabled: boolean) => {
+    const newDisabled = enabled
+      ? disabledNiveaus.filter((n) => n !== niveauId)
+      : [...disabledNiveaus, niveauId];
+    const { error } = await supabase.from("admin_settings").upsert({ key: "disabled_niveaus", value: newDisabled as any, updated_at: new Date().toISOString() } as any, { onConflict: "key" });
+    if (error) { toast.error("Kon instelling niet opslaan"); return; }
+    setDisabledNiveaus(newDisabled);
+    toast.success(`${niveauId.toUpperCase()} ${enabled ? "ingeschakeld" : "uitgeschakeld"}`);
   };
 
   const promoteToAdmin = async (user: AppUser) => {
@@ -512,7 +532,7 @@ export default function Owner() {
               <Map className="h-5 w-5 text-primary" /> Spellen
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Map className="h-4 w-4 text-muted-foreground" />
@@ -520,6 +540,39 @@ export default function Owner() {
               </div>
               <Switch checked={explorerEnabled} onCheckedChange={toggleExplorer} />
             </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Bot className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-medium">AI Leraar</span>
+              </div>
+              <Switch checked={aiTeacherEnabled} onCheckedChange={toggleAiTeacher} />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Niveau settings */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <GraduationCap className="h-5 w-5 text-primary" /> Niveaus
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {[
+              { id: "vmbo-havo", label: "VMBO-HAVO" },
+              { id: "havo-vwo", label: "HAVO-VWO" },
+            ].map((n) => (
+              <div key={n.id} className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <GraduationCap className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm font-medium">{n.label}</span>
+                </div>
+                <Switch
+                  checked={!disabledNiveaus.includes(n.id)}
+                  onCheckedChange={(checked) => toggleNiveau(n.id, checked)}
+                />
+              </div>
+            ))}
           </CardContent>
         </Card>
 
