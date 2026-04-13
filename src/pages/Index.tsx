@@ -507,7 +507,7 @@ const Index = () => {
             {([
               { id: "vmbo-havo" as Niveau, label: "VMBO-HAVO", desc: "Leerjaar 1 · Basisniveau" },
               { id: "havo-vwo" as Niveau, label: "HAVO-VWO", desc: "Leerjaar 1 · Hoger niveau" },
-            ]).map((n) => {
+            ]).filter((n) => !disabledNiveaus.includes(n.id)).map((n) => {
               const isActive = niveau === n.id;
               return (
                 <button

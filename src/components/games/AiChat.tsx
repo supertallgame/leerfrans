@@ -35,21 +35,38 @@ export default function AiChat({ onBack }: Props) {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Parse score from AI response
+  // Track score independently from AI text
+  const scoreRef = useRef({ correct: 0, total: 0 });
+
+  // Count user messages as total questions answered, parse correctness from AI response
   useEffect(() => {
-    if (messages.length === 0) return;
-    const lastAssistant = [...messages].reverse().find((m) => m.role === "assistant");
-    if (!lastAssistant) return;
-    const content = lastAssistant.content;
-    // Look for patterns like "Score: 3/5", "3 goed, 2 fout", "3 correct, 2 incorrect"
-    const scoreMatch = content.match(/(\d+)\s*(?:\/|van|uit)\s*(\d+)/i) 
-      || content.match(/(\d+)\s*(?:goed|correct|juist|správn)/i);
-    if (scoreMatch) {
-      const correct = parseInt(scoreMatch[1]);
-      const total = scoreMatch[2] ? parseInt(scoreMatch[2]) : correct + score.wrong;
-      setScore({ correct, wrong: Math.max(0, total - correct) });
+    if (messages.length < 2) return;
+    const lastAssistant = messages[messages.length - 1];
+    if (lastAssistant.role !== "assistant") return;
+    const content = lastAssistant.content.toLowerCase();
+    
+    // Check if the AI is responding to a user answer (not the first greeting)
+    const userMsgCount = messages.filter(m => m.role === "user").length;
+    if (userMsgCount === 0) return;
+    
+    // Detect correct answer patterns
+    const isCorrect = /(?:goed|correct|juist|helemaal|klopt|prima|uitstekend|fantastisch|geweldig|topstart|bravo|excellent|perfect|👏|🎉|✅|💪)/.test(content)
+      && !/(?:niet goed|niet correct|niet juist|helaas|fout|verkeerd|incorrect|onjuist)/.test(content);
+    
+    scoreRef.current.total = userMsgCount;
+    if (isCorrect) {
+      // Only increment if this is a new correct answer
+      const prevCorrect = score.correct;
+      const newCorrect = prevCorrect + 1;
+      setScore({ correct: newCorrect, wrong: userMsgCount - newCorrect });
+    } else {
+      // Check if it's actually an answer evaluation (not a hint response)
+      const isEvaluation = /(?:fout|verkeerd|incorrect|helaas|niet goed|niet juist|onjuist|het juiste antwoord|correct antwoord|goed|correct|juist)/.test(content);
+      if (isEvaluation) {
+        setScore(prev => ({ correct: prev.correct, wrong: userMsgCount - prev.correct }));
+      }
     }
-  }, [messages]);
+  }, [messages.length]);
 
   const vocabSample = activeVocabulary.slice(0, 30).map((v) => ({
     dutch: v.dutch,
