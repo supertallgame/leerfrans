@@ -95,8 +95,8 @@ const Index = () => {
   const [user, setUser] = useState<any>(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [disabledSubjects, setDisabledSubjects] = useState<string[]>([]);
-  const [explorerEnabled, setExplorerEnabled] = useState(true);
-  const [aiTeacherEnabled, setAiTeacherEnabled] = useState(true);
+  const [explorerEnabled, setExplorerEnabled] = useState(false);
+  const [aiTeacherEnabled, setAiTeacherEnabled] = useState(false);
   const [disabledNiveaus, setDisabledNiveaus] = useState<string[]>([]);
   const [isHeadAdmin, setIsHeadAdmin] = useState(false);
 
@@ -115,10 +115,10 @@ const Index = () => {
         if (data && Array.isArray(data)) setDisabledSubjects(data as string[]);
       });
       supabase.rpc("get_public_setting", { p_key: "explorer_enabled" }).then(({ data }) => {
-        setExplorerEnabled(data !== false);
+        setExplorerEnabled(data === true);
       });
       supabase.rpc("get_public_setting", { p_key: "ai_teacher_enabled" }).then(({ data }) => {
-        setAiTeacherEnabled(data !== false);
+        setAiTeacherEnabled(data === true);
       });
       supabase.rpc("get_public_setting", { p_key: "disabled_niveaus" }).then(({ data }) => {
         if (data && Array.isArray(data)) setDisabledNiveaus(data as string[]);
