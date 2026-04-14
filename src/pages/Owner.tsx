@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { Shield, Home, Crown, Users, ShieldPlus, ShieldMinus, Search, Map, ShieldCheck, ArrowUpCircle, ArrowDownCircle, BarChart3, Megaphone, Plus, Trash2, X, ImageIcon, Bot, GraduationCap } from "lucide-react";
+import { Shield, Home, Crown, Users, ShieldPlus, ShieldMinus, Search, Map, ShieldCheck, ArrowUpCircle, ArrowDownCircle, BarChart3, Megaphone, Plus, Trash2, X, ImageIcon, Bot, GraduationCap, Train } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -119,6 +119,7 @@ export default function Owner() {
   const [explorerEnabled, setExplorerEnabled] = useState(true);
   const [aiTeacherEnabled, setAiTeacherEnabled] = useState(true);
   const [disabledNiveaus, setDisabledNiveaus] = useState<string[]>([]);
+  const [polarExpressEnabled, setPolarExpressEnabled] = useState(false);
 
   // Poll management
   const [polls, setPolls] = useState<any[]>([]);
@@ -144,7 +145,7 @@ export default function Owner() {
       return;
     }
     setIsOwner(true);
-    await Promise.all([loadRoles(), loadUsers(), loadExplorerSetting(), loadAiTeacherSetting(), loadNiveauSetting(), loadPolls(), loadAnnouncements()]);
+    await Promise.all([loadRoles(), loadUsers(), loadExplorerSetting(), loadAiTeacherSetting(), loadNiveauSetting(), loadPolarExpressSetting(), loadPolls(), loadAnnouncements()]);
     setLoading(false);
   };
 
