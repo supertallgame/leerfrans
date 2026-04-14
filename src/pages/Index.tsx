@@ -51,6 +51,7 @@ const languageGames = [
   { id: "clocktimes" as Game, title: "Kloktijden", description: "Leer hoe je de tijd zegt in het Frans", icon: Clock, color: "bg-[hsl(var(--success))]/10 text-[hsl(var(--success))]", frenchOnly: true },
   { id: "etre" as Game, title: "Être (zijn)", description: "Oefen de vervoeging van être", icon: BookType, color: "bg-destructive/10 text-destructive", frenchOnly: true },
   { id: "explorer" as Game, title: "Verkenner", description: "Loop rond, beantwoord vragen en verzamel sterren", icon: Map, color: "bg-[hsl(var(--success))]/10 text-[hsl(var(--success))]", frenchOnly: true },
+  { id: "grammar" as Game, title: "Grammar Quiz", description: "Oefen Engelse grammatica-regels", icon: BookText, color: "bg-primary/10 text-primary", englishOnly: true },
 ];
 
 const naskGames = [
