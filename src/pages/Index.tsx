@@ -205,9 +205,13 @@ const Index = () => {
 
   const hasSentences = activeVocabulary.some((v) => v.french.includes(" ") && v.french.length > 15);
   const isVmboHavoCh3 = niveau === "vmbo-havo" && chapterId === "chapitre3";
+  const isEnglishCh4 = language === "english" && chapterId === "en_chapter4";
   const filterAiTeacher = (list: typeof languageGames) => aiTeacherEnabled ? list : list.filter(g => g.id !== "ai");
   const games = language === "biology" ? filterAiTeacher(biologyGames) : (language === "nask") ? filterAiTeacher(naskGames) : filterAiTeacher(languageGames).filter((g) => {
     if ((g as any).frenchOnly && language !== "french") return false;
+    if ((g as any).englishOnly && language !== "english") return false;
+    if (g.id === "grammar" && !isEnglishCh4) return false;
+    if (g.id === "grammar" && !includeGrammar) return false;
     if (g.id === "explorer" && !explorerEnabled) return false;
     if (g.id === "sentence" && !hasSentences) return false;
     if ((g.id === "etre" || g.id === "clocktimes") && !isVmboHavoCh3) return false;
