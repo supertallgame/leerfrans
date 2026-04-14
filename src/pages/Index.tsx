@@ -470,7 +470,7 @@ const Index = () => {
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="font-medium">{section === "Nummers" ? "🔢 Nummers 1-20" : `Sectie ${section}`}</span>
+                    <span className="font-medium">{section === "Nummers" ? "🔢 Nummers 1-20" : section.length > 1 ? section : `Sectie ${section}`}</span>
                     {isSelected && <span className="text-primary text-xs">✓</span>}
                   </div>
                 </button>
