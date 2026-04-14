@@ -842,7 +842,7 @@ export const englishChapters: Chapter[] = [
   {
     id: "en_chapter4",
     title: "Chapter 4",
-    description: "Sport & bewegen",
+    description: "Sport, werk & vrije tijd",
     words: englishChapter4Words,
     requiresLogin: false,
   },
