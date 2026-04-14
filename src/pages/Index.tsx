@@ -3,7 +3,8 @@ import { useThemeSync } from "@/hooks/use-theme-sync";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { BookOpen, Brain, Puzzle, Keyboard, Users, PenTool, MessageSquare, Bot, Settings, Star, Lock, BookMarked, FlaskConical, CheckCircle, Layers, Microscope, Bone, Clock, BookType, Map, ShieldCheck, GraduationCap, Hash } from "lucide-react";
+import { BookOpen, Brain, Puzzle, Keyboard, Users, PenTool, MessageSquare, Bot, Settings, Star, Lock, BookMarked, FlaskConical, CheckCircle, Layers, Microscope, Bone, Clock, BookType, Map, ShieldCheck, GraduationCap, Hash, BookText } from "lucide-react";
+import polarExpressImg from "@/assets/polar-express.png";
 import { FlagNL, FlagFR } from "@/components/Flags";
 import { getChaptersForLanguage, getChapter, getForeignLabel, getForeignLabelNative, Language, Niveau } from "@/data/vocabulary";
 import { useChapter } from "@/contexts/ChapterContext";
@@ -35,8 +36,9 @@ const SkeletonLabel = lazy(() => import("@/components/games/SkeletonLabel"));
 const ClockTimes = lazy(() => import("@/components/games/ClockTimes"));
 const EtreConjugation = lazy(() => import("@/components/games/EtreConjugation"));
 const FrenchExplorer = lazy(() => import("@/components/games/FrenchExplorer"));
+const GrammarQuiz = lazy(() => import("@/components/games/GrammarQuiz"));
 
-type Game = "menu" | "flashcards" | "quiz" | "match" | "type" | "multiplayer" | "fill" | "sentence" | "ai" | "truefalse" | "memory" | "skeleton" | "clocktimes" | "etre" | "explorer";
+type Game = "menu" | "flashcards" | "quiz" | "match" | "type" | "multiplayer" | "fill" | "sentence" | "ai" | "truefalse" | "memory" | "skeleton" | "clocktimes" | "etre" | "explorer" | "grammar";
 
 const languageGames = [
   { id: "flashcards" as Game, title: "Flashcards", description: "Draai kaarten om en leer de woorden", icon: BookOpen, color: "bg-primary/10 text-primary" },
@@ -49,6 +51,7 @@ const languageGames = [
   { id: "clocktimes" as Game, title: "Kloktijden", description: "Leer hoe je de tijd zegt in het Frans", icon: Clock, color: "bg-[hsl(var(--success))]/10 text-[hsl(var(--success))]", frenchOnly: true },
   { id: "etre" as Game, title: "Être (zijn)", description: "Oefen de vervoeging van être", icon: BookType, color: "bg-destructive/10 text-destructive", frenchOnly: true },
   { id: "explorer" as Game, title: "Verkenner", description: "Loop rond, beantwoord vragen en verzamel sterren", icon: Map, color: "bg-[hsl(var(--success))]/10 text-[hsl(var(--success))]", frenchOnly: true },
+  { id: "grammar" as Game, title: "Grammar Quiz", description: "Oefen Engelse grammatica-regels", icon: BookText, color: "bg-primary/10 text-primary", englishOnly: true },
 ];
 
 const naskGames = [
@@ -99,6 +102,8 @@ const Index = () => {
   const [aiTeacherEnabled, setAiTeacherEnabled] = useState(false);
   const [disabledNiveaus, setDisabledNiveaus] = useState<string[]>([]);
   const [isHeadAdmin, setIsHeadAdmin] = useState(false);
+  const [polarExpressEnabled, setPolarExpressEnabled] = useState(false);
+  const [includeGrammar, setIncludeGrammar] = useState(false);
 
   const chaptersForLanguage = getChaptersForLanguage(language, niveau);
   const foreignLabel = getForeignLabel(language);
@@ -122,6 +127,9 @@ const Index = () => {
       });
       supabase.rpc("get_public_setting", { p_key: "disabled_niveaus" }).then(({ data }) => {
         if (data && Array.isArray(data)) setDisabledNiveaus(data as string[]);
+      });
+      supabase.rpc("get_public_setting", { p_key: "polar_express_enabled" }).then(({ data }) => {
+        setPolarExpressEnabled(data === true);
       });
     };
     fetchAll();
@@ -193,12 +201,17 @@ const Index = () => {
   if (activeGame === "clocktimes") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6"><ClockTimes onBack={() => setActiveGame("menu")} /></div></Suspense>;
   if (activeGame === "etre") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6"><EtreConjugation onBack={() => setActiveGame("menu")} /></div></Suspense>;
   if (activeGame === "explorer") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6"><FrenchExplorer onBack={() => setActiveGame("menu")} /></div></Suspense>;
+  if (activeGame === "grammar") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6"><GrammarQuiz onBack={() => setActiveGame("menu")} /></div></Suspense>;
 
   const hasSentences = activeVocabulary.some((v) => v.french.includes(" ") && v.french.length > 15);
   const isVmboHavoCh3 = niveau === "vmbo-havo" && chapterId === "chapitre3";
+  const isEnglishCh4 = language === "english" && chapterId === "en_chapter4";
   const filterAiTeacher = (list: typeof languageGames) => aiTeacherEnabled ? list : list.filter(g => g.id !== "ai");
   const games = language === "biology" ? filterAiTeacher(biologyGames) : (language === "nask") ? filterAiTeacher(naskGames) : filterAiTeacher(languageGames).filter((g) => {
     if ((g as any).frenchOnly && language !== "french") return false;
+    if ((g as any).englishOnly && language !== "english") return false;
+    if (g.id === "grammar" && !isEnglishCh4) return false;
+    if (g.id === "grammar" && !includeGrammar) return false;
     if (g.id === "explorer" && !explorerEnabled) return false;
     if (g.id === "sentence" && !hasSentences) return false;
     if ((g.id === "etre" || g.id === "clocktimes") && !isVmboHavoCh3) return false;
@@ -476,6 +489,21 @@ const Index = () => {
                 </button>
               );
             })}
+            {isEnglishCh4 && (
+              <button
+                onClick={() => setIncludeGrammar(!includeGrammar)}
+                className={`w-full text-left px-3 py-2.5 rounded-lg border text-sm transition-all ${
+                  includeGrammar
+                    ? "border-primary bg-primary/10 font-medium"
+                    : "border-border hover:border-primary/50 hover:bg-primary/5 cursor-pointer"
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="font-medium">📖 Grammar</span>
+                  {includeGrammar && <span className="text-primary text-xs">✓</span>}
+                </div>
+              </button>
+            )}
           </div>
           <div className="flex gap-2 pt-2">
             <Button
@@ -532,6 +560,22 @@ const Index = () => {
       </Dialog>
 
       <ObamaPopup />
+
+      {/* Polar Express Easter Egg */}
+      {polarExpressEnabled && (
+        <a
+          href="https://www.youtube.com/watch?v=TQhRqtt-Fpo"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="fixed bottom-4 left-4 z-40 opacity-80 hover:opacity-100 transition-opacity"
+        >
+          <img
+            src={polarExpressImg}
+            alt="Polar Express"
+            className="w-16 h-16 md:w-20 md:h-20 rounded-lg shadow-lg object-cover"
+          />
+        </a>
+      )}
       <AuthDialog open={showLoginPrompt} onOpenChange={setShowLoginPrompt} />
 
       <SettingsDialog open={showSettings} onOpenChange={setShowSettings} user={user}>

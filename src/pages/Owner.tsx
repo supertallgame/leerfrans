@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { Shield, Home, Crown, Users, ShieldPlus, ShieldMinus, Search, Map, ShieldCheck, ArrowUpCircle, ArrowDownCircle, BarChart3, Megaphone, Plus, Trash2, X, ImageIcon, Bot, GraduationCap } from "lucide-react";
+import { Shield, Home, Crown, Users, ShieldPlus, ShieldMinus, Search, Map, ShieldCheck, ArrowUpCircle, ArrowDownCircle, BarChart3, Megaphone, Plus, Trash2, X, ImageIcon, Bot, GraduationCap, Train } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -119,6 +119,7 @@ export default function Owner() {
   const [explorerEnabled, setExplorerEnabled] = useState(true);
   const [aiTeacherEnabled, setAiTeacherEnabled] = useState(true);
   const [disabledNiveaus, setDisabledNiveaus] = useState<string[]>([]);
+  const [polarExpressEnabled, setPolarExpressEnabled] = useState(false);
 
   // Poll management
   const [polls, setPolls] = useState<any[]>([]);
@@ -144,7 +145,7 @@ export default function Owner() {
       return;
     }
     setIsOwner(true);
-    await Promise.all([loadRoles(), loadUsers(), loadExplorerSetting(), loadAiTeacherSetting(), loadNiveauSetting(), loadPolls(), loadAnnouncements()]);
+    await Promise.all([loadRoles(), loadUsers(), loadExplorerSetting(), loadAiTeacherSetting(), loadNiveauSetting(), loadPolarExpressSetting(), loadPolls(), loadAnnouncements()]);
     setLoading(false);
   };
 
@@ -281,6 +282,18 @@ export default function Owner() {
   const loadNiveauSetting = async () => {
     const { data } = await supabase.from("admin_settings").select("value").eq("key", "disabled_niveaus").maybeSingle();
     if (data && Array.isArray(data.value)) setDisabledNiveaus(data.value as string[]);
+  };
+
+  const loadPolarExpressSetting = async () => {
+    const { data } = await supabase.from("admin_settings").select("value").eq("key", "polar_express_enabled").maybeSingle();
+    if (data) setPolarExpressEnabled(data.value === true);
+  };
+
+  const togglePolarExpress = async (checked: boolean) => {
+    const { error } = await supabase.from("admin_settings").upsert({ key: "polar_express_enabled", value: checked as any, updated_at: new Date().toISOString() } as any, { onConflict: "key" });
+    if (error) { toast.error("Kon instelling niet opslaan"); return; }
+    setPolarExpressEnabled(checked);
+    toast.success(checked ? "Polar Express ingeschakeld" : "Polar Express uitgeschakeld");
   };
 
   const toggleExplorer = async (checked: boolean) => {
@@ -546,6 +559,13 @@ export default function Owner() {
                 <span className="text-sm font-medium">AI Leraar</span>
               </div>
               <Switch checked={aiTeacherEnabled} onCheckedChange={toggleAiTeacher} />
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Train className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-medium">Polar Express Easter Egg</span>
+              </div>
+              <Switch checked={polarExpressEnabled} onCheckedChange={togglePolarExpress} />
             </div>
           </CardContent>
         </Card>
