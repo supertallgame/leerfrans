@@ -560,6 +560,22 @@ const Index = () => {
       </Dialog>
 
       <ObamaPopup />
+
+      {/* Polar Express Easter Egg */}
+      {polarExpressEnabled && (
+        <a
+          href="https://www.youtube.com/watch?v=TQhRqtt-Fpo"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="fixed bottom-4 left-4 z-40 opacity-80 hover:opacity-100 transition-opacity"
+        >
+          <img
+            src={polarExpressImg}
+            alt="Polar Express"
+            className="w-16 h-16 md:w-20 md:h-20 rounded-lg shadow-lg object-cover"
+          />
+        </a>
+      )}
       <AuthDialog open={showLoginPrompt} onOpenChange={setShowLoginPrompt} />
 
       <SettingsDialog open={showSettings} onOpenChange={setShowSettings} user={user}>
