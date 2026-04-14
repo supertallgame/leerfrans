@@ -102,6 +102,8 @@ const Index = () => {
   const [aiTeacherEnabled, setAiTeacherEnabled] = useState(false);
   const [disabledNiveaus, setDisabledNiveaus] = useState<string[]>([]);
   const [isHeadAdmin, setIsHeadAdmin] = useState(false);
+  const [polarExpressEnabled, setPolarExpressEnabled] = useState(false);
+  const [includeGrammar, setIncludeGrammar] = useState(false);
 
   const chaptersForLanguage = getChaptersForLanguage(language, niveau);
   const foreignLabel = getForeignLabel(language);
@@ -125,6 +127,9 @@ const Index = () => {
       });
       supabase.rpc("get_public_setting", { p_key: "disabled_niveaus" }).then(({ data }) => {
         if (data && Array.isArray(data)) setDisabledNiveaus(data as string[]);
+      });
+      supabase.rpc("get_public_setting", { p_key: "polar_express_enabled" }).then(({ data }) => {
+        setPolarExpressEnabled(data === true);
       });
     };
     fetchAll();
