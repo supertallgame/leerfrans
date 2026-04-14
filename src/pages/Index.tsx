@@ -3,7 +3,8 @@ import { useThemeSync } from "@/hooks/use-theme-sync";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { BookOpen, Brain, Puzzle, Keyboard, Users, PenTool, MessageSquare, Bot, Settings, Star, Lock, BookMarked, FlaskConical, CheckCircle, Layers, Microscope, Bone, Clock, BookType, Map, ShieldCheck, GraduationCap, Hash } from "lucide-react";
+import { BookOpen, Brain, Puzzle, Keyboard, Users, PenTool, MessageSquare, Bot, Settings, Star, Lock, BookMarked, FlaskConical, CheckCircle, Layers, Microscope, Bone, Clock, BookType, Map, ShieldCheck, GraduationCap, Hash, BookText } from "lucide-react";
+import polarExpressImg from "@/assets/polar-express.png";
 import { FlagNL, FlagFR } from "@/components/Flags";
 import { getChaptersForLanguage, getChapter, getForeignLabel, getForeignLabelNative, Language, Niveau } from "@/data/vocabulary";
 import { useChapter } from "@/contexts/ChapterContext";
@@ -35,8 +36,9 @@ const SkeletonLabel = lazy(() => import("@/components/games/SkeletonLabel"));
 const ClockTimes = lazy(() => import("@/components/games/ClockTimes"));
 const EtreConjugation = lazy(() => import("@/components/games/EtreConjugation"));
 const FrenchExplorer = lazy(() => import("@/components/games/FrenchExplorer"));
+const GrammarQuiz = lazy(() => import("@/components/games/GrammarQuiz"));
 
-type Game = "menu" | "flashcards" | "quiz" | "match" | "type" | "multiplayer" | "fill" | "sentence" | "ai" | "truefalse" | "memory" | "skeleton" | "clocktimes" | "etre" | "explorer";
+type Game = "menu" | "flashcards" | "quiz" | "match" | "type" | "multiplayer" | "fill" | "sentence" | "ai" | "truefalse" | "memory" | "skeleton" | "clocktimes" | "etre" | "explorer" | "grammar";
 
 const languageGames = [
   { id: "flashcards" as Game, title: "Flashcards", description: "Draai kaarten om en leer de woorden", icon: BookOpen, color: "bg-primary/10 text-primary" },
