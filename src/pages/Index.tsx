@@ -489,6 +489,21 @@ const Index = () => {
                 </button>
               );
             })}
+            {isEnglishCh4 && (
+              <button
+                onClick={() => setIncludeGrammar(!includeGrammar)}
+                className={`w-full text-left px-3 py-2.5 rounded-lg border text-sm transition-all ${
+                  includeGrammar
+                    ? "border-primary bg-primary/10 font-medium"
+                    : "border-border hover:border-primary/50 hover:bg-primary/5 cursor-pointer"
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="font-medium">📖 Grammar</span>
+                  {includeGrammar && <span className="text-primary text-xs">✓</span>}
+                </div>
+              </button>
+            )}
           </div>
           <div className="flex gap-2 pt-2">
             <Button
