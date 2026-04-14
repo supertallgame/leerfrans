@@ -560,6 +560,13 @@ export default function Owner() {
               </div>
               <Switch checked={aiTeacherEnabled} onCheckedChange={toggleAiTeacher} />
             </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Train className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-medium">Polar Express Easter Egg</span>
+              </div>
+              <Switch checked={polarExpressEnabled} onCheckedChange={togglePolarExpress} />
+            </div>
           </CardContent>
         </Card>
 
