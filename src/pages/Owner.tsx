@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { Shield, Home, Crown, Users, ShieldPlus, ShieldMinus, Search, Map, ShieldCheck, ArrowUpCircle, ArrowDownCircle, BarChart3, Megaphone, Plus, Trash2, X, ImageIcon, Bot, GraduationCap, Train } from "lucide-react";
+import { Shield, Home, Crown, Users, ShieldPlus, ShieldMinus, Search, Map, ShieldCheck, ArrowUpCircle, ArrowDownCircle, BarChart3, Megaphone, Plus, Trash2, X, ImageIcon, Bot, GraduationCap, Train, Ban } from "lucide-react";
+import BanManagement from "@/components/owner/BanManagement";
 import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -746,6 +747,18 @@ export default function Owner() {
             {announcements.length === 0 && (
               <p className="text-sm text-muted-foreground">Nog geen berichten geplaatst.</p>
             )}
+          </CardContent>
+        </Card>
+
+        {/* Ban & VPN Management */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <Ban className="h-5 w-5 text-destructive" /> Bans, Mutes & VPN
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <BanManagement />
           </CardContent>
         </Card>
 
