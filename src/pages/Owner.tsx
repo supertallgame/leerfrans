@@ -750,6 +750,18 @@ export default function Owner() {
           </CardContent>
         </Card>
 
+        {/* Ban & VPN Management */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <Ban className="h-5 w-5 text-destructive" /> Bans, Mutes & VPN
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <BanManagement />
+          </CardContent>
+        </Card>
+
         {/* Normal users */}
         <Card>
           <CardHeader>
