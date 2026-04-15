@@ -134,6 +134,20 @@ const Index = () => {
     };
     fetchAll();
     const interval = setInterval(fetchAll, 15000);
+
+    // Check IP/VPN on load (fire-and-forget)
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        supabase.functions.invoke("check-ip").then(({ data }) => {
+          if (data?.banned) {
+            // User or IP is banned - sign them out
+            supabase.auth.signOut();
+            window.location.reload();
+          }
+        }).catch(() => {});
+      }
+    });
+
     return () => clearInterval(interval);
   }, []);
 
