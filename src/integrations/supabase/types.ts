@@ -244,6 +244,30 @@ export type Database = {
           },
         ]
       }
+      ip_bans: {
+        Row: {
+          banned_by: string
+          created_at: string
+          id: string
+          ip_address: string
+          reason: string | null
+        }
+        Insert: {
+          banned_by: string
+          created_at?: string
+          id?: string
+          ip_address: string
+          reason?: string | null
+        }
+        Update: {
+          banned_by?: string
+          created_at?: string
+          id?: string
+          ip_address?: string
+          reason?: string | null
+        }
+        Relationships: []
+      }
       juf_notes: {
         Row: {
           created_at: string
@@ -495,6 +519,75 @@ export type Database = {
         }
         Relationships: []
       }
+      user_bans: {
+        Row: {
+          ban_type: string
+          banned_by: string
+          created_at: string
+          id: string
+          mute_until: string | null
+          reason: string | null
+          user_email: string
+        }
+        Insert: {
+          ban_type?: string
+          banned_by: string
+          created_at?: string
+          id?: string
+          mute_until?: string | null
+          reason?: string | null
+          user_email: string
+        }
+        Update: {
+          ban_type?: string
+          banned_by?: string
+          created_at?: string
+          id?: string
+          mute_until?: string | null
+          reason?: string | null
+          user_email?: string
+        }
+        Relationships: []
+      }
+      user_ips: {
+        Row: {
+          city: string | null
+          country: string | null
+          created_at: string
+          id: string
+          ip_address: string
+          is_vpn: boolean | null
+          last_seen_at: string
+          user_email: string
+          user_id: string | null
+          vpn_provider: string | null
+        }
+        Insert: {
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          id?: string
+          ip_address: string
+          is_vpn?: boolean | null
+          last_seen_at?: string
+          user_email: string
+          user_id?: string | null
+          vpn_provider?: string | null
+        }
+        Update: {
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          id?: string
+          ip_address?: string
+          is_vpn?: boolean | null
+          last_seen_at?: string
+          user_email?: string
+          user_id?: string | null
+          vpn_provider?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -616,6 +709,16 @@ export type Database = {
       }
     }
     Functions: {
+      check_ip_ban: { Args: { p_ip: string }; Returns: boolean }
+      check_user_ban: {
+        Args: { p_email: string }
+        Returns: {
+          ban_type: string
+          is_banned: boolean
+          mute_until: string
+          reason: string
+        }[]
+      }
       create_game_room:
         | {
             Args: {
