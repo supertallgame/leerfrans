@@ -250,6 +250,8 @@ export type Database = {
           created_at: string
           id: string
           ip_address: string
+          is_mute: boolean | null
+          mute_until: string | null
           reason: string | null
         }
         Insert: {
@@ -257,6 +259,8 @@ export type Database = {
           created_at?: string
           id?: string
           ip_address: string
+          is_mute?: boolean | null
+          mute_until?: string | null
           reason?: string | null
         }
         Update: {
@@ -264,6 +268,8 @@ export type Database = {
           created_at?: string
           id?: string
           ip_address?: string
+          is_mute?: boolean | null
+          mute_until?: string | null
           reason?: string | null
         }
         Relationships: []

@@ -5,6 +5,11 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Simple obfuscation for emails in transit
+function encodeEmail(email: string): string {
+  return btoa(email.split('').reverse().join(''));
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -46,18 +51,28 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Check if IP is banned
+    // Check if IP is banned (permanent ban)
     const { data: ipBan } = await supabase
       .from("ip_bans")
-      .select("id")
+      .select("id, is_mute, mute_until")
       .eq("ip_address", ip)
       .maybeSingle();
 
     if (ipBan) {
-      return new Response(
-        JSON.stringify({ banned: true, reason: "IP banned" }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 403 }
-      );
+      // Permanent IP ban (not a mute)
+      if (!ipBan.is_mute) {
+        return new Response(
+          JSON.stringify({ banned: true, reason: "IP banned" }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 403 }
+        );
+      }
+      // IP mute - check if still active
+      if (ipBan.mute_until && new Date(ipBan.mute_until) > new Date()) {
+        return new Response(
+          JSON.stringify({ banned: false, muted: true, muted_until: ipBan.mute_until, reason: "IP muted" }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
     }
 
     // Check user ban
@@ -98,7 +113,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Upsert user IP record
+    // Upsert user IP record (email encoded in transit, stored plain for admin)
     await supabase.from("user_ips").upsert(
       {
         user_id: userId,
@@ -129,6 +144,7 @@ Deno.serve(async (req) => {
         muted: !!userMute,
         muted_until: userMute?.mute_until || null,
         is_vpn: isVpn,
+        e: encodeEmail(userEmail),
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
