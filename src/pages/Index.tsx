@@ -513,7 +513,7 @@ const Index = () => {
                 }`}
               >
                 <div className="flex items-center justify-between">
-                  <span className="font-medium">📖 Grammar</span>
+                  <span className="font-medium">Grammar</span>
                   {includeGrammar && <span className="text-primary text-xs">✓</span>}
                 </div>
               </button>
@@ -524,7 +524,7 @@ const Index = () => {
               variant="outline"
               size="sm"
               className="flex-1"
-              onClick={() => { setSelectedSections([]); }}
+              onClick={() => { setSelectedSections([]); if (isEnglishCh4) setIncludeGrammar(true); }}
             >
               Alles
             </Button>
@@ -581,7 +581,7 @@ const Index = () => {
           href="https://www.youtube.com/watch?v=TQhRqtt-Fpo"
           target="_blank"
           rel="noopener noreferrer"
-          className="fixed bottom-4 left-4 z-40 opacity-80 hover:opacity-100 transition-opacity"
+          className="mt-4 opacity-80 hover:opacity-100 transition-opacity inline-block"
         >
           <img
             src={polarExpressImg}
