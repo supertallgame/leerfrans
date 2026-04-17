@@ -14,6 +14,69 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_applications: {
+        Row: {
+          created_at: string
+          id: string
+          motivation: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          user_email: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          motivation: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          user_email: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          motivation?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          user_email?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      admin_chat_messages: {
+        Row: {
+          created_at: string
+          id: string
+          image_url: string | null
+          message: string
+          sender_display: string
+          sender_email: string
+          sender_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          message: string
+          sender_display: string
+          sender_email: string
+          sender_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          message?: string
+          sender_display?: string
+          sender_email?: string
+          sender_id?: string
+        }
+        Relationships: []
+      }
       admin_settings: {
         Row: {
           id: string
@@ -471,6 +534,86 @@ export type Database = {
         }
         Relationships: []
       }
+      support_report_messages: {
+        Row: {
+          created_at: string
+          id: string
+          image_url: string | null
+          message: string
+          report_id: string
+          sender_email: string
+          sender_id: string
+          sender_role: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          message: string
+          report_id: string
+          sender_email: string
+          sender_id: string
+          sender_role?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          message?: string
+          report_id?: string
+          sender_email?: string
+          sender_id?: string
+          sender_role?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_report_messages_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "support_reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      support_reports: {
+        Row: {
+          category: string
+          closed_at: string | null
+          closed_by: string | null
+          created_at: string
+          id: string
+          status: string
+          subject: string
+          updated_at: string
+          user_email: string
+          user_id: string
+        }
+        Insert: {
+          category?: string
+          closed_at?: string | null
+          closed_by?: string | null
+          created_at?: string
+          id?: string
+          status?: string
+          subject: string
+          updated_at?: string
+          user_email: string
+          user_id: string
+        }
+        Update: {
+          category?: string
+          closed_at?: string | null
+          closed_by?: string | null
+          created_at?: string
+          id?: string
+          status?: string
+          subject?: string
+          updated_at?: string
+          user_email?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       update_announcements: {
         Row: {
           created_at: string
@@ -683,6 +826,48 @@ export type Database = {
         }
         Relationships: []
       }
+      review_replies_public: {
+        Row: {
+          created_at: string | null
+          display_name: string | null
+          id: string | null
+          message: string | null
+          review_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          display_name?: string | null
+          id?: string | null
+          message?: string | null
+          review_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          display_name?: string | null
+          id?: string | null
+          message?: string | null
+          review_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_replies_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "review_replies_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reviews_public: {
         Row: {
           created_at: string | null
@@ -797,6 +982,7 @@ export type Database = {
           muted_until: string
         }[]
       }
+      get_my_staff_role: { Args: never; Returns: string }
       get_public_rooms: {
         Args: never
         Returns: {
@@ -843,7 +1029,11 @@ export type Database = {
           team_number: number
         }[]
       }
+      has_open_report: { Args: never; Returns: boolean }
       is_head_admin: { Args: { _user_id: string }; Returns: boolean }
+      is_owner: { Args: { _user_id: string }; Returns: boolean }
+      is_staff: { Args: { _user_id: string }; Returns: boolean }
+      is_tester: { Args: { _user_id: string }; Returns: boolean }
       join_game_room: {
         Args: { p_player_name: string; p_room_id: string }
         Returns: Json
