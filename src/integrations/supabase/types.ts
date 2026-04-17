@@ -826,48 +826,6 @@ export type Database = {
         }
         Relationships: []
       }
-      review_replies_public: {
-        Row: {
-          created_at: string | null
-          display_name: string | null
-          id: string | null
-          message: string | null
-          review_id: string | null
-          user_id: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          display_name?: string | null
-          id?: string | null
-          message?: string | null
-          review_id?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          display_name?: string | null
-          id?: string | null
-          message?: string | null
-          review_id?: string | null
-          user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "review_replies_review_id_fkey"
-            columns: ["review_id"]
-            isOneToOne: false
-            referencedRelation: "reviews"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "review_replies_review_id_fkey"
-            columns: ["review_id"]
-            isOneToOne: false
-            referencedRelation: "reviews_public"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       reviews_public: {
         Row: {
           created_at: string | null
@@ -998,6 +956,17 @@ export type Database = {
         }[]
       }
       get_public_setting: { Args: { p_key: string }; Returns: Json }
+      get_review_replies_public: {
+        Args: never
+        Returns: {
+          created_at: string
+          display_name: string
+          id: string
+          message: string
+          review_id: string
+          user_id: string
+        }[]
+      }
       get_review_vote_counts: {
         Args: never
         Returns: {
