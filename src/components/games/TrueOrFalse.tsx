@@ -28,8 +28,20 @@ export default function TrueOrFalse({ onBack }: Props) {
 
   const [questions] = useState<Question[]>(() => {
     const shuffled = shuffle(activeVocabulary);
-    return shuffled.map((item) => {
-      const isCorrect = Math.random() > 0.5;
+    const total = shuffled.length;
+    // Force a balanced 50/50 split, then shuffle which positions are true/false
+    const trueCount = Math.ceil(total / 2);
+    const flags = [
+      ...Array(trueCount).fill(true),
+      ...Array(total - trueCount).fill(false),
+    ];
+    // Fisher-Yates shuffle on flags so pattern is random
+    for (let i = flags.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [flags[i], flags[j]] = [flags[j], flags[i]];
+    }
+    return shuffled.map((item, idx) => {
+      const isCorrect = flags[idx];
       if (isCorrect) {
         return {
           term: item.dutch,
@@ -40,7 +52,6 @@ export default function TrueOrFalse({ onBack }: Props) {
       } else {
         const others = activeVocabulary.filter((v) => v.dutch !== item.dutch && v.french !== item.french);
         if (others.length === 0) {
-          // No different definition available, make it a "true" question
           return { term: item.dutch, shownDefinition: item.french, correctDefinition: item.french, isCorrect: true };
         }
         const wrong = others[Math.floor(Math.random() * others.length)];
