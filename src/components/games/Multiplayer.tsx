@@ -1862,7 +1862,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
                 {teamScores.map((team, i) => {
                   const tc = TEAM_COLORS[team.teamNumber - 1];
                   return (
-                    <div key={team.teamNumber} className={`p-4 rounded-xl ${i === 0 ? "bg-yellow-50 border-2 border-yellow-400 dark:bg-yellow-900/20" : i === 1 ? "bg-gray-50 border border-gray-300 dark:bg-gray-800/30" : i === 2 ? "bg-orange-50 border border-orange-300 dark:bg-orange-900/20" : "bg-muted/30"}`}>
+                    <div key={team.teamNumber} className={`p-4 rounded-xl text-foreground ${i === 0 ? "bg-yellow-50 border-2 border-yellow-400 dark:bg-yellow-900/20" : i === 1 ? "bg-gray-50 border border-gray-300 dark:bg-gray-800/30 dark:border-gray-700" : i === 2 ? "bg-orange-50 border border-orange-300 dark:bg-orange-900/20 dark:border-orange-700" : "bg-muted/30"}`}>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <span className="text-2xl">{i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `${i + 1}.`}</span>
@@ -1888,9 +1888,9 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
                 return (
                   <div
                     key={p.id}
-                    className={`flex items-center justify-between p-4 rounded-xl ${
+                    className={`flex items-center justify-between p-4 rounded-xl text-foreground ${
                       !isTeamMode
-                        ? i === 0 ? "bg-yellow-50 border-2 border-yellow-400" : i === 1 ? "bg-gray-50 border border-gray-300" : i === 2 ? "bg-orange-50 border border-orange-300" : "bg-muted/30"
+                        ? i === 0 ? "bg-yellow-50 border-2 border-yellow-400 dark:bg-yellow-900/20" : i === 1 ? "bg-gray-50 border border-gray-300 dark:bg-gray-800/30 dark:border-gray-700" : i === 2 ? "bg-orange-50 border border-orange-300 dark:bg-orange-900/20 dark:border-orange-700" : "bg-muted/30"
                         : tc ? `${tc.bg} border ${tc.border}` : "bg-muted/30"
                     }`}
                   >

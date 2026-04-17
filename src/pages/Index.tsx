@@ -219,7 +219,7 @@ const Index = () => {
 
   const hasSentences = activeVocabulary.some((v) => v.french.includes(" ") && v.french.length > 15);
   const isVmboHavoCh3 = niveau === "vmbo-havo" && chapterId === "chapitre3";
-  const isEnglishCh4 = language === "english" && chapterId === "en_chapter4";
+  const isEnglishCh4 = language === "english" && (chapterId === "en_chapter4" || chapterId === "en_hv_chapter4");
   const filterAiTeacher = (list: typeof languageGames) => aiTeacherEnabled ? list : list.filter(g => g.id !== "ai");
   const games = language === "biology" ? filterAiTeacher(biologyGames) : (language === "nask") ? filterAiTeacher(naskGames) : filterAiTeacher(languageGames).filter((g) => {
     if ((g as any).frenchOnly && language !== "french") return false;
@@ -311,7 +311,7 @@ const Index = () => {
               {language === "nask" ? <FlaskConical className="h-3.5 w-3.5" /> : language === "biology" ? <Microscope className="h-3.5 w-3.5" /> : language === "french" ? <FlagFR className="w-4 h-3 rounded-sm" /> : <FlagEN className="w-4 h-3 rounded-sm" />}
               {language === "nask" ? "NASK" : language === "biology" ? "Biologie" : language === "french" ? "Frans" : "Engels"}
             </button>
-            {language === "french" && (
+            {(language === "french" || language === "english") && (
               <button
                 onClick={() => setShowNiveauPicker(true)}
                 className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors cursor-pointer"

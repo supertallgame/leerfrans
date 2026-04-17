@@ -862,6 +862,139 @@ export const englishChapters: Chapter[] = [
   },
 ];
 
+// ─── English HAVO-VWO chapters ───
+// Chapter 4 — Sports, Work & occupations, Money, Going out
+const englishHavoVwoChapter4Words: VocabItem[] = [
+  // Section A — Sports
+  { french: "athletics; track and field", dutch: "atletiek", section: "Sports" },
+  { french: "to be fit", dutch: "in goede conditie zijn", section: "Sports" },
+  { french: "to beat (someone)", dutch: "verslaan", section: "Sports" },
+  { french: "glove", dutch: "handschoen", section: "Sports" },
+  { french: "gymnastics", dutch: "turnen; gymnastiek", section: "Sports" },
+  { french: "helmet", dutch: "helm", section: "Sports" },
+  { french: "horse riding", dutch: "paardrijden", section: "Sports" },
+  { french: "martial arts", dutch: "gevechtssport", section: "Sports" },
+  { french: "(ice) rink", dutch: "ijsbaan", section: "Sports" },
+  { french: "to skate", dutch: "schaatsen", section: "Sports" },
+  { french: "to work out", dutch: "fitnessen; sporten", section: "Sports" },
+  { french: "court", dutch: "baan; veld", section: "Sports" },
+  { french: "ball", dutch: "bal", section: "Sports" },
+  { french: "basketball", dutch: "basketbal", section: "Sports" },
+  { french: "goal", dutch: "doel; doelpunt", section: "Sports" },
+  { french: "(field) hockey; (ice) hockey", dutch: "hockey; ijshockey", section: "Sports" },
+  { french: "baseball", dutch: "honkbal", section: "Sports" },
+  { french: "bat", dutch: "knuppel", section: "Sports" },
+  { french: "puck", dutch: "puck", section: "Sports" },
+  { french: "racket", dutch: "racket", section: "Sports" },
+  { french: "to kick", dutch: "schoppen", section: "Sports" },
+  { french: "to score", dutch: "scoren", section: "Sports" },
+  { french: "to hit", dutch: "slaan", section: "Sports" },
+  { french: "stick", dutch: "stick", section: "Sports" },
+  { french: "(table) tennis", dutch: "(tafel)tennis", section: "Sports" },
+  { french: "to catch", dutch: "vangen", section: "Sports" },
+  { french: "field", dutch: "veld", section: "Sports" },
+  { french: "to lose", dutch: "verliezen", section: "Sports" },
+  { french: "football (UK); soccer (US)", dutch: "voetbal", section: "Sports" },
+  { french: "volleyball", dutch: "volleybal", section: "Sports" },
+  { french: "match (UK); game (US)", dutch: "wedstrijd", section: "Sports" },
+  { french: "to win", dutch: "winnen", section: "Sports" },
+  { french: "to swim", dutch: "zwemmen", section: "Sports" },
+
+  // Section B — Work and occupations
+  { french: "application", dutch: "sollicitatie", section: "Work" },
+  { french: "to be employed", dutch: "in dienst zijn", section: "Work" },
+  { french: "to be retired", dutch: "met pensioen zijn", section: "Work" },
+  { french: "employee", dutch: "medewerker", section: "Work" },
+  { french: "employer", dutch: "werkgever", section: "Work" },
+  { french: "(job) interview", dutch: "sollicitatiegesprek", section: "Work" },
+  { french: "personnel", dutch: "personeel", section: "Work" },
+  { french: "to quit", dutch: "ontslag nemen", section: "Work" },
+  { french: "trial period", dutch: "proefperiode", section: "Work" },
+  { french: "volunteer", dutch: "vrijwilliger", section: "Work" },
+  { french: "job", dutch: "baan", section: "Work" },
+  { french: "boss", dutch: "baas", section: "Work" },
+  { french: "vet; veterinarian", dutch: "dierenarts", section: "Work" },
+  { french: "doctor", dutch: "dokter", section: "Work" },
+  { french: "hairdresser", dutch: "kapper", section: "Work" },
+  { french: "cashier", dutch: "kassamedewerker; cassière", section: "Work" },
+  { french: "newspaper carrier", dutch: "krantenbezorger", section: "Work" },
+  { french: "mechanic", dutch: "monteur", section: "Work" },
+  { french: "waiter; waitress", dutch: "ober; serveerster", section: "Work" },
+  { french: "babysitter", dutch: "oppas", section: "Work" },
+  { french: "dentist", dutch: "tandarts", section: "Work" },
+  { french: "shelf stocker", dutch: "vakkenvuller", section: "Work" },
+  { french: "to earn", dutch: "verdienen", section: "Work" },
+  { french: "to work", dutch: "werken", section: "Work" },
+  { french: "shop assistant", dutch: "winkelmedewerker", section: "Work" },
+
+  // Section C — Money
+  { french: "bank account", dutch: "bankrekening", section: "Money" },
+  { french: "banknote; bill", dutch: "bankbiljet", section: "Money" },
+  { french: "to be worth (it)", dutch: "(het) waard zijn", section: "Money" },
+  { french: "to borrow", dutch: "lenen (van)", section: "Money" },
+  { french: "cash machine (UK); ATM (US)", dutch: "geldautomaat", section: "Money" },
+  { french: "collector", dutch: "verzamelaar", section: "Money" },
+  { french: "company", dutch: "bedrijf", section: "Money" },
+  { french: "fake", dutch: "vals; nep", section: "Money" },
+  { french: "government", dutch: "regering", section: "Money" },
+  { french: "to lend", dutch: "lenen aan", section: "Money" },
+  { french: "quarter", dutch: "kwartje", section: "Money" },
+  { french: "savings", dutch: "spaargeld", section: "Money" },
+  { french: "valuable", dutch: "waardevol", section: "Money" },
+  { french: "poor", dutch: "arm", section: "Money" },
+  { french: "to pay (for)", dutch: "betalen (voor)", section: "Money" },
+  { french: "cash", dutch: "contant geld", section: "Money" },
+  { french: "money", dutch: "geld", section: "Money" },
+  { french: "to cost", dutch: "kosten", section: "Money" },
+  { french: "coin", dutch: "munt", section: "Money" },
+  { french: "change", dutch: "muntgeld; wisselgeld", section: "Money" },
+  { french: "pound (£)", dutch: "pond", section: "Money" },
+  { french: "wallet", dutch: "portemonnee", section: "Money" },
+  { french: "price", dutch: "prijs", section: "Money" },
+  { french: "rich", dutch: "rijk", section: "Money" },
+  { french: "piggy bank", dutch: "spaarvarken; spaarpot", section: "Money" },
+  { french: "to save (up for)", dutch: "sparen (voor)", section: "Money" },
+  { french: "to spend", dutch: "uitgeven", section: "Money" },
+  { french: "sold out", dutch: "uitverkocht", section: "Money" },
+  { french: "to sell", dutch: "verkopen", section: "Money" },
+  { french: "pocket money (UK); allowance (US)", dutch: "zakgeld", section: "Money" },
+
+  // Section D — Going out
+  { french: "bowling", dutch: "bowlen", section: "Going out" },
+  { french: "coffee shop", dutch: "café", section: "Going out" },
+  { french: "entrance fee", dutch: "toegangsprijs", section: "Going out" },
+  { french: "to get a bite to eat", dutch: "een hapje eten", section: "Going out" },
+  { french: "to have a good time", dutch: "plezier hebben; zich vermaken", section: "Going out" },
+  { french: "ice cream parlour", dutch: "ijssalon", section: "Going out" },
+  { french: "ride", dutch: "attractie", section: "Going out" },
+  { french: "youth club", dutch: "jeugdclub", section: "Going out" },
+  { french: "zoo", dutch: "dierentuin", section: "Going out" },
+  { french: "amusement park", dutch: "attractiepark", section: "Going out" },
+  { french: "concert", dutch: "concert", section: "Going out" },
+  { french: "to enjoy (oneself)", dutch: "genieten", section: "Going out" },
+  { french: "to have plenty of time", dutch: "genoeg tijd hebben", section: "Going out" },
+  { french: "funfair (UK); carnival (US)", dutch: "kermis", section: "Going out" },
+  { french: "sleepover", dutch: "logeerpartij", section: "Going out" },
+  { french: "fun", dutch: "pret; lol", section: "Going out" },
+  { french: "restaurant", dutch: "restaurant", section: "Going out" },
+  { french: "beach", dutch: "strand", section: "Going out" },
+  { french: "to stay in", dutch: "thuisblijven", section: "Going out" },
+  { french: "to hang out (with)", dutch: "tijd doorbrengen (met)", section: "Going out" },
+  { french: "to watch TV", dutch: "tv-kijken", section: "Going out" },
+  { french: "to go out (with)", dutch: "uitgaan (met); daten (met)", section: "Going out" },
+  { french: "shopping centre (UK); shopping mall (US)", dutch: "winkelcentrum", section: "Going out" },
+];
+
+export const englishChaptersHavoVwo: Chapter[] = [
+  {
+    id: "en_hv_chapter4",
+    title: "Chapter 4",
+    description: "Sports, work, money & going out (HAVO-VWO)",
+    words: englishHavoVwoChapter4Words,
+    requiresLogin: false,
+  },
+];
+
 // ─── NASK chapters ───
 
 const naskChapter1Words: VocabItem[] = [
@@ -1041,7 +1174,10 @@ export function getChaptersForLanguage(lang: Language, niveau?: Niveau): Chapter
     if (niveau === "havo-vwo") return frenchChaptersHavoVwo;
     return frenchChaptersVmboHavo;
   }
-  if (lang === "english") return englishChapters;
+  if (lang === "english") {
+    if (niveau === "havo-vwo") return englishChaptersHavoVwo;
+    return englishChapters;
+  }
   if (lang === "biology") return biologyChapters;
   return naskChapters;
 }
@@ -1051,7 +1187,10 @@ export function getDefaultChapterId(lang: Language, niveau?: Niveau): string {
     if (niveau === "havo-vwo") return "hv_chapitre1";
     return "chapitre3";
   }
-  if (lang === "english") return "en_chapter1";
+  if (lang === "english") {
+    if (niveau === "havo-vwo") return "en_hv_chapter4";
+    return "en_chapter1";
+  }
   if (lang === "biology") return "bio_chapter4";
   return "nask_chapter1";
 }
@@ -1062,7 +1201,7 @@ export const chapters = frenchChapters;
 export const DEFAULT_CHAPTER_ID = "chapitre3";
 
 export function getChapter(id: string): Chapter | undefined {
-  return [...frenchChaptersVmboHavo, ...frenchChaptersHavoVwo, ...englishChapters, ...naskChapters, ...biologyChapters].find((c) => c.id === id);
+  return [...frenchChaptersVmboHavo, ...frenchChaptersHavoVwo, ...englishChapters, ...englishChaptersHavoVwo, ...naskChapters, ...biologyChapters].find((c) => c.id === id);
 }
 
 export function getActiveVocabulary(chapterId: string): VocabItem[] {
