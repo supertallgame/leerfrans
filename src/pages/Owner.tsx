@@ -328,7 +328,7 @@ export default function Owner() {
   };
 
   const promoteToAdmin = async (user: AppUser) => {
-    const allRoleEmails = [...adminRoles, ...headAdminRoles].map(r => r.email);
+    const allRoleEmails = [...adminRoles, ...headAdminRoles, ...testerRoles].map(r => r.email);
     if (OWNER_EMAILS.includes(user.email) || allRoleEmails.includes(user.email)) {
       toast.error("Deze gebruiker heeft al een rol");
       return;
@@ -349,6 +349,37 @@ export default function Owner() {
     } finally {
       setPromoting(null);
     }
+  };
+
+  const promoteToTester = async (user: AppUser) => {
+    const allRoleEmails = [...adminRoles, ...headAdminRoles, ...testerRoles].map(r => r.email);
+    if (OWNER_EMAILS.includes(user.email) || allRoleEmails.includes(user.email)) {
+      toast.error("Deze gebruiker heeft al een rol");
+      return;
+    }
+    setPromoting(user.id);
+    try {
+      const { error } = await supabase.from("user_roles").insert({
+        user_id: user.id,
+        email: user.email,
+        role: "tester",
+      });
+      if (error) throw error;
+      toast.success(`${user.email} is nu tester`);
+      await loadRoles();
+    } catch (e: any) {
+      console.error(e);
+      toast.error("Kon niet promoveren tot tester");
+    } finally {
+      setPromoting(null);
+    }
+  };
+
+  const removeTester = async (role: UserRole) => {
+    const { error } = await supabase.from("user_roles").delete().eq("id", role.id);
+    if (error) { toast.error("Kon niet verwijderen"); return; }
+    toast.success(`${role.email} is geen tester meer`);
+    await loadRoles();
   };
 
   const promoteToHeadAdmin = async (role: UserRole) => {
@@ -418,7 +449,7 @@ export default function Owner() {
     );
   }
 
-  const allRoleEmails = new Set([...OWNER_EMAILS, ...adminRoles.map(r => r.email), ...headAdminRoles.map(r => r.email)]);
+  const allRoleEmails = new Set([...OWNER_EMAILS, ...adminRoles.map(r => r.email), ...headAdminRoles.map(r => r.email), ...testerRoles.map(r => r.email)]);
   const normalUsers = allUsers.filter(u => !allRoleEmails.has(u.email));
   const filteredUsers = searchQuery
     ? normalUsers.filter(u => u.email.toLowerCase().includes(searchQuery.toLowerCase()))
@@ -427,15 +458,23 @@ export default function Owner() {
   return (
     <div className="min-h-screen bg-background p-4 md:p-8">
       <div className="max-w-2xl mx-auto space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center gap-3">
             <Crown className="h-6 w-6 text-primary" />
             <h1 className="text-2xl font-bold text-foreground">Owner Dashboard</h1>
           </div>
-          <Button variant="outline" size="sm" onClick={() => navigate("/")} className="gap-2">
-            <Home className="h-4 w-4" /> Home
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={() => setStaffChatOpen(true)} className="gap-2">
+              <MessagesSquare className="h-4 w-4" /> Staff Chat
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => navigate("/")} className="gap-2">
+              <Home className="h-4 w-4" /> Home
+            </Button>
+          </div>
         </div>
+
+        <SupportAdminPanel />
+        <AdminApplicationsPanel />
 
         {/* Owners */}
         <Card>
@@ -539,6 +578,38 @@ export default function Owner() {
                       <ShieldMinus className="h-4 w-4" /> Degraderen
                     </Button>
                   </div>
+                </div>
+              ))
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Testers */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <Beaker className="h-5 w-5 text-primary" /> Testers
+              <span className="text-sm font-normal text-muted-foreground">({testerRoles.length})</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {testerRoles.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Nog geen testers. Promoveer gebruikers hieronder via de Beaker-knop.</p>
+            ) : (
+              testerRoles.map((role) => (
+                <div key={role.id} className="flex items-center justify-between rounded-lg border p-3">
+                  <div className="flex items-center gap-2">
+                    <Beaker className="h-4 w-4 text-primary" />
+                    <span className="text-sm font-medium">{role.email}</span>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-destructive hover:text-destructive hover:bg-destructive/10 gap-1"
+                    onClick={() => removeTester(role)}
+                  >
+                    <ShieldMinus className="h-4 w-4" /> Verwijderen
+                  </Button>
                 </div>
               ))
             )}
@@ -798,16 +869,28 @@ export default function Owner() {
                       <Users className="h-4 w-4 text-muted-foreground shrink-0" />
                       <span className="text-sm font-medium truncate">{user.email}</span>
                     </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="gap-1 shrink-0 ml-2"
-                      disabled={promoting === user.id}
-                      onClick={() => promoteToAdmin(user)}
-                    >
-                      <ShieldPlus className="h-4 w-4" />
-                      {promoting === user.id ? "Bezig..." : "Promoveren"}
-                    </Button>
+                    <div className="flex gap-1 shrink-0 ml-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="gap-1"
+                        disabled={promoting === user.id}
+                        onClick={() => promoteToTester(user)}
+                        title="Promoveer tot tester"
+                      >
+                        <Beaker className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="gap-1"
+                        disabled={promoting === user.id}
+                        onClick={() => promoteToAdmin(user)}
+                      >
+                        <ShieldPlus className="h-4 w-4" />
+                        {promoting === user.id ? "Bezig..." : "Admin"}
+                      </Button>
+                    </div>
                   </div>
                 ))
               )}
@@ -815,6 +898,7 @@ export default function Owner() {
           </CardContent>
         </Card>
       </div>
+      <StaffChat open={staffChatOpen} onOpenChange={setStaffChatOpen} />
     </div>
   );
 }
