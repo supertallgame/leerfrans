@@ -458,15 +458,23 @@ export default function Owner() {
   return (
     <div className="min-h-screen bg-background p-4 md:p-8">
       <div className="max-w-2xl mx-auto space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center gap-3">
             <Crown className="h-6 w-6 text-primary" />
             <h1 className="text-2xl font-bold text-foreground">Owner Dashboard</h1>
           </div>
-          <Button variant="outline" size="sm" onClick={() => navigate("/")} className="gap-2">
-            <Home className="h-4 w-4" /> Home
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={() => setStaffChatOpen(true)} className="gap-2">
+              <MessagesSquare className="h-4 w-4" /> Staff Chat
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => navigate("/")} className="gap-2">
+              <Home className="h-4 w-4" /> Home
+            </Button>
+          </div>
         </div>
+
+        <SupportAdminPanel />
+        <AdminApplicationsPanel />
 
         {/* Owners */}
         <Card>
