@@ -328,7 +328,7 @@ export default function Owner() {
   };
 
   const promoteToAdmin = async (user: AppUser) => {
-    const allRoleEmails = [...adminRoles, ...headAdminRoles].map(r => r.email);
+    const allRoleEmails = [...adminRoles, ...headAdminRoles, ...testerRoles].map(r => r.email);
     if (OWNER_EMAILS.includes(user.email) || allRoleEmails.includes(user.email)) {
       toast.error("Deze gebruiker heeft al een rol");
       return;
@@ -349,6 +349,37 @@ export default function Owner() {
     } finally {
       setPromoting(null);
     }
+  };
+
+  const promoteToTester = async (user: AppUser) => {
+    const allRoleEmails = [...adminRoles, ...headAdminRoles, ...testerRoles].map(r => r.email);
+    if (OWNER_EMAILS.includes(user.email) || allRoleEmails.includes(user.email)) {
+      toast.error("Deze gebruiker heeft al een rol");
+      return;
+    }
+    setPromoting(user.id);
+    try {
+      const { error } = await supabase.from("user_roles").insert({
+        user_id: user.id,
+        email: user.email,
+        role: "tester",
+      });
+      if (error) throw error;
+      toast.success(`${user.email} is nu tester`);
+      await loadRoles();
+    } catch (e: any) {
+      console.error(e);
+      toast.error("Kon niet promoveren tot tester");
+    } finally {
+      setPromoting(null);
+    }
+  };
+
+  const removeTester = async (role: UserRole) => {
+    const { error } = await supabase.from("user_roles").delete().eq("id", role.id);
+    if (error) { toast.error("Kon niet verwijderen"); return; }
+    toast.success(`${role.email} is geen tester meer`);
+    await loadRoles();
   };
 
   const promoteToHeadAdmin = async (role: UserRole) => {
