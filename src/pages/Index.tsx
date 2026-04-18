@@ -274,32 +274,29 @@ const Index = () => {
           </div>
           <div className="flex items-center gap-0.5">
             {isHeadAdmin && (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-9 w-9"
-                onClick={() => navigate("/headadmin")}
-                aria-label="Head Admin"
-              >
+              <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => navigate("/headadmin")} aria-label="Head Admin">
                 <ShieldCheck className="h-5 w-5" />
               </Button>
             )}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-9 w-9"
-              onClick={() => navigate("/reviews")}
-              aria-label="Reviews"
-            >
+            {isStaff && (
+              <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => setShowStaffChat(true)} aria-label="Staff Chat">
+                <MessagesSquare className="h-5 w-5" />
+              </Button>
+            )}
+            {user && (
+              <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => setShowSupport(true)} aria-label="Support / Bug">
+                <LifeBuoy className="h-5 w-5" />
+              </Button>
+            )}
+            {user && !isStaff && (
+              <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => setShowApply(true)} aria-label="Admin worden">
+                <ShieldQuestion className="h-5 w-5" />
+              </Button>
+            )}
+            <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => navigate("/reviews")} aria-label="Reviews">
               <Star className="h-5 w-5" />
             </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-9 w-9"
-              onClick={handleSettingsClick}
-              aria-label="Instellingen"
-            >
+            <Button variant="ghost" size="icon" className="h-9 w-9" onClick={handleSettingsClick} aria-label="Instellingen">
               <Settings className="h-5 w-5" />
             </Button>
           </div>
