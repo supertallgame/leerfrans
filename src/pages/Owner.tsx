@@ -869,16 +869,28 @@ export default function Owner() {
                       <Users className="h-4 w-4 text-muted-foreground shrink-0" />
                       <span className="text-sm font-medium truncate">{user.email}</span>
                     </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="gap-1 shrink-0 ml-2"
-                      disabled={promoting === user.id}
-                      onClick={() => promoteToAdmin(user)}
-                    >
-                      <ShieldPlus className="h-4 w-4" />
-                      {promoting === user.id ? "Bezig..." : "Promoveren"}
-                    </Button>
+                    <div className="flex gap-1 shrink-0 ml-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="gap-1"
+                        disabled={promoting === user.id}
+                        onClick={() => promoteToTester(user)}
+                        title="Promoveer tot tester"
+                      >
+                        <Beaker className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="gap-1"
+                        disabled={promoting === user.id}
+                        onClick={() => promoteToAdmin(user)}
+                      >
+                        <ShieldPlus className="h-4 w-4" />
+                        {promoting === user.id ? "Bezig..." : "Admin"}
+                      </Button>
+                    </div>
                   </div>
                 ))
               )}
@@ -886,6 +898,7 @@ export default function Owner() {
           </CardContent>
         </Card>
       </div>
+      <StaffChat open={staffChatOpen} onOpenChange={setStaffChatOpen} />
     </div>
   );
 }
