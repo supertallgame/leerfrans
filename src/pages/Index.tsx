@@ -598,6 +598,9 @@ const Index = () => {
         </a>
       )}
       <AuthDialog open={showLoginPrompt} onOpenChange={setShowLoginPrompt} />
+      <SupportDialog open={showSupport} onOpenChange={setShowSupport} />
+      <AdminApplyDialog open={showApply} onOpenChange={setShowApply} />
+      <StaffChat open={showStaffChat} onOpenChange={setShowStaffChat} />
 
       <SettingsDialog open={showSettings} onOpenChange={setShowSettings} user={user}>
           <div className="flex items-center justify-between">
