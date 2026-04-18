@@ -173,26 +173,29 @@ const Index = () => {
   }, [disabledSubjects, language]);
 
   useEffect(() => {
-    const checkHeadAdmin = async (userId: string | undefined) => {
-      if (!userId) { setIsHeadAdmin(false); return; }
+    const checkRoles = async (userId: string | undefined) => {
+      if (!userId) { setIsHeadAdmin(false); setIsStaff(false); return; }
       const OWNER_EMAILS = ["brankovantland@gmail.com", "branko18vantland@gmail.com"];
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user?.email && OWNER_EMAILS.includes(session.user.email)) {
         setIsHeadAdmin(true);
+        setIsStaff(true);
         return;
       }
-      const { data } = await supabase.from("user_roles").select("role").eq("user_id", userId).eq("role", "head_admin") as any;
-      setIsHeadAdmin(data && data.length > 0);
+      const { data: staffRole } = await supabase.rpc("get_my_staff_role");
+      const role = staffRole as string | null;
+      setIsHeadAdmin(role === "head_admin");
+      setIsStaff(role === "owner" || role === "head_admin" || role === "admin" || role === "tester");
     };
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
       setAuthLoading(false);
-      checkHeadAdmin(session?.user?.id);
+      checkRoles(session?.user?.id);
     });
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
       setAuthLoading(false);
-      checkHeadAdmin(session?.user?.id);
+      checkRoles(session?.user?.id);
     });
     return () => subscription.unsubscribe();
   }, []);
