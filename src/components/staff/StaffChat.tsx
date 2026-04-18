@@ -1,0 +1,201 @@
+import { useEffect, useRef, useState } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import { ImageIcon, Loader2, MessagesSquare, Send, Trash2, X } from "lucide-react";
+
+interface Message {
+  id: string;
+  sender_id: string;
+  sender_email: string;
+  sender_display: string;
+  message: string;
+  image_url: string | null;
+  created_at: string;
+}
+
+interface Props {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+}
+
+export default function StaffChat({ open, onOpenChange }: Props) {
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<{ id: string; email: string; role: string } | null>(null);
+  const [text, setText] = useState("");
+  const [image, setImage] = useState<File | null>(null);
+  const [sending, setSending] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    void init();
+    const interval = setInterval(() => { void load(false); }, 3000);
+    return () => clearInterval(interval);
+  }, [open]);
+
+  useEffect(() => {
+    if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+  }, [messages.length]);
+
+  const init = async () => {
+    setLoading(true);
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user?.email) { setLoading(false); return; }
+    const { data: role } = await supabase.rpc("get_my_staff_role");
+    setUser({ id: session.user.id, email: session.user.email, role: (role as string) || "staff" });
+    await load(false);
+    setLoading(false);
+  };
+
+  const load = async (showLoading = true) => {
+    if (showLoading) setLoading(true);
+    const { data } = await supabase
+      .from("admin_chat_messages")
+      .select("*")
+      .order("created_at", { ascending: true })
+      .limit(200);
+    if (data) setMessages(data as Message[]);
+    if (showLoading) setLoading(false);
+  };
+
+  const send = async () => {
+    if (!text.trim() && !image) return;
+    if (!user) return;
+    setSending(true);
+    let imageUrl: string | null = null;
+    if (image) {
+      const ext = image.name.split(".").pop()?.toLowerCase() || "jpg";
+      if (!["jpg","jpeg","png","gif","webp"].includes(ext)) {
+        toast.error("Alleen afbeeldingen");
+        setSending(false);
+        return;
+      }
+      if (image.size > 5 * 1024 * 1024) {
+        toast.error("Max 5MB");
+        setSending(false);
+        return;
+      }
+      const path = `staff/${user.id}/${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage.from("support-uploads").upload(path, image);
+      if (upErr) {
+        toast.error("Upload mislukt");
+        setSending(false);
+        return;
+      }
+      const { data: signed } = await supabase.storage.from("support-uploads").createSignedUrl(path, 60 * 60 * 24 * 30);
+      imageUrl = signed?.signedUrl || null;
+    }
+    const display = user.email.split("@")[0];
+    const { error } = await supabase.from("admin_chat_messages").insert({
+      sender_id: user.id,
+      sender_email: user.email,
+      sender_display: display,
+      message: text.trim().slice(0, 2000),
+      image_url: imageUrl,
+    });
+    if (error) toast.error(error.message);
+    else {
+      setText("");
+      setImage(null);
+      await load(false);
+    }
+    setSending(false);
+  };
+
+  const remove = async (id: string) => {
+    const { error } = await supabase.from("admin_chat_messages").delete().eq("id", id);
+    if (error) toast.error("Kon niet verwijderen");
+    else setMessages((prev) => prev.filter((m) => m.id !== id));
+  };
+
+  const roleColor = (email: string) => {
+    if (email === "brankovantland@gmail.com" || email === "branko18vantland@gmail.com") return "text-destructive";
+    return "text-primary";
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <MessagesSquare className="h-5 w-5 text-primary" /> Staff Chat
+            <span className="text-xs font-normal text-muted-foreground">({messages.length})</span>
+          </DialogTitle>
+        </DialogHeader>
+
+        {loading ? (
+          <div className="flex justify-center py-8"><Loader2 className="animate-spin h-6 w-6" /></div>
+        ) : (
+          <>
+            <div ref={scrollRef} className="flex-1 overflow-y-auto space-y-2 py-2 min-h-[300px] max-h-[55vh]">
+              {messages.length === 0 && <p className="text-sm text-muted-foreground text-center py-8">Nog geen berichten. Start het gesprek!</p>}
+              {messages.map((m) => {
+                const isMine = m.sender_id === user?.id;
+                return (
+                  <div key={m.id} className={`flex ${isMine ? "justify-end" : "justify-start"} group`}>
+                    <div className={`max-w-[75%] rounded-2xl px-3 py-2 ${isMine ? "bg-primary text-primary-foreground" : "bg-muted"}`}>
+                      <div className="flex items-center justify-between gap-2 mb-0.5">
+                        <p className={`text-[11px] font-semibold ${isMine ? "opacity-90" : roleColor(m.sender_email)}`}>
+                          {m.sender_display}
+                        </p>
+                        {isMine && (
+                          <button
+                            onClick={() => remove(m.id)}
+                            className="opacity-0 group-hover:opacity-100 transition-opacity"
+                            aria-label="Verwijder"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </button>
+                        )}
+                      </div>
+                      {m.message && <p className="text-sm whitespace-pre-wrap break-words">{m.message}</p>}
+                      {m.image_url && (
+                        <img src={m.image_url} alt="" className="mt-1 rounded-md max-h-56 w-auto" />
+                      )}
+                      <p className="text-[9px] opacity-60 mt-1">
+                        {new Date(m.created_at).toLocaleTimeString("nl-NL", { hour: "2-digit", minute: "2-digit" })}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <div className="space-y-2 pt-2 border-t">
+              <Textarea
+                placeholder="Bericht aan team..."
+                value={text}
+                maxLength={2000}
+                rows={2}
+                onChange={(e) => setText(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); void send(); }
+                }}
+              />
+              <div className="flex items-center gap-2">
+                <label className="flex items-center gap-1.5 text-xs text-muted-foreground cursor-pointer hover:text-foreground">
+                  <ImageIcon className="h-3.5 w-3.5" />
+                  {image ? image.name.slice(0, 20) : "Bestand"}
+                  <input type="file" accept="image/*" className="hidden" onChange={(e) => setImage(e.target.files?.[0] ?? null)} />
+                </label>
+                {image && (
+                  <Button variant="ghost" size="sm" className="h-6 px-1" onClick={() => setImage(null)}>
+                    <X className="h-3 w-3" />
+                  </Button>
+                )}
+                <div className="flex-1" />
+                <Button onClick={send} disabled={sending} size="sm" className="gap-1">
+                  {sending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
+                  Stuur
+                </Button>
+              </div>
+            </div>
+          </>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
