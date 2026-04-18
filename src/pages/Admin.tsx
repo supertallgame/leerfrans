@@ -5,7 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Shield, Home, FlaskConical, Microscope, Trash2, Star, MessageSquare, Search, Filter, Download, BarChart3, TrendingUp, Users, Mail, VolumeX, Clock, Gamepad2, Globe, Lock, XCircle, Reply, ChevronDown, ChevronUp } from "lucide-react";
+import { Shield, Home, FlaskConical, Microscope, Trash2, Star, MessageSquare, Search, Filter, Download, BarChart3, TrendingUp, Users, Mail, VolumeX, Clock, Gamepad2, Globe, Lock, XCircle, Reply, ChevronDown, ChevronUp, MessagesSquare } from "lucide-react";
+import SupportAdminPanel from "@/components/support/SupportAdminPanel";
+import AdminApplicationsPanel from "@/components/support/AdminApplicationsPanel";
+import StaffChat from "@/components/staff/StaffChat";
 import {
   Select,
   SelectContent,
@@ -111,6 +114,7 @@ export default function Admin() {
   const [deleteVotesReviewId, setDeleteVotesReviewId] = useState<string | null>(null);
   const [refreshingRooms, setRefreshingRooms] = useState(false);
   const [obamaEnabled, setObamaEnabled] = useState(true);
+  const [staffChatOpen, setStaffChatOpen] = useState(false);
 
   useEffect(() => {
     checkAdmin();
@@ -406,12 +410,20 @@ export default function Admin() {
   return (
     <div className="min-h-screen bg-background p-6">
       <div className="max-w-4xl mx-auto space-y-6">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-            <Shield className="h-5 w-5 text-primary" />
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+              <Shield className="h-5 w-5 text-primary" />
+            </div>
+            <h1 className="text-2xl font-bold text-foreground">Admin Dashboard</h1>
           </div>
-          <h1 className="text-2xl font-bold text-foreground">Admin Dashboard</h1>
+          <Button variant="outline" size="sm" className="gap-2" onClick={() => setStaffChatOpen(true)}>
+            <MessagesSquare className="h-4 w-4" /> Staff Chat
+          </Button>
         </div>
+
+        <SupportAdminPanel />
+        <AdminApplicationsPanel />
 
         <div className="rounded-2xl border border-border bg-card p-6 space-y-4">
           <h2 className="text-lg font-semibold">Vakken beheren</h2>
@@ -901,6 +913,7 @@ export default function Admin() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      <StaffChat open={staffChatOpen} onOpenChange={setStaffChatOpen} />
     </div>
   );
 }

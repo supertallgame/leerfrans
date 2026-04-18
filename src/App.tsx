@@ -21,6 +21,7 @@ const Woordenzoeker = lazyRetry(() => import("./pages/Woordenzoeker.tsx"));
 const Kruiswoordpuzzel = lazyRetry(() => import("./pages/Kruiswoordpuzzel.tsx"));
 const Owner = lazyRetry(() => import("./pages/Owner.tsx"));
 const HeadAdmin = lazyRetry(() => import("./pages/HeadAdmin.tsx"));
+const Tester = lazyRetry(() => import("./pages/Tester.tsx"));
 const NotFound = lazyRetry(() => import("./pages/NotFound.tsx"));
 
 const queryClient = new QueryClient();
@@ -48,6 +49,7 @@ const App = () => (
               <Route path="/kruiswoordpuzzel" element={<Kruiswoordpuzzel />} />
               <Route path="/owner" element={<Owner />} />
               <Route path="/headadmin" element={<HeadAdmin />} />
+              <Route path="/tester" element={<Tester />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

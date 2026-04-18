@@ -3,7 +3,7 @@ import { useThemeSync } from "@/hooks/use-theme-sync";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { BookOpen, Brain, Puzzle, Keyboard, Users, PenTool, MessageSquare, Bot, Settings, Star, Lock, BookMarked, FlaskConical, CheckCircle, Layers, Microscope, Bone, Clock, BookType, Map, ShieldCheck, GraduationCap, Hash, BookText } from "lucide-react";
+import { BookOpen, Brain, Puzzle, Keyboard, Users, PenTool, MessageSquare, Bot, Settings, Star, Lock, BookMarked, FlaskConical, CheckCircle, Layers, Microscope, Bone, Clock, BookType, Map, ShieldCheck, GraduationCap, Hash, BookText, LifeBuoy, ShieldQuestion, MessagesSquare } from "lucide-react";
 import polarExpressImg from "@/assets/polar-express.png";
 import { FlagNL, FlagFR } from "@/components/Flags";
 import { getChaptersForLanguage, getChapter, getForeignLabel, getForeignLabelNative, Language, Niveau } from "@/data/vocabulary";
@@ -21,6 +21,9 @@ import AuthDialog from "@/components/AuthDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import UpdateBanner from "@/components/UpdateBanner";
+import SupportDialog from "@/components/support/SupportDialog";
+import AdminApplyDialog from "@/components/support/AdminApplyDialog";
+import StaffChat from "@/components/staff/StaffChat";
 
 const Flashcards = lazy(() => import("@/components/games/Flashcards"));
 const MultipleChoice = lazy(() => import("@/components/games/MultipleChoice"));
@@ -102,8 +105,12 @@ const Index = () => {
   const [aiTeacherEnabled, setAiTeacherEnabled] = useState(false);
   const [disabledNiveaus, setDisabledNiveaus] = useState<string[]>([]);
   const [isHeadAdmin, setIsHeadAdmin] = useState(false);
+  const [isStaff, setIsStaff] = useState(false);
   const [polarExpressEnabled, setPolarExpressEnabled] = useState(false);
   const [includeGrammar, setIncludeGrammar] = useState(false);
+  const [showSupport, setShowSupport] = useState(false);
+  const [showApply, setShowApply] = useState(false);
+  const [showStaffChat, setShowStaffChat] = useState(false);
 
   const chaptersForLanguage = getChaptersForLanguage(language, niveau);
   const foreignLabel = getForeignLabel(language);
@@ -166,26 +173,29 @@ const Index = () => {
   }, [disabledSubjects, language]);
 
   useEffect(() => {
-    const checkHeadAdmin = async (userId: string | undefined) => {
-      if (!userId) { setIsHeadAdmin(false); return; }
+    const checkRoles = async (userId: string | undefined) => {
+      if (!userId) { setIsHeadAdmin(false); setIsStaff(false); return; }
       const OWNER_EMAILS = ["brankovantland@gmail.com", "branko18vantland@gmail.com"];
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user?.email && OWNER_EMAILS.includes(session.user.email)) {
         setIsHeadAdmin(true);
+        setIsStaff(true);
         return;
       }
-      const { data } = await supabase.from("user_roles").select("role").eq("user_id", userId).eq("role", "head_admin") as any;
-      setIsHeadAdmin(data && data.length > 0);
+      const { data: staffRole } = await supabase.rpc("get_my_staff_role");
+      const role = staffRole as string | null;
+      setIsHeadAdmin(role === "head_admin");
+      setIsStaff(role === "owner" || role === "head_admin" || role === "admin" || role === "tester");
     };
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
       setAuthLoading(false);
-      checkHeadAdmin(session?.user?.id);
+      checkRoles(session?.user?.id);
     });
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
       setAuthLoading(false);
-      checkHeadAdmin(session?.user?.id);
+      checkRoles(session?.user?.id);
     });
     return () => subscription.unsubscribe();
   }, []);
@@ -264,32 +274,29 @@ const Index = () => {
           </div>
           <div className="flex items-center gap-0.5">
             {isHeadAdmin && (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-9 w-9"
-                onClick={() => navigate("/headadmin")}
-                aria-label="Head Admin"
-              >
+              <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => navigate("/headadmin")} aria-label="Head Admin">
                 <ShieldCheck className="h-5 w-5" />
               </Button>
             )}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-9 w-9"
-              onClick={() => navigate("/reviews")}
-              aria-label="Reviews"
-            >
+            {isStaff && (
+              <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => setShowStaffChat(true)} aria-label="Staff Chat">
+                <MessagesSquare className="h-5 w-5" />
+              </Button>
+            )}
+            {user && (
+              <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => setShowSupport(true)} aria-label="Support / Bug">
+                <LifeBuoy className="h-5 w-5" />
+              </Button>
+            )}
+            {user && !isStaff && (
+              <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => setShowApply(true)} aria-label="Admin worden">
+                <ShieldQuestion className="h-5 w-5" />
+              </Button>
+            )}
+            <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => navigate("/reviews")} aria-label="Reviews">
               <Star className="h-5 w-5" />
             </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-9 w-9"
-              onClick={handleSettingsClick}
-              aria-label="Instellingen"
-            >
+            <Button variant="ghost" size="icon" className="h-9 w-9" onClick={handleSettingsClick} aria-label="Instellingen">
               <Settings className="h-5 w-5" />
             </Button>
           </div>
@@ -591,6 +598,9 @@ const Index = () => {
         </a>
       )}
       <AuthDialog open={showLoginPrompt} onOpenChange={setShowLoginPrompt} />
+      <SupportDialog open={showSupport} onOpenChange={setShowSupport} />
+      <AdminApplyDialog open={showApply} onOpenChange={setShowApply} />
+      <StaffChat open={showStaffChat} onOpenChange={setShowStaffChat} />
 
       <SettingsDialog open={showSettings} onOpenChange={setShowSettings} user={user}>
           <div className="flex items-center justify-between">
