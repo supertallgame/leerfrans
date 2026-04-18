@@ -3,7 +3,7 @@ import { useThemeSync } from "@/hooks/use-theme-sync";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { BookOpen, Brain, Puzzle, Keyboard, Users, PenTool, MessageSquare, Bot, Settings, Star, Lock, BookMarked, FlaskConical, CheckCircle, Layers, Microscope, Bone, Clock, BookType, Map, ShieldCheck, GraduationCap, Hash, BookText } from "lucide-react";
+import { BookOpen, Brain, Puzzle, Keyboard, Users, PenTool, MessageSquare, Bot, Settings, Star, Lock, BookMarked, FlaskConical, CheckCircle, Layers, Microscope, Bone, Clock, BookType, Map, ShieldCheck, GraduationCap, Hash, BookText, LifeBuoy, ShieldQuestion, MessagesSquare } from "lucide-react";
 import polarExpressImg from "@/assets/polar-express.png";
 import { FlagNL, FlagFR } from "@/components/Flags";
 import { getChaptersForLanguage, getChapter, getForeignLabel, getForeignLabelNative, Language, Niveau } from "@/data/vocabulary";
@@ -21,6 +21,9 @@ import AuthDialog from "@/components/AuthDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import UpdateBanner from "@/components/UpdateBanner";
+import SupportDialog from "@/components/support/SupportDialog";
+import AdminApplyDialog from "@/components/support/AdminApplyDialog";
+import StaffChat from "@/components/staff/StaffChat";
 
 const Flashcards = lazy(() => import("@/components/games/Flashcards"));
 const MultipleChoice = lazy(() => import("@/components/games/MultipleChoice"));
@@ -102,8 +105,12 @@ const Index = () => {
   const [aiTeacherEnabled, setAiTeacherEnabled] = useState(false);
   const [disabledNiveaus, setDisabledNiveaus] = useState<string[]>([]);
   const [isHeadAdmin, setIsHeadAdmin] = useState(false);
+  const [isStaff, setIsStaff] = useState(false);
   const [polarExpressEnabled, setPolarExpressEnabled] = useState(false);
   const [includeGrammar, setIncludeGrammar] = useState(false);
+  const [showSupport, setShowSupport] = useState(false);
+  const [showApply, setShowApply] = useState(false);
+  const [showStaffChat, setShowStaffChat] = useState(false);
 
   const chaptersForLanguage = getChaptersForLanguage(language, niveau);
   const foreignLabel = getForeignLabel(language);
