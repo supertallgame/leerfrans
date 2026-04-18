@@ -5,8 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { Shield, Home, Crown, Users, ShieldPlus, ShieldMinus, Search, Map, ShieldCheck, ArrowUpCircle, ArrowDownCircle, BarChart3, Megaphone, Plus, Trash2, X, ImageIcon, Bot, GraduationCap, Train, Ban } from "lucide-react";
+import { Shield, Home, Crown, Users, ShieldPlus, ShieldMinus, Search, Map, ShieldCheck, ArrowUpCircle, ArrowDownCircle, BarChart3, Megaphone, Plus, Trash2, X, ImageIcon, Bot, GraduationCap, Train, Ban, Beaker, MessagesSquare } from "lucide-react";
 import BanManagement from "@/components/owner/BanManagement";
+import SupportAdminPanel from "@/components/support/SupportAdminPanel";
+import AdminApplicationsPanel from "@/components/support/AdminApplicationsPanel";
+import StaffChat from "@/components/staff/StaffChat";
 import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -114,6 +117,7 @@ export default function Owner() {
   const [loading, setLoading] = useState(true);
   const [adminRoles, setAdminRoles] = useState<UserRole[]>([]);
   const [headAdminRoles, setHeadAdminRoles] = useState<UserRole[]>([]);
+  const [testerRoles, setTesterRoles] = useState<UserRole[]>([]);
   const [allUsers, setAllUsers] = useState<AppUser[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [promoting, setPromoting] = useState<string | null>(null);
@@ -133,6 +137,7 @@ export default function Owner() {
   const [newAnnouncementMsg, setNewAnnouncementMsg] = useState("");
   const [newAnnouncementImg, setNewAnnouncementImg] = useState<File | null>(null);
   const [creatingAnnouncement, setCreatingAnnouncement] = useState(false);
+  const [staffChatOpen, setStaffChatOpen] = useState(false);
 
   useEffect(() => {
     checkOwner();
@@ -262,6 +267,7 @@ export default function Owner() {
     if (!error && data) {
       setAdminRoles(data.filter(r => r.role === "admin"));
       setHeadAdminRoles(data.filter(r => r.role === "head_admin"));
+      setTesterRoles(data.filter(r => r.role === "tester"));
     }
   };
 

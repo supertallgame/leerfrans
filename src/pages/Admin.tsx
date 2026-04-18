@@ -913,6 +913,7 @@ export default function Admin() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      <StaffChat open={staffChatOpen} onOpenChange={setStaffChatOpen} />
     </div>
   );
 }
