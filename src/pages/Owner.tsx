@@ -584,6 +584,38 @@ export default function Owner() {
           </CardContent>
         </Card>
 
+        {/* Testers */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <Beaker className="h-5 w-5 text-primary" /> Testers
+              <span className="text-sm font-normal text-muted-foreground">({testerRoles.length})</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {testerRoles.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Nog geen testers. Promoveer gebruikers hieronder via de Beaker-knop.</p>
+            ) : (
+              testerRoles.map((role) => (
+                <div key={role.id} className="flex items-center justify-between rounded-lg border p-3">
+                  <div className="flex items-center gap-2">
+                    <Beaker className="h-4 w-4 text-primary" />
+                    <span className="text-sm font-medium">{role.email}</span>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-destructive hover:text-destructive hover:bg-destructive/10 gap-1"
+                    onClick={() => removeTester(role)}
+                  >
+                    <ShieldMinus className="h-4 w-4" /> Verwijderen
+                  </Button>
+                </div>
+              ))
+            )}
+          </CardContent>
+        </Card>
+
         {/* Game settings */}
         <Card>
           <CardHeader>
