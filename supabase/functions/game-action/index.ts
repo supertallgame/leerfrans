@@ -131,6 +131,9 @@ Deno.serve(async (req) => {
     }
 
     // ACTION: seed-questions
+    // Server pre-computes the option order for each question so every client sees
+    // exactly the same options in the same positions. Idempotent: once seeded,
+    // re-seeding is rejected to prevent the host from changing questions mid-game.
     if (action === "seed-questions") {
       if (!isHost(player, room)) {
         return jsonResponse({ error: "Not the host" }, 403);
@@ -144,11 +147,27 @@ Deno.serve(async (req) => {
         .eq("room_id", roomId)
         .maybeSingle();
       if (existing) {
-        return jsonResponse({ error: "Questions already seeded" }, 409);
+        // Already seeded — silently succeed so accidental re-seeds don't error
+        return jsonResponse({ success: true, alreadySeeded: true });
       }
+
+      // Pre-compute deterministic options for both directions so every client
+      // gets the exact same option arrays regardless of when they connect.
+      const direction = room.direction || "nl_to_fr";
+      const answerKey = direction === "nl_to_fr" ? "french" : "dutch";
+      const enriched = bodyQuestions.map((q: any, idx: number) => {
+        const correct = q[answerKey];
+        const others = bodyQuestions
+          .filter((_: any, i: number) => i !== idx)
+          .map((o: any) => o[answerKey]);
+        const wrong = shuffleArray(others).slice(0, 3);
+        const options = shuffleArray([correct, ...wrong]);
+        return { ...q, _options: options };
+      });
+
       await supabase
         .from("game_questions")
-        .insert({ room_id: roomId, questions: bodyQuestions });
+        .insert({ room_id: roomId, questions: enriched });
       return jsonResponse({ success: true });
     }
 
