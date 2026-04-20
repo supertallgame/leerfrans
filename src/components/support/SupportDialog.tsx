@@ -238,6 +238,21 @@ export default function SupportDialog({ open, onOpenChange }: Props) {
           <div className="flex items-center justify-center py-12">
             <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
           </div>
+        ) : !displayName ? (
+          <div className="space-y-3 py-2">
+            <p className="text-sm text-muted-foreground">
+              Kies een gebruikersnaam voor deze sessie. Je e-mailadres blijft verborgen voor het support team.
+            </p>
+            <Input
+              placeholder="Bijv. AnoniemeFan"
+              value={nameInput}
+              maxLength={30}
+              onChange={(e) => setNameInput(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter") confirmName(); }}
+              autoFocus
+            />
+            <Button onClick={confirmName} className="w-full">Doorgaan</Button>
+          </div>
         ) : !report ? (
           <div className="space-y-3">
             <p className="text-sm text-muted-foreground">
@@ -279,13 +294,23 @@ export default function SupportDialog({ open, onOpenChange }: Props) {
               {messages.length === 0 && <p className="text-sm text-muted-foreground text-center">Geen berichten.</p>}
               {messages.map((m) => {
                 const isStaff = m.sender_role !== "user";
+                const staffRole = isStaff ? getStaffRole(m) : "";
+                const roleStyle = staffRole ? ROLE_STYLES[staffRole] : null;
                 return (
                   <div key={m.id} className={`flex ${isStaff ? "justify-start" : "justify-end"}`}>
                     <div className={`max-w-[80%] rounded-2xl px-3 py-2 ${isStaff ? "bg-muted" : "bg-primary text-primary-foreground"}`}>
                       {isStaff && (
-                        <p className="text-[10px] font-semibold mb-0.5 opacity-70">
-                          🛡️ Support team
+                        <p className="text-[10px] font-semibold mb-0.5 flex items-center gap-1.5">
+                          <span className="opacity-70">🛡️ Support team</span>
+                          {roleStyle && (
+                            <span className={`font-bold uppercase tracking-wide ${roleStyle.cls}`}>
+                              [{roleStyle.label}]
+                            </span>
+                          )}
                         </p>
+                      )}
+                      {!isStaff && (
+                        <p className="text-[10px] font-semibold mb-0.5 opacity-90">{displayName}</p>
                       )}
                       {m.message && <p className="text-sm whitespace-pre-wrap break-words">{m.message}</p>}
                       {m.image_url && (
@@ -298,6 +323,15 @@ export default function SupportDialog({ open, onOpenChange }: Props) {
               })}
             </div>
             <div className="space-y-2 pt-2 border-t">
+              <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+                <span>Verstuurd als <span className="font-semibold text-foreground">{displayName}</span></span>
+                <button
+                  className="underline hover:text-foreground"
+                  onClick={() => { setDisplayName(""); setNameInput(""); }}
+                >
+                  Wijzig naam
+                </button>
+              </div>
               <Textarea
                 placeholder="Typ je bericht..."
                 value={reply}
