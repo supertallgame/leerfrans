@@ -131,6 +131,9 @@ Deno.serve(async (req) => {
     }
 
     // ACTION: seed-questions
+    // Server pre-computes the option order for each question so every client sees
+    // exactly the same options in the same positions. Idempotent: once seeded,
+    // re-seeding is rejected to prevent the host from changing questions mid-game.
     if (action === "seed-questions") {
       if (!isHost(player, room)) {
         return jsonResponse({ error: "Not the host" }, 403);
@@ -144,11 +147,27 @@ Deno.serve(async (req) => {
         .eq("room_id", roomId)
         .maybeSingle();
       if (existing) {
-        return jsonResponse({ error: "Questions already seeded" }, 409);
+        // Already seeded — silently succeed so accidental re-seeds don't error
+        return jsonResponse({ success: true, alreadySeeded: true });
       }
+
+      // Pre-compute deterministic options for both directions so every client
+      // gets the exact same option arrays regardless of when they connect.
+      const direction = room.direction || "nl_to_fr";
+      const answerKey = direction === "nl_to_fr" ? "french" : "dutch";
+      const enriched = bodyQuestions.map((q: any, idx: number) => {
+        const correct = q[answerKey];
+        const others = bodyQuestions
+          .filter((_: any, i: number) => i !== idx)
+          .map((o: any) => o[answerKey]);
+        const wrong = shuffleArray(others).slice(0, 3);
+        const options = shuffleArray([correct, ...wrong]);
+        return { ...q, _options: options };
+      });
+
       await supabase
         .from("game_questions")
-        .insert({ room_id: roomId, questions: bodyQuestions });
+        .insert({ room_id: roomId, questions: enriched });
       return jsonResponse({ success: true });
     }
 
@@ -211,6 +230,8 @@ Deno.serve(async (req) => {
     }
 
     // ACTION: get-question
+    // Returns the pre-computed options that were stored at seed time, so every
+    // player sees identical questions and option ordering — fully server-driven.
     if (action === "get-question") {
       if (room.status !== "playing") return jsonResponse({ error: "Game not in progress" }, 400);
       const { data: questionsData } = await supabase
@@ -221,14 +242,20 @@ Deno.serve(async (req) => {
       if (!questionsData) return jsonResponse({ error: "Questions not found" }, 404);
       const questions = questionsData.questions as any[];
       const currentQ = questions[room.current_question_index];
+      if (!currentQ) return jsonResponse({ error: "Question index out of range" }, 400);
       const questionKey = room.direction === "nl_to_fr" ? "dutch" : "french";
       const answerKey = room.direction === "nl_to_fr" ? "french" : "dutch";
       const correctAnswer = currentQ[answerKey];
-      const otherAnswers = questions
-        .filter((_: any, i: number) => i !== room.current_question_index)
-        .map((q: any) => q[answerKey]);
-      const wrongOptions = shuffleArray(otherAnswers).slice(0, 3);
-      const options = shuffleArray([correctAnswer, ...wrongOptions]);
+      // Use pre-computed options (deterministic across clients). Fall back to
+      // on-the-fly generation only for legacy rooms seeded before this change.
+      let options: string[] = Array.isArray(currentQ._options) ? currentQ._options : [];
+      if (options.length === 0) {
+        const otherAnswers = questions
+          .filter((_: any, i: number) => i !== room.current_question_index)
+          .map((q: any) => q[answerKey]);
+        const wrongOptions = shuffleArray(otherAnswers).slice(0, 3);
+        options = shuffleArray([correctAnswer, ...wrongOptions]);
+      }
       return jsonResponse({
         question: currentQ[questionKey],
         options,

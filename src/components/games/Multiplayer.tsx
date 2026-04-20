@@ -1788,46 +1788,48 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
             </Card>
           )}
 
-          {/* Live scoreboard */}
-          <Card className="bg-muted/30">
-            <CardContent className="p-4">
-              <h3 className="text-sm font-semibold mb-2 flex items-center gap-1">
-                <Trophy className="h-3 w-3" /> {m.liveScore}
-              </h3>
-              {isTeamMode ? (
-                <div className="space-y-2">
-                  {getTeamScores().map((team, i) => {
-                    const tc = TEAM_COLORS[team.teamNumber - 1];
-                    return (
-                      <div key={team.teamNumber} className="space-y-1">
-                        <div className={`flex justify-between items-center text-sm font-bold ${tc?.text}`}>
-                          <span>{i === 0 && "🥇 "}{i === 1 && "🥈 "}{i === 2 && "🥉 "}{getTeamEmoji(team.teamNumber)} {getTeamName(team.teamNumber)}</span>
-                          <span className="font-mono">{team.total}</span>
-                        </div>
-                        {team.players.map((p) => (
-                          <div key={p.id} className="flex justify-between items-center text-xs text-muted-foreground pl-6">
-                            <span className={p.id === myPlayerId ? "font-bold text-primary" : ""}>{p.player_name}</span>
-                            <span className="font-mono">{p.score}</span>
+          {/* Live scoreboard — hidden in Kahoot mode (only the between-question scoreboard is shown there) */}
+          {room?.game_mode !== "kahoot" && (
+            <Card className="bg-muted/30">
+              <CardContent className="p-4">
+                <h3 className="text-sm font-semibold mb-2 flex items-center gap-1">
+                  <Trophy className="h-3 w-3" /> {m.liveScore}
+                </h3>
+                {isTeamMode ? (
+                  <div className="space-y-2">
+                    {getTeamScores().map((team, i) => {
+                      const tc = TEAM_COLORS[team.teamNumber - 1];
+                      return (
+                        <div key={team.teamNumber} className="space-y-1">
+                          <div className={`flex justify-between items-center text-sm font-bold ${tc?.text}`}>
+                            <span>{i === 0 && "🥇 "}{i === 1 && "🥈 "}{i === 2 && "🥉 "}{getTeamEmoji(team.teamNumber)} {getTeamName(team.teamNumber)}</span>
+                            <span className="font-mono">{team.total}</span>
                           </div>
-                        ))}
+                          {team.players.map((p) => (
+                            <div key={p.id} className="flex justify-between items-center text-xs text-muted-foreground pl-6">
+                              <span className={p.id === myPlayerId ? "font-bold text-primary" : ""}>{p.player_name}</span>
+                              <span className="font-mono">{p.score}</span>
+                            </div>
+                          ))}
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="space-y-1">
+                    {[...players].sort((a, b) => b.score - a.score).map((p, i) => (
+                      <div key={p.id} className="flex justify-between items-center text-sm">
+                        <span className={p.id === myPlayerId ? "font-bold text-primary" : ""}>
+                          {i === 0 && "🥇 "}{i === 1 && "🥈 "}{i === 2 && "🥉 "}{p.player_name}
+                        </span>
+                        <span className="font-mono font-bold">{p.score}</span>
                       </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="space-y-1">
-                  {[...players].sort((a, b) => b.score - a.score).map((p, i) => (
-                    <div key={p.id} className="flex justify-between items-center text-sm">
-                      <span className={p.id === myPlayerId ? "font-bold text-primary" : ""}>
-                        {i === 0 && "🥇 "}{i === 1 && "🥈 "}{i === 2 && "🥉 "}{p.player_name}
-                      </span>
-                      <span className="font-mono font-bold">{p.score}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
           {leaveConfirmDialog}
         </div>
       </div>
