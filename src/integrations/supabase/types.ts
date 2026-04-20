@@ -98,6 +98,36 @@ export type Database = {
         }
         Relationships: []
       }
+      anonymous_bug_reports: {
+        Row: {
+          category: string
+          created_at: string
+          id: string
+          message: string
+          status: string
+          subject: string
+          username: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          id?: string
+          message: string
+          status?: string
+          subject: string
+          username: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          id?: string
+          message?: string
+          status?: string
+          subject?: string
+          username?: string
+        }
+        Relationships: []
+      }
       game_answers: {
         Row: {
           chapter_id: string
