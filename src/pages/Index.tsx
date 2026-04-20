@@ -297,11 +297,9 @@ const Index = () => {
                 <MessagesSquare className="h-5 w-5" />
               </Button>
             )}
-            {user && (
-              <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => setShowSupport(true)} aria-label="Support / Bug">
-                <LifeBuoy className="h-5 w-5" />
-              </Button>
-            )}
+            <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => setShowSupport(true)} aria-label="Support / Bug">
+              <LifeBuoy className="h-5 w-5" />
+            </Button>
             {user && !isStaff && (
               <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => setShowApply(true)} aria-label="Admin worden">
                 <ShieldQuestion className="h-5 w-5" />

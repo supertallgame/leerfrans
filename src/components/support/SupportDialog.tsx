@@ -34,8 +34,6 @@ interface Message {
   created_at: string;
 }
 
-const SESSION_NAME_KEY = "support_chat_username";
-
 const ROLE_STYLES: Record<string, { label: string; cls: string }> = {
   owner: { label: "Owner", cls: "text-destructive" },
   head_admin: { label: "Head Admin", cls: "text-purple-500" },
@@ -48,6 +46,7 @@ export default function SupportDialog({ open, onOpenChange }: Props) {
   const [report, setReport] = useState<Report | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [user, setUser] = useState<{ id: string; email: string } | null>(null);
+  const [authChecked, setAuthChecked] = useState(false);
 
   // Per-session username (re-prompted every open)
   const [displayName, setDisplayName] = useState<string>("");
@@ -85,7 +84,15 @@ export default function SupportDialog({ open, onOpenChange }: Props) {
   const load = async (showLoading = true) => {
     if (showLoading) setLoading(true);
     const { data: { session } } = await supabase.auth.getSession();
-    if (!session?.user?.email) { setLoading(false); return; }
+    setAuthChecked(true);
+    if (!session?.user?.email) {
+      // Anonymous mode — no chat thread, just one-way submission
+      setUser(null);
+      setReport(null);
+      setMessages([]);
+      if (showLoading) setLoading(false);
+      return;
+    }
     setUser({ id: session.user.id, email: session.user.email });
 
     const { data: reports } = await supabase
@@ -106,7 +113,6 @@ export default function SupportDialog({ open, onOpenChange }: Props) {
       if (msgs) {
         const list = msgs as Message[];
         setMessages(list);
-        // Look up roles for any staff senders we haven't seen yet
         const staffIds = Array.from(new Set(list.filter(m => m.sender_role !== "user").map(m => m.sender_id)));
         const unknown = staffIds.filter(id => !(id in rolesMap));
         if (unknown.length > 0) {
@@ -134,7 +140,6 @@ export default function SupportDialog({ open, onOpenChange }: Props) {
       return;
     }
     setDisplayName(trimmed);
-    sessionStorage.setItem(SESSION_NAME_KEY, trimmed);
   };
 
   const getStaffRole = (m: Message): string => {
@@ -182,6 +187,36 @@ export default function SupportDialog({ open, onOpenChange }: Props) {
     setCreating(false);
   };
 
+  const submitAnonymousReport = async () => {
+    if (!subject.trim() || !firstMessage.trim()) {
+      toast.error("Vul een onderwerp en bericht in");
+      return;
+    }
+    if (subject.length > 120 || firstMessage.length > 2000) {
+      toast.error("Tekst is te lang");
+      return;
+    }
+    setCreating(true);
+    const { error } = await supabase.from("anonymous_bug_reports" as any).insert({
+      username: displayName.slice(0, 30),
+      category,
+      subject: subject.trim().slice(0, 120),
+      message: firstMessage.trim().slice(0, 2000),
+    });
+    if (error) {
+      toast.error(error.message || "Kon melding niet versturen");
+      setCreating(false);
+      return;
+    }
+    setSubject("");
+    setFirstMessage("");
+    setCategory("bug");
+    toast.success("Melding verstuurd! Bedankt voor je hulp 🙌");
+    setDisplayName(""); // re-prompt next time
+    setCreating(false);
+    onOpenChange(false);
+  };
+
   const sendReply = async () => {
     if (!reply.trim() && !replyImage) return;
     if (!report || !user) return;
@@ -227,11 +262,15 @@ export default function SupportDialog({ open, onOpenChange }: Props) {
     setSending(false);
   };
 
+  const isAnon = authChecked && !user;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg max-h-[90vh] flex flex-col">
         <DialogHeader>
-          <DialogTitle>{report ? `Support: ${report.subject}` : "Support / Bug melden"}</DialogTitle>
+          <DialogTitle>
+            {report ? `Support: ${report.subject}` : isAnon ? "Bug melden (anoniem)" : "Support / Bug melden"}
+          </DialogTitle>
         </DialogHeader>
 
         {loading ? (
@@ -241,7 +280,9 @@ export default function SupportDialog({ open, onOpenChange }: Props) {
         ) : !displayName ? (
           <div className="space-y-3 py-2">
             <p className="text-sm text-muted-foreground">
-              Kies een gebruikersnaam voor deze sessie. Je e-mailadres blijft verborgen voor het support team.
+              {isAnon
+                ? "Kies een naam waarmee we je melding kunnen herkennen. Je hoeft niet ingelogd te zijn."
+                : "Kies een gebruikersnaam voor deze sessie. Je e-mailadres blijft verborgen voor het support team."}
             </p>
             <Input
               placeholder="Bijv. AnoniemeFan"
@@ -252,6 +293,50 @@ export default function SupportDialog({ open, onOpenChange }: Props) {
               autoFocus
             />
             <Button onClick={confirmName} className="w-full">Doorgaan</Button>
+          </div>
+        ) : isAnon ? (
+          <div className="space-y-3">
+            <p className="text-sm text-muted-foreground">
+              Beschrijf je bug of feedback. Omdat je niet bent ingelogd kunnen we niet terugkoppelen — voor support-chat moet je eerst inloggen.
+            </p>
+            <div className="space-y-2">
+              <label className="text-xs font-medium">Categorie</label>
+              <Select value={category} onValueChange={setCategory}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="bug">🐛 Bug</SelectItem>
+                  <SelectItem value="feature">💡 Feature verzoek</SelectItem>
+                  <SelectItem value="question">❓ Vraag</SelectItem>
+                  <SelectItem value="other">📝 Anders</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <Input
+              placeholder="Onderwerp (kort)"
+              value={subject}
+              maxLength={120}
+              onChange={(e) => setSubject(e.target.value)}
+            />
+            <Textarea
+              placeholder="Beschrijf je probleem of vraag..."
+              value={firstMessage}
+              maxLength={2000}
+              rows={5}
+              onChange={(e) => setFirstMessage(e.target.value)}
+            />
+            <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+              <span>Verstuurd als <span className="font-semibold text-foreground">{displayName}</span></span>
+              <button
+                className="underline hover:text-foreground"
+                onClick={() => { setDisplayName(""); setNameInput(""); }}
+              >
+                Wijzig naam
+              </button>
+            </div>
+            <Button onClick={submitAnonymousReport} disabled={creating} className="w-full gap-2">
+              {creating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+              Verstuur melding
+            </Button>
           </div>
         ) : !report ? (
           <div className="space-y-3">
