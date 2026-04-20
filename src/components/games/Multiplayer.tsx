@@ -538,13 +538,46 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
 
   useEffect(() => {
     if (!room?.id) return;
-    const interval = setInterval(() => { fetchPlayers(room.id); }, 1500);
+    const interval = setInterval(() => {
+      fetchPlayers(room.id);
+      // Also poll room status so phase transitions (waiting → playing →
+      // finished) and current_question_index updates always arrive even if
+      // realtime fails or is rate-limited. This is the canonical fix for
+      // "countdown reaches 0 but game never starts" desync.
+      fetchRoomState(room.id);
+    }, 1500);
     return () => clearInterval(interval);
   }, [room?.id]);
 
   const fetchPlayers = async (roomId: string) => {
     const { data } = await supabase.rpc("get_room_players", { p_room_id: roomId }) as any;
     if (data) setPlayers(data as Player[]);
+  };
+
+  const fetchRoomState = async (roomId: string) => {
+    const { data } = await (supabase
+      .from("game_rooms_public" as any)
+      .select("id, status, current_question_index, total_questions, direction, game_mode, team_mode, num_teams, team_names, team_emojis, kahoot_timer, quiz_language, quiz_chapter_id, quiz_sections, host_name, code")
+      .eq("id", roomId)
+      .maybeSingle() as any);
+    if (!data) return;
+    setRoom((prev) => {
+      if (!prev) return prev;
+      // No-op if nothing relevant changed (avoid re-render loops)
+      if (
+        prev.status === data.status &&
+        prev.current_question_index === data.current_question_index
+      ) {
+        return prev;
+      }
+      return {
+        ...prev,
+        status: data.status,
+        current_question_index: data.current_question_index,
+      };
+    });
+    if (data.status === "playing") setPhase((p) => (p === "lobby" ? "playing" : p));
+    if (data.status === "finished") setPhase((p) => (p !== "results" ? "results" : p));
   };
 
   const createRoom = async () => {
@@ -707,21 +740,41 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
       if (next === 0) {
         playCountdownGo();
         setCountdown(next);
-        const { data } = await supabase.functions.invoke("game-action", {
-          body: { action: "start-game", roomId: room!.id, playerId: myPlayerId, playerToken: myPlayerToken },
-        });
-        if (data?.error) {
-          toast.error(data.error === "Need at least 2 players" ? m.needMinPlayers : data.error);
-          setCountdown(null);
+        // Retry start-game up to 3x in case of transient edge function errors —
+        // this prevents the "countdown ends, game never starts" bug.
+        let attempts = 0;
+        let success = false;
+        while (attempts < 3 && !success) {
+          attempts++;
+          const { data, error } = await supabase.functions.invoke("game-action", {
+            body: { action: "start-game", roomId: room!.id, playerId: myPlayerId, playerToken: myPlayerToken },
+          });
+          if (data?.error) {
+            toast.error(data.error === "Need at least 2 players" ? m.needMinPlayers : data.error);
+            setCountdown(null);
+            return;
+          }
+          if (!error) {
+            success = true;
+            break;
+          }
+          await new Promise((r) => setTimeout(r, 400));
         }
-        // countdown=0 will be cleaned up on next render
+        if (!success) {
+          toast.error(locale === "sk" ? "Hra sa nepodarila spustiť, skús znova." : "Spel kon niet starten, probeer opnieuw.");
+          setCountdown(null);
+          return;
+        }
+        // Force a state poll right after start-game so the host's UI also
+        // transitions to "playing" without waiting for realtime.
+        if (room?.id) await fetchRoomState(room.id);
       } else {
         setCountdown(next);
         playCountdownTick();
       }
     }, 1000);
     return () => clearTimeout(timer);
-  }, [countdown, room, myPlayerId, myPlayerToken]);
+  }, [countdown, room, myPlayerId, myPlayerToken, locale, m.needMinPlayers]);
 
   const submitAnswer = async (answer: string) => {
     if (!room || !myPlayerId || selectedAnswer) return;
