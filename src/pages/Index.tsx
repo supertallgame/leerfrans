@@ -185,7 +185,11 @@ const Index = () => {
       const { data: staffRole } = await supabase.rpc("get_my_staff_role");
       const role = staffRole as string | null;
       setIsHeadAdmin(role === "head_admin");
-      setIsStaff(role === "owner" || role === "head_admin" || role === "admin" || role === "tester");
+      // Testers must explicitly enable admin-mode in /tester before staff
+      // features (badge, staff chat, etc.) become active elsewhere in the app.
+      const testerAdminMode = localStorage.getItem("tester_admin_mode") === "1";
+      const isActiveTester = role === "tester" && testerAdminMode;
+      setIsStaff(role === "owner" || role === "head_admin" || role === "admin" || isActiveTester);
     };
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
@@ -197,7 +201,17 @@ const Index = () => {
       setAuthLoading(false);
       checkRoles(session?.user?.id);
     });
-    return () => subscription.unsubscribe();
+    // React when the tester toggles admin-mode in another tab/page
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === "tester_admin_mode") {
+        supabase.auth.getSession().then(({ data: { session } }) => checkRoles(session?.user?.id));
+      }
+    };
+    window.addEventListener("storage", onStorage);
+    return () => {
+      subscription.unsubscribe();
+      window.removeEventListener("storage", onStorage);
+    };
   }, []);
 
   const handleSettingsClick = () => {
