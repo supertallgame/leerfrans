@@ -34,11 +34,27 @@ interface Message {
   created_at: string;
 }
 
+const SESSION_NAME_KEY = "support_chat_username";
+
+const ROLE_STYLES: Record<string, { label: string; cls: string }> = {
+  owner: { label: "Owner", cls: "text-destructive" },
+  head_admin: { label: "Head Admin", cls: "text-purple-500" },
+  admin: { label: "Admin", cls: "text-primary" },
+  tester: { label: "Tester", cls: "text-green-500" },
+};
+
 export default function SupportDialog({ open, onOpenChange }: Props) {
   const [loading, setLoading] = useState(true);
   const [report, setReport] = useState<Report | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [user, setUser] = useState<{ id: string; email: string } | null>(null);
+
+  // Per-session username (re-prompted every open)
+  const [displayName, setDisplayName] = useState<string>("");
+  const [nameInput, setNameInput] = useState<string>("");
+
+  // Map of staff sender_id -> role for badge display
+  const [rolesMap, setRolesMap] = useState<Record<string, string>>({});
 
   // New report form
   const [subject, setSubject] = useState("");
@@ -54,6 +70,8 @@ export default function SupportDialog({ open, onOpenChange }: Props) {
 
   useEffect(() => {
     if (!open) return;
+    setDisplayName("");
+    setNameInput("");
     void load();
     const interval = setInterval(() => { void load(false); }, 4000);
     return () => clearInterval(interval);
@@ -85,12 +103,43 @@ export default function SupportDialog({ open, onOpenChange }: Props) {
         .select("*")
         .eq("report_id", reports[0].id)
         .order("created_at", { ascending: true });
-      if (msgs) setMessages(msgs as Message[]);
+      if (msgs) {
+        const list = msgs as Message[];
+        setMessages(list);
+        // Look up roles for any staff senders we haven't seen yet
+        const staffIds = Array.from(new Set(list.filter(m => m.sender_role !== "user").map(m => m.sender_id)));
+        const unknown = staffIds.filter(id => !(id in rolesMap));
+        if (unknown.length > 0) {
+          const { data: rows } = await supabase
+            .from("user_roles")
+            .select("user_id, role")
+            .in("user_id", unknown);
+          const next = { ...rolesMap };
+          unknown.forEach(id => { next[id] = ""; });
+          (rows || []).forEach((r: any) => { if (!next[r.user_id]) next[r.user_id] = r.role; });
+          setRolesMap(next);
+        }
+      }
     } else {
       setReport(null);
       setMessages([]);
     }
     if (showLoading) setLoading(false);
+  };
+
+  const confirmName = () => {
+    const trimmed = nameInput.trim().slice(0, 30);
+    if (trimmed.length < 2) {
+      toast.error("Naam moet minimaal 2 tekens zijn");
+      return;
+    }
+    setDisplayName(trimmed);
+    sessionStorage.setItem(SESSION_NAME_KEY, trimmed);
+  };
+
+  const getStaffRole = (m: Message): string => {
+    if (m.sender_email === "brankovantland@gmail.com" || m.sender_email === "branko18vantland@gmail.com") return "owner";
+    return rolesMap[m.sender_id] || "";
   };
 
   const createReport = async () => {
