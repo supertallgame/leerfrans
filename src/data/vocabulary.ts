@@ -1234,7 +1234,7 @@ export const englishChapters: Chapter[] = [
   {
     id: "en_chapter3",
     title: "Chapter 3",
-    description: "Vervoer & reizen",
+    description: "School, familie, landen & uiterlijk",
     words: englishChapter3Words,
     requiresLogin: false,
   },
