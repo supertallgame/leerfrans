@@ -7,6 +7,7 @@ import { BookOpen, Brain, Puzzle, Keyboard, Users, PenTool, MessageSquare, Bot, 
 import polarExpressImg from "@/assets/polar-express.png";
 import { FlagNL, FlagFR } from "@/components/Flags";
 import { getChaptersForLanguage, getChapter, getForeignLabel, getForeignLabelNative, Language, Niveau } from "@/data/vocabulary";
+import { hasGrammarForChapter } from "@/data/grammar-en";
 import { useChapter } from "@/contexts/ChapterContext";
 import { Switch } from "@/components/ui/switch";
 import SettingsDialog from "@/components/SettingsDialog";
