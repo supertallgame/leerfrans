@@ -253,14 +253,17 @@ const Index = () => {
   const hasSentences = activeVocabulary.some((v) => v.french.includes(" ") && v.french.length > 15);
   const isVmboHavoCh3 = niveau === "vmbo-havo" && chapterId === "chapitre3";
   const isEnglishCh4 = language === "english" && (chapterId === "en_chapter4" || chapterId === "en_hv_chapter4");
+  const isEnglishCh2 = language === "english" && chapterId === "en_chapter2";
   const isHvCh2 = language === "french" && niveau === "havo-vwo" && chapterId === "hv_chapitre2";
   const isHvCh3 = language === "french" && niveau === "havo-vwo" && chapterId === "hv_chapitre3";
+  const chapterHasGrammar = language === "english" && hasGrammarForChapter(chapterId);
   const filterAiTeacher = (list: typeof languageGames) => aiTeacherEnabled ? list : list.filter(g => g.id !== "ai");
   const games = language === "biology" ? filterAiTeacher(biologyGames) : (language === "nask") ? filterAiTeacher(naskGames) : filterAiTeacher(languageGames).filter((g) => {
     if ((g as any).frenchOnly && language !== "french") return false;
     if ((g as any).englishOnly && language !== "english") return false;
-    if (g.id === "grammar" && !isEnglishCh4) return false;
-    if (g.id === "grammar" && !includeGrammar) return false;
+    if (g.id === "grammar" && !chapterHasGrammar) return false;
+    if (g.id === "grammar" && isEnglishCh4 && !includeGrammar) return false;
+    if (g.id === "enclock" && !isEnglishCh2) return false;
     if (g.id === "grammaire2" && !isHvCh2) return false;
     if (g.id === "grammaire3" && !isHvCh3) return false;
     if (g.id === "explorer" && !explorerEnabled) return false;
