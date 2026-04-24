@@ -7,6 +7,7 @@ import { BookOpen, Brain, Puzzle, Keyboard, Users, PenTool, MessageSquare, Bot, 
 import polarExpressImg from "@/assets/polar-express.png";
 import { FlagNL, FlagFR } from "@/components/Flags";
 import { getChaptersForLanguage, getChapter, getForeignLabel, getForeignLabelNative, Language, Niveau } from "@/data/vocabulary";
+import { hasGrammarForChapter } from "@/data/grammar-en";
 import { useChapter } from "@/contexts/ChapterContext";
 import { Switch } from "@/components/ui/switch";
 import SettingsDialog from "@/components/SettingsDialog";
@@ -42,8 +43,9 @@ const FrenchExplorer = lazy(() => import("@/components/games/FrenchExplorer"));
 const GrammarQuiz = lazy(() => import("@/components/games/GrammarQuiz"));
 const Chapitre2Grammaire = lazy(() => import("@/components/games/Chapitre2Grammaire"));
 const Chapitre3Grammaire = lazy(() => import("@/components/games/Chapitre3Grammaire"));
+const EnglishClockTimes = lazy(() => import("@/components/games/EnglishClockTimes"));
 
-type Game = "menu" | "flashcards" | "quiz" | "match" | "type" | "multiplayer" | "fill" | "sentence" | "ai" | "truefalse" | "memory" | "skeleton" | "clocktimes" | "etre" | "explorer" | "grammar" | "grammaire2" | "grammaire3";
+type Game = "menu" | "flashcards" | "quiz" | "match" | "type" | "multiplayer" | "fill" | "sentence" | "ai" | "truefalse" | "memory" | "skeleton" | "clocktimes" | "etre" | "explorer" | "grammar" | "grammaire2" | "grammaire3" | "enclock";
 
 const languageGames = [
   { id: "flashcards" as Game, title: "Flashcards", description: "Draai kaarten om en leer de woorden", icon: BookOpen, color: "bg-primary/10 text-primary" },
@@ -57,6 +59,7 @@ const languageGames = [
   { id: "etre" as Game, title: "Être (zijn)", description: "Oefen de vervoeging van être", icon: BookType, color: "bg-destructive/10 text-destructive", frenchOnly: true },
   { id: "explorer" as Game, title: "Verkenner", description: "Loop rond, beantwoord vragen en verzamel sterren", icon: Map, color: "bg-[hsl(var(--success))]/10 text-[hsl(var(--success))]", frenchOnly: true },
   { id: "grammar" as Game, title: "Grammar Quiz", description: "Oefen Engelse grammatica-regels", icon: BookText, color: "bg-primary/10 text-primary", englishOnly: true },
+  { id: "enclock" as Game, title: "Telling the Time", description: "Lees de klok in het Engels", icon: Clock, color: "bg-[hsl(var(--success))]/10 text-[hsl(var(--success))]", englishOnly: true },
   { id: "grammaire2" as Game, title: "Grammaire (Ch. 2)", description: "Werkwoorden op -er & ontkenning ne…pas", icon: BookText, color: "bg-[hsl(var(--success))]/10 text-[hsl(var(--success))]", frenchOnly: true },
   { id: "grammaire3" as Game, title: "Grammaire (Ch. 3)", description: "Het werkwoord être & bezittelijke vnw.", icon: BookText, color: "bg-accent/10 text-accent", frenchOnly: true },
 ];
@@ -243,21 +246,25 @@ const Index = () => {
   if (activeGame === "clocktimes") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6"><ClockTimes onBack={() => setActiveGame("menu")} /></div></Suspense>;
   if (activeGame === "etre") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6"><EtreConjugation onBack={() => setActiveGame("menu")} /></div></Suspense>;
   if (activeGame === "explorer") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6"><FrenchExplorer onBack={() => setActiveGame("menu")} /></div></Suspense>;
-  if (activeGame === "grammar") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6"><GrammarQuiz onBack={() => setActiveGame("menu")} /></div></Suspense>;
+  if (activeGame === "grammar") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6"><GrammarQuiz onBack={() => setActiveGame("menu")} chapterId={chapterId} /></div></Suspense>;
   if (activeGame === "grammaire2") return <Suspense fallback={gameLoader}><Chapitre2Grammaire onBack={() => setActiveGame("menu")} /></Suspense>;
   if (activeGame === "grammaire3") return <Suspense fallback={gameLoader}><Chapitre3Grammaire onBack={() => setActiveGame("menu")} /></Suspense>;
+  if (activeGame === "enclock") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6"><EnglishClockTimes onBack={() => setActiveGame("menu")} /></div></Suspense>;
 
   const hasSentences = activeVocabulary.some((v) => v.french.includes(" ") && v.french.length > 15);
   const isVmboHavoCh3 = niveau === "vmbo-havo" && chapterId === "chapitre3";
   const isEnglishCh4 = language === "english" && (chapterId === "en_chapter4" || chapterId === "en_hv_chapter4");
+  const isEnglishCh2 = language === "english" && chapterId === "en_chapter2";
   const isHvCh2 = language === "french" && niveau === "havo-vwo" && chapterId === "hv_chapitre2";
   const isHvCh3 = language === "french" && niveau === "havo-vwo" && chapterId === "hv_chapitre3";
+  const chapterHasGrammar = language === "english" && hasGrammarForChapter(chapterId);
   const filterAiTeacher = (list: typeof languageGames) => aiTeacherEnabled ? list : list.filter(g => g.id !== "ai");
   const games = language === "biology" ? filterAiTeacher(biologyGames) : (language === "nask") ? filterAiTeacher(naskGames) : filterAiTeacher(languageGames).filter((g) => {
     if ((g as any).frenchOnly && language !== "french") return false;
     if ((g as any).englishOnly && language !== "english") return false;
-    if (g.id === "grammar" && !isEnglishCh4) return false;
-    if (g.id === "grammar" && !includeGrammar) return false;
+    if (g.id === "grammar" && !chapterHasGrammar) return false;
+    if (g.id === "grammar" && isEnglishCh4 && !includeGrammar) return false;
+    if (g.id === "enclock" && !isEnglishCh2) return false;
     if (g.id === "grammaire2" && !isHvCh2) return false;
     if (g.id === "grammaire3" && !isHvCh3) return false;
     if (g.id === "explorer" && !explorerEnabled) return false;
