@@ -42,8 +42,9 @@ const FrenchExplorer = lazy(() => import("@/components/games/FrenchExplorer"));
 const GrammarQuiz = lazy(() => import("@/components/games/GrammarQuiz"));
 const Chapitre2Grammaire = lazy(() => import("@/components/games/Chapitre2Grammaire"));
 const Chapitre3Grammaire = lazy(() => import("@/components/games/Chapitre3Grammaire"));
+const EnglishClockTimes = lazy(() => import("@/components/games/EnglishClockTimes"));
 
-type Game = "menu" | "flashcards" | "quiz" | "match" | "type" | "multiplayer" | "fill" | "sentence" | "ai" | "truefalse" | "memory" | "skeleton" | "clocktimes" | "etre" | "explorer" | "grammar" | "grammaire2" | "grammaire3";
+type Game = "menu" | "flashcards" | "quiz" | "match" | "type" | "multiplayer" | "fill" | "sentence" | "ai" | "truefalse" | "memory" | "skeleton" | "clocktimes" | "etre" | "explorer" | "grammar" | "grammaire2" | "grammaire3" | "enclock";
 
 const languageGames = [
   { id: "flashcards" as Game, title: "Flashcards", description: "Draai kaarten om en leer de woorden", icon: BookOpen, color: "bg-primary/10 text-primary" },
