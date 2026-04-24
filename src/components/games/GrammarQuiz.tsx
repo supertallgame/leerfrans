@@ -2,13 +2,19 @@ import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, RotateCcw, BookOpen } from "lucide-react";
-import { allGrammarQuestions, grammarTopics, getGrammarByTopic, GrammarQuestion } from "@/data/grammar-en";
+import {
+  GrammarQuestion,
+  getGrammarByChapter,
+  getGrammarTopicsForChapter,
+  getGrammarByTopic,
+} from "@/data/grammar-en";
 
 interface Props {
   onBack: () => void;
+  chapterId: string;
 }
 
-export default function GrammarQuiz({ onBack }: Props) {
+export default function GrammarQuiz({ onBack, chapterId }: Props) {
   const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selected, setSelected] = useState<string | null>(null);
@@ -16,15 +22,19 @@ export default function GrammarQuiz({ onBack }: Props) {
   const [answered, setAnswered] = useState(0);
   const [showExplanation, setShowExplanation] = useState(false);
 
-  const questions = useMemo(() => {
-    const source = selectedTopic ? getGrammarByTopic(selectedTopic) : allGrammarQuestions;
+  const chapterQuestions = useMemo(() => getGrammarByChapter(chapterId), [chapterId]);
+  const topics = useMemo(() => getGrammarTopicsForChapter(chapterId), [chapterId]);
+
+  const questions: GrammarQuestion[] = useMemo(() => {
+    if (!selectedTopic) return [];
+    const source = selectedTopic === "all" ? chapterQuestions : getGrammarByTopic(selectedTopic, chapterId);
     return [...source].sort(() => Math.random() - 0.5);
-  }, [selectedTopic]);
+  }, [selectedTopic, chapterId, chapterQuestions]);
 
   const current = questions[currentIndex];
 
   const handleSelect = (option: string) => {
-    if (selected) return;
+    if (selected || !current) return;
     setSelected(option);
     setShowExplanation(true);
     setAnswered((a) => a + 1);
@@ -50,10 +60,10 @@ export default function GrammarQuiz({ onBack }: Props) {
     setSelectedTopic(null);
   };
 
-  const finished = currentIndex + 1 >= questions.length && selected !== null;
+  const finished = !!current && currentIndex + 1 >= questions.length && selected !== null;
 
   // Topic selector
-  if (selectedTopic === null && currentIndex === 0 && answered === 0) {
+  if (selectedTopic === null) {
     return (
       <div className="max-w-xl mx-auto space-y-6">
         <div className="flex items-center gap-3">
@@ -62,40 +72,50 @@ export default function GrammarQuiz({ onBack }: Props) {
           </Button>
           <h1 className="text-xl md:text-2xl font-bold">📖 Grammar Quiz</h1>
         </div>
-        <p className="text-muted-foreground text-sm">Kies een onderwerp of oefen alles:</p>
-        <div className="space-y-2">
-          <Card
-            className="cursor-pointer hover:shadow-md hover:-translate-y-0.5 transition-all active:scale-[0.98]"
-            onClick={() => setSelectedTopic("all")}
-          >
-            <CardContent className="p-4 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                <BookOpen className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <p className="font-semibold">Alle onderwerpen</p>
-                <p className="text-xs text-muted-foreground">{allGrammarQuestions.length} vragen</p>
-              </div>
-            </CardContent>
-          </Card>
-          {grammarTopics.map((topic) => (
-            <Card
-              key={topic}
-              className="cursor-pointer hover:shadow-md hover:-translate-y-0.5 transition-all active:scale-[0.98]"
-              onClick={() => setSelectedTopic(topic)}
-            >
-              <CardContent className="p-4 flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center">
-                  <BookOpen className="h-5 w-5 text-accent" />
-                </div>
-                <div>
-                  <p className="font-semibold">{topic}</p>
-                  <p className="text-xs text-muted-foreground">{getGrammarByTopic(topic).length} vragen</p>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        {chapterQuestions.length === 0 ? (
+          <p className="text-muted-foreground text-sm">
+            Voor dit hoofdstuk zijn nog geen grammatica-oefeningen beschikbaar.
+          </p>
+        ) : (
+          <>
+            <p className="text-muted-foreground text-sm">Kies een onderwerp of oefen alles:</p>
+            <div className="space-y-2">
+              <Card
+                className="cursor-pointer hover:shadow-md hover:-translate-y-0.5 transition-all active:scale-[0.98]"
+                onClick={() => setSelectedTopic("all")}
+              >
+                <CardContent className="p-4 flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <BookOpen className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="font-semibold">Alle onderwerpen</p>
+                    <p className="text-xs text-muted-foreground">{chapterQuestions.length} vragen</p>
+                  </div>
+                </CardContent>
+              </Card>
+              {topics.map((topic) => (
+                <Card
+                  key={topic}
+                  className="cursor-pointer hover:shadow-md hover:-translate-y-0.5 transition-all active:scale-[0.98]"
+                  onClick={() => setSelectedTopic(topic)}
+                >
+                  <CardContent className="p-4 flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center">
+                      <BookOpen className="h-5 w-5 text-accent" />
+                    </div>
+                    <div>
+                      <p className="font-semibold">{topic}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {getGrammarByTopic(topic, chapterId).length} vragen
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </>
+        )}
       </div>
     );
   }
@@ -119,6 +139,8 @@ export default function GrammarQuiz({ onBack }: Props) {
       </div>
     );
   }
+
+  if (!current) return null;
 
   return (
     <div className="max-w-xl mx-auto space-y-4">
@@ -160,7 +182,7 @@ export default function GrammarQuiz({ onBack }: Props) {
                 <Button
                   key={opt}
                   variant={variant}
-                  className={`justify-start text-left h-auto py-3 px-4 ${extraClass}`}
+                  className={`justify-start text-left h-auto py-3 px-4 whitespace-normal ${extraClass}`}
                   onClick={() => handleSelect(opt)}
                   disabled={!!selected}
                 >
