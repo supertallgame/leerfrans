@@ -224,6 +224,9 @@ function ReplySection({
                 maxLength={500}
                 className="text-sm min-h-[60px] resize-none"
               />
+              <p className="text-xs text-muted-foreground text-right">
+                {message.length}/500
+              </p>
               <div className="flex gap-2">
                 <Button size="sm" className="h-7 text-xs gap-1" onClick={handleSubmit} disabled={submitting}>
                   <Send className="h-3 w-3" /> {submitting ? "Bezig..." : "Verstuur"}
