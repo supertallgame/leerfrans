@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/dialog";
 import AuthDialog from "@/components/AuthDialog";
 import { supabase } from "@/integrations/supabase/client";
+import { usePollingInterval } from "@/lib/usePollingInterval";
 import { toast } from "sonner";
 import UpdateBanner from "@/components/UpdateBanner";
 import SupportDialog from "@/components/support/SupportDialog";
@@ -127,22 +128,20 @@ const Index = () => {
 
   const ALL_SUBJECT_IDS: Language[] = ["french", "english", "nask", "biology"];
 
-  // Fetch settings + polling for instant updates
+  // Fetch settings for instant updates (poll only while tab is visible)
+  const fetchSettings = () => {
+    (supabase.rpc as any)("get_public_settings_bulk").then(({ data }: { data: any }) => {
+      if (!data || typeof data !== "object") return;
+      if (Array.isArray(data.disabled_subjects)) setDisabledSubjects(data.disabled_subjects as string[]);
+      setExplorerEnabled(data.explorer_enabled === true);
+      setAiTeacherEnabled(data.ai_teacher_enabled === true);
+      if (Array.isArray(data.disabled_niveaus)) setDisabledNiveaus(data.disabled_niveaus as string[]);
+      setPolarExpressEnabled(data.polar_express_enabled === true);
+    });
+  };
+
   useEffect(() => {
-    const fetchAll = () => {
-      (supabase.rpc as any)("get_public_settings_bulk").then(({ data }: { data: any }) => {
-        if (!data || typeof data !== "object") return;
-        if (Array.isArray(data.disabled_subjects)) setDisabledSubjects(data.disabled_subjects as string[]);
-        setExplorerEnabled(data.explorer_enabled === true);
-        setAiTeacherEnabled(data.ai_teacher_enabled === true);
-        if (Array.isArray(data.disabled_niveaus)) setDisabledNiveaus(data.disabled_niveaus as string[]);
-        setPolarExpressEnabled(data.polar_express_enabled === true);
-      });
-    };
-    fetchAll();
-    const interval = setInterval(() => {
-      if (document.visibilityState === "visible") fetchAll();
-    }, 60000);
+    fetchSettings();
 
     // Check IP/VPN on load (fire-and-forget) with 1h localStorage cache
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -172,9 +171,9 @@ const Index = () => {
         }).catch(() => {});
       }
     });
-
-    return () => clearInterval(interval);
   }, []);
+
+  usePollingInterval(fetchSettings, 60000);
 
   // If language becomes disabled, redirect to first available and kick back to menu
   useEffect(() => {
