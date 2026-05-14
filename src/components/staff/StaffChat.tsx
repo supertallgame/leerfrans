@@ -75,8 +75,7 @@ export default function StaffChat({ open, onOpenChange }: Props) {
                 if (data) {
                   setRolesMap((prev) => ({ ...prev, [data.user_id]: data.role }));
                 }
-              })
-              .catch(() => {});
+              });
           }
         }
       )
