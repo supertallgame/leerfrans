@@ -41,9 +41,66 @@ export default function SupportAdminPanel() {
 
   useEffect(() => {
     void load();
-    const i = setInterval(() => { void load(); if (openId) void loadMessages(openId); }, 5000);
-    return () => clearInterval(i);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
+    // Realtime: refresh report list on any insert/update
+    const reportsChannel = supabase
+      .channel("admin_support_reports")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "support_reports" },
+        (payload) => {
+          const newRow = (payload.new ?? null) as Report | null;
+          const oldRow = (payload.old ?? null) as Report | null;
+          if (payload.eventType === "INSERT" && newRow) {
+            setReports((prev) => (prev.some((r) => r.id === newRow.id) ? prev : [newRow, ...prev]));
+          } else if (payload.eventType === "UPDATE" && newRow) {
+            setReports((prev) => {
+              const next = prev.map((r) => (r.id === newRow.id ? newRow : r));
+              next.sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
+              return next;
+            });
+          } else if (payload.eventType === "DELETE" && oldRow) {
+            setReports((prev) => prev.filter((r) => r.id !== oldRow.id));
+          }
+        }
+      )
+      .subscribe();
+
+    // Visibility-aware fallback poll (covers missed events / reconnects)
+    let pollTimer: ReturnType<typeof setInterval> | null = null;
+    const startPoll = () => {
+      if (pollTimer) return;
+      pollTimer = setInterval(() => {
+        if (document.visibilityState === "visible") void load();
+      }, 30000);
+    };
+    const stopPoll = () => { if (pollTimer) { clearInterval(pollTimer); pollTimer = null; } };
+    startPoll();
+    const onVis = () => { if (document.visibilityState === "visible") startPoll(); else stopPoll(); };
+    document.addEventListener("visibilitychange", onVis);
+
+    return () => {
+      supabase.removeChannel(reportsChannel);
+      document.removeEventListener("visibilitychange", onVis);
+      stopPoll();
+    };
+  }, []);
+
+  // Per-open-report messages subscription
+  useEffect(() => {
+    if (!openId) return;
+    const channel = supabase
+      .channel(`admin_support_msgs_${openId}`)
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "support_report_messages", filter: `report_id=eq.${openId}` },
+        (payload) => {
+          const row = payload.new as Message;
+          setMessages((prev) => (prev.some((m) => m.id === row.id) ? prev : [...prev, row]));
+        }
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
   }, [openId]);
 
   useEffect(() => {
@@ -102,7 +159,6 @@ export default function SupportAdminPanel() {
     else {
       setReply("");
       setImage(null);
-      await loadMessages(openId);
     }
     setSending(false);
   };

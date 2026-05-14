@@ -71,9 +71,113 @@ export default function SupportDialog({ open, onOpenChange }: Props) {
     if (!open) return;
     setDisplayName("");
     setNameInput("");
-    void load();
-    const interval = setInterval(() => { void load(false); }, 4000);
-    return () => clearInterval(interval);
+    let cancelled = false;
+    let userId: string | null = null;
+    let reportsChannel: ReturnType<typeof supabase.channel> | null = null;
+    let messagesChannel: ReturnType<typeof supabase.channel> | null = null;
+
+    const fetchRoleFor = async (senderId: string) => {
+      if (!senderId) return;
+      // read latest map via state setter to avoid stale closure
+      let already = false;
+      setRolesMap((prev) => {
+        already = senderId in prev;
+        return prev;
+      });
+      if (already) return;
+      const { data } = await supabase
+        .from("user_roles")
+        .select("user_id, role")
+        .eq("user_id", senderId)
+        .maybeSingle();
+      if (data) setRolesMap((prev) => ({ ...prev, [data.user_id]: data.role }));
+      else setRolesMap((prev) => ({ ...prev, [senderId]: "" }));
+    };
+
+    const subscribeMessages = (reportId: string) => {
+      if (messagesChannel) supabase.removeChannel(messagesChannel);
+      messagesChannel = supabase
+        .channel(`support_msgs_${reportId}`)
+        .on(
+          "postgres_changes",
+          { event: "INSERT", schema: "public", table: "support_report_messages", filter: `report_id=eq.${reportId}` },
+          (payload) => {
+            const row = payload.new as Message;
+            setMessages((prev) => (prev.some((m) => m.id === row.id) ? prev : [...prev, row]));
+            if (row.sender_role !== "user") void fetchRoleFor(row.sender_id);
+          }
+        )
+        .subscribe();
+    };
+
+    const init = async () => {
+      await load();
+      if (cancelled) return;
+      const { data: { session } } = await supabase.auth.getSession();
+      userId = session?.user?.id ?? null;
+      if (!userId) return;
+
+      reportsChannel = supabase
+        .channel(`support_reports_${userId}`)
+        .on(
+          "postgres_changes",
+          { event: "*", schema: "public", table: "support_reports", filter: `user_id=eq.${userId}` },
+          (payload) => {
+            const newRow = (payload.new ?? null) as Report | null;
+            const oldRow = (payload.old ?? null) as Report | null;
+            if (payload.eventType === "INSERT" && newRow?.status === "open") {
+              setReport(newRow);
+              setMessages([]);
+              subscribeMessages(newRow.id);
+            } else if (payload.eventType === "UPDATE" && newRow) {
+              setReport((prev) => (prev && prev.id === newRow.id ? newRow : prev));
+              if (newRow.status !== "open") {
+                setReport((prev) => (prev && prev.id === newRow.id ? null : prev));
+                setMessages([]);
+              }
+            } else if (payload.eventType === "DELETE" && oldRow) {
+              setReport((prev) => (prev && prev.id === oldRow.id ? null : prev));
+            }
+          }
+        )
+        .subscribe();
+    };
+
+    void init();
+
+    // Visibility-aware fallback (handles missed events / reconnects)
+    let pollTimer: ReturnType<typeof setInterval> | null = null;
+    const startPoll = () => {
+      if (pollTimer) return;
+      pollTimer = setInterval(() => {
+        if (document.visibilityState === "visible") void load(false);
+      }, 30000);
+    };
+    const stopPoll = () => {
+      if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+    };
+    startPoll();
+    const onVis = () => { if (document.visibilityState === "visible") startPoll(); else stopPoll(); };
+    document.addEventListener("visibilitychange", onVis);
+
+    // When report becomes available later (after initial load), subscribe to its messages
+    const reportSubInterval = setInterval(() => {
+      setReport((current) => {
+        if (current && !messagesChannel) subscribeMessages(current.id);
+        return current;
+      });
+    }, 500);
+    // Stop the bootstrap subscriber after a few seconds — by then either report is set or won't be soon
+    setTimeout(() => clearInterval(reportSubInterval), 5000);
+
+    return () => {
+      cancelled = true;
+      document.removeEventListener("visibilitychange", onVis);
+      stopPoll();
+      clearInterval(reportSubInterval);
+      if (reportsChannel) supabase.removeChannel(reportsChannel);
+      if (messagesChannel) supabase.removeChannel(messagesChannel);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
@@ -257,7 +361,6 @@ export default function SupportDialog({ open, onOpenChange }: Props) {
     } else {
       setReply("");
       setReplyImage(null);
-      await load(false);
     }
     setSending(false);
   };
