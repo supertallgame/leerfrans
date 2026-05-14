@@ -127,17 +127,22 @@ export default function SupportAdminPanel() {
   const load = async () => {
     const { data } = await supabase
       .from("support_reports")
-      .select("*")
+      .select("id, subject, category, status, user_email, user_id, created_at, updated_at")
       .order("updated_at", { ascending: false })
       .limit(100);
-    if (data) setReports(data as Report[]);
+    if (data) {
+      const rows = data as Report[];
+      setReports(rows);
+      const newest = rows.reduce((acc, r) => (r.updated_at > acc ? r.updated_at : acc), "");
+      if (newest) lastSeenUpdatedAtRef.current = newest;
+    }
   };
 
   const loadMessages = async (reportId: string) => {
     setLoadingMsgs(true);
     const { data } = await supabase
       .from("support_report_messages")
-      .select("*")
+      .select("id, report_id, message, image_url, sender_role, sender_email, sender_id, created_at")
       .eq("report_id", reportId)
       .order("created_at", { ascending: true });
     if (data) setMessages(data as Message[]);
