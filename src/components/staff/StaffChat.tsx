@@ -48,12 +48,41 @@ export default function StaffChat({ open, onOpenChange }: Props) {
 
   useEffect(() => {
     if (!open) return;
-    // Always re-prompt for username when chat opens (user requirement)
     setDisplayName("");
     setNameInput("");
     void init();
-    const interval = setInterval(() => { void load(false); }, 3000);
-    return () => clearInterval(interval);
+
+    const channel = supabase
+      .channel("admin_chat_messages")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "admin_chat_messages" },
+        (payload) => {
+          const row = payload.new as Message;
+          setMessages((prev) => {
+            if (prev.some((m) => m.id === row.id)) return prev;
+            const next = [...prev, row];
+            next.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+            return next;
+          });
+          if (row.sender_id && !(row.sender_id in rolesMap)) {
+            supabase
+              .from("user_roles")
+              .select("user_id, role")
+              .eq("user_id", row.sender_id)
+              .single()
+              .then(({ data }) => {
+                if (data) {
+                  setRolesMap((prev) => ({ ...prev, [data.user_id]: data.role }));
+                }
+              })
+              .catch(() => {});
+          }
+        }
+      )
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
@@ -75,13 +104,12 @@ export default function StaffChat({ open, onOpenChange }: Props) {
     if (showLoading) setLoading(true);
     const { data } = await supabase
       .from("admin_chat_messages")
-      .select("*")
+      .select("id, sender_id, sender_email, sender_display, message, image_url, created_at")
       .order("created_at", { ascending: true })
       .limit(200);
     if (data) {
       const msgs = data as Message[];
       setMessages(msgs);
-      // Fetch roles for any unknown sender ids in one batch
       const unknownIds = Array.from(new Set(msgs.map(m => m.sender_id))).filter(id => !(id in rolesMap));
       if (unknownIds.length > 0) {
         const { data: rows } = await supabase
