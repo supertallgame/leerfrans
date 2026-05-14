@@ -223,7 +223,7 @@ export default function SupportDialog({ open, onOpenChange }: Props) {
 
     const { data: reports } = await supabase
       .from("support_reports")
-      .select("*")
+      .select("id, subject, category, status, created_at, user_email, user_id")
       .eq("user_id", session.user.id)
       .eq("status", "open")
       .order("created_at", { ascending: false })
@@ -233,7 +233,7 @@ export default function SupportDialog({ open, onOpenChange }: Props) {
       setReport(reports[0] as Report);
       const { data: msgs } = await supabase
         .from("support_report_messages")
-        .select("*")
+        .select("id, report_id, message, image_url, sender_role, sender_email, sender_id, created_at")
         .eq("report_id", reports[0].id)
         .order("created_at", { ascending: true });
       if (msgs) {
