@@ -25,6 +25,7 @@ export default function Feedback() {
   const [submitting, setSubmitting] = useState(false);
   const [mutedUntil, setMutedUntil] = useState<string | null>(null);
   const [blocked, setBlocked] = useState(false);
+  const [blockAnonymous, setBlockAnonymous] = useState(false);
 
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
