@@ -517,47 +517,48 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
     return () => clearTimeout(timer);
   }, [kahootCountdown, isHost]);
 
+  const lastInteractionRef = useRef<number>(Date.now());
+  const inactivityWarnedRef = useRef<boolean>(false);
+
   useEffect(() => {
     if (!myPlayerId) return;
-    let lastInteraction = Date.now();
-    let warned = false;
-    const resetActivity = () => { lastInteraction = Date.now(); warned = false; };
+    lastInteractionRef.current = Date.now();
+    inactivityWarnedRef.current = false;
+    const resetActivity = () => { lastInteractionRef.current = Date.now(); inactivityWarnedRef.current = false; };
     window.addEventListener("click", resetActivity);
     window.addEventListener("keydown", resetActivity);
     window.addEventListener("touchstart", resetActivity);
-    const interval = setInterval(() => {
-      supabase.functions.invoke("game-action", {
-        body: { action: "heartbeat", roomId: room?.id, playerId: myPlayerId, playerToken: myPlayerToken },
-      }).catch(() => {});
-      const inactiveMs = Date.now() - lastInteraction;
-      if (inactiveMs >= 4 * 60 * 1000 && !warned) {
-        warned = true;
-        toast.warning("Je wordt over 1 minuut verwijderd wegens inactiviteit!", {
-          duration: 30_000,
-          description: "Klik ergens om actief te blijven.",
-        });
-      }
-    }, 15_000);
     return () => {
-      clearInterval(interval);
       window.removeEventListener("click", resetActivity);
       window.removeEventListener("keydown", resetActivity);
       window.removeEventListener("touchstart", resetActivity);
     };
   }, [myPlayerId]);
 
-  useEffect(() => {
+  const heartbeatTick = useCallback(() => {
+    if (!myPlayerId || !room?.id || !myPlayerToken) return;
+    supabase.functions.invoke("game-action", {
+      body: { action: "heartbeat", roomId: room.id, playerId: myPlayerId, playerToken: myPlayerToken },
+    }).catch(() => {});
+    const inactiveMs = Date.now() - lastInteractionRef.current;
+    if (inactiveMs >= 4 * 60 * 1000 && !inactivityWarnedRef.current) {
+      inactivityWarnedRef.current = true;
+      toast.warning("Je wordt over 1 minuut verwijderd wegens inactiviteit!", {
+        duration: 30_000,
+        description: "Klik ergens om actief te blijven.",
+      });
+    }
+  }, [myPlayerId, room?.id, myPlayerToken]);
+  usePollingInterval(heartbeatTick, myPlayerId ? 15_000 : null);
+
+  // Realtime backup poll: only runs while the room channel is unhealthy.
+  // Once realtime reconnects (status === SUBSCRIBED), polling stops.
+  const fallbackTick = useCallback(() => {
     if (!room?.id) return;
-    const interval = setInterval(() => {
-      fetchPlayers(room.id);
-      // Also poll room status so phase transitions (waiting → playing →
-      // finished) and current_question_index updates always arrive even if
-      // realtime fails or is rate-limited. This is the canonical fix for
-      // "countdown reaches 0 but game never starts" desync.
-      fetchRoomState(room.id);
-    }, 1500);
-    return () => clearInterval(interval);
+    fetchPlayers(room.id);
+    fetchRoomState(room.id);
   }, [room?.id]);
+  usePollingInterval(fallbackTick, room?.id && !realtimeOk ? 1500 : null);
 
   const fetchPlayers = async (roomId: string) => {
     const { data } = await supabase.rpc("get_room_players", { p_room_id: roomId }) as any;
