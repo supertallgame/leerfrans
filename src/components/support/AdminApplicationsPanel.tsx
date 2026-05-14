@@ -22,8 +22,15 @@ export default function AdminApplicationsPanel() {
 
   useEffect(() => {
     void load();
-    const i = setInterval(() => void load(), 8000);
-    return () => clearInterval(i);
+    const channel = supabase
+      .channel("admin-applications-realtime")
+      .on("postgres_changes", { event: "*", schema: "public", table: "admin_applications" }, () => {
+        void load();
+      })
+      .subscribe();
+    return () => {
+      void supabase.removeChannel(channel);
+    };
   }, []);
 
   const load = async () => {
