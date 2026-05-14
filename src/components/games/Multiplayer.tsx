@@ -337,6 +337,8 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
   const [quizSections, setQuizSections] = useState<string[]>([]);
   const [pendingTeamMode, setPendingTeamMode] = useState<TeamMode>("solo");
   const [pendingNumTeams, setPendingNumTeams] = useState(2);
+  // Tracks the room realtime channel health. Polling fallback only runs when this is false.
+  const [realtimeOk, setRealtimeOk] = useState(true);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
