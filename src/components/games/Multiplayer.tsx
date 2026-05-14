@@ -17,6 +17,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { supabase } from "@/integrations/supabase/client";
+import { usePollingInterval } from "@/lib/usePollingInterval";
 import { shuffle, getChaptersForLanguage, getSectionsForChapter, getChapter, Language } from "@/data/vocabulary";
 import { useChapter } from "@/contexts/ChapterContext";
 import { useLocale } from "@/contexts/LocaleContext";
