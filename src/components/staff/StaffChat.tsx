@@ -82,7 +82,7 @@ export default function StaffChat({ open, onOpenChange }: Props) {
       )
       .subscribe();
 
-    return () => { supabase.removeChannel(channel); };
+    return () => { void supabase.removeChannel(channel); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
