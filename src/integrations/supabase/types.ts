@@ -986,6 +986,7 @@ export type Database = {
         }[]
       }
       get_public_setting: { Args: { p_key: string }; Returns: Json }
+      get_public_settings_bulk: { Args: never; Returns: Json }
       get_review_replies_public: {
         Args: never
         Returns: {
