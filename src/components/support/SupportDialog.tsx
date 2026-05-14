@@ -67,6 +67,8 @@ export default function SupportDialog({ open, onOpenChange }: Props) {
   const [replyImage, setReplyImage] = useState<File | null>(null);
   const [sending, setSending] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const messagesChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+  const subscribeMessagesRef = useRef<((reportId: string) => void) | null>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -75,7 +77,6 @@ export default function SupportDialog({ open, onOpenChange }: Props) {
     let cancelled = false;
     let userId: string | null = null;
     let reportsChannel: ReturnType<typeof supabase.channel> | null = null;
-    let messagesChannel: ReturnType<typeof supabase.channel> | null = null;
 
     const fetchRoleFor = async (senderId: string) => {
       if (!senderId) return;
@@ -96,8 +97,8 @@ export default function SupportDialog({ open, onOpenChange }: Props) {
     };
 
     const subscribeMessages = (reportId: string) => {
-      if (messagesChannel) supabase.removeChannel(messagesChannel);
-      messagesChannel = supabase
+      if (messagesChannelRef.current) supabase.removeChannel(messagesChannelRef.current);
+      messagesChannelRef.current = supabase
         .channel(`support_msgs_${reportId}`)
         .on(
           "postgres_changes",
@@ -110,6 +111,7 @@ export default function SupportDialog({ open, onOpenChange }: Props) {
         )
         .subscribe();
     };
+    subscribeMessagesRef.current = subscribeMessages;
 
     const init = async () => {
       await load();
@@ -146,24 +148,23 @@ export default function SupportDialog({ open, onOpenChange }: Props) {
 
     void init();
 
-    // When report becomes available later (after initial load), subscribe to its messages
-    const reportSubInterval = setInterval(() => {
-      setReport((current) => {
-        if (current && !messagesChannel) subscribeMessages(current.id);
-        return current;
-      });
-    }, 500);
-    // Stop the bootstrap subscriber after a few seconds — by then either report is set or won't be soon
-    setTimeout(() => clearInterval(reportSubInterval), 5000);
-
     return () => {
       cancelled = true;
-      clearInterval(reportSubInterval);
       if (reportsChannel) supabase.removeChannel(reportsChannel);
-      if (messagesChannel) supabase.removeChannel(messagesChannel);
+      if (messagesChannelRef.current) {
+        supabase.removeChannel(messagesChannelRef.current);
+        messagesChannelRef.current = null;
+      }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
+
+  // Subscribe to messages whenever a report becomes available and no channel is open yet
+  useEffect(() => {
+    if (!report?.id) return;
+    if (messagesChannelRef.current) return;
+    subscribeMessagesRef.current?.(report.id);
+  }, [report?.id]);
 
   // Visibility-aware fallback poll: only fetches messages newer than the last
   // one we already have, instead of refetching the whole report on every tick.
