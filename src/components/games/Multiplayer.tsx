@@ -449,8 +449,15 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
           fetchPlayers(room.id);
         }
       )
-      .subscribe();
-    return () => { supabase.removeChannel(roomChannel); };
+      .subscribe((status) => {
+        if (status === "SUBSCRIBED") setRealtimeOk(true);
+        else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT" || status === "CLOSED") setRealtimeOk(false);
+      });
+    return () => {
+      supabase.removeChannel(roomChannel);
+      // Reset to "ok" so the fallback poll doesn't keep firing after we leave the room.
+      setRealtimeOk(true);
+    };
   }, [room?.id, myPlayerId, myPlayerToken, fetchQuestion]);
 
   useEffect(() => {
