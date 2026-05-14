@@ -159,6 +159,13 @@ export default function SupportDialog({ open, onOpenChange }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
+  // Subscribe to messages whenever a report becomes available and no channel is open yet
+  useEffect(() => {
+    if (!report?.id) return;
+    if (messagesChannelRef.current) return;
+    subscribeMessagesRef.current?.(report.id);
+  }, [report?.id]);
+
   // Visibility-aware fallback poll: only fetches messages newer than the last
   // one we already have, instead of refetching the whole report on every tick.
   const lastMsgCreatedAtRef = useRef<string | null>(null);
