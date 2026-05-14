@@ -146,21 +146,6 @@ export default function SupportDialog({ open, onOpenChange }: Props) {
 
     void init();
 
-    // Visibility-aware fallback (handles missed events / reconnects)
-    let pollTimer: ReturnType<typeof setInterval> | null = null;
-    const startPoll = () => {
-      if (pollTimer) return;
-      pollTimer = setInterval(() => {
-        if (document.visibilityState === "visible") void load(false);
-      }, 30000);
-    };
-    const stopPoll = () => {
-      if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
-    };
-    startPoll();
-    const onVis = () => { if (document.visibilityState === "visible") startPoll(); else stopPoll(); };
-    document.addEventListener("visibilitychange", onVis);
-
     // When report becomes available later (after initial load), subscribe to its messages
     const reportSubInterval = setInterval(() => {
       setReport((current) => {
@@ -173,14 +158,50 @@ export default function SupportDialog({ open, onOpenChange }: Props) {
 
     return () => {
       cancelled = true;
-      document.removeEventListener("visibilitychange", onVis);
-      stopPoll();
       clearInterval(reportSubInterval);
       if (reportsChannel) supabase.removeChannel(reportsChannel);
       if (messagesChannel) supabase.removeChannel(messagesChannel);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
+
+  // Visibility-aware fallback poll: only fetches messages newer than the last
+  // one we already have, instead of refetching the whole report on every tick.
+  const lastMsgCreatedAtRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (messages.length === 0) return;
+    const newest = messages.reduce((acc, m) => (m.created_at > acc ? m.created_at : acc), "");
+    if (newest) lastMsgCreatedAtRef.current = newest;
+  }, [messages]);
+
+  const incrementalReload = useCallback(async () => {
+    if (!open) return;
+    if (!report?.id) {
+      // No active report yet — just re-run the cheap top-level load
+      await load(false);
+      return;
+    }
+    const cursor = lastMsgCreatedAtRef.current;
+    let q = supabase
+      .from("support_report_messages")
+      .select("id, report_id, message, image_url, sender_role, sender_email, sender_id, created_at")
+      .eq("report_id", report.id)
+      .order("created_at", { ascending: true });
+    if (cursor) q = q.gt("created_at", cursor);
+    const { data } = await q;
+    if (!data || data.length === 0) return;
+    const rows = data as Message[];
+    setMessages((prev) => {
+      const ids = new Set(prev.map((m) => m.id));
+      const merged = [...prev];
+      rows.forEach((r) => { if (!ids.has(r.id)) merged.push(r); });
+      return merged;
+    });
+    rows.forEach((r) => { if (r.sender_role !== "user") void supabase
+      .from("user_roles").select("user_id, role").eq("user_id", r.sender_id).maybeSingle()
+      .then(({ data: rd }) => { if (rd) setRolesMap((p) => ({ ...p, [rd.user_id]: rd.role })); }); });
+  }, [open, report?.id]);
+  usePollingInterval(incrementalReload, open ? 30000 : null);
 
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
