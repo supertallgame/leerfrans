@@ -621,7 +621,7 @@ const Index = () => {
         </DialogContent>
       </Dialog>
 
-      <ObamaPopup />
+      <ObamaPopup adminEnabled={obamaEnabled} />
 
       {/* Polar Express Easter Egg */}
       {polarExpressEnabled && (
