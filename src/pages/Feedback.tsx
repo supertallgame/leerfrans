@@ -43,6 +43,7 @@ export default function Feedback() {
           .rpc("get_public_setting", { p_key: "block_anonymous_reviews" });
         if (anonSetting === true) {
           setBlocked(true);
+          setBlockAnonymous(true);
         }
       }
 
