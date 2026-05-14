@@ -115,6 +115,7 @@ const Index = () => {
   const [isHeadAdmin, setIsHeadAdmin] = useState(false);
   const [isStaff, setIsStaff] = useState(false);
   const [polarExpressEnabled, setPolarExpressEnabled] = useState(false);
+  const [obamaEnabled, setObamaEnabled] = useState(false);
   const [includeGrammar, setIncludeGrammar] = useState(false);
   const [showSupport, setShowSupport] = useState(false);
   const [showApply, setShowApply] = useState(false);
@@ -137,6 +138,7 @@ const Index = () => {
       setAiTeacherEnabled(data.ai_teacher_enabled === true);
       if (Array.isArray(data.disabled_niveaus)) setDisabledNiveaus(data.disabled_niveaus as string[]);
       setPolarExpressEnabled(data.polar_express_enabled === true);
+      setObamaEnabled(data.obama_enabled === true);
     });
   };
 
