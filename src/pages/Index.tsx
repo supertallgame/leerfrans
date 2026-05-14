@@ -144,12 +144,28 @@ const Index = () => {
       if (document.visibilityState === "visible") fetchAll();
     }, 60000);
 
-    // Check IP/VPN on load (fire-and-forget)
+    // Check IP/VPN on load (fire-and-forget) with 1h localStorage cache
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
+        const CACHE_KEY = "check-ip-result";
+        const ONE_HOUR = 3600000;
+        try {
+          const raw = localStorage.getItem(CACHE_KEY);
+          if (raw) {
+            const cached = JSON.parse(raw);
+            if (typeof cached.ts === "number" && Date.now() - cached.ts < ONE_HOUR) {
+              if (cached.banned) {
+                supabase.auth.signOut();
+                window.location.reload();
+              }
+              return;
+            }
+          }
+        } catch {}
         supabase.functions.invoke("check-ip").then(({ data }) => {
-          if (data?.banned) {
-            // User or IP is banned - sign them out
+          const banned = !!data?.banned;
+          localStorage.setItem(CACHE_KEY, JSON.stringify({ banned, ts: Date.now() }));
+          if (banned) {
             supabase.auth.signOut();
             window.location.reload();
           }
