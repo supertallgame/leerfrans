@@ -40,6 +40,8 @@ export default function SupportAdminPanel() {
   const [loadingMsgs, setLoadingMsgs] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  const lastSeenUpdatedAtRef = useRef<string | null>(null);
+
   useEffect(() => {
     void load();
 
@@ -54,12 +56,18 @@ export default function SupportAdminPanel() {
           const oldRow = (payload.old ?? null) as Report | null;
           if (payload.eventType === "INSERT" && newRow) {
             setReports((prev) => (prev.some((r) => r.id === newRow.id) ? prev : [newRow, ...prev]));
+            if (newRow.updated_at > (lastSeenUpdatedAtRef.current ?? "")) {
+              lastSeenUpdatedAtRef.current = newRow.updated_at;
+            }
           } else if (payload.eventType === "UPDATE" && newRow) {
             setReports((prev) => {
               const next = prev.map((r) => (r.id === newRow.id ? newRow : r));
               next.sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
               return next;
             });
+            if (newRow.updated_at > (lastSeenUpdatedAtRef.current ?? "")) {
+              lastSeenUpdatedAtRef.current = newRow.updated_at;
+            }
           } else if (payload.eventType === "DELETE" && oldRow) {
             setReports((prev) => prev.filter((r) => r.id !== oldRow.id));
           }
@@ -67,25 +75,33 @@ export default function SupportAdminPanel() {
       )
       .subscribe();
 
-    // Visibility-aware fallback poll (covers missed events / reconnects)
-    let pollTimer: ReturnType<typeof setInterval> | null = null;
-    const startPoll = () => {
-      if (pollTimer) return;
-      pollTimer = setInterval(() => {
-        if (document.visibilityState === "visible") void load();
-      }, 30000);
-    };
-    const stopPoll = () => { if (pollTimer) { clearInterval(pollTimer); pollTimer = null; } };
-    startPoll();
-    const onVis = () => { if (document.visibilityState === "visible") startPoll(); else stopPoll(); };
-    document.addEventListener("visibilitychange", onVis);
-
     return () => {
       supabase.removeChannel(reportsChannel);
-      document.removeEventListener("visibilitychange", onVis);
-      stopPoll();
     };
   }, []);
+
+  // Visibility-aware fallback poll: only fetches reports updated since last seen
+  const incrementalReload = useCallback(async () => {
+    const cursor = lastSeenUpdatedAtRef.current;
+    let q = supabase
+      .from("support_reports")
+      .select("id, subject, category, status, user_email, user_id, created_at, updated_at")
+      .order("updated_at", { ascending: false })
+      .limit(100);
+    if (cursor) q = q.gt("updated_at", cursor);
+    const { data } = await q;
+    if (!data || data.length === 0) return;
+    setReports((prev) => {
+      const map = new Map(prev.map((r) => [r.id, r]));
+      (data as Report[]).forEach((r) => map.set(r.id, r));
+      const merged = Array.from(map.values());
+      merged.sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
+      return merged;
+    });
+    const newest = (data as Report[]).reduce((acc, r) => (r.updated_at > acc ? r.updated_at : acc), cursor ?? "");
+    if (newest) lastSeenUpdatedAtRef.current = newest;
+  }, []);
+  usePollingInterval(incrementalReload, 30000);
 
   // Per-open-report messages subscription
   useEffect(() => {
