@@ -361,7 +361,6 @@ export default function SupportDialog({ open, onOpenChange }: Props) {
     } else {
       setReply("");
       setReplyImage(null);
-      await load(false);
     }
     setSending(false);
   };
