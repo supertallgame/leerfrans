@@ -119,11 +119,17 @@ export default function Admin() {
   useEffect(() => {
     checkAdmin();
 
-    // Poll reviews instead of realtime (email privacy)
-    const reviewInterval = setInterval(async () => {
+    const refetchReviews = async () => {
       const { data } = await supabase.rpc("get_reviews_admin" as any) as any;
       if (data) setReviews(data);
-    }, 15000);
+    };
+
+    const reviewsChannel = supabase
+      .channel('admin-reviews-realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'reviews' }, () => {
+        void refetchReviews();
+      })
+      .subscribe();
 
     const roomsChannel = supabase
       .channel('admin-rooms-realtime')
@@ -141,7 +147,7 @@ export default function Admin() {
       .subscribe();
 
     return () => {
-      clearInterval(reviewInterval);
+      supabase.removeChannel(reviewsChannel);
       supabase.removeChannel(roomsChannel);
     };
   }, []);
