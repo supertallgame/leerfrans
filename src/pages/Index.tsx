@@ -130,24 +130,19 @@ const Index = () => {
   // Fetch settings + polling for instant updates
   useEffect(() => {
     const fetchAll = () => {
-      supabase.rpc("get_public_setting", { p_key: "disabled_subjects" }).then(({ data }) => {
-        if (data && Array.isArray(data)) setDisabledSubjects(data as string[]);
-      });
-      supabase.rpc("get_public_setting", { p_key: "explorer_enabled" }).then(({ data }) => {
-        setExplorerEnabled(data === true);
-      });
-      supabase.rpc("get_public_setting", { p_key: "ai_teacher_enabled" }).then(({ data }) => {
-        setAiTeacherEnabled(data === true);
-      });
-      supabase.rpc("get_public_setting", { p_key: "disabled_niveaus" }).then(({ data }) => {
-        if (data && Array.isArray(data)) setDisabledNiveaus(data as string[]);
-      });
-      supabase.rpc("get_public_setting", { p_key: "polar_express_enabled" }).then(({ data }) => {
-        setPolarExpressEnabled(data === true);
+      (supabase.rpc as any)("get_public_settings_bulk").then(({ data }: { data: any }) => {
+        if (!data || typeof data !== "object") return;
+        if (Array.isArray(data.disabled_subjects)) setDisabledSubjects(data.disabled_subjects as string[]);
+        setExplorerEnabled(data.explorer_enabled === true);
+        setAiTeacherEnabled(data.ai_teacher_enabled === true);
+        if (Array.isArray(data.disabled_niveaus)) setDisabledNiveaus(data.disabled_niveaus as string[]);
+        setPolarExpressEnabled(data.polar_express_enabled === true);
       });
     };
     fetchAll();
-    const interval = setInterval(fetchAll, 15000);
+    const interval = setInterval(() => {
+      if (document.visibilityState === "visible") fetchAll();
+    }, 60000);
 
     // Check IP/VPN on load (fire-and-forget)
     supabase.auth.getSession().then(({ data: { session } }) => {
