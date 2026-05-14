@@ -67,6 +67,8 @@ export default function SupportDialog({ open, onOpenChange }: Props) {
   const [replyImage, setReplyImage] = useState<File | null>(null);
   const [sending, setSending] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const messagesChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+  const subscribeMessagesRef = useRef<((reportId: string) => void) | null>(null);
 
   useEffect(() => {
     if (!open) return;
