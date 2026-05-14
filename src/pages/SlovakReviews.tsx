@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback, useRef } from "react";
+import { usePollingInterval } from "@/lib/usePollingInterval";
 import { useThemeSync } from "@/hooks/use-theme-sync";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -423,17 +424,36 @@ export default function SlovakReviews() {
   ];
   const { translated: translatedMessages, isTranslating } = useTranslations(translationItems);
 
+  const stripReview = (r: any): Review => ({
+    id: r.id,
+    display_name: r.display_name,
+    rating: r.rating,
+    message: r.message,
+    created_at: r.created_at,
+    image_url: r.image_url ?? null,
+    user_id: r.user_id ?? null,
+  });
+
+  const stripReply = (r: any): ReviewReply => ({
+    id: r.id,
+    review_id: r.review_id,
+    display_name: r.display_name,
+    message: r.message,
+    created_at: r.created_at,
+    user_id: r.user_id ?? null,
+  });
+
+  const fullSync = useCallback(async () => {
+    const [reviewsRes, repliesRes] = await Promise.all([
+      supabase.from("reviews_public" as any).select("id, display_name, rating, message, created_at, image_url, user_id").order("created_at", { ascending: false }) as any,
+      supabase.from("review_replies" as any).select("id, review_id, display_name, message, created_at, user_id").order("created_at", { ascending: true }) as any,
+    ]);
+    if (reviewsRes.data) setReviews((reviewsRes.data as any[]).map(stripReview));
+    if (repliesRes.data) setReplies((repliesRes.data as any[]).map(stripReply));
+  }, []);
+
   useEffect(() => {
-    const fetchData = async () => {
-      const [reviewsRes, repliesRes] = await Promise.all([
-        supabase.from("reviews_public" as any).select("id, display_name, rating, message, created_at, image_url, user_id").order("created_at", { ascending: false }) as any,
-        supabase.from("review_replies" as any).select("*").order("created_at", { ascending: true }) as any,
-      ]);
-      if (reviewsRes.data) setReviews(reviewsRes.data);
-      if (repliesRes.data) setReplies(repliesRes.data);
-      setLoading(false);
-    };
-    fetchData();
+    void fullSync().finally(() => setLoading(false));
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       const uid = session?.user?.id ?? null;
@@ -478,10 +498,56 @@ export default function SlovakReviews() {
       })
       .subscribe();
 
+    // Reviews: incremental merge (RLS may block anon; fallback poll covers gaps)
+    const reviewsChannel = supabase
+      .channel('sk-reviews-incremental-realtime')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'reviews' }, (payload) => {
+        const r = stripReview(payload.new);
+        setReviews((prev) => prev.some((x) => x.id === r.id) ? prev : [r, ...prev]);
+      })
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'reviews' }, (payload) => {
+        const r = stripReview(payload.new);
+        setReviews((prev) => prev.map((x) => (x.id === r.id ? { ...x, ...r } : x)));
+      })
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'reviews' }, (payload) => {
+        const id = (payload.old as any)?.id;
+        if (!id) return;
+        setReviews((prev) => prev.filter((x) => x.id !== id));
+      })
+      .subscribe();
+
+    // Replies: incremental merge
+    const repliesChannel = supabase
+      .channel('sk-review-replies-incremental-realtime')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'review_replies' }, (payload) => {
+        const r = stripReply(payload.new);
+        setReplies((prev) => {
+          if (prev.some((x) => x.id === r.id)) return prev;
+          const next = [...prev, r];
+          next.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+          return next;
+        });
+      })
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'review_replies' }, (payload) => {
+        const r = stripReply(payload.new);
+        setReplies((prev) => prev.map((x) => (x.id === r.id ? { ...x, ...r } : x)));
+      })
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'review_replies' }, (payload) => {
+        const id = (payload.old as any)?.id;
+        if (!id) return;
+        setReplies((prev) => prev.filter((x) => x.id !== id));
+      })
+      .subscribe();
+
     return () => {
       supabase.removeChannel(votesChannel);
+      supabase.removeChannel(reviewsChannel);
+      supabase.removeChannel(repliesChannel);
     };
-  }, []);
+  }, [fullSync]);
+
+  // Low-frequency fallback sync (5 min, paused while tab hidden)
+  usePollingInterval(fullSync, 5 * 60 * 1000);
 
   const handleDelete = async () => {
     if (!deleteId) return;
