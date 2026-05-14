@@ -172,7 +172,6 @@ export default function StaffChat({ open, onOpenChange }: Props) {
     else {
       setText("");
       setImage(null);
-      await load(false);
     }
     setSending(false);
   };
