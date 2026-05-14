@@ -380,19 +380,7 @@ export default function Reviews() {
       setHeadAdminUserIds(ids);
     });
 
-    const refetchAll = async () => {
-      const [reviewsRes, repliesRes] = await Promise.all([
-        supabase.from("reviews_public" as any).select("id, display_name, rating, message, created_at, image_url, user_id").order("created_at", { ascending: false }) as any,
-        supabase.from("review_replies" as any).select("*").order("created_at", { ascending: true }) as any,
-      ]);
-      if (reviewsRes.data) setReviews(reviewsRes.data);
-      if (repliesRes.data) setReplies(repliesRes.data);
-    };
-
-    // Poll for new reviews every 15 seconds
-    const interval = setInterval(refetchAll, 15000);
-
-    // Realtime subscription for votes
+    // Realtime subscription for votes (covers all updates; no polling needed)
     const votesChannel = supabase
       .channel('review-votes-realtime')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'review_votes' }, () => {
@@ -401,7 +389,6 @@ export default function Reviews() {
       .subscribe();
 
     return () => {
-      clearInterval(interval);
       supabase.removeChannel(votesChannel);
     };
   }, []);
