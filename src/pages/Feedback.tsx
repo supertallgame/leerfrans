@@ -25,6 +25,7 @@ export default function Feedback() {
   const [submitting, setSubmitting] = useState(false);
   const [mutedUntil, setMutedUntil] = useState<string | null>(null);
   const [blocked, setBlocked] = useState(false);
+  const [blockAnonymous, setBlockAnonymous] = useState(false);
 
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -42,6 +43,7 @@ export default function Feedback() {
           .rpc("get_public_setting", { p_key: "block_anonymous_reviews" });
         if (anonSetting === true) {
           setBlocked(true);
+          setBlockAnonymous(true);
         }
       }
 
@@ -103,9 +105,7 @@ export default function Feedback() {
     const { data: { session } } = await supabase.auth.getSession();
 
     if (!session?.user) {
-      const { data: anonSetting } = await supabase
-        .rpc("get_public_setting", { p_key: "block_anonymous_reviews" });
-      if (anonSetting === true) {
+      if (blockAnonymous) {
         setSubmitting(false);
         return toast.error("Reviews plaatsen is tijdelijk uitgeschakeld. Probeer het later opnieuw.");
       }

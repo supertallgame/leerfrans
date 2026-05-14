@@ -558,7 +558,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
     fetchPlayers(room.id);
     fetchRoomState(room.id);
   }, [room?.id]);
-  usePollingInterval(fallbackTick, room?.id && !realtimeOk ? 1500 : null);
+  usePollingInterval(fallbackTick, room?.id && !realtimeOk ? 5000 : null);
 
   const fetchPlayers = async (roomId: string) => {
     const { data } = await supabase.rpc("get_room_players", { p_room_id: roomId }) as any;

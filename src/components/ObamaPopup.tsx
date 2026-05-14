@@ -3,29 +3,22 @@ import { useLocation } from "react-router-dom";
 import obamaImg from "@/assets/obama.jpg";
 import { fireConfetti } from "@/lib/confetti";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
 
-export default function ObamaPopup() {
+interface Props {
+  adminEnabled?: boolean;
+}
+
+export default function ObamaPopup({ adminEnabled = true }: Props) {
   const [visible, setVisible] = useState(false);
   const [exiting, setExiting] = useState(false);
   const [ready, setReady] = useState(false);
-  const [adminEnabled, setAdminEnabled] = useState<boolean | null>(null);
   const location = useLocation();
 
   // Only allow on the home page
   const isHomePage = location.pathname === "/";
 
-  // Check admin setting
-  useEffect(() => {
-    supabase.rpc("get_public_setting", { p_key: "obama_enabled" }).then(({ data }) => {
-      // Default to true if no setting exists
-      setAdminEnabled(data !== false);
-    });
-  }, []);
-
   useEffect(() => {
     if (!isHomePage || adminEnabled === false) { setVisible(false); return; }
-    if (adminEnabled === null) return; // still loading
     if (localStorage.getItem("obama_unlocked") === "true") return;
 
     const delay = 20000 + Math.random() * 10000;

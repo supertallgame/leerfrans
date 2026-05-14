@@ -21,6 +21,7 @@ export default function SlovakFeedback() {
   const [submitting, setSubmitting] = useState(false);
   const [mutedUntil, setMutedUntil] = useState<string | null>(null);
   const [blocked, setBlocked] = useState(false);
+  const [blockAnonymous, setBlockAnonymous] = useState(false);
 
   useEffect(() => {
     const checkStatus = async () => {
@@ -30,6 +31,7 @@ export default function SlovakFeedback() {
           .rpc("get_public_setting", { p_key: "block_anonymous_reviews" });
         if (anonSetting === true) {
           setBlocked(true);
+          setBlockAnonymous(true);
         }
       }
       if (session?.user?.email) {
@@ -60,9 +62,7 @@ export default function SlovakFeedback() {
     const { data: { session } } = await supabase.auth.getSession();
 
     if (!session?.user) {
-      const { data: anonSetting } = await supabase
-        .rpc("get_public_setting", { p_key: "block_anonymous_reviews" });
-      if (anonSetting === true) {
+      if (blockAnonymous) {
         setSubmitting(false);
         return toast.error("Písanie recenzií je dočasne vypnuté.");
       }
