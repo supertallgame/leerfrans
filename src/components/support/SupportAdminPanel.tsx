@@ -159,7 +159,6 @@ export default function SupportAdminPanel() {
     else {
       setReply("");
       setImage(null);
-      await loadMessages(openId);
     }
     setSending(false);
   };
