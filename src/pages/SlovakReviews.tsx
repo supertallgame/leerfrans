@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback, useRef } from "react";
+import { usePollingInterval } from "@/lib/usePollingInterval";
 import { useThemeSync } from "@/hooks/use-theme-sync";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
