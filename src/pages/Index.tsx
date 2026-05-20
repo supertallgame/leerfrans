@@ -44,9 +44,10 @@ const FrenchExplorer = lazy(() => import("@/components/games/FrenchExplorer"));
 const GrammarQuiz = lazy(() => import("@/components/games/GrammarQuiz"));
 const Chapitre2Grammaire = lazy(() => import("@/components/games/Chapitre2Grammaire"));
 const Chapitre3Grammaire = lazy(() => import("@/components/games/Chapitre3Grammaire"));
+const Chapitre6Grammaire = lazy(() => import("@/components/games/Chapitre6Grammaire"));
 const EnglishClockTimes = lazy(() => import("@/components/games/EnglishClockTimes"));
 
-type Game = "menu" | "flashcards" | "quiz" | "match" | "type" | "multiplayer" | "fill" | "sentence" | "ai" | "truefalse" | "memory" | "skeleton" | "clocktimes" | "etre" | "explorer" | "grammar" | "grammaire2" | "grammaire3" | "enclock";
+type Game = "menu" | "flashcards" | "quiz" | "match" | "type" | "multiplayer" | "fill" | "sentence" | "ai" | "truefalse" | "memory" | "skeleton" | "clocktimes" | "etre" | "explorer" | "grammar" | "grammaire2" | "grammaire3" | "grammaire6" | "enclock";
 
 const languageGames = [
   { id: "flashcards" as Game, title: "Flashcards", description: "Draai kaarten om en leer de woorden", icon: BookOpen, color: "bg-primary/10 text-primary" },
@@ -63,6 +64,7 @@ const languageGames = [
   { id: "enclock" as Game, title: "Telling the Time", description: "Lees de klok in het Engels", icon: Clock, color: "bg-[hsl(var(--success))]/10 text-[hsl(var(--success))]", englishOnly: true },
   { id: "grammaire2" as Game, title: "Grammaire (Ch. 2)", description: "Werkwoorden op -er & ontkenning ne…pas", icon: BookText, color: "bg-[hsl(var(--success))]/10 text-[hsl(var(--success))]", frenchOnly: true },
   { id: "grammaire3" as Game, title: "Grammaire (Ch. 3)", description: "Het werkwoord être & bezittelijke vnw.", icon: BookText, color: "bg-accent/10 text-accent", frenchOnly: true },
+  { id: "grammaire6" as Game, title: "Grammaire (Ch. 6)", description: "Vragen stellen, aller & futur proche", icon: BookText, color: "bg-primary/10 text-primary", frenchOnly: true },
 ];
 
 const naskGames = [
