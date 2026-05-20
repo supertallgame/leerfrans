@@ -9,26 +9,32 @@ interface Props {
 }
 
 export default function ObamaPopup({ adminEnabled = true }: Props) {
+  const location = useLocation();
+  const isHomePage = location.pathname === "/";
+
+  // Hard short-circuit: if the admin toggle is off (or we're not on the home page),
+  // render nothing and skip all timers, scroll listeners and toasts entirely.
+  if (!adminEnabled || !isHomePage) return null;
+
+  return <ObamaPopupInner />;
+}
+
+function ObamaPopupInner() {
   const [visible, setVisible] = useState(false);
   const [exiting, setExiting] = useState(false);
   const [ready, setReady] = useState(false);
-  const location = useLocation();
-
-  // Only allow on the home page
-  const isHomePage = location.pathname === "/";
 
   useEffect(() => {
-    if (!isHomePage || adminEnabled === false) { setVisible(false); return; }
     if (localStorage.getItem("obama_unlocked") === "true") return;
 
     const delay = 20000 + Math.random() * 10000;
     const timer = setTimeout(() => setReady(true), delay);
     return () => clearTimeout(timer);
-  }, [isHomePage, adminEnabled]);
+  }, []);
 
   // Show only when scrolled down (past 400px)
   const handleScroll = useCallback(() => {
-    if (!ready || !isHomePage) return;
+    if (!ready) return;
     if (window.scrollY > 400) {
       setVisible(true);
     } else {
@@ -37,15 +43,14 @@ export default function ObamaPopup({ adminEnabled = true }: Props) {
         setTimeout(() => { setVisible(false); setExiting(false); }, 500);
       }
     }
-  }, [ready, isHomePage, visible, exiting]);
+  }, [ready, visible, exiting]);
 
   useEffect(() => {
-    if (!ready || !isHomePage) return;
-    // Check immediately in case already scrolled
+    if (!ready) return;
     if (window.scrollY > 400) { setVisible(true); return; }
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [ready, isHomePage, handleScroll]);
+  }, [ready, handleScroll]);
 
   useEffect(() => {
     if (!visible) return;
