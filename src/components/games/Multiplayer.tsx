@@ -1369,7 +1369,19 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
                 </Button>
               </CardContent>
             </Card>
+            <Card className="cursor-pointer transition-all hover:shadow-lg hover:-translate-y-1 active:scale-[0.98] border-2 border-orange-400/40 hover:border-orange-500 bg-gradient-to-br from-orange-500/10 via-red-500/10 to-yellow-500/10" onClick={() => startWithSettings("lava")}>
+              <CardContent className="p-4 md:p-6 flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-orange-500/20 flex items-center justify-center shrink-0 text-2xl">
+                  🌋
+                </div>
+                <div>
+                  <h2 className="text-base md:text-lg font-bold">{m.lava}</h2>
+                  <p className="text-xs md:text-sm text-muted-foreground">{m.lavaDesc}</p>
+                </div>
+              </CardContent>
+            </Card>
           </div>
+
         </div>
       </div>
     );
