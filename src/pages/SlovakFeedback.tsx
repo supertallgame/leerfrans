@@ -22,17 +22,26 @@ export default function SlovakFeedback() {
   const [mutedUntil, setMutedUntil] = useState<string | null>(null);
   const [blocked, setBlocked] = useState(false);
   const [blockAnonymous, setBlockAnonymous] = useState(false);
+  const [settingLoaded, setSettingLoaded] = useState(false);
+  const [settingError, setSettingError] = useState(false);
 
   useEffect(() => {
     const checkStatus = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.user) {
-        const { data: anonSetting } = await supabase
+        const { data: anonSetting, error: anonError } = await supabase
           .rpc("get_public_setting", { p_key: "block_anonymous_reviews" });
-        if (anonSetting === true) {
-          setBlocked(true);
-          setBlockAnonymous(true);
+        if (anonError) {
+          setSettingError(true);
+        } else {
+          if (anonSetting === true) {
+            setBlocked(true);
+            setBlockAnonymous(true);
+          }
+          setSettingLoaded(true);
         }
+      } else {
+        setSettingLoaded(true);
       }
       if (session?.user?.email) {
         const { data: muteData } = await supabase.rpc("get_my_mute_status" as any);
@@ -62,6 +71,14 @@ export default function SlovakFeedback() {
     const { data: { session } } = await supabase.auth.getSession();
 
     if (!session?.user) {
+      if (settingError) {
+        setSubmitting(false);
+        return toast.error("Nepodarilo sa načítať nastavenia. Skús to neskôr.");
+      }
+      if (!settingLoaded) {
+        setSubmitting(false);
+        return toast.error("Moment, nastavenia sa načítavajú…");
+      }
       if (blockAnonymous) {
         setSubmitting(false);
         return toast.error("Písanie recenzií je dočasne vypnuté.");

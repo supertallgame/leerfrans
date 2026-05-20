@@ -26,6 +26,8 @@ export default function Feedback() {
   const [mutedUntil, setMutedUntil] = useState<string | null>(null);
   const [blocked, setBlocked] = useState(false);
   const [blockAnonymous, setBlockAnonymous] = useState(false);
+  const [settingLoaded, setSettingLoaded] = useState(false);
+  const [settingError, setSettingError] = useState(false);
 
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -37,14 +39,22 @@ export default function Feedback() {
   useEffect(() => {
     const checkStatus = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      
+
       if (!session?.user) {
-        const { data: anonSetting } = await supabase
+        const { data: anonSetting, error: anonError } = await supabase
           .rpc("get_public_setting", { p_key: "block_anonymous_reviews" });
-        if (anonSetting === true) {
-          setBlocked(true);
-          setBlockAnonymous(true);
+        if (anonError) {
+          setSettingError(true);
+        } else {
+          if (anonSetting === true) {
+            setBlocked(true);
+            setBlockAnonymous(true);
+          }
+          setSettingLoaded(true);
         }
+      } else {
+        // Signed-in users don't need the anonymous-block setting
+        setSettingLoaded(true);
       }
 
       if (session?.user?.email) {
@@ -105,6 +115,14 @@ export default function Feedback() {
     const { data: { session } } = await supabase.auth.getSession();
 
     if (!session?.user) {
+      if (settingError) {
+        setSubmitting(false);
+        return toast.error("Kon de instellingen niet laden. Probeer het later opnieuw.");
+      }
+      if (!settingLoaded) {
+        setSubmitting(false);
+        return toast.error("Even geduld, instellingen worden geladen…");
+      }
       if (blockAnonymous) {
         setSubmitting(false);
         return toast.error("Reviews plaatsen is tijdelijk uitgeschakeld. Probeer het later opnieuw.");
