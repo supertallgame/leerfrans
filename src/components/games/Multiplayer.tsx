@@ -1744,8 +1744,13 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
   // PLAYING PHASE
   if (phase === "playing" && room) {
     const progress = ((room.current_question_index + 1) / room.total_questions) * 100;
-    const answeredCount = players.filter((p) => p.has_answered).length;
+    const activePlayers = players.filter((p) => !p.eliminated);
+    const answeredCount = activePlayers.filter((p) => p.has_answered).length;
     const isTeamMode = room.team_mode === "teams";
+    const isLava = room.team_mode === "lava";
+    const me = players.find((p) => p.id === myPlayerId);
+    const iAmEliminated = !!(isLava && me?.eliminated);
+    const isFinalShowdown = isLava && activePlayers.length === 2;
 
     return (
       <div className="min-h-screen flex flex-col items-center px-4 py-8">
