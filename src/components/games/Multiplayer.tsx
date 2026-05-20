@@ -1794,6 +1794,24 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
             </div>
           )}
 
+          {/* Lava mode banners */}
+          {isLava && !iAmEliminated && (
+            <div className={`text-center py-2 px-3 rounded-lg border-2 ${isFinalShowdown ? "bg-red-500/15 border-red-500 text-red-600 dark:text-red-300 animate-pulse" : "bg-orange-500/10 border-orange-400/50 text-orange-700 dark:text-orange-300"}`}>
+              <p className="text-sm font-bold">
+                {isFinalShowdown ? m.lavaFinalShowdown : `🌋 ${activePlayers.length} ${m.lavaSurvivors}`}
+              </p>
+              {isFinalShowdown && <p className="text-xs opacity-80 mt-0.5">{m.lavaFinalShowdownDesc}</p>}
+            </div>
+          )}
+          {iAmEliminated && (
+            <Card className="border-2 border-red-500/60 bg-red-500/10">
+              <CardContent className="p-6 text-center space-y-1">
+                <p className="text-2xl font-black text-red-600 dark:text-red-300">{m.lavaEliminated}</p>
+                <p className="text-xs text-muted-foreground">{m.lavaEliminatedDesc}</p>
+              </CardContent>
+            </Card>
+          )}
+
           <Card className="border-2">
             <CardContent className="p-8 text-center">
               <p className="text-sm text-muted-foreground mb-2">
