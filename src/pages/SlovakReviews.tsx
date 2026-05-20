@@ -550,6 +550,7 @@ export default function SlovakReviews() {
 
   // Low-frequency fallback sync (5 min, paused while tab hidden)
   usePollingInterval(fullSync, 5 * 60 * 1000);
+  usePollingInterval(() => { void fetchVotes(); }, 5 * 60 * 1000);
 
   const handleDelete = async () => {
     if (!deleteId) return;
