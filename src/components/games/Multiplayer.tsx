@@ -125,6 +125,14 @@ const mp = {
     english: "Engels",
     nask: "NaSk",
     biology: "Biologie",
+    lava: "🌋 De vloer is lava",
+    lavaDesc: "Survival! Wie het laagst scoort, valt elke 2 vragen in de lava. Laatste overlever wint.",
+    lavaEliminated: "💀 Je bent geëlimineerd!",
+    lavaEliminatedDesc: "Je viel in de lava. Kijk hoe de rest het er vanaf brengt!",
+    lavaSurvivors: "overlevers",
+    lavaFinalShowdown: "🔥 FINAL SHOWDOWN 🔥",
+    lavaFinalShowdownDesc: "Nog 2 spelers — punten verdubbeld, 5 seconden per vraag!",
+    lavaKnockOut: (name: string) => `💥 ${name} is geëlimineerd!`,
   },
   sk: {
     back: "Späť",
@@ -225,6 +233,14 @@ const mp = {
     english: "Angličtina",
     nask: "NaSk",
     biology: "Biológia",
+    lava: "🌋 Podlaha je láva",
+    lavaDesc: "Prežitie! Najnižšie skóre padá do lávy každé 2 otázky. Posledný preživší vyhráva.",
+    lavaEliminated: "💀 Si vyradený!",
+    lavaEliminatedDesc: "Spadol si do lávy. Sleduj, ako sa darí ostatným!",
+    lavaSurvivors: "preživších",
+    lavaFinalShowdown: "🔥 FINÁLNY SÚBOJ 🔥",
+    lavaFinalShowdownDesc: "Zostali 2 hráči — body sa zdvojnásobujú, 5 sekúnd na otázku!",
+    lavaKnockOut: (name: string) => `💥 ${name} je vyradený!`,
   },
 } as const;
 
@@ -234,7 +250,7 @@ interface MultiplayerProps {
 
 type Phase = "setup" | "mode-select" | "team-select" | "content-select" | "lobby" | "playing" | "results";
 type GameMode = "normal" | "kahoot";
-type TeamMode = "solo" | "teams";
+type TeamMode = "solo" | "teams" | "lava";
 
 interface Room {
   id: string;
@@ -275,6 +291,7 @@ interface Player {
   score: number;
   has_answered: boolean;
   team_number: number | null;
+  eliminated?: boolean;
 }
 
 const TEAM_COLORS = [
@@ -462,6 +479,11 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
 
   useEffect(() => {
     if (room && phase === "playing" && myPlayerId && myPlayerToken && !showKahootScoreboard) {
+      // Clear stale question/options FIRST so the previous question never
+      // briefly shows alongside the new answer/options while fetchQuestion
+      // is in flight. This fixes the "question changes too late" bug.
+      setCurrentQuestion("");
+      setOptions([]);
       setSelectedAnswer(null);
       setShowResult(false);
       setCorrectAnswer("");
@@ -476,7 +498,10 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
   useEffect(() => {
     if (!room || room.game_mode !== "kahoot" || phase !== "playing") return;
     if (players.length === 0 || showKahootScoreboard) return;
-    const allAnswered = players.every((p) => p.has_answered);
+    // Eliminated lava players never answer — exclude them from the "all answered" gate.
+    const activePlayers = players.filter((p) => !p.eliminated);
+    if (activePlayers.length === 0) return;
+    const allAnswered = activePlayers.every((p) => p.has_answered);
     if (!allAnswered) return;
     setShowResult(true);
     const timer = room.kahoot_timer ?? 5;
@@ -628,6 +653,10 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
 
     const tm = pendingTeamMode;
     const teams = pendingNumTeams;
+    // Lava mode forces Kahoot-style timed play with a 10s timer (the server
+    // drops it to 5s automatically when the FINAL SHOWDOWN starts).
+    const effectiveGameMode: GameMode = tm === "lava" ? "kahoot" : gameMode;
+    const effectiveTimer = tm === "lava" ? 10 : (gameMode === "kahoot" ? kahootTimerSetting : 5);
     const code = generateCode();
     const numQ = Math.min(20, vocab.length);
     const questions = shuffle(vocab).slice(0, numQ).map((v: any) => ({ french: v.french, dutch: v.dutch }));
@@ -637,13 +666,13 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
         p_code: code,
         p_host_name: playerName,
         p_total_questions: numQ,
-        p_game_mode: gameMode,
+        p_game_mode: effectiveGameMode,
         p_team_mode: tm,
         p_num_teams: teams,
         p_team_names: teamNames.slice(0, teams),
         p_team_emojis: teamEmojis.slice(0, teams),
         p_is_public: isPublic,
-        p_kahoot_timer: gameMode === "kahoot" ? kahootTimerSetting : 5,
+        p_kahoot_timer: effectiveTimer,
         p_quiz_language: quizLanguage,
         p_quiz_chapter_id: quizChapterId,
         p_quiz_sections: quizSections,
@@ -665,12 +694,12 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
       current_question_index: roomData.current_question_index,
       total_questions: roomData.total_questions,
       direction: roomData.direction,
-      game_mode: gameMode,
+      game_mode: effectiveGameMode,
       team_mode: tm,
       num_teams: teams,
       team_names: teamNames.slice(0, teams),
       team_emojis: teamEmojis.slice(0, teams),
-      kahoot_timer: roomData.kahoot_timer ?? kahootTimerSetting,
+      kahoot_timer: roomData.kahoot_timer ?? effectiveTimer,
       quiz_language: roomData.quiz_language ?? quizLanguage,
       quiz_chapter_id: roomData.quiz_chapter_id ?? quizChapterId,
       quiz_sections: roomData.quiz_sections ?? quizSections,
@@ -1340,7 +1369,19 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
                 </Button>
               </CardContent>
             </Card>
+            <Card className="cursor-pointer transition-all hover:shadow-lg hover:-translate-y-1 active:scale-[0.98] border-2 border-orange-400/40 hover:border-orange-500 bg-gradient-to-br from-orange-500/10 via-red-500/10 to-yellow-500/10" onClick={() => startWithSettings("lava")}>
+              <CardContent className="p-4 md:p-6 flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-orange-500/20 flex items-center justify-center shrink-0 text-2xl">
+                  🌋
+                </div>
+                <div>
+                  <h2 className="text-base md:text-lg font-bold">{m.lava}</h2>
+                  <p className="text-xs md:text-sm text-muted-foreground">{m.lavaDesc}</p>
+                </div>
+              </CardContent>
+            </Card>
           </div>
+
         </div>
       </div>
     );
@@ -1703,8 +1744,13 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
   // PLAYING PHASE
   if (phase === "playing" && room) {
     const progress = ((room.current_question_index + 1) / room.total_questions) * 100;
-    const answeredCount = players.filter((p) => p.has_answered).length;
+    const activePlayers = players.filter((p) => !p.eliminated);
+    const answeredCount = activePlayers.filter((p) => p.has_answered).length;
     const isTeamMode = room.team_mode === "teams";
+    const isLava = room.team_mode === "lava";
+    const me = players.find((p) => p.id === myPlayerId);
+    const iAmEliminated = !!(isLava && me?.eliminated);
+    const isFinalShowdown = isLava && activePlayers.length === 2;
 
     return (
       <div className="min-h-screen flex flex-col items-center px-4 py-8">
@@ -1748,6 +1794,24 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
             </div>
           )}
 
+          {/* Lava mode banners */}
+          {isLava && !iAmEliminated && (
+            <div className={`text-center py-2 px-3 rounded-lg border-2 ${isFinalShowdown ? "bg-red-500/15 border-red-500 text-red-600 dark:text-red-300 animate-pulse" : "bg-orange-500/10 border-orange-400/50 text-orange-700 dark:text-orange-300"}`}>
+              <p className="text-sm font-bold">
+                {isFinalShowdown ? m.lavaFinalShowdown : `🌋 ${activePlayers.length} ${m.lavaSurvivors}`}
+              </p>
+              {isFinalShowdown && <p className="text-xs opacity-80 mt-0.5">{m.lavaFinalShowdownDesc}</p>}
+            </div>
+          )}
+          {iAmEliminated && (
+            <Card className="border-2 border-red-500/60 bg-red-500/10">
+              <CardContent className="p-6 text-center space-y-1">
+                <p className="text-2xl font-black text-red-600 dark:text-red-300">{m.lavaEliminated}</p>
+                <p className="text-xs text-muted-foreground">{m.lavaEliminatedDesc}</p>
+              </CardContent>
+            </Card>
+          )}
+
           <Card className="border-2">
             <CardContent className="p-8 text-center">
               <p className="text-sm text-muted-foreground mb-2">
@@ -1769,7 +1833,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
                 extraClass += " bg-primary/10 border-primary text-primary";
               }
               return (
-                <Button key={i} variant="outline" className={extraClass} onClick={() => submitAnswer(option)} disabled={!!selectedAnswer}>
+                <Button key={i} variant="outline" className={extraClass} onClick={() => submitAnswer(option)} disabled={!!selectedAnswer || iAmEliminated}>
                   {option}
                 </Button>
               );

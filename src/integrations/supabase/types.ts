@@ -173,6 +173,7 @@ export type Database = {
       game_players: {
         Row: {
           current_answer: string | null
+          eliminated: boolean
           has_answered: boolean
           id: string
           joined_at: string
@@ -185,6 +186,7 @@ export type Database = {
         }
         Insert: {
           current_answer?: string | null
+          eliminated?: boolean
           has_answered?: boolean
           id?: string
           joined_at?: string
@@ -197,6 +199,7 @@ export type Database = {
         }
         Update: {
           current_answer?: string | null
+          eliminated?: boolean
           has_answered?: boolean
           id?: string
           joined_at?: string
@@ -274,6 +277,7 @@ export type Database = {
           kahoot_timer: number
           max_players: number
           num_teams: number
+          question_started_at: string | null
           quiz_chapter_id: string
           quiz_language: string
           quiz_sections: Json
@@ -296,6 +300,7 @@ export type Database = {
           kahoot_timer?: number
           max_players?: number
           num_teams?: number
+          question_started_at?: string | null
           quiz_chapter_id?: string
           quiz_language?: string
           quiz_sections?: Json
@@ -318,6 +323,7 @@ export type Database = {
           kahoot_timer?: number
           max_players?: number
           num_teams?: number
+          question_started_at?: string | null
           quiz_chapter_id?: string
           quiz_language?: string
           quiz_sections?: Json
@@ -1020,6 +1026,7 @@ export type Database = {
       get_room_players: {
         Args: { p_room_id: string }
         Returns: {
+          eliminated: boolean
           has_answered: boolean
           id: string
           joined_at: string
