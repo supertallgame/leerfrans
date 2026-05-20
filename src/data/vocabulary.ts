@@ -961,14 +961,19 @@ export const frenchChaptersHavoVwo: Chapter[] = [
     words: havoVwoChapitre3Words,
     requiresLogin: false,
   },
-  {
-    id: "hv_chapitre6",
-    title: "Chapitre 6",
-    description: "De weg vragen, je stad & futur proche (HAVO-VWO)",
-    words: havoVwoChapitre6Words,
-    requiresLogin: false,
-  },
 ];
+
+// Chapitre 6 is taught in VMBO-HAVO (verplaatst vanuit HAVO-VWO).
+// Pushed here (after both arrays + words are declared) to avoid
+// "used before declaration" errors with the const ordering.
+frenchChaptersVmboHavo.push({
+  id: "chapitre6",
+  title: "Chapitre 6",
+  description: "De weg vragen, je stad & futur proche",
+  words: havoVwoChapitre6Words,
+  requiresLogin: false,
+});
+
 
 // Keep backward compat
 export const frenchChapters: Chapter[] = frenchChaptersVmboHavo;
