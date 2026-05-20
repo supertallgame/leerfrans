@@ -479,6 +479,11 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
 
   useEffect(() => {
     if (room && phase === "playing" && myPlayerId && myPlayerToken && !showKahootScoreboard) {
+      // Clear stale question/options FIRST so the previous question never
+      // briefly shows alongside the new answer/options while fetchQuestion
+      // is in flight. This fixes the "question changes too late" bug.
+      setCurrentQuestion("");
+      setOptions([]);
       setSelectedAnswer(null);
       setShowResult(false);
       setCorrectAnswer("");
@@ -493,7 +498,10 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
   useEffect(() => {
     if (!room || room.game_mode !== "kahoot" || phase !== "playing") return;
     if (players.length === 0 || showKahootScoreboard) return;
-    const allAnswered = players.every((p) => p.has_answered);
+    // Eliminated lava players never answer — exclude them from the "all answered" gate.
+    const activePlayers = players.filter((p) => !p.eliminated);
+    if (activePlayers.length === 0) return;
+    const allAnswered = activePlayers.every((p) => p.has_answered);
     if (!allAnswered) return;
     setShowResult(true);
     const timer = room.kahoot_timer ?? 5;
