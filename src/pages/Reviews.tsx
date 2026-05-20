@@ -290,13 +290,15 @@ export default function Reviews() {
   const [myVotes, setMyVotes] = useState<MyVotes>({});
   const [animatingVote, setAnimatingVote] = useState<string | null>(null);
 
-  const fetchVotes = async (userId?: string | null) => {
+  const fetchVotes = useCallback(async (userId?: string | null) => {
     const voterId = userId ?? currentUserId;
-    if (!voterId) return;
-    const [countsRes, myRes] = await Promise.all([
-      supabase.rpc("get_review_vote_counts" as any) as any,
-      supabase.from("review_votes" as any).select("review_id, vote_type").eq("voter_id", voterId) as any,
-    ]);
+    // Always fetch public counts (so likes don't disappear for anonymous viewers).
+    // Only fetch personal votes when a user is signed in.
+    const countsPromise = supabase.rpc("get_review_vote_counts" as any) as any;
+    const myPromise = voterId
+      ? (supabase.from("review_votes" as any).select("review_id, vote_type").eq("voter_id", voterId) as any)
+      : Promise.resolve({ data: null });
+    const [countsRes, myRes] = await Promise.all([countsPromise, myPromise]);
     if (countsRes.data) {
       const counts: VoteCounts = {};
       for (const r of countsRes.data) counts[r.review_id] = { likes: Number(r.likes), dislikes: Number(r.dislikes) };
@@ -307,7 +309,7 @@ export default function Reviews() {
       for (const r of myRes.data) mv[r.review_id] = r.vote_type;
       setMyVotes(mv);
     }
-  };
+  }, [currentUserId]);
 
   const handleVote = async (reviewId: string, voteType: "like" | "dislike") => {
     if (!currentUserId) {
@@ -366,6 +368,8 @@ export default function Reviews() {
 
   useEffect(() => {
     void fullSync().finally(() => setLoading(false));
+    // Always fetch public vote counts so anonymous viewers see likes too.
+    fetchVotes(null);
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       const uid = session?.user?.id ?? null;
@@ -464,6 +468,8 @@ export default function Reviews() {
 
   // Low-frequency fallback sync (5 min, paused while tab hidden)
   usePollingInterval(fullSync, 5 * 60 * 1000);
+  // Also re-sync vote counts on the same cadence in case realtime missed events
+  usePollingInterval(() => { void fetchVotes(); }, 5 * 60 * 1000);
 
   const handleDelete = async () => {
     if (!deleteId) return;
