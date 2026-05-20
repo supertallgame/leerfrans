@@ -1833,7 +1833,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
                 extraClass += " bg-primary/10 border-primary text-primary";
               }
               return (
-                <Button key={i} variant="outline" className={extraClass} onClick={() => submitAnswer(option)} disabled={!!selectedAnswer}>
+                <Button key={i} variant="outline" className={extraClass} onClick={() => submitAnswer(option)} disabled={!!selectedAnswer || iAmEliminated}>
                   {option}
                 </Button>
               );
