@@ -272,7 +272,7 @@ const Index = () => {
   const isEnglishCh2 = language === "english" && chapterId === "en_chapter2";
   const isHvCh2 = language === "french" && niveau === "havo-vwo" && chapterId === "hv_chapitre2";
   const isHvCh3 = language === "french" && niveau === "havo-vwo" && chapterId === "hv_chapitre3";
-  const isHvCh6 = language === "french" && niveau === "havo-vwo" && chapterId === "hv_chapitre6";
+  const isHvCh6 = language === "french" && niveau === "vmbo-havo" && chapterId === "chapitre6";
   const chapterHasGrammar = language === "english" && hasGrammarForChapter(chapterId);
   const filterAiTeacher = (list: typeof languageGames) => aiTeacherEnabled ? list : list.filter(g => g.id !== "ai");
   const games = language === "biology" ? filterAiTeacher(biologyGames) : (language === "nask") ? filterAiTeacher(naskGames) : filterAiTeacher(languageGames).filter((g) => {
