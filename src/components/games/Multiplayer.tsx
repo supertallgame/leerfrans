@@ -275,6 +275,7 @@ interface Player {
   score: number;
   has_answered: boolean;
   team_number: number | null;
+  eliminated?: boolean;
 }
 
 const TEAM_COLORS = [
