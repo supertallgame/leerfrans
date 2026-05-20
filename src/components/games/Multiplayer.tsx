@@ -234,7 +234,7 @@ interface MultiplayerProps {
 
 type Phase = "setup" | "mode-select" | "team-select" | "content-select" | "lobby" | "playing" | "results";
 type GameMode = "normal" | "kahoot";
-type TeamMode = "solo" | "teams";
+type TeamMode = "solo" | "teams" | "lava";
 
 interface Room {
   id: string;
