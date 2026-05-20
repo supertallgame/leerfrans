@@ -576,14 +576,21 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
   }, [myPlayerId, room?.id, myPlayerToken]);
   usePollingInterval(heartbeatTick, myPlayerId ? 15_000 : null);
 
-  // Realtime backup poll: only runs while the room channel is unhealthy.
-  // Once realtime reconnects (status === SUBSCRIBED), polling stops.
+  // Realtime backup poll: runs at a low rate while realtime is healthy
+  // (because postgres_changes events for game_players are filtered out by
+  // its restrictive RLS SELECT policy and never reach clients), and faster
+  // when the channel is unhealthy. Cadence is tighter in the lobby so new
+  // joiners show up quickly for everyone.
   const fallbackTick = useCallback(() => {
     if (!room?.id) return;
     fetchPlayers(room.id);
     fetchRoomState(room.id);
   }, [room?.id]);
-  usePollingInterval(fallbackTick, room?.id && !realtimeOk ? 5000 : null);
+  const pollMs = room?.id
+    ? (!realtimeOk ? 2000 : (room.status === "waiting" ? 2500 : 6000))
+    : null;
+  usePollingInterval(fallbackTick, pollMs);
+
 
   const fetchPlayers = async (roomId: string) => {
     const { data } = await supabase.rpc("get_room_players", { p_room_id: roomId }) as any;
