@@ -263,6 +263,7 @@ const Index = () => {
   if (activeGame === "grammar") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6"><GrammarQuiz onBack={() => setActiveGame("menu")} chapterId={chapterId} /></div></Suspense>;
   if (activeGame === "grammaire2") return <Suspense fallback={gameLoader}><Chapitre2Grammaire onBack={() => setActiveGame("menu")} /></Suspense>;
   if (activeGame === "grammaire3") return <Suspense fallback={gameLoader}><Chapitre3Grammaire onBack={() => setActiveGame("menu")} /></Suspense>;
+  if (activeGame === "grammaire6") return <Suspense fallback={gameLoader}><Chapitre6Grammaire onBack={() => setActiveGame("menu")} /></Suspense>;
   if (activeGame === "enclock") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6"><EnglishClockTimes onBack={() => setActiveGame("menu")} /></div></Suspense>;
 
   const hasSentences = activeVocabulary.some((v) => v.french.includes(" ") && v.french.length > 15);
@@ -271,6 +272,7 @@ const Index = () => {
   const isEnglishCh2 = language === "english" && chapterId === "en_chapter2";
   const isHvCh2 = language === "french" && niveau === "havo-vwo" && chapterId === "hv_chapitre2";
   const isHvCh3 = language === "french" && niveau === "havo-vwo" && chapterId === "hv_chapitre3";
+  const isHvCh6 = language === "french" && niveau === "havo-vwo" && chapterId === "hv_chapitre6";
   const chapterHasGrammar = language === "english" && hasGrammarForChapter(chapterId);
   const filterAiTeacher = (list: typeof languageGames) => aiTeacherEnabled ? list : list.filter(g => g.id !== "ai");
   const games = language === "biology" ? filterAiTeacher(biologyGames) : (language === "nask") ? filterAiTeacher(naskGames) : filterAiTeacher(languageGames).filter((g) => {
@@ -281,6 +283,7 @@ const Index = () => {
     if (g.id === "enclock" && !isEnglishCh2) return false;
     if (g.id === "grammaire2" && !isHvCh2) return false;
     if (g.id === "grammaire3" && !isHvCh3) return false;
+    if (g.id === "grammaire6" && !isHvCh6) return false;
     if (g.id === "explorer" && !explorerEnabled) return false;
     if (g.id === "sentence" && !hasSentences) return false;
     if ((g.id === "etre" || g.id === "clocktimes") && !isVmboHavoCh3) return false;
