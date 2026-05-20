@@ -653,6 +653,10 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
 
     const tm = pendingTeamMode;
     const teams = pendingNumTeams;
+    // Lava mode forces Kahoot-style timed play with a 10s timer (the server
+    // drops it to 5s automatically when the FINAL SHOWDOWN starts).
+    const effectiveGameMode: GameMode = tm === "lava" ? "kahoot" : gameMode;
+    const effectiveTimer = tm === "lava" ? 10 : (gameMode === "kahoot" ? kahootTimerSetting : 5);
     const code = generateCode();
     const numQ = Math.min(20, vocab.length);
     const questions = shuffle(vocab).slice(0, numQ).map((v: any) => ({ french: v.french, dutch: v.dutch }));
@@ -662,13 +666,13 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
         p_code: code,
         p_host_name: playerName,
         p_total_questions: numQ,
-        p_game_mode: gameMode,
+        p_game_mode: effectiveGameMode,
         p_team_mode: tm,
         p_num_teams: teams,
         p_team_names: teamNames.slice(0, teams),
         p_team_emojis: teamEmojis.slice(0, teams),
         p_is_public: isPublic,
-        p_kahoot_timer: gameMode === "kahoot" ? kahootTimerSetting : 5,
+        p_kahoot_timer: effectiveTimer,
         p_quiz_language: quizLanguage,
         p_quiz_chapter_id: quizChapterId,
         p_quiz_sections: quizSections,
@@ -690,12 +694,12 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
       current_question_index: roomData.current_question_index,
       total_questions: roomData.total_questions,
       direction: roomData.direction,
-      game_mode: gameMode,
+      game_mode: effectiveGameMode,
       team_mode: tm,
       num_teams: teams,
       team_names: teamNames.slice(0, teams),
       team_emojis: teamEmojis.slice(0, teams),
-      kahoot_timer: roomData.kahoot_timer ?? kahootTimerSetting,
+      kahoot_timer: roomData.kahoot_timer ?? effectiveTimer,
       quiz_language: roomData.quiz_language ?? quizLanguage,
       quiz_chapter_id: roomData.quiz_chapter_id ?? quizChapterId,
       quiz_sections: roomData.quiz_sections ?? quizSections,
