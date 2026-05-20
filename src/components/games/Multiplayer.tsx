@@ -233,6 +233,14 @@ const mp = {
     english: "Angličtina",
     nask: "NaSk",
     biology: "Biológia",
+    lava: "🌋 Podlaha je láva",
+    lavaDesc: "Prežitie! Najnižšie skóre padá do lávy každé 2 otázky. Posledný preživší vyhráva.",
+    lavaEliminated: "💀 Si vyradený!",
+    lavaEliminatedDesc: "Spadol si do lávy. Sleduj, ako sa darí ostatným!",
+    lavaSurvivors: "preživších",
+    lavaFinalShowdown: "🔥 FINÁLNY SÚBOJ 🔥",
+    lavaFinalShowdownDesc: "Zostali 2 hráči — body sa zdvojnásobujú, 5 sekúnd na otázku!",
+    lavaKnockOut: (name: string) => `💥 ${name} je vyradený!`,
   },
 } as const;
 
