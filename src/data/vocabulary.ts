@@ -610,10 +610,10 @@ export const frenchChaptersVmboHavo: Chapter[] = [
     requiresLogin: false,
   },
   {
-    id: "chapitre6",
-    title: "Chapitre 6",
-    description: "De weg vragen, je stad & futur proche",
-    words: havoVwoChapitre6Words,
+    id: "chapitre5",
+    title: "Chapitre 5",
+    description: "Familie, maanden & uiterlijk",
+    words: chapitre5Words,
     requiresLogin: false,
   },
 ];
