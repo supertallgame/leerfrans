@@ -2235,6 +2235,13 @@ const englishHavoVwoChapter4Words: VocabItem[] = [
 
 export const englishChaptersHavoVwo: Chapter[] = [
   {
+    id: "en_hv_chapter1",
+    title: "Chapter 1",
+    description: "School, family, countries & appearance (HAVO-VWO)",
+    words: englishHavoVwoChapter1Words,
+    requiresLogin: false,
+  },
+  {
     id: "en_hv_chapter4",
     title: "Chapter 4",
     description: "Sports, work, money & going out (HAVO-VWO)",
