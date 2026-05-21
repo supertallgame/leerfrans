@@ -478,10 +478,10 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
   }, [room?.id, myPlayerId, myPlayerToken, fetchQuestion]);
 
   useEffect(() => {
-    if (room && phase === "playing" && myPlayerId && myPlayerToken && !showKahootScoreboard) {
-      // Clear stale question/options FIRST so the previous question never
-      // briefly shows alongside the new answer/options while fetchQuestion
-      // is in flight. This fixes the "question changes too late" bug.
+    if (room && phase === "playing" && myPlayerId && myPlayerToken) {
+      // Always fetch on index change. Previously this was gated by
+      // !showKahootScoreboard, which caused the question to never refresh
+      // in lava/kahoot mode (especially the "vraag steeds hetzelfde" bug).
       setCurrentQuestion("");
       setOptions([]);
       setSelectedAnswer(null);
