@@ -1967,14 +1967,14 @@ export const englishChapters: Chapter[] = [
   {
     id: "en_chapter5",
     title: "Chapter 5",
-    description: "Natuur & omgeving",
+    description: "Natuur, weer, lichaam & gezondheid",
     words: englishChapter5Words,
     requiresLogin: false,
   },
   {
     id: "en_chapter6",
     title: "Chapter 6",
-    description: "Muziek & instrumenten",
+    description: "Muziek, huis, technologie & vakantie",
     words: englishChapter6Words,
     requiresLogin: false,
   },
