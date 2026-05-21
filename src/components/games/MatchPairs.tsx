@@ -100,7 +100,7 @@ export default function MatchPairs({ onBack }: Props) {
   }
 
   return (
-    <div className="flex flex-col items-center gap-4 md:gap-6 w-full max-w-2xl mx-auto">
+    <div className="flex flex-col items-center gap-4 md:gap-6 w-full max-w-2xl mx-auto md:mt-12 lg:mt-20">
       <div className="flex items-center justify-between w-full">
         <Button variant="ghost" onClick={onBack} className="gap-2 text-sm">
           <ArrowLeft className="h-4 w-4" /> {i.back}
