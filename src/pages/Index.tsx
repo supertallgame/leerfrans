@@ -42,8 +42,10 @@ const ClockTimes = lazy(() => import("@/components/games/ClockTimes"));
 const EtreConjugation = lazy(() => import("@/components/games/EtreConjugation"));
 const FrenchExplorer = lazy(() => import("@/components/games/FrenchExplorer"));
 const GrammarQuiz = lazy(() => import("@/components/games/GrammarQuiz"));
+const Chapitre1Grammaire = lazy(() => import("@/components/games/Chapitre1Grammaire"));
 const Chapitre2Grammaire = lazy(() => import("@/components/games/Chapitre2Grammaire"));
 const Chapitre3Grammaire = lazy(() => import("@/components/games/Chapitre3Grammaire"));
+const Chapitre5Grammaire = lazy(() => import("@/components/games/Chapitre5Grammaire"));
 const Chapitre6Grammaire = lazy(() => import("@/components/games/Chapitre6Grammaire"));
 const EnglishClockTimes = lazy(() => import("@/components/games/EnglishClockTimes"));
 
