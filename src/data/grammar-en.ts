@@ -100,6 +100,81 @@ const ch4Future: GrammarQuestion[] = [
   { question: "_______ you cook dinner for me?", options: ["Will", "Shall", "Are", "Do"], correctAnswer: "Will", explanation: "Bij verzoeken gebruik je 'Will you...?'", topic: "Will/Shall/Going to", chapterId: "en_chapter4" },
 ];
 
+// ─── Chapter 5 (HAVO-VWO): Word order adverbs + Past simple ───
+
+const hv5WordOrder: GrammarQuestion[] = [
+  { question: "He's going to give a concert ____.", options: ["in Houston", "Houston in", "at Houston going", "to Houston is"], correctAnswer: "in Houston", explanation: "Plaats- en tijdsbepalingen staan meestal aan het EIND van de zin.", topic: "Word order: place & time", chapterId: "en_hv_chapter5" },
+  { question: "Sally's going to order the tickets ____.", options: ["tomorrow", "in tomorrow", "at tomorrow", "tomorrow's"], correctAnswer: "tomorrow", explanation: "Tijdsbepaling 'tomorrow' staat aan het einde van de zin.", topic: "Word order: place & time", chapterId: "en_hv_chapter5" },
+  { question: "Welke zin benadrukt het tijdstip extra?", options: ["Last night, I watched his concert on TV.", "I watched his concert on TV last night.", "I last night watched on TV his concert.", "On TV last night I watched his concert."], correctAnswer: "Last night, I watched his concert on TV.", explanation: "Door de tijdsbepaling helemaal vooraan te zetten, benadruk je het moment.", topic: "Word order: place & time", chapterId: "en_hv_chapter5" },
+  { question: "Wanneer plaats én tijd achteraan staan, welke komt EERST?", options: ["plaats (P), dan tijd (T)", "tijd (T), dan plaats (P)", "maakt niet uit", "alleen tijd mag achter"], correctAnswer: "plaats (P), dan tijd (T)", explanation: "Onthoud: P van Plaats vóór T van Tijd → 'at the O2 Arena tonight'.", topic: "Word order: place & time", chapterId: "en_hv_chapter5" },
+  { question: "Kies de correcte volgorde:", options: ["There's going to be a big music event at the O2 Arena tonight.", "There's going to be a big music event tonight at the O2 Arena.", "Tonight there's going to be at the O2 Arena a big music event.", "There's going to be at the O2 Arena tonight a big music event."], correctAnswer: "There's going to be a big music event at the O2 Arena tonight.", explanation: "Plaats (at the O2 Arena) vóór tijd (tonight).", topic: "Word order: place & time", chapterId: "en_hv_chapter5" },
+  { question: "Kies de correcte zin:", options: ["I watched his concert on TV last night.", "I watched on TV last night his concert.", "I last night on TV watched his concert.", "On TV I watched last night his concert."], correctAnswer: "I watched his concert on TV last night.", explanation: "Werkwoord + object + plaats + tijd.", topic: "Word order: place & time", chapterId: "en_hv_chapter5" },
+];
+
+const hv5PastSimple: GrammarQuestion[] = [
+  { question: "I ____ to Isaac. (to talk – past simple)", options: ["talked", "talk", "talkes", "was talk"], correctAnswer: "talked", explanation: "Past simple van regelmatige werkwoorden: werkwoord + -ed.", topic: "Past simple (+)", chapterId: "en_hv_chapter5" },
+  { question: "They ____ in stone houses. (to live)", options: ["lived", "liveed", "livd", "lives"], correctAnswer: "lived", explanation: "Eindigt op -e → alleen -d toevoegen: live → lived.", topic: "Past simple (+)", chapterId: "en_hv_chapter5" },
+  { question: "We ____ to help him yesterday. (to try)", options: ["tried", "tryed", "tryied", "trys"], correctAnswer: "tried", explanation: "Medeklinker + y → -y wordt -ied: try → tried.", topic: "Past simple (+)", chapterId: "en_hv_chapter5" },
+  { question: "She ____ a game yesterday. (to play)", options: ["played", "plaied", "plaed", "plays"], correctAnswer: "played", explanation: "Klinker + y → gewoon -ed: play → played.", topic: "Past simple (+)", chapterId: "en_hv_chapter5" },
+  { question: "I ____ the video. (to stop)", options: ["stopped", "stoped", "stopt", "stops"], correctAnswer: "stopped", explanation: "Eén klinker + één medeklinker → laatste letter verdubbelen + -ed: stop → stopped.", topic: "Past simple (+)", chapterId: "en_hv_chapter5" },
+  { question: "Jessica ____ after the show. (to clap)", options: ["clapped", "claped", "clapt", "claps"], correctAnswer: "clapped", explanation: "1 klinker + 1 medeklinker → verdubbelen + -ed: clap → clapped.", topic: "Past simple (+)", chapterId: "en_hv_chapter5" },
+  { question: "We ____ to another city. (to travel)", options: ["travelled", "traveled", "travelt", "travels"], correctAnswer: "travelled", explanation: "Twee of meer lettergrepen die eindigen op -l → -l verdubbelen + -ed.", topic: "Past simple (+)", chapterId: "en_hv_chapter5" },
+  { question: "They ____ all flights because of the fog. (to cancel)", options: ["cancelled", "canceled", "cancelt", "cancels"], correctAnswer: "cancelled", explanation: "Eindigt op -l → -l verdubbelen + -ed: cancel → cancelled.", topic: "Past simple (+)", chapterId: "en_hv_chapter5" },
+  { question: "The wound ____ heal well. (-)", options: ["did not", "does not", "was not", "is not"], correctAnswer: "did not", explanation: "Ontkenning in past simple: did not / didn't + hele werkwoord.", topic: "Past simple (-)", chapterId: "en_hv_chapter5" },
+  { question: "His arm ____ hurt. (-)", options: ["didn't", "doesn't", "wasn't", "isn't"], correctAnswer: "didn't", explanation: "Past simple ontkenning: didn't + hele werkwoord (zonder -ed).", topic: "Past simple (-)", chapterId: "en_hv_chapter5" },
+  { question: "____ the wound heal well? (?)", options: ["Did", "Does", "Was", "Is"], correctAnswer: "Did", explanation: "Vraag in past simple: Did + onderwerp + hele werkwoord.", topic: "Past simple (?)", chapterId: "en_hv_chapter5" },
+  { question: "____ his arm hurt? (?)", options: ["Did", "Does", "Was", "Were"], correctAnswer: "Did", explanation: "Did + onderwerp + hele werkwoord (geen -ed!).", topic: "Past simple (?)", chapterId: "en_hv_chapter5" },
+  { question: "Welke zin is FOUT?", options: ["Did he hurt his arm?", "Did he hurted his arm?", "He didn't hurt his arm.", "He hurt his arm."], correctAnswer: "Did he hurted his arm?", explanation: "Na did/didn't gebruik je het HELE werkwoord, dus géén -ed.", topic: "Past simple (?)", chapterId: "en_hv_chapter5" },
+];
+
+// ─── Chapter 6 (HAVO-VWO): Irregular past simple, to be past, Possessive 's, Some/any ───
+
+const hv6Irregular: GrammarQuestion[] = [
+  { question: "Past simple van 'to become' is ____.", options: ["became", "becomed", "becamed", "becomes"], correctAnswer: "became", explanation: "Onregelmatig: become → became.", topic: "Past simple (irregular)", chapterId: "en_hv_chapter6" },
+  { question: "Past simple van 'to bring' is ____.", options: ["brought", "bringed", "brang", "brung"], correctAnswer: "brought", explanation: "Onregelmatig: bring → brought.", topic: "Past simple (irregular)", chapterId: "en_hv_chapter6" },
+  { question: "Past simple van 'to come' is ____.", options: ["came", "comed", "comme", "comes"], correctAnswer: "came", explanation: "Onregelmatig: come → came.", topic: "Past simple (irregular)", chapterId: "en_hv_chapter6" },
+  { question: "Past simple van 'to do' is ____.", options: ["did", "doed", "done", "didded"], correctAnswer: "did", explanation: "Onregelmatig: do → did.", topic: "Past simple (irregular)", chapterId: "en_hv_chapter6" },
+  { question: "Past simple van 'to find' is ____.", options: ["found", "finded", "fund", "finded"], correctAnswer: "found", explanation: "Onregelmatig: find → found.", topic: "Past simple (irregular)", chapterId: "en_hv_chapter6" },
+  { question: "Past simple van 'to go' is ____.", options: ["went", "goed", "gone", "goes"], correctAnswer: "went", explanation: "Onregelmatig: go → went.", topic: "Past simple (irregular)", chapterId: "en_hv_chapter6" },
+  { question: "Past simple van 'to have' is ____.", options: ["had", "haved", "haded", "has"], correctAnswer: "had", explanation: "Onregelmatig: have → had.", topic: "Past simple (irregular)", chapterId: "en_hv_chapter6" },
+  { question: "Past simple van 'to see' is ____.", options: ["saw", "seed", "seen", "sees"], correctAnswer: "saw", explanation: "Onregelmatig: see → saw.", topic: "Past simple (irregular)", chapterId: "en_hv_chapter6" },
+  { question: "Past simple van 'to know' is ____.", options: ["knew", "knowed", "known", "knows"], correctAnswer: "knew", explanation: "Onregelmatig: know → knew.", topic: "Past simple (irregular)", chapterId: "en_hv_chapter6" },
+  { question: "Past simple van 'to think' is ____.", options: ["thought", "thinked", "thunk", "thinks"], correctAnswer: "thought", explanation: "Onregelmatig: think → thought.", topic: "Past simple (irregular)", chapterId: "en_hv_chapter6" },
+  { question: "Past simple van 'to write' is ____.", options: ["wrote", "writed", "written", "writes"], correctAnswer: "wrote", explanation: "Onregelmatig: write → wrote.", topic: "Past simple (irregular)", chapterId: "en_hv_chapter6" },
+  { question: "Past simple van 'to say' is ____.", options: ["said", "sayed", "sad", "says"], correctAnswer: "said", explanation: "Onregelmatig: say → said.", topic: "Past simple (irregular)", chapterId: "en_hv_chapter6" },
+];
+
+const hv6ToBePast: GrammarQuestion[] = [
+  { question: "I ____ angry.", options: ["was", "were", "is", "am"], correctAnswer: "was", explanation: "Past simple van to be: I/he/she/it → was.", topic: "Past simple of 'to be'", chapterId: "en_hv_chapter6" },
+  { question: "You ____ angry.", options: ["were", "was", "are", "is"], correctAnswer: "were", explanation: "You/we/they → were.", topic: "Past simple of 'to be'", chapterId: "en_hv_chapter6" },
+  { question: "He ____ angry.", options: ["was", "were", "is", "are"], correctAnswer: "was", explanation: "He/she/it → was.", topic: "Past simple of 'to be'", chapterId: "en_hv_chapter6" },
+  { question: "We ____ angry.", options: ["were", "was", "are", "is"], correctAnswer: "were", explanation: "We/you/they → were.", topic: "Past simple of 'to be'", chapterId: "en_hv_chapter6" },
+  { question: "She ____ angry. (-)", options: ["wasn't", "weren't", "isn't", "doesn't"], correctAnswer: "wasn't", explanation: "Bij 'to be' gebruik je GEEN did/didn't, maar was not/wasn't.", topic: "Past simple of 'to be'", chapterId: "en_hv_chapter6" },
+  { question: "They ____ angry. (-)", options: ["weren't", "wasn't", "didn't", "aren't"], correctAnswer: "weren't", explanation: "We/you/they → were not / weren't.", topic: "Past simple of 'to be'", chapterId: "en_hv_chapter6" },
+  { question: "____ he angry? (?)", options: ["Was", "Were", "Did", "Is"], correctAnswer: "Was", explanation: "Bij vragen met 'to be' zet je was/were vóór het onderwerp.", topic: "Past simple of 'to be'", chapterId: "en_hv_chapter6" },
+  { question: "____ they angry? (?)", options: ["Were", "Was", "Did", "Are"], correctAnswer: "Were", explanation: "Were + we/you/they.", topic: "Past simple of 'to be'", chapterId: "en_hv_chapter6" },
+];
+
+const hv6Possessive: GrammarQuestion[] = [
+  { question: "Dit is het boek van mijn vriend(in). → This is my ____ book.", options: ["friend's", "friends'", "friend", "friends"], correctAnswer: "friend's", explanation: "Bezit van één persoon → 's: friend's.", topic: "Possessive 's / of", chapterId: "en_hv_chapter6" },
+  { question: "Dit zijn de vrienden van mijn zussen. → These are my ____ friends.", options: ["sisters'", "sister's", "sisters", "sisterses"], correctAnswer: "sisters'", explanation: "Meervoud dat al eindigt op -s → alleen een apostrof erna: sisters'.", topic: "Possessive 's / of", chapterId: "en_hv_chapter6" },
+  { question: "De kleren van de kinderen liggen boven. → The ____ clothes are upstairs.", options: ["children's", "childrens'", "childrens", "childs'"], correctAnswer: "children's", explanation: "Meervoud dat NIET op -s eindigt → 's: children's.", topic: "Possessive 's / of", chapterId: "en_hv_chapter6" },
+  { question: "De dochter van Jess is op school. → ____ daughter is at school.", options: ["Jess's", "Jess'", "Jesss", "Jesses"], correctAnswer: "Jess's", explanation: "Bij namen op -s mag zowel 's als alleen ': Jess's / Jess'.", topic: "Possessive 's / of", chapterId: "en_hv_chapter6" },
+  { question: "Hij stond op de voorkant van een tijdschrift. → He was on the ____ a magazine.", options: ["cover of", "cover's", "covers'", "cover"], correctAnswer: "cover of", explanation: "Bij DINGEN gebruik je '… of …', niet 's.", topic: "Possessive 's / of", chapterId: "en_hv_chapter6" },
+  { question: "Het geluid van de machines is erg hard. → The ____ the machines is very loud.", options: ["noise of", "noise's", "noises'", "machines' noise"], correctAnswer: "noise of", explanation: "Bezit van DINGEN → … of …", topic: "Possessive 's / of", chapterId: "en_hv_chapter6" },
+  { question: "We zijn in de stad Londen. → We are in the ____ London.", options: ["city of", "city's", "London's city", "Londons city"], correctAnswer: "city of", explanation: "Bij geografische locaties → … of …", topic: "Possessive 's / of", chapterId: "en_hv_chapter6" },
+];
+
+const hv6SomeAny: GrammarQuestion[] = [
+  { question: "I have ____ good ideas for my party. (+)", options: ["some", "any", "no", "much"], correctAnswer: "some", explanation: "In bevestigende zinnen gebruik je some.", topic: "Some / Any", chapterId: "en_hv_chapter6" },
+  { question: "Do you want ____ milk? (aanbod)", options: ["some", "any", "no", "many"], correctAnswer: "some", explanation: "In vragen waarin iets wordt aangeboden → some.", topic: "Some / Any", chapterId: "en_hv_chapter6" },
+  { question: "Shall we buy ____ souvenirs? (voorstel)", options: ["some", "any", "much", "no"], correctAnswer: "some", explanation: "In vragen waarin iets wordt voorgesteld → some.", topic: "Some / Any", chapterId: "en_hv_chapter6" },
+  { question: "Can I have ____ more sugar, please? (verzoek)", options: ["some", "any", "no", "much"], correctAnswer: "some", explanation: "In verzoeken → some.", topic: "Some / Any", chapterId: "en_hv_chapter6" },
+  { question: "Have you got ____ plans for the weekend? (?)", options: ["any", "some", "no", "many"], correctAnswer: "any", explanation: "In gewone vragen (geen aanbod/verzoek) → any.", topic: "Some / Any", chapterId: "en_hv_chapter6" },
+  { question: "There aren't ____ campgrounds in the city. (-)", options: ["any", "some", "no", "much"], correctAnswer: "any", explanation: "In ontkennende zinnen → any (not + any = 'geen').", topic: "Some / Any", chapterId: "en_hv_chapter6" },
+  { question: "I have ____ idea what you mean. (= geen)", options: ["no", "any", "some", "much"], correctAnswer: "no", explanation: "'No' = niet + any. 'I have no idea' = 'I don't have any idea'.", topic: "Some / Any", chapterId: "en_hv_chapter6" },
+];
+
 export const allGrammarQuestions: GrammarQuestion[] = [
   ...ch2Plurals,
   ...ch2Demonstratives,
@@ -107,6 +182,12 @@ export const allGrammarQuestions: GrammarQuestion[] = [
   ...ch4TagQuestions,
   ...ch4MuchMany,
   ...ch4Future,
+  ...hv5WordOrder,
+  ...hv5PastSimple,
+  ...hv6Irregular,
+  ...hv6ToBePast,
+  ...hv6Possessive,
+  ...hv6SomeAny,
 ];
 
 export function getGrammarByChapter(chapterId: string): GrammarQuestion[] {
