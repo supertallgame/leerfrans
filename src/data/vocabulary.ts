@@ -1244,6 +1244,13 @@ export const frenchChaptersHavoVwo: Chapter[] = [
     words: havoVwoChapitre3Words,
     requiresLogin: false,
   },
+  {
+    id: "hv_chapitre5",
+    title: "Chapitre 5",
+    description: "Le passé composé & bijvoeglijk naamwoord",
+    words: chapitre5Words,
+    requiresLogin: false,
+  },
 ];
 
 // Chapitre 6 is taught in VMBO-HAVO (verplaatst vanuit HAVO-VWO).
