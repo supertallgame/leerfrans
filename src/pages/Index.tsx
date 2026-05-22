@@ -279,7 +279,7 @@ const Index = () => {
   const isVhCh1 = language === "french" && niveau === "vmbo-havo" && chapterId === "chapitre1";
   const isVhCh2 = language === "french" && niveau === "vmbo-havo" && chapterId === "chapitre2";
   const isVhCh3 = language === "french" && niveau === "vmbo-havo" && chapterId === "chapitre3";
-  const isVhCh5 = language === "french" && niveau === "vmbo-havo" && chapterId === "chapitre5";
+  const isVhCh5 = language === "french" && ((niveau === "vmbo-havo" && chapterId === "chapitre5") || (niveau === "havo-vwo" && chapterId === "hv_chapitre5"));
   const isVhCh6 = language === "french" && niveau === "vmbo-havo" && chapterId === "chapitre6";
   const chapterHasGrammar = language === "english" && hasGrammarForChapter(chapterId);
   const filterAiTeacher = (list: typeof languageGames) => aiTeacherEnabled ? list : list.filter(g => g.id !== "ai");
