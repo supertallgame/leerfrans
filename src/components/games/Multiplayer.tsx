@@ -1233,7 +1233,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
     return (
       <div className="min-h-screen flex flex-col items-center px-3 py-6 md:px-4 md:py-12">
         <div className="max-w-md w-full space-y-4 md:space-y-6">
-          <Button variant="ghost" onClick={() => setPhase("mode-select")} className="gap-2 text-sm">
+          <Button variant="ghost" onClick={() => { setTeamsExpanded(false); setPhase("mode-select"); }} className="gap-2 text-sm">
             <ArrowLeft className="h-4 w-4" /> {m.back}
           </Button>
           <div className="text-center space-y-2">
