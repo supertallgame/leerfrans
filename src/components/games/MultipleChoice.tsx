@@ -39,8 +39,18 @@ export default function MultipleChoice({ onBack }: Props) {
     const pool = sameType.length >= 3 ? sameType : activeVocabulary.filter((v) => v !== current).map((v) => (showDutch ? v.french : v.dutch)).filter((v) => v !== correct);
     // Ensure unique distractors
     const uniquePool = [...new Set(pool)];
-    const others = shuffle(uniquePool).slice(0, 3);
-    return shuffle([correct, ...others]);
+    // Plain Fisher-Yates (vocabulary's shuffle has an adjacency constraint that
+    // biases 4-item shuffles toward placing the correct answer in the middle).
+    const fy = <T,>(arr: T[]): T[] => {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    };
+    const others = fy(uniquePool).slice(0, 3);
+    return fy([correct, ...others]);
   }, [qIndex, showDutch, finished]);
 
   const correctAnswer = showDutch ? current?.french : current?.dutch;
