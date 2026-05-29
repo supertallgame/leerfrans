@@ -1298,7 +1298,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
                 </div>
               </CardContent>
             </Card>
-            <Card className="cursor-pointer transition-all hover:shadow-lg hover:-translate-y-1 active:scale-[0.98] border-2 hover:border-accent/50 relative" onClick={() => {}}>
+            <Card className="cursor-pointer transition-all hover:shadow-lg hover:-translate-y-1 active:scale-[0.98] border-2 hover:border-accent/50 relative" onClick={() => setTeamsExpanded(true)}>
               <CardContent className="p-4 md:p-6 space-y-4">
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center shrink-0">
