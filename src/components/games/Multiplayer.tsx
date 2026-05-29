@@ -1309,6 +1309,8 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
                     <p className="text-xs md:text-sm text-muted-foreground">{m.teamsDesc}</p>
                   </div>
                 </div>
+                {teamsExpanded && (
+                  <>
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-muted-foreground whitespace-nowrap">{m.numTeams}</span>
                   <div className="flex gap-2">
@@ -1375,6 +1377,8 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
                 <Button className="w-full" onClick={(e) => { e.stopPropagation(); startWithSettings("teams", numTeams); }}>
                   {m.startWith} {numTeams} {m.teamsWord}
                 </Button>
+                  </>
+                )}
               </CardContent>
             </Card>
             <Card className="cursor-pointer transition-all hover:shadow-lg hover:-translate-y-1 active:scale-[0.98] border-2 border-orange-400/40 hover:border-orange-500 bg-gradient-to-br from-orange-500/10 via-red-500/10 to-yellow-500/10" onClick={() => startWithSettings("lava")}>
