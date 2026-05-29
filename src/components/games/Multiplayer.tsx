@@ -324,6 +324,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
   const [teamEmojis, setTeamEmojis] = useState<string[]>(["🔵", "🔴", "🟢", "🟡"]);
   const [kahootTimerSetting, setKahootTimerSetting] = useState(5);
   const [showEmojiPicker, setShowEmojiPicker] = useState<number | null>(null);
+  const [teamsExpanded, setTeamsExpanded] = useState(false);
   const [isHost, setIsHost] = useState(false);
   const [room, setRoom] = useState<Room | null>(null);
   const [players, setPlayers] = useState<Player[]>([]);
@@ -1232,7 +1233,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
     return (
       <div className="min-h-screen flex flex-col items-center px-3 py-6 md:px-4 md:py-12">
         <div className="max-w-md w-full space-y-4 md:space-y-6">
-          <Button variant="ghost" onClick={() => setPhase("mode-select")} className="gap-2 text-sm">
+          <Button variant="ghost" onClick={() => { setTeamsExpanded(false); setPhase("mode-select"); }} className="gap-2 text-sm">
             <ArrowLeft className="h-4 w-4" /> {m.back}
           </Button>
           <div className="text-center space-y-2">
@@ -1297,7 +1298,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
                 </div>
               </CardContent>
             </Card>
-            <Card className="cursor-pointer transition-all hover:shadow-lg hover:-translate-y-1 active:scale-[0.98] border-2 hover:border-accent/50 relative" onClick={() => {}}>
+            <Card className="cursor-pointer transition-all hover:shadow-lg hover:-translate-y-1 active:scale-[0.98] border-2 hover:border-accent/50 relative" onClick={() => setTeamsExpanded(true)}>
               <CardContent className="p-4 md:p-6 space-y-4">
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center shrink-0">
@@ -1308,6 +1309,8 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
                     <p className="text-xs md:text-sm text-muted-foreground">{m.teamsDesc}</p>
                   </div>
                 </div>
+                {teamsExpanded && (
+                  <>
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-muted-foreground whitespace-nowrap">{m.numTeams}</span>
                   <div className="flex gap-2">
@@ -1374,6 +1377,8 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
                 <Button className="w-full" onClick={(e) => { e.stopPropagation(); startWithSettings("teams", numTeams); }}>
                   {m.startWith} {numTeams} {m.teamsWord}
                 </Button>
+                  </>
+                )}
               </CardContent>
             </Card>
             <Card className="cursor-pointer transition-all hover:shadow-lg hover:-translate-y-1 active:scale-[0.98] border-2 border-orange-400/40 hover:border-orange-500 bg-gradient-to-br from-orange-500/10 via-red-500/10 to-yellow-500/10" onClick={() => startWithSettings("lava")}>
