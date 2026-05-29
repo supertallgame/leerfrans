@@ -18,7 +18,10 @@ export default function MatchPairs({ onBack }: Props) {
   const { activeVocabulary, language } = useChapter();
   const locale = useLocale();
   const i = t(locale);
-  const [allWords] = useState(() => shuffle(activeVocabulary));
+  // Exclude long sentences — they make matching trivial (only 1 long item per side).
+  const [allWords] = useState(() => shuffle(
+    activeVocabulary.filter((v) => v.dutch.length <= 25 && v.french.length <= 25)
+  ));
   const totalRounds = Math.ceil(allWords.length / PAIRS_PER_ROUND);
   const [roundIndex, setRoundIndex] = useState(0);
   const [resetKey, setResetKey] = useState(0);
