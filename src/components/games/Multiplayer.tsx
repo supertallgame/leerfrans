@@ -1481,7 +1481,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
                       key={s}
                       variant={quizSections.includes(s) ? "default" : "outline"}
                       size="sm"
-                      className="text-sm w-10"
+                      className="text-sm"
                       onClick={() => {
                         setQuizSections((prev) =>
                           prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s]
