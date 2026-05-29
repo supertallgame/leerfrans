@@ -324,6 +324,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
   const [teamEmojis, setTeamEmojis] = useState<string[]>(["🔵", "🔴", "🟢", "🟡"]);
   const [kahootTimerSetting, setKahootTimerSetting] = useState(5);
   const [showEmojiPicker, setShowEmojiPicker] = useState<number | null>(null);
+  const [teamsExpanded, setTeamsExpanded] = useState(false);
   const [isHost, setIsHost] = useState(false);
   const [room, setRoom] = useState<Room | null>(null);
   const [players, setPlayers] = useState<Player[]>([]);
