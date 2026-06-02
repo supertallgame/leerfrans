@@ -284,6 +284,7 @@ export const allGrammarQuestions: GrammarQuestion[] = [
   ...ch1PossessivePronouns,
   ...ch1ToBe,
   ...ch1HaveGot,
+  ...ch1AAn,
   ...ch3PresentContinuous,
   ...ch2Plurals,
   ...ch2Demonstratives,
