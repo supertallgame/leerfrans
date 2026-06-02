@@ -267,7 +267,11 @@ const hv6SomeAny: GrammarQuestion[] = [
 ];
 
 export const allGrammarQuestions: GrammarQuestion[] = [
-  ...ch2Plurals,
+  ...ch1PersonalPronouns,
+  ...ch1PossessivePronouns,
+  ...ch1ToBe,
+  ...ch1HaveGot,
+  ...ch3PresentContinuous,
   ...ch2Demonstratives,
   ...ch2PresentSimple,
   ...ch4TagQuestions,
