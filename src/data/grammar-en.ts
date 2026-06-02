@@ -129,6 +129,31 @@ const ch2PresentSimple: GrammarQuestion[] = [
   { question: "She ____ got new shoes. (-)", options: ["hasn't", "doesn't have", "don't have", "isn't"], correctAnswer: "hasn't", explanation: "Bij 'have got' gebruik je voor ontkenning: hasn't / haven't got.", topic: "Present Simple (-)", chapterId: "en_chapter2" },
 ];
 
+// ─── Chapter 3 (VMBO-HAVO): Present continuous ───
+
+const ch3PresentContinuous: GrammarQuestion[] = [
+  { question: "I ____ TV right now.", options: ["am watching", "watch", "watches", "is watching"], correctAnswer: "am watching", explanation: "Present continuous: am/is/are + werkwoord+ing. Bij I → am.", topic: "Present continuous (+)", chapterId: "en_chapter3" },
+  { question: "He ____ to music at the moment.", options: ["is listening", "are listening", "am listening", "listens"], correctAnswer: "is listening", explanation: "He/she/it → is + werkwoord+ing.", topic: "Present continuous (+)", chapterId: "en_chapter3" },
+  { question: "They ____ football now.", options: ["are playing", "is playing", "am playing", "play"], correctAnswer: "are playing", explanation: "We/you/they → are + werkwoord+ing.", topic: "Present continuous (+)", chapterId: "en_chapter3" },
+  { question: "She ____ her grandparents today.", options: ["is visiting", "visit", "visits", "are visiting"], correctAnswer: "is visiting", explanation: "Bezig nú → present continuous met is + -ing.", topic: "Present continuous (+)", chapterId: "en_chapter3" },
+  { question: "Korte vorm: I am driving = ____", options: ["I'm driving", "I am'driving", "I are driving", "Im driving"], correctAnswer: "I'm driving", explanation: "I am → I'm.", topic: "Present continuous (+)", chapterId: "en_chapter3" },
+  { question: "Korte vorm: He is walking = ____", options: ["He's walking", "He're walking", "Hes walking", "He'is walking"], correctAnswer: "He's walking", explanation: "He is → He's.", topic: "Present continuous (+)", chapterId: "en_chapter3" },
+  { question: "I ____ studying. (-)", options: ["am not", "isn't", "aren't", "don't"], correctAnswer: "am not", explanation: "Ontkenning bij I → am not (geen 'amn't').", topic: "Present continuous (-)", chapterId: "en_chapter3" },
+  { question: "We ____ spending money today. (-)", options: ["aren't", "isn't", "amn't", "don't"], correctAnswer: "aren't", explanation: "We/you/they → aren't + werkwoord+ing.", topic: "Present continuous (-)", chapterId: "en_chapter3" },
+  { question: "She ____ working at the moment. (-)", options: ["isn't", "aren't", "amn't", "doesn't"], correctAnswer: "isn't", explanation: "He/she/it → isn't + werkwoord+ing.", topic: "Present continuous (-)", chapterId: "en_chapter3" },
+  { question: "____ Paul visiting his grandparents today? (?)", options: ["Is", "Are", "Am", "Does"], correctAnswer: "Is", explanation: "Vraag met he/she/it → Is + onderwerp + -ing.", topic: "Present continuous (?)", chapterId: "en_chapter3" },
+  { question: "____ they moving to New York? (?)", options: ["Are", "Is", "Am", "Do"], correctAnswer: "Are", explanation: "Vraag met we/you/they → Are + onderwerp + -ing.", topic: "Present continuous (?)", chapterId: "en_chapter3" },
+  { question: "____ I disturbing you? (?)", options: ["Am", "Is", "Are", "Do"], correctAnswer: "Am", explanation: "Vraag met I → Am I + -ing?", topic: "Present continuous (?)", chapterId: "en_chapter3" },
+  { question: "Spelling: live + ing = ____", options: ["living", "liveing", "liveing", "livving"], correctAnswer: "living", explanation: "Werkwoord eindigt op -e → -e weglaten + -ing: live → living.", topic: "Present continuous: spelling", chapterId: "en_chapter3" },
+  { question: "Spelling: move + ing = ____", options: ["moving", "moveing", "movving", "moveng"], correctAnswer: "moving", explanation: "-e weglaten: move → moving.", topic: "Present continuous: spelling", chapterId: "en_chapter3" },
+  { question: "Spelling: lie + ing = ____", options: ["lying", "lieing", "liying", "liing"], correctAnswer: "lying", explanation: "-ie wordt -y + ing: lie → lying.", topic: "Present continuous: spelling", chapterId: "en_chapter3" },
+  { question: "Spelling: die + ing = ____", options: ["dying", "dieing", "diying", "diing"], correctAnswer: "dying", explanation: "-ie wordt -y + ing: die → dying.", topic: "Present continuous: spelling", chapterId: "en_chapter3" },
+  { question: "Spelling: get + ing = ____", options: ["getting", "geting", "gettting", "geting"], correctAnswer: "getting", explanation: "Kort woord, 1 klinker + 1 medeklinker → laatste letter verdubbelen: get → getting.", topic: "Present continuous: spelling", chapterId: "en_chapter3" },
+  { question: "Spelling: swim + ing = ____", options: ["swimming", "swiming", "swimmming", "swimeng"], correctAnswer: "swimming", explanation: "1 klinker + 1 medeklinker → verdubbelen: swim → swimming.", topic: "Present continuous: spelling", chapterId: "en_chapter3" },
+  { question: "Spelling: travel + ing = ____", options: ["travelling", "traveling", "traveleng", "travling"], correctAnswer: "travelling", explanation: "Eindigt op -l → -l verdubbelen: travel → travelling.", topic: "Present continuous: spelling", chapterId: "en_chapter3" },
+  { question: "Spelling: begin + ing = ____", options: ["beginning", "begining", "beginng", "beginneng"], correctAnswer: "beginning", explanation: "Eindigt op klinker + medeklinker (klemtoon achter) → verdubbelen: begin → beginning.", topic: "Present continuous: spelling", chapterId: "en_chapter3" },
+];
+
 // ─── Chapter 4 (existing) ───
 
 const ch4TagQuestions: GrammarQuestion[] = [
