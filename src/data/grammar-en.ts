@@ -167,6 +167,38 @@ const ch3PresentContinuous: GrammarQuestion[] = [
   { question: "Spelling: begin + ing = ____", options: ["beginning", "begining", "beginng", "beginneng"], correctAnswer: "beginning", explanation: "Eindigt op klinker + medeklinker (klemtoon achter) → verdubbelen: begin → beginning.", topic: "Present continuous: spelling", chapterId: "en_chapter3" },
 ];
 
+const ch3Comparisons: GrammarQuestion[] = [
+  { question: "Cycling is ____ walking. (quick)", options: ["quicker than", "more quick than", "quickest than", "as quicker"], correctAnswer: "quicker than", explanation: "Kort woord → -er + than: quicker than.", topic: "Comparisons", chapterId: "en_chapter3" },
+  { question: "Driving is ____ way. (quick – overtreffende trap)", options: ["the quickest", "the most quick", "quicker", "more quickest"], correctAnswer: "the quickest", explanation: "Kort woord, overtreffende trap → the + -est: the quickest.", topic: "Comparisons", chapterId: "en_chapter3" },
+  { question: "A car is ____ a bicycle. (fast)", options: ["faster than", "more fast than", "fastest than", "as fast"], correctAnswer: "faster than", explanation: "Kort woord → -er than: faster than.", topic: "Comparisons", chapterId: "en_chapter3" },
+  { question: "Walking is ____ way to travel. (cheap)", options: ["the cheapest", "the most cheap", "cheaper", "more cheaper"], correctAnswer: "the cheapest", explanation: "Kort woord → the + -est: the cheapest.", topic: "Comparisons", chapterId: "en_chapter3" },
+  { question: "Anthony has a ____ smile than Tom. (nice)", options: ["nicer", "more nice", "nicest", "nicerer"], correctAnswer: "nicer", explanation: "Eindigt op -e → alleen -r erbij: nicer.", topic: "Comparisons", chapterId: "en_chapter3" },
+  { question: "Which form of transport is ____? (safe)", options: ["the safest", "the most safe", "safer", "the saver"], correctAnswer: "the safest", explanation: "Eindigt op -e → alleen -st: the safest.", topic: "Comparisons", chapterId: "en_chapter3" },
+  { question: "This route is much ____. (easy)", options: ["easier", "more easy", "easyer", "easiest"], correctAnswer: "easier", explanation: "Medeklinker + y → -y wordt -ier: easier.", topic: "Comparisons", chapterId: "en_chapter3" },
+  { question: "This is ____ road in the city. (busy)", options: ["the busiest", "the most busy", "busier", "the busyest"], correctAnswer: "the busiest", explanation: "Medeklinker + y → -y wordt -iest: the busiest.", topic: "Comparisons", chapterId: "en_chapter3" },
+  { question: "big → ____ → biggest", options: ["bigger", "biger", "more big", "biggerer"], correctAnswer: "bigger", explanation: "Kort woord, 1 klinker + 1 medeklinker → laatste letter verdubbelen: bigger.", topic: "Comparisons", chapterId: "en_chapter3" },
+  { question: "thin → thinner → ____", options: ["thinnest", "thinest", "most thin", "the most thinner"], correctAnswer: "thinnest", explanation: "Laatste letter verdubbelen + -est: thinnest.", topic: "Comparisons", chapterId: "en_chapter3" },
+  { question: "good → ____ → best (onregelmatig)", options: ["better", "gooder", "more good", "goodest"], correctAnswer: "better", explanation: "Onregelmatig: good → better → best.", topic: "Comparisons", chapterId: "en_chapter3" },
+  { question: "bad → ____ → worst", options: ["worse", "badder", "more bad", "baddest"], correctAnswer: "worse", explanation: "Onregelmatig: bad → worse → worst.", topic: "Comparisons", chapterId: "en_chapter3" },
+  { question: "My bike is ____ yours. (expensive)", options: ["more expensive than", "expensiver than", "the most expensive", "most expensive than"], correctAnswer: "more expensive than", explanation: "Lang woord → more + bijvoeglijk naamwoord + than.", topic: "Comparisons", chapterId: "en_chapter3" },
+  { question: "That race car is ____ car there is. (powerful)", options: ["the most powerful", "the powerfullest", "more powerful", "powerfuller"], correctAnswer: "the most powerful", explanation: "Lang woord → the most + bijvoeglijk naamwoord.", topic: "Comparisons", chapterId: "en_chapter3" },
+  { question: "narrow → ____ (uitzondering, korte vorm)", options: ["narrower", "more narrow", "narrowest", "narrowerer"], correctAnswer: "narrower", explanation: "Uitzondering: narrow neemt -er: narrower.", topic: "Comparisons", chapterId: "en_chapter3" },
+  { question: "simple → ____", options: ["simpler", "more simple", "simplest", "simplerer"], correctAnswer: "simpler", explanation: "Uitzondering: simple neemt -r: simpler.", topic: "Comparisons", chapterId: "en_chapter3" },
+];
+
+const ch3SimpleVsContinuous: GrammarQuestion[] = [
+  { question: "I ____ fantastic things every day.", options: ["see", "am seeing", "sees", "seeing"], correctAnswer: "see", explanation: "Algemeen / vaak ('every day') → present simple.", topic: "Present simple vs continuous", chapterId: "en_chapter3" },
+  { question: "His uncle ____ in New York. (woont daar)", options: ["lives", "is living", "live", "are living"], correctAnswer: "lives", explanation: "Blijvende situatie → present simple. He → lives.", topic: "Present simple vs continuous", chapterId: "en_chapter3" },
+  { question: "____ you live in the city? (vast)", options: ["Do", "Are", "Is", "Does"], correctAnswer: "Do", explanation: "Vaste woonplaats → present simple. Vraag met you → Do.", topic: "Present simple vs continuous", chapterId: "en_chapter3" },
+  { question: "They ____ their friends a lot. (-)", options: ["don't visit", "aren't visiting", "doesn't visit", "isn't visiting"], correctAnswer: "don't visit", explanation: "'A lot' = vaak → present simple. They → don't visit.", topic: "Present simple vs continuous", chapterId: "en_chapter3" },
+  { question: "I ____ with my parents. (nu, tijdelijk)", options: ["am travelling", "travel", "travels", "am travel"], correctAnswer: "am travelling", explanation: "Bezig op dit moment / tijdelijk → present continuous. I → am travelling.", topic: "Present simple vs continuous", chapterId: "en_chapter3" },
+  { question: "They ____ in New York for a couple of days. (tijdelijk)", options: ["are staying", "stay", "stays", "is staying"], correctAnswer: "are staying", explanation: "Tijdelijke situatie → present continuous. They → are staying.", topic: "Present simple vs continuous", chapterId: "en_chapter3" },
+  { question: "____ he playing computer games again? (nu)", options: ["Is", "Does", "Are", "Do"], correctAnswer: "Is", explanation: "Bezig nu → present continuous. He → Is.", topic: "Present simple vs continuous", chapterId: "en_chapter3" },
+  { question: "It ____ today. (-)", options: ["isn't raining", "doesn't rain", "aren't raining", "don't rain"], correctAnswer: "isn't raining", explanation: "'Today' = nu / vandaag → present continuous. It → isn't raining.", topic: "Present simple vs continuous", chapterId: "en_chapter3" },
+  { question: "Welke zin gebruikt de juiste tijd voor 'altijd'?", options: ["She always drinks tea in the morning.", "She is always drinking tea in the morning.", "She drink always tea in the morning.", "She always is drinking tea in the morning."], correctAnswer: "She always drinks tea in the morning.", explanation: "'Always' = vaste gewoonte → present simple + werkwoord + s bij she.", topic: "Present simple vs continuous", chapterId: "en_chapter3" },
+  { question: "Welke zin gebruikt de juiste tijd voor 'right now'?", options: ["He is watching a movie right now.", "He watches a movie right now.", "He watch a movie right now.", "He does watch a movie right now."], correctAnswer: "He is watching a movie right now.", explanation: "'Right now' = bezig nu → present continuous (is + werkwoord+ing).", topic: "Present simple vs continuous", chapterId: "en_chapter3" },
+];
+
 // ─── Chapter 4 (existing) ───
 
 const ch4TagQuestions: GrammarQuestion[] = [
