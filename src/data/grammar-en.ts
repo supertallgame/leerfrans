@@ -318,6 +318,8 @@ export const allGrammarQuestions: GrammarQuestion[] = [
   ...ch1HaveGot,
   ...ch1AAn,
   ...ch3PresentContinuous,
+  ...ch3Comparisons,
+  ...ch3SimpleVsContinuous,
   ...ch2Plurals,
   ...ch2Demonstratives,
   ...ch2PresentSimple,
