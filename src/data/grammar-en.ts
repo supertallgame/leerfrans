@@ -75,6 +75,19 @@ const ch1HaveGot: GrammarQuestion[] = [
   { question: "You ____ a lot of hair. (-)", options: ["haven't got", "hasn't got", "don't got", "aren't got"], correctAnswer: "haven't got", explanation: "You → haven't got.", topic: "To have got", chapterId: "en_chapter1" },
 ];
 
+const ch1AAn: GrammarQuestion[] = [
+  { question: "____ brother", options: ["a", "an", "the", "—"], correctAnswer: "a", explanation: "'Brother' begint met een medeklinkerklank → a.", topic: "A / An", chapterId: "en_chapter1" },
+  { question: "____ aunt", options: ["an", "a", "the", "—"], correctAnswer: "an", explanation: "'Aunt' begint met een klinkerklank → an.", topic: "A / An", chapterId: "en_chapter1" },
+  { question: "____ uniform [joeniform]", options: ["a", "an", "the", "—"], correctAnswer: "a", explanation: "'Uniform' klinkt als 'joeniform' → medeklinkerklank → a.", topic: "A / An", chapterId: "en_chapter1" },
+  { question: "____ ugly jumper", options: ["an", "a", "the", "—"], correctAnswer: "an", explanation: "'Ugly' begint met een klinkerklank (u) → an.", topic: "A / An", chapterId: "en_chapter1" },
+  { question: "____ honest man [onust]", options: ["an", "a", "the", "—"], correctAnswer: "an", explanation: "De 'h' is stom, het klinkt als 'onust' → klinkerklank → an.", topic: "A / An", chapterId: "en_chapter1" },
+  { question: "____ healthy man", options: ["a", "an", "the", "—"], correctAnswer: "a", explanation: "'Healthy' begint met hoorbare 'h' (medeklinkerklank) → a.", topic: "A / An", chapterId: "en_chapter1" },
+  { question: "____ apple", options: ["an", "a", "the", "—"], correctAnswer: "an", explanation: "Klinkerklank → an.", topic: "A / An", chapterId: "en_chapter1" },
+  { question: "____ university", options: ["a", "an", "the", "—"], correctAnswer: "a", explanation: "Klinkt als 'joeniversity' → medeklinkerklank → a.", topic: "A / An", chapterId: "en_chapter1" },
+  { question: "____ hour", options: ["an", "a", "the", "—"], correctAnswer: "an", explanation: "De 'h' is stom → klinkerklank → an.", topic: "A / An", chapterId: "en_chapter1" },
+  { question: "____ European country", options: ["a", "an", "the", "—"], correctAnswer: "a", explanation: "Klinkt als 'joeropean' → medeklinkerklank → a.", topic: "A / An", chapterId: "en_chapter1" },
+];
+
 // ─── Chapter 2 (VMBO-HAVO): Plurals, Demonstratives, Present simple ───
 
 const ch2Plurals: GrammarQuestion[] = [
@@ -271,6 +284,7 @@ export const allGrammarQuestions: GrammarQuestion[] = [
   ...ch1PossessivePronouns,
   ...ch1ToBe,
   ...ch1HaveGot,
+  ...ch1AAn,
   ...ch3PresentContinuous,
   ...ch2Plurals,
   ...ch2Demonstratives,
