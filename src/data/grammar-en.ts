@@ -311,6 +311,16 @@ const hv6SomeAny: GrammarQuestion[] = [
   { question: "I have ____ idea what you mean. (= geen)", options: ["no", "any", "some", "much"], correctAnswer: "no", explanation: "'No' = niet + any. 'I have no idea' = 'I don't have any idea'.", topic: "Some / Any", chapterId: "en_hv_chapter6" },
 ];
 
+// Havo-Vwo Chapter 1 reuses the same topics as VMBO-HAVO chapter 1
+// (Personal pronouns, Possessive pronouns, to be, a/an, to have got).
+const hvCh1: GrammarQuestion[] = [
+  ...ch1PersonalPronouns,
+  ...ch1PossessivePronouns,
+  ...ch1ToBe,
+  ...ch1HaveGot,
+  ...ch1AAn,
+].map((q) => ({ ...q, chapterId: "en_hv_chapter1" }));
+
 export const allGrammarQuestions: GrammarQuestion[] = [
   ...ch1PersonalPronouns,
   ...ch1PossessivePronouns,
@@ -332,6 +342,7 @@ export const allGrammarQuestions: GrammarQuestion[] = [
   ...hv6ToBePast,
   ...hv6Possessive,
   ...hv6SomeAny,
+  ...hvCh1,
 ];
 
 export function getGrammarByChapter(chapterId: string): GrammarQuestion[] {
