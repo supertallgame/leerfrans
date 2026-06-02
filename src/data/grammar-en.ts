@@ -9,6 +9,72 @@ export interface GrammarQuestion {
   chapterId: string; // e.g. "en_chapter2", "en_chapter4"
 }
 
+// ─── Chapter 1 (VMBO-HAVO): Personal pronouns, Possessive pronouns, to be, have got ───
+
+const ch1PersonalPronouns: GrammarQuestion[] = [
+  { question: "ik → ____ (onderwerpsvorm)", options: ["I", "me", "my", "mine"], correctAnswer: "I", explanation: "Onderwerpsvorm 1e persoon enkelvoud = I (altijd met hoofdletter).", topic: "Personal pronouns", chapterId: "en_chapter1" },
+  { question: "jij → ____ (onderwerpsvorm)", options: ["you", "your", "yours", "thou"], correctAnswer: "you", explanation: "Onderwerp 'jij' = you.", topic: "Personal pronouns", chapterId: "en_chapter1" },
+  { question: "hij → ____ (onderwerpsvorm)", options: ["he", "him", "his", "she"], correctAnswer: "he", explanation: "Onderwerp 'hij' = he.", topic: "Personal pronouns", chapterId: "en_chapter1" },
+  { question: "zij (enkelvoud) → ____", options: ["she", "her", "hers", "they"], correctAnswer: "she", explanation: "Onderwerp 'zij' (enkelvoud) = she.", topic: "Personal pronouns", chapterId: "en_chapter1" },
+  { question: "wij → ____ (onderwerpsvorm)", options: ["we", "us", "our", "they"], correctAnswer: "we", explanation: "Onderwerp 'wij' = we.", topic: "Personal pronouns", chapterId: "en_chapter1" },
+  { question: "zij (meervoud) → ____", options: ["they", "them", "their", "we"], correctAnswer: "they", explanation: "Onderwerp 'zij' (meervoud) = they.", topic: "Personal pronouns", chapterId: "en_chapter1" },
+  { question: "mij → ____ (voorwerpsvorm)", options: ["me", "I", "my", "mine"], correctAnswer: "me", explanation: "Voorwerpsvorm 'mij' = me.", topic: "Personal pronouns", chapterId: "en_chapter1" },
+  { question: "hem → ____", options: ["him", "he", "his", "her"], correctAnswer: "him", explanation: "Voorwerpsvorm 'hem' = him.", topic: "Personal pronouns", chapterId: "en_chapter1" },
+  { question: "haar → ____ (voorwerpsvorm)", options: ["her", "she", "hers", "him"], correctAnswer: "her", explanation: "Voorwerpsvorm 'haar' = her.", topic: "Personal pronouns", chapterId: "en_chapter1" },
+  { question: "ons → ____", options: ["us", "we", "our", "ours"], correctAnswer: "us", explanation: "Voorwerpsvorm 'ons' = us.", topic: "Personal pronouns", chapterId: "en_chapter1" },
+  { question: "hen / hun → ____", options: ["them", "they", "their", "theirs"], correctAnswer: "them", explanation: "Voorwerpsvorm 'hen/hun' = them.", topic: "Personal pronouns", chapterId: "en_chapter1" },
+  { question: "I walk to school every day. You can walk with ____.", options: ["me", "I", "my", "mine"], correctAnswer: "me", explanation: "Na 'with' komt voorwerpsvorm: me.", topic: "Personal pronouns", chapterId: "en_chapter1" },
+  { question: "We eat lunch together. Do you want to eat with ____?", options: ["us", "we", "our", "ours"], correctAnswer: "us", explanation: "Na 'with' komt voorwerpsvorm: us.", topic: "Personal pronouns", chapterId: "en_chapter1" },
+];
+
+const ch1PossessivePronouns: GrammarQuestion[] = [
+  { question: "mijn (met zelfstandig naamwoord) → This is ____ book.", options: ["my", "mine", "me", "I"], correctAnswer: "my", explanation: "Met zelfstandig naamwoord erna → my.", topic: "Possessive pronouns", chapterId: "en_chapter1" },
+  { question: "die van mij (zonder zelfstandig naamwoord) → The book is ____.", options: ["mine", "my", "me", "I"], correctAnswer: "mine", explanation: "Zonder zelfstandig naamwoord erna → mine.", topic: "Possessive pronouns", chapterId: "en_chapter1" },
+  { question: "jouw → ____ pen", options: ["your", "yours", "you", "yore"], correctAnswer: "your", explanation: "Met zelfstandig naamwoord → your.", topic: "Possessive pronouns", chapterId: "en_chapter1" },
+  { question: "die van jou → The pen is ____.", options: ["yours", "your", "you", "yourse"], correctAnswer: "yours", explanation: "Zonder zelfstandig naamwoord → yours.", topic: "Possessive pronouns", chapterId: "en_chapter1" },
+  { question: "zijn → ____ pen", options: ["his", "him", "he", "his'"], correctAnswer: "his", explanation: "His is hetzelfde mét of zonder zelfstandig naamwoord.", topic: "Possessive pronouns", chapterId: "en_chapter1" },
+  { question: "haar → ____ bag", options: ["her", "hers", "she", "her's"], correctAnswer: "her", explanation: "Met zelfstandig naamwoord → her.", topic: "Possessive pronouns", chapterId: "en_chapter1" },
+  { question: "die van haar → The bag is ____.", options: ["hers", "her", "her's", "she"], correctAnswer: "hers", explanation: "Zonder zelfstandig naamwoord → hers (geen apostrof!).", topic: "Possessive pronouns", chapterId: "en_chapter1" },
+  { question: "onze → ____ teacher", options: ["our", "ours", "us", "we"], correctAnswer: "our", explanation: "Met zelfstandig naamwoord → our.", topic: "Possessive pronouns", chapterId: "en_chapter1" },
+  { question: "die van ons → The teacher is ____.", options: ["ours", "our", "us", "our's"], correctAnswer: "ours", explanation: "Zonder zelfstandig naamwoord → ours (geen apostrof).", topic: "Possessive pronouns", chapterId: "en_chapter1" },
+  { question: "hun → ____ schedule", options: ["their", "theirs", "they", "there"], correctAnswer: "their", explanation: "Met zelfstandig naamwoord → their.", topic: "Possessive pronouns", chapterId: "en_chapter1" },
+  { question: "die van hen → The schedule is ____.", options: ["theirs", "their", "there", "their's"], correctAnswer: "theirs", explanation: "Zonder zelfstandig naamwoord → theirs.", topic: "Possessive pronouns", chapterId: "en_chapter1" },
+  { question: "Look, the dog is biting ____ tail!", options: ["its", "it's", "his", "their"], correctAnswer: "its", explanation: "Bezittelijk 'zijn' voor een dier/ding → its (zonder apostrof!).", topic: "Possessive pronouns", chapterId: "en_chapter1" },
+  { question: "Is that ____ pen? – No, it's ____. (zijn pen – die van haar)", options: ["his / hers", "his / her", "him / hers", "his / her's"], correctAnswer: "his / hers", explanation: "Met zelfstandig naamwoord: his. Zonder: hers.", topic: "Possessive pronouns", chapterId: "en_chapter1" },
+];
+
+const ch1ToBe: GrammarQuestion[] = [
+  { question: "I ____ 13 years old.", options: ["am", "is", "are", "be"], correctAnswer: "am", explanation: "I → am.", topic: "To be (present)", chapterId: "en_chapter1" },
+  { question: "You ____ in Spain.", options: ["are", "is", "am", "be"], correctAnswer: "are", explanation: "You → are.", topic: "To be (present)", chapterId: "en_chapter1" },
+  { question: "He ____ German.", options: ["is", "are", "am", "be"], correctAnswer: "is", explanation: "He/she/it → is.", topic: "To be (present)", chapterId: "en_chapter1" },
+  { question: "She ____ Dutch.", options: ["is", "are", "am", "be"], correctAnswer: "is", explanation: "She → is.", topic: "To be (present)", chapterId: "en_chapter1" },
+  { question: "We ____ at home.", options: ["are", "is", "am", "be"], correctAnswer: "are", explanation: "We/you/they → are.", topic: "To be (present)", chapterId: "en_chapter1" },
+  { question: "They ____ abroad.", options: ["are", "is", "am", "were"], correctAnswer: "are", explanation: "They → are.", topic: "To be (present)", chapterId: "en_chapter1" },
+  { question: "Korte vorm: I am = ____", options: ["I'm", "Im", "I're", "I's"], correctAnswer: "I'm", explanation: "I am → I'm.", topic: "To be (present)", chapterId: "en_chapter1" },
+  { question: "Korte vorm: She is = ____", options: ["She's", "Shes", "She're", "She'is"], correctAnswer: "She's", explanation: "She is → She's.", topic: "To be (present)", chapterId: "en_chapter1" },
+  { question: "Korte vorm: They are = ____", options: ["They're", "Theyre", "They's", "They'are"], correctAnswer: "They're", explanation: "They are → They're.", topic: "To be (present)", chapterId: "en_chapter1" },
+  { question: "I ____ Dutch. (-)", options: ["am not", "aren't", "isn't", "not am"], correctAnswer: "am not", explanation: "I + am not (geen korte vorm 'amn't').", topic: "To be (present)", chapterId: "en_chapter1" },
+  { question: "He ____ Dutch. (-)", options: ["isn't", "aren't", "amn't", "doesn't"], correctAnswer: "isn't", explanation: "He/she/it → isn't (is not).", topic: "To be (present)", chapterId: "en_chapter1" },
+  { question: "We ____ Dutch. (-)", options: ["aren't", "isn't", "amn't", "don't"], correctAnswer: "aren't", explanation: "We/you/they → aren't (are not).", topic: "To be (present)", chapterId: "en_chapter1" },
+  { question: "____ I Dutch? (?)", options: ["Am", "Is", "Are", "Do"], correctAnswer: "Am", explanation: "Vraag met I → Am I…?", topic: "To be (present)", chapterId: "en_chapter1" },
+  { question: "____ she Dutch? (?)", options: ["Is", "Are", "Am", "Does"], correctAnswer: "Is", explanation: "Vraag met he/she/it → Is …?", topic: "To be (present)", chapterId: "en_chapter1" },
+  { question: "____ they Dutch? (?)", options: ["Are", "Is", "Am", "Do"], correctAnswer: "Are", explanation: "Vraag met we/you/they → Are …?", topic: "To be (present)", chapterId: "en_chapter1" },
+];
+
+const ch1HaveGot: GrammarQuestion[] = [
+  { question: "I ____ blonde hair.", options: ["have got", "has got", "am got", "is got"], correctAnswer: "have got", explanation: "I/you/we/they → have got.", topic: "To have got", chapterId: "en_chapter1" },
+  { question: "She ____ curly hair.", options: ["has got", "have got", "is got", "haves got"], correctAnswer: "has got", explanation: "He/she/it → has got.", topic: "To have got", chapterId: "en_chapter1" },
+  { question: "He ____ straight hair.", options: ["has got", "have got", "is got", "got"], correctAnswer: "has got", explanation: "He → has got.", topic: "To have got", chapterId: "en_chapter1" },
+  { question: "My dog ____ black fur. (-)", options: ["has not got", "have not got", "doesn't has got", "isn't got"], correctAnswer: "has not got", explanation: "It → has not got / hasn't got.", topic: "To have got", chapterId: "en_chapter1" },
+  { question: "We ____ the same earrings. (-)", options: ["have not got", "has not got", "don't have got", "aren't got"], correctAnswer: "have not got", explanation: "We → have not got / haven't got.", topic: "To have got", chapterId: "en_chapter1" },
+  { question: "Welke zin klopt om te vragen of iemand een bril heeft?", options: ["Has she got glasses?", "Does she got glasses?", "Is she got glasses?", "She has got glasses?"], correctAnswer: "Has she got glasses?", explanation: "Vraag met she/he/it → Has … got…? (geen do/does!).", topic: "To have got", chapterId: "en_chapter1" },
+  { question: "____ you got braces? (?)", options: ["Have", "Has", "Do", "Are"], correctAnswer: "Have", explanation: "Vraag met you → Have you got…?", topic: "To have got", chapterId: "en_chapter1" },
+  { question: "Korte vorm: I have got = ____", options: ["I've got", "I'm got", "I has got", "I'd got"], correctAnswer: "I've got", explanation: "I have → I've.", topic: "To have got", chapterId: "en_chapter1" },
+  { question: "Korte vorm: He has got = ____", options: ["He's got", "He've got", "He'as got", "He has't"], correctAnswer: "He's got", explanation: "He has → He's (zelfde vorm als He is, context maakt verschil).", topic: "To have got", chapterId: "en_chapter1" },
+  { question: "Korte vorm: She has not got = ____", options: ["She hasn't got", "She haven't got", "She'sn't got", "She isn't got"], correctAnswer: "She hasn't got", explanation: "has not → hasn't.", topic: "To have got", chapterId: "en_chapter1" },
+  { question: "You ____ a lot of hair. (-)", options: ["haven't got", "hasn't got", "don't got", "aren't got"], correctAnswer: "haven't got", explanation: "You → haven't got.", topic: "To have got", chapterId: "en_chapter1" },
+];
+
 // ─── Chapter 2 (VMBO-HAVO): Plurals, Demonstratives, Present simple ───
 
 const ch2Plurals: GrammarQuestion[] = [
@@ -61,6 +127,31 @@ const ch2PresentSimple: GrammarQuestion[] = [
   { question: "____ she play the piano?", options: ["Does", "Do", "Is", "Are"], correctAnswer: "Does", explanation: "She → Does … play.", topic: "Present Simple (?)", chapterId: "en_chapter2" },
   { question: "Bij 'have got' gebruik je voor vraag/ontkenning géén do/does. Welke zin klopt?", options: ["Have you got new shoes?", "Do you have got new shoes?", "Does you got new shoes?", "Are you got new shoes?"], correctAnswer: "Have you got new shoes?", explanation: "Bij 'have got' gebruik je geen do/does: Have you got…?", topic: "Present Simple (?)", chapterId: "en_chapter2" },
   { question: "She ____ got new shoes. (-)", options: ["hasn't", "doesn't have", "don't have", "isn't"], correctAnswer: "hasn't", explanation: "Bij 'have got' gebruik je voor ontkenning: hasn't / haven't got.", topic: "Present Simple (-)", chapterId: "en_chapter2" },
+];
+
+// ─── Chapter 3 (VMBO-HAVO): Present continuous ───
+
+const ch3PresentContinuous: GrammarQuestion[] = [
+  { question: "I ____ TV right now.", options: ["am watching", "watch", "watches", "is watching"], correctAnswer: "am watching", explanation: "Present continuous: am/is/are + werkwoord+ing. Bij I → am.", topic: "Present continuous (+)", chapterId: "en_chapter3" },
+  { question: "He ____ to music at the moment.", options: ["is listening", "are listening", "am listening", "listens"], correctAnswer: "is listening", explanation: "He/she/it → is + werkwoord+ing.", topic: "Present continuous (+)", chapterId: "en_chapter3" },
+  { question: "They ____ football now.", options: ["are playing", "is playing", "am playing", "play"], correctAnswer: "are playing", explanation: "We/you/they → are + werkwoord+ing.", topic: "Present continuous (+)", chapterId: "en_chapter3" },
+  { question: "She ____ her grandparents today.", options: ["is visiting", "visit", "visits", "are visiting"], correctAnswer: "is visiting", explanation: "Bezig nú → present continuous met is + -ing.", topic: "Present continuous (+)", chapterId: "en_chapter3" },
+  { question: "Korte vorm: I am driving = ____", options: ["I'm driving", "I am'driving", "I are driving", "Im driving"], correctAnswer: "I'm driving", explanation: "I am → I'm.", topic: "Present continuous (+)", chapterId: "en_chapter3" },
+  { question: "Korte vorm: He is walking = ____", options: ["He's walking", "He're walking", "Hes walking", "He'is walking"], correctAnswer: "He's walking", explanation: "He is → He's.", topic: "Present continuous (+)", chapterId: "en_chapter3" },
+  { question: "I ____ studying. (-)", options: ["am not", "isn't", "aren't", "don't"], correctAnswer: "am not", explanation: "Ontkenning bij I → am not (geen 'amn't').", topic: "Present continuous (-)", chapterId: "en_chapter3" },
+  { question: "We ____ spending money today. (-)", options: ["aren't", "isn't", "amn't", "don't"], correctAnswer: "aren't", explanation: "We/you/they → aren't + werkwoord+ing.", topic: "Present continuous (-)", chapterId: "en_chapter3" },
+  { question: "She ____ working at the moment. (-)", options: ["isn't", "aren't", "amn't", "doesn't"], correctAnswer: "isn't", explanation: "He/she/it → isn't + werkwoord+ing.", topic: "Present continuous (-)", chapterId: "en_chapter3" },
+  { question: "____ Paul visiting his grandparents today? (?)", options: ["Is", "Are", "Am", "Does"], correctAnswer: "Is", explanation: "Vraag met he/she/it → Is + onderwerp + -ing.", topic: "Present continuous (?)", chapterId: "en_chapter3" },
+  { question: "____ they moving to New York? (?)", options: ["Are", "Is", "Am", "Do"], correctAnswer: "Are", explanation: "Vraag met we/you/they → Are + onderwerp + -ing.", topic: "Present continuous (?)", chapterId: "en_chapter3" },
+  { question: "____ I disturbing you? (?)", options: ["Am", "Is", "Are", "Do"], correctAnswer: "Am", explanation: "Vraag met I → Am I + -ing?", topic: "Present continuous (?)", chapterId: "en_chapter3" },
+  { question: "Spelling: live + ing = ____", options: ["living", "liveing", "liveing", "livving"], correctAnswer: "living", explanation: "Werkwoord eindigt op -e → -e weglaten + -ing: live → living.", topic: "Present continuous: spelling", chapterId: "en_chapter3" },
+  { question: "Spelling: move + ing = ____", options: ["moving", "moveing", "movving", "moveng"], correctAnswer: "moving", explanation: "-e weglaten: move → moving.", topic: "Present continuous: spelling", chapterId: "en_chapter3" },
+  { question: "Spelling: lie + ing = ____", options: ["lying", "lieing", "liying", "liing"], correctAnswer: "lying", explanation: "-ie wordt -y + ing: lie → lying.", topic: "Present continuous: spelling", chapterId: "en_chapter3" },
+  { question: "Spelling: die + ing = ____", options: ["dying", "dieing", "diying", "diing"], correctAnswer: "dying", explanation: "-ie wordt -y + ing: die → dying.", topic: "Present continuous: spelling", chapterId: "en_chapter3" },
+  { question: "Spelling: get + ing = ____", options: ["getting", "geting", "gettting", "geting"], correctAnswer: "getting", explanation: "Kort woord, 1 klinker + 1 medeklinker → laatste letter verdubbelen: get → getting.", topic: "Present continuous: spelling", chapterId: "en_chapter3" },
+  { question: "Spelling: swim + ing = ____", options: ["swimming", "swiming", "swimmming", "swimeng"], correctAnswer: "swimming", explanation: "1 klinker + 1 medeklinker → verdubbelen: swim → swimming.", topic: "Present continuous: spelling", chapterId: "en_chapter3" },
+  { question: "Spelling: travel + ing = ____", options: ["travelling", "traveling", "traveleng", "travling"], correctAnswer: "travelling", explanation: "Eindigt op -l → -l verdubbelen: travel → travelling.", topic: "Present continuous: spelling", chapterId: "en_chapter3" },
+  { question: "Spelling: begin + ing = ____", options: ["beginning", "begining", "beginng", "beginneng"], correctAnswer: "beginning", explanation: "Eindigt op klinker + medeklinker (klemtoon achter) → verdubbelen: begin → beginning.", topic: "Present continuous: spelling", chapterId: "en_chapter3" },
 ];
 
 // ─── Chapter 4 (existing) ───
@@ -176,6 +267,11 @@ const hv6SomeAny: GrammarQuestion[] = [
 ];
 
 export const allGrammarQuestions: GrammarQuestion[] = [
+  ...ch1PersonalPronouns,
+  ...ch1PossessivePronouns,
+  ...ch1ToBe,
+  ...ch1HaveGot,
+  ...ch3PresentContinuous,
   ...ch2Plurals,
   ...ch2Demonstratives,
   ...ch2PresentSimple,
