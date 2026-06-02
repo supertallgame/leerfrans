@@ -41,9 +41,9 @@ export function playCorrect() {
 }
 
 export function playWrong() {
-  beep(311, 0.15, "square", 0.2); // Eb4
-  setTimeout(() => beep(233, 0.3, "square", 0.2), 150); // Bb3
+  // Disabled: wrong-answer sound was irritating users and breaking flow.
 }
+
 
 export function playSkip() {
   beep(600, 0.06, "sine", 0.08); // gentle short boop
