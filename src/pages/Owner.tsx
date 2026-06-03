@@ -451,7 +451,7 @@ export default function Owner() {
     );
   }
 
-  const allRoleEmails = new Set([...OWNER_EMAILS, ...adminRoles.map(r => r.email), ...headAdminRoles.map(r => r.email), ...testerRoles.map(r => r.email)]);
+  const allRoleEmails = new Set([...OWNER_EMAILS, ...adminRoles.map(r => r.email), ...headAdminRoles.map(r => r.email), ...testerRoles.map(r => r.email), ...headTesterRoles.map(r => r.email)]);
   const normalUsers = allUsers.filter(u => !allRoleEmails.has(u.email));
   const filteredUsers = searchQuery
     ? normalUsers.filter(u => u.email.toLowerCase().includes(searchQuery.toLowerCase()))
