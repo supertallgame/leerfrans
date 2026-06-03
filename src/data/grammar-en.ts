@@ -321,6 +321,13 @@ const hvCh1: GrammarQuestion[] = [
   ...ch1AAn,
 ].map((q) => ({ ...q, chapterId: "en_hv_chapter1" }));
 
+// VMBO-HAVO Chapter 5 reuses the same topics as HAVO-VWO chapter 5
+// (Word order: place & time, Past simple).
+const ch5: GrammarQuestion[] = [
+  ...hv5WordOrder,
+  ...hv5PastSimple,
+].map((q) => ({ ...q, chapterId: "en_chapter5" }));
+
 export const allGrammarQuestions: GrammarQuestion[] = [
   ...ch1PersonalPronouns,
   ...ch1PossessivePronouns,
@@ -343,6 +350,7 @@ export const allGrammarQuestions: GrammarQuestion[] = [
   ...hv6Possessive,
   ...hv6SomeAny,
   ...hvCh1,
+  ...ch5,
 ];
 
 export function getGrammarByChapter(chapterId: string): GrammarQuestion[] {
