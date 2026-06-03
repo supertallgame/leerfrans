@@ -656,17 +656,71 @@ export default function Owner() {
               testerRoles.map((role) => (
                 <div key={role.id} className="flex items-center justify-between rounded-lg border p-3">
                   <div className="flex items-center gap-2">
-                    <Beaker className="h-4 w-4 text-primary" />
+                    <Beaker className="h-4 w-4 text-green-500" />
                     <span className="text-sm font-medium">{role.email}</span>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-destructive hover:text-destructive hover:bg-destructive/10 gap-1"
-                    onClick={() => removeTester(role)}
-                  >
-                    <ShieldMinus className="h-4 w-4" /> Verwijderen
-                  </Button>
+                  <div className="flex gap-1">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="gap-1"
+                      onClick={() => promoteTesterToHeadTester(role)}
+                      title="Promoveer tot head tester"
+                    >
+                      <Star className="h-4 w-4 text-orange-500" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-destructive hover:text-destructive hover:bg-destructive/10 gap-1"
+                      onClick={() => removeTester(role)}
+                    >
+                      <ShieldMinus className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Head Testers */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <Star className="h-5 w-5 text-orange-500" /> Head Testers
+              <span className="text-sm font-normal text-muted-foreground">({headTesterRoles.length})</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {headTesterRoles.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Nog geen head testers. Promoveer hieronder via de Star-knop.</p>
+            ) : (
+              headTesterRoles.map((role) => (
+                <div key={role.id} className="flex items-center justify-between rounded-lg border p-3">
+                  <div className="flex items-center gap-2">
+                    <Star className="h-4 w-4 text-orange-500" />
+                    <span className="text-sm font-medium">{role.email}</span>
+                  </div>
+                  <div className="flex gap-1">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="gap-1"
+                      onClick={() => demoteHeadTester(role)}
+                      title="Demote naar tester"
+                    >
+                      <ArrowDownCircle className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-destructive hover:text-destructive hover:bg-destructive/10 gap-1"
+                      onClick={() => removeHeadTester(role)}
+                    >
+                      <ShieldMinus className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               ))
             )}
