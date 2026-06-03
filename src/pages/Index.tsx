@@ -394,7 +394,7 @@ const Index = () => {
               className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors cursor-pointer"
             >
               <BookMarked className="h-3.5 w-3.5" />
-              {getChapter(chapterId)?.title ?? "Chapitre 3"}
+              {getChapter(chapterId)?.title ?? "Unit"}
             </button>
             {availableSections.length > 0 && (
               <button
@@ -471,7 +471,7 @@ const Index = () => {
       <Dialog open={showChapterPicker} onOpenChange={setShowChapterPicker}>
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
-            <DialogTitle>Kies een {(language === "nask" || language === "biology") ? "Hoofdstuk" : language === "french" ? "Chapitre" : "Chapter"}</DialogTitle>
+            <DialogTitle>Kies een {(language === "nask" || language === "biology") ? "Hoofdstuk" : "Unit"}</DialogTitle>
           </DialogHeader>
           <div className="space-y-1.5">
             {chaptersForLanguage.map((ch) => {
@@ -694,13 +694,13 @@ const Index = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <BookMarked className="h-4 w-4" />
-              <span className="text-sm font-medium">{(language === "nask" || language === "biology") ? "Hoofdstuk" : language === "french" ? "Chapitre" : "Chapter"}</span>
+              <span className="text-sm font-medium">{(language === "nask" || language === "biology") ? "Hoofdstuk" : "Unit"}</span>
             </div>
             <button
               onClick={() => { setShowSettings(false); setShowChapterPicker(true); }}
               className="text-sm font-medium px-3 py-1 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
             >
-              {getChapter(chapterId)?.title ?? "Chapitre 3"}
+              {getChapter(chapterId)?.title ?? "Unit"}
             </button>
           </div>
           {availableSections.length > 0 && (
