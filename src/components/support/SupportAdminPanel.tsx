@@ -155,8 +155,28 @@ export default function SupportAdminPanel() {
       .select("id, report_id, message, image_url, sender_role, sender_email, sender_id, created_at")
       .eq("report_id", reportId)
       .order("created_at", { ascending: true });
-    if (data) setMessages(data as Message[]);
+    if (data) {
+      const list = data as Message[];
+      setMessages(list);
+      const ids = Array.from(new Set(list.map((m) => m.sender_id)));
+      const unknown = ids.filter((id) => !(id in rolesMap));
+      if (unknown.length > 0) {
+        const { data: rows } = await supabase
+          .from("user_roles")
+          .select("user_id, role")
+          .in("user_id", unknown);
+        const next = { ...rolesMap };
+        unknown.forEach((id) => { next[id] = ""; });
+        (rows || []).forEach((r: any) => { if (!next[r.user_id]) next[r.user_id] = r.role; });
+        setRolesMap(next);
+      }
+    }
     setLoadingMsgs(false);
+  };
+
+  const getRole = (m: Message): string => {
+    if (OWNER_EMAILS.includes(m.sender_email)) return "owner";
+    return rolesMap[m.sender_id] || "";
   };
 
   const open = async (id: string) => {
