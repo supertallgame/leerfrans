@@ -29,11 +29,21 @@ interface Message {
   created_at: string;
 }
 
+const OWNER_EMAILS = ["brankovantland@gmail.com", "branko18vantland@gmail.com"];
+const ROLE_STYLES: Record<string, { label: string; cls: string }> = {
+  owner: { label: "Owner", cls: "text-destructive" },
+  head_admin: { label: "Head Admin", cls: "text-purple-500" },
+  admin: { label: "Admin", cls: "text-primary" },
+  head_tester: { label: "Head Tester", cls: "text-orange-500" },
+  tester: { label: "Tester", cls: "text-green-500" },
+};
+
 export default function SupportAdminPanel() {
   const [reports, setReports] = useState<Report[]>([]);
   const [showClosed, setShowClosed] = useState(false);
   const [openId, setOpenId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
+  const [rolesMap, setRolesMap] = useState<Record<string, string>>({});
   const [reply, setReply] = useState("");
   const [image, setImage] = useState<File | null>(null);
   const [sending, setSending] = useState(false);
@@ -135,7 +145,23 @@ export default function SupportAdminPanel() {
       setReports(rows);
       const newest = rows.reduce((acc, r) => (r.updated_at > acc ? r.updated_at : acc), "");
       if (newest) lastSeenUpdatedAtRef.current = newest;
+      void fetchRolesFor(rows.map((r) => r.user_id));
     }
+  };
+
+  const fetchRolesFor = async (ids: string[]) => {
+    const unknown = Array.from(new Set(ids)).filter((id) => id && !(id in rolesMap));
+    if (unknown.length === 0) return;
+    const { data: rows } = await supabase
+      .from("user_roles")
+      .select("user_id, role")
+      .in("user_id", unknown);
+    setRolesMap((prev) => {
+      const next = { ...prev };
+      unknown.forEach((id) => { if (!(id in next)) next[id] = ""; });
+      (rows || []).forEach((r: any) => { if (!next[r.user_id]) next[r.user_id] = r.role; });
+      return next;
+    });
   };
 
   const loadMessages = async (reportId: string) => {
@@ -145,8 +171,28 @@ export default function SupportAdminPanel() {
       .select("id, report_id, message, image_url, sender_role, sender_email, sender_id, created_at")
       .eq("report_id", reportId)
       .order("created_at", { ascending: true });
-    if (data) setMessages(data as Message[]);
+    if (data) {
+      const list = data as Message[];
+      setMessages(list);
+      const ids = Array.from(new Set(list.map((m) => m.sender_id)));
+      const unknown = ids.filter((id) => !(id in rolesMap));
+      if (unknown.length > 0) {
+        const { data: rows } = await supabase
+          .from("user_roles")
+          .select("user_id, role")
+          .in("user_id", unknown);
+        const next = { ...rolesMap };
+        unknown.forEach((id) => { next[id] = ""; });
+        (rows || []).forEach((r: any) => { if (!next[r.user_id]) next[r.user_id] = r.role; });
+        setRolesMap(next);
+      }
+    }
     setLoadingMsgs(false);
+  };
+
+  const getRole = (m: Message): string => {
+    if (OWNER_EMAILS.includes(m.sender_email)) return "owner";
+    return rolesMap[m.sender_id] || "";
   };
 
   const open = async (id: string) => {
@@ -227,7 +273,14 @@ export default function SupportAdminPanel() {
                     <span className="text-[10px] px-1.5 py-0.5 rounded bg-primary/10 text-primary">{r.category}</span>
                     <p className="text-sm font-medium truncate">{r.subject}</p>
                   </div>
-                  <p className="text-xs text-muted-foreground truncate mt-0.5">{r.user_email}</p>
+                  <p className="text-xs text-muted-foreground truncate mt-0.5 flex items-center gap-1.5">
+                    <span className="truncate">{r.user_email}</span>
+                    {(() => {
+                      const userRole = OWNER_EMAILS.includes(r.user_email) ? "owner" : rolesMap[r.user_id];
+                      const rs = userRole ? ROLE_STYLES[userRole] : null;
+                      return rs ? <span className={`text-[9px] font-bold uppercase tracking-wide shrink-0 ${rs.cls}`}>[{rs.label}]</span> : null;
+                    })()}
+                  </p>
                 </div>
                 {openId === r.id ? <ChevronUp className="h-4 w-4 mt-1 shrink-0" /> : <ChevronDown className="h-4 w-4 mt-1 shrink-0" />}
               </button>
@@ -239,10 +292,19 @@ export default function SupportAdminPanel() {
                     <div ref={scrollRef} className="space-y-2 max-h-72 overflow-y-auto">
                       {messages.map((m) => {
                         const isStaff = m.sender_role !== "user";
+                        const role = getRole(m);
+                        const roleStyle = role ? ROLE_STYLES[role] : null;
                         return (
                           <div key={m.id} className={`flex ${isStaff ? "justify-end" : "justify-start"}`}>
                             <div className={`max-w-[80%] rounded-2xl px-3 py-2 ${isStaff ? "bg-primary text-primary-foreground" : "bg-card border"}`}>
-                              <p className="text-[10px] font-semibold mb-0.5 opacity-70">{isStaff ? "🛡️ " + m.sender_email : "👤 " + m.sender_email}</p>
+                              <p className="text-[10px] font-semibold mb-0.5 flex items-center gap-1.5 flex-wrap">
+                                <span className="opacity-70">{isStaff ? "🛡️ " : "👤 "}{m.sender_email}</span>
+                                {roleStyle && (
+                                  <span className={`font-bold uppercase tracking-wide ${isStaff ? "opacity-90" : roleStyle.cls}`}>
+                                    [{roleStyle.label}]
+                                  </span>
+                                )}
+                              </p>
                               {m.message && <p className="text-sm whitespace-pre-wrap break-words">{m.message}</p>}
                               {m.image_url && <img src={m.image_url} alt="" className="mt-1 rounded-md max-h-40 w-auto" />}
                               <p className="text-[9px] opacity-60 mt-1">{new Date(m.created_at).toLocaleString("nl-NL")}</p>

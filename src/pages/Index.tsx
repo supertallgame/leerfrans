@@ -293,7 +293,7 @@ const Index = () => {
     if ((g as any).frenchOnly && language !== "french") return false;
     if ((g as any).englishOnly && language !== "english") return false;
     if (g.id === "grammar" && !chapterHasGrammar) return false;
-    if (g.id === "grammar" && isEnglishCh4 && !includeGrammar) return false;
+    // grammar tile is shown whenever the chapter has grammar; no extra toggle gating
     if (g.id === "enclock" && !isEnglishCh2) return false;
     if (g.id === "grammaire1" && !isVhCh1) return false;
     if (g.id === "grammaire2" && !isVhCh2) return false;
