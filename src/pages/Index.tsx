@@ -273,6 +273,7 @@ const Index = () => {
   if (activeGame === "grammaire5") return <Suspense fallback={gameLoader}><Chapitre5Grammaire onBack={() => setActiveGame("menu")} /></Suspense>;
   if (activeGame === "grammaire6") return <Suspense fallback={gameLoader}><Chapitre6Grammaire onBack={() => setActiveGame("menu")} /></Suspense>;
   if (activeGame === "enclock") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6"><EnglishClockTimes onBack={() => setActiveGame("menu")} /></div></Suspense>;
+  if (activeGame === "naskspeed") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6"><NaskSpeedStories onBack={() => setActiveGame("menu")} /></div></Suspense>;
 
   const hasSentences = activeVocabulary.some((v) => v.french.includes(" ") && v.french.length > 15);
   const isVmboHavoCh3 = niveau === "vmbo-havo" && chapterId === "chapitre3";
