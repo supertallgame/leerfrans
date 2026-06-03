@@ -22,6 +22,7 @@ const Kruiswoordpuzzel = lazyRetry(() => import("./pages/Kruiswoordpuzzel.tsx"))
 const Owner = lazyRetry(() => import("./pages/Owner.tsx"));
 const HeadAdmin = lazyRetry(() => import("./pages/HeadAdmin.tsx"));
 const Tester = lazyRetry(() => import("./pages/Tester.tsx"));
+const HeadTester = lazyRetry(() => import("./pages/HeadTester.tsx"));
 const NotFound = lazyRetry(() => import("./pages/NotFound.tsx"));
 
 const queryClient = new QueryClient();
