@@ -328,6 +328,15 @@ const ch5: GrammarQuestion[] = [
   ...hv5PastSimple,
 ].map((q) => ({ ...q, chapterId: "en_chapter5" }));
 
+// VMBO-HAVO Chapter 6 reuses the same topics as HAVO-VWO chapter 6
+// (Past simple of 'to be', irregular past simple, Possessive 's/of, Some/Any).
+const ch6: GrammarQuestion[] = [
+  ...hv6Irregular,
+  ...hv6ToBePast,
+  ...hv6Possessive,
+  ...hv6SomeAny,
+].map((q) => ({ ...q, chapterId: "en_chapter6" }));
+
 export const allGrammarQuestions: GrammarQuestion[] = [
   ...ch1PersonalPronouns,
   ...ch1PossessivePronouns,
@@ -351,6 +360,7 @@ export const allGrammarQuestions: GrammarQuestion[] = [
   ...hv6SomeAny,
   ...hvCh1,
   ...ch5,
+  ...ch6,
 ];
 
 export function getGrammarByChapter(chapterId: string): GrammarQuestion[] {
