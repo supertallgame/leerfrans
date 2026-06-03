@@ -8,6 +8,14 @@ interface Props {
   adminEnabled?: boolean;
 }
 
+const hasObamaUnlocked = () => {
+  try {
+    return localStorage.getItem("obama_unlocked") === "true" || localStorage.getItem("obama_mode") === "true";
+  } catch {
+    return false;
+  }
+};
+
 export default function ObamaPopup({ adminEnabled = true }: Props) {
   const location = useLocation();
   const isHomePage = location.pathname === "/";
@@ -23,18 +31,39 @@ function ObamaPopupInner() {
   const [visible, setVisible] = useState(false);
   const [exiting, setExiting] = useState(false);
   const [ready, setReady] = useState(false);
+  const [unlocked, setUnlocked] = useState(hasObamaUnlocked);
 
   useEffect(() => {
-    if (localStorage.getItem("obama_unlocked") === "true") return;
+    if (unlocked) {
+      setVisible(false);
+      setReady(false);
+      return;
+    }
 
     const delay = 20000 + Math.random() * 10000;
     const timer = setTimeout(() => setReady(true), delay);
     return () => clearTimeout(timer);
+  }, [unlocked]);
+
+  useEffect(() => {
+    const syncUnlocked = () => {
+      if (!hasObamaUnlocked()) return;
+      localStorage.setItem("obama_unlocked", "true");
+      setUnlocked(true);
+    };
+
+    syncUnlocked();
+    window.addEventListener("storage", syncUnlocked);
+    window.addEventListener("obama-unlocked", syncUnlocked);
+    return () => {
+      window.removeEventListener("storage", syncUnlocked);
+      window.removeEventListener("obama-unlocked", syncUnlocked);
+    };
   }, []);
 
   // Show only when scrolled down (past 400px)
   const handleScroll = useCallback(() => {
-    if (!ready) return;
+    if (!ready || unlocked) return;
     if (window.scrollY > 400) {
       setVisible(true);
     } else {
@@ -43,14 +72,14 @@ function ObamaPopupInner() {
         setTimeout(() => { setVisible(false); setExiting(false); }, 500);
       }
     }
-  }, [ready, visible, exiting]);
+  }, [ready, visible, exiting, unlocked]);
 
   useEffect(() => {
-    if (!ready) return;
+    if (!ready || unlocked) return;
     if (window.scrollY > 400) { setVisible(true); return; }
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [ready, handleScroll]);
+  }, [ready, handleScroll, unlocked]);
 
   useEffect(() => {
     if (!visible) return;
@@ -65,6 +94,7 @@ function ObamaPopupInner() {
   const handleClick = () => {
     localStorage.setItem("obama_unlocked", "true");
     localStorage.setItem("obama_mode", "true");
+    setUnlocked(true);
     document.documentElement.classList.add("obama-mode");
     fireConfetti();
     toast.success("🇺🇸 Obama modus ontgrendeld!");
@@ -74,7 +104,7 @@ function ObamaPopupInner() {
     window.dispatchEvent(new Event("obama-unlocked"));
   };
 
-  if (!visible) return null;
+  if (!visible || unlocked) return null;
 
   return (
     <button
