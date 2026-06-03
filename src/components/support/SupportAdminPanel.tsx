@@ -29,11 +29,21 @@ interface Message {
   created_at: string;
 }
 
+const OWNER_EMAILS = ["brankovantland@gmail.com", "branko18vantland@gmail.com"];
+const ROLE_STYLES: Record<string, { label: string; cls: string }> = {
+  owner: { label: "Owner", cls: "text-destructive" },
+  head_admin: { label: "Head Admin", cls: "text-purple-500" },
+  admin: { label: "Admin", cls: "text-primary" },
+  head_tester: { label: "Head Tester", cls: "text-orange-500" },
+  tester: { label: "Tester", cls: "text-green-500" },
+};
+
 export default function SupportAdminPanel() {
   const [reports, setReports] = useState<Report[]>([]);
   const [showClosed, setShowClosed] = useState(false);
   const [openId, setOpenId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
+  const [rolesMap, setRolesMap] = useState<Record<string, string>>({});
   const [reply, setReply] = useState("");
   const [image, setImage] = useState<File | null>(null);
   const [sending, setSending] = useState(false);
