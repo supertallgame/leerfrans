@@ -1038,6 +1038,7 @@ export type Database = {
       }
       has_open_report: { Args: never; Returns: boolean }
       is_head_admin: { Args: { _user_id: string }; Returns: boolean }
+      is_head_tester: { Args: { _user_id: string }; Returns: boolean }
       is_owner: { Args: { _user_id: string }; Returns: boolean }
       is_staff: { Args: { _user_id: string }; Returns: boolean }
       is_tester: { Args: { _user_id: string }; Returns: boolean }

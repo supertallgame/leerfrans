@@ -29,6 +29,7 @@ const ROLE_STYLES: Record<string, { label: string; cls: string }> = {
   owner: { label: "Owner", cls: "text-destructive" },
   head_admin: { label: "Head Admin", cls: "text-purple-500" },
   admin: { label: "Admin", cls: "text-primary" },
+  head_tester: { label: "Head Tester", cls: "text-orange-500" },
   tester: { label: "Tester", cls: "text-green-500" },
 };
 

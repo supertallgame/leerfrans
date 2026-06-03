@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { Shield, Home, Crown, Users, ShieldPlus, ShieldMinus, Search, Map, ShieldCheck, ArrowUpCircle, ArrowDownCircle, BarChart3, Megaphone, Plus, Trash2, X, ImageIcon, Bot, GraduationCap, Train, Ban, Beaker, MessagesSquare } from "lucide-react";
+import { Shield, Home, Crown, Users, ShieldPlus, ShieldMinus, Search, Map, ShieldCheck, ArrowUpCircle, ArrowDownCircle, BarChart3, Megaphone, Plus, Trash2, X, ImageIcon, Bot, GraduationCap, Train, Ban, Beaker, MessagesSquare, Star } from "lucide-react";
 import BanManagement from "@/components/owner/BanManagement";
 import SupportAdminPanel from "@/components/support/SupportAdminPanel";
 import AdminApplicationsPanel from "@/components/support/AdminApplicationsPanel";
@@ -118,6 +118,7 @@ export default function Owner() {
   const [adminRoles, setAdminRoles] = useState<UserRole[]>([]);
   const [headAdminRoles, setHeadAdminRoles] = useState<UserRole[]>([]);
   const [testerRoles, setTesterRoles] = useState<UserRole[]>([]);
+  const [headTesterRoles, setHeadTesterRoles] = useState<UserRole[]>([]);
   const [allUsers, setAllUsers] = useState<AppUser[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [promoting, setPromoting] = useState<string | null>(null);
@@ -268,6 +269,7 @@ export default function Owner() {
       setAdminRoles(data.filter(r => r.role === "admin"));
       setHeadAdminRoles(data.filter(r => r.role === "head_admin"));
       setTesterRoles(data.filter(r => r.role === "tester"));
+      setHeadTesterRoles(data.filter(r => r.role === "head_tester"));
     }
   };
 
@@ -328,7 +330,7 @@ export default function Owner() {
   };
 
   const promoteToAdmin = async (user: AppUser) => {
-    const allRoleEmails = [...adminRoles, ...headAdminRoles, ...testerRoles].map(r => r.email);
+    const allRoleEmails = [...adminRoles, ...headAdminRoles, ...testerRoles, ...headTesterRoles].map(r => r.email);
     if (OWNER_EMAILS.includes(user.email) || allRoleEmails.includes(user.email)) {
       toast.error("Deze gebruiker heeft al een rol");
       return;
@@ -352,7 +354,7 @@ export default function Owner() {
   };
 
   const promoteToTester = async (user: AppUser) => {
-    const allRoleEmails = [...adminRoles, ...headAdminRoles, ...testerRoles].map(r => r.email);
+    const allRoleEmails = [...adminRoles, ...headAdminRoles, ...testerRoles, ...headTesterRoles].map(r => r.email);
     if (OWNER_EMAILS.includes(user.email) || allRoleEmails.includes(user.email)) {
       toast.error("Deze gebruiker heeft al een rol");
       return;
@@ -379,6 +381,61 @@ export default function Owner() {
     const { error } = await supabase.from("user_roles").delete().eq("id", role.id);
     if (error) { toast.error("Kon niet verwijderen"); return; }
     toast.success(`${role.email} is geen tester meer`);
+    await loadRoles();
+  };
+
+  const promoteToHeadTester = async (user: AppUser) => {
+    const allEmails = [...adminRoles, ...headAdminRoles, ...testerRoles, ...headTesterRoles].map(r => r.email);
+    if (OWNER_EMAILS.includes(user.email) || allEmails.includes(user.email)) {
+      toast.error("Deze gebruiker heeft al een rol");
+      return;
+    }
+    setPromoting(user.id);
+    try {
+      const { error } = await supabase.from("user_roles").insert({
+        user_id: user.id,
+        email: user.email,
+        role: "head_tester",
+      });
+      if (error) throw error;
+      toast.success(`${user.email} is nu head tester`);
+      await loadRoles();
+    } catch (e: any) {
+      console.error(e);
+      toast.error("Kon niet promoveren tot head tester");
+    } finally {
+      setPromoting(null);
+    }
+  };
+
+  const promoteTesterToHeadTester = async (role: UserRole) => {
+    try {
+      await supabase.from("user_roles").delete().eq("id", role.id);
+      const { error } = await supabase.from("user_roles").insert({
+        user_id: role.user_id, email: role.email, role: "head_tester",
+      });
+      if (error) throw error;
+      toast.success(`${role.email} is nu head tester`);
+      await loadRoles();
+    } catch { toast.error("Kon niet promoveren"); }
+  };
+
+  const demoteHeadTester = async (role: UserRole) => {
+    try {
+      await supabase.from("user_roles").delete().eq("id", role.id);
+      const { error } = await supabase.from("user_roles").insert({
+        user_id: role.user_id, email: role.email, role: "tester",
+      });
+      if (error) throw error;
+      toast.success(`${role.email} is nu tester`);
+      await loadRoles();
+    } catch { toast.error("Kon niet demoteren"); }
+  };
+
+  const removeHeadTester = async (role: UserRole) => {
+    const { error } = await supabase.from("user_roles").delete().eq("id", role.id);
+    if (error) { toast.error("Kon niet verwijderen"); return; }
+    toast.success(`${role.email} is geen head tester meer`);
     await loadRoles();
   };
 
@@ -449,7 +506,7 @@ export default function Owner() {
     );
   }
 
-  const allRoleEmails = new Set([...OWNER_EMAILS, ...adminRoles.map(r => r.email), ...headAdminRoles.map(r => r.email), ...testerRoles.map(r => r.email)]);
+  const allRoleEmails = new Set([...OWNER_EMAILS, ...adminRoles.map(r => r.email), ...headAdminRoles.map(r => r.email), ...testerRoles.map(r => r.email), ...headTesterRoles.map(r => r.email)]);
   const normalUsers = allUsers.filter(u => !allRoleEmails.has(u.email));
   const filteredUsers = searchQuery
     ? normalUsers.filter(u => u.email.toLowerCase().includes(searchQuery.toLowerCase()))
@@ -599,17 +656,71 @@ export default function Owner() {
               testerRoles.map((role) => (
                 <div key={role.id} className="flex items-center justify-between rounded-lg border p-3">
                   <div className="flex items-center gap-2">
-                    <Beaker className="h-4 w-4 text-primary" />
+                    <Beaker className="h-4 w-4 text-green-500" />
                     <span className="text-sm font-medium">{role.email}</span>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-destructive hover:text-destructive hover:bg-destructive/10 gap-1"
-                    onClick={() => removeTester(role)}
-                  >
-                    <ShieldMinus className="h-4 w-4" /> Verwijderen
-                  </Button>
+                  <div className="flex gap-1">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="gap-1"
+                      onClick={() => promoteTesterToHeadTester(role)}
+                      title="Promoveer tot head tester"
+                    >
+                      <Star className="h-4 w-4 text-orange-500" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-destructive hover:text-destructive hover:bg-destructive/10 gap-1"
+                      onClick={() => removeTester(role)}
+                    >
+                      <ShieldMinus className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Head Testers */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <Star className="h-5 w-5 text-orange-500" /> Head Testers
+              <span className="text-sm font-normal text-muted-foreground">({headTesterRoles.length})</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {headTesterRoles.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Nog geen head testers. Promoveer hieronder via de Star-knop.</p>
+            ) : (
+              headTesterRoles.map((role) => (
+                <div key={role.id} className="flex items-center justify-between rounded-lg border p-3">
+                  <div className="flex items-center gap-2">
+                    <Star className="h-4 w-4 text-orange-500" />
+                    <span className="text-sm font-medium">{role.email}</span>
+                  </div>
+                  <div className="flex gap-1">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="gap-1"
+                      onClick={() => demoteHeadTester(role)}
+                      title="Demote naar tester"
+                    >
+                      <ArrowDownCircle className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-destructive hover:text-destructive hover:bg-destructive/10 gap-1"
+                      onClick={() => removeHeadTester(role)}
+                    >
+                      <ShieldMinus className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               ))
             )}
@@ -879,6 +990,16 @@ export default function Owner() {
                         title="Promoveer tot tester"
                       >
                         <Beaker className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="gap-1"
+                        disabled={promoting === user.id}
+                        onClick={() => promoteToHeadTester(user)}
+                        title="Promoveer tot head tester"
+                      >
+                        <Star className="h-4 w-4 text-orange-500" />
                       </Button>
                       <Button
                         variant="outline"

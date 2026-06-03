@@ -211,10 +211,10 @@ const Index = () => {
       const { data: staffRole } = await supabase.rpc("get_my_staff_role");
       const role = staffRole as string | null;
       setIsHeadAdmin(role === "head_admin");
-      // Testers must explicitly enable admin-mode in /tester before staff
-      // features (badge, staff chat, etc.) become active elsewhere in the app.
+      // Testers/head_testers must explicitly enable admin-mode in /tester or
+      // /headtester before staff features (badge, staff chat, etc.) become active.
       const testerAdminMode = localStorage.getItem("tester_admin_mode") === "1";
-      const isActiveTester = role === "tester" && testerAdminMode;
+      const isActiveTester = (role === "tester" || role === "head_tester") && testerAdminMode;
       setIsStaff(role === "owner" || role === "head_admin" || role === "admin" || isActiveTester);
     };
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
