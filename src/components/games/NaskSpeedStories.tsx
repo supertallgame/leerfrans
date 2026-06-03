@@ -181,7 +181,7 @@ function MiniCalculator() {
   ];
 
   return (
-    <Card className="w-full lg:w-64 shrink-0">
+    <Card className="w-full md:w-56 shrink-0">
       <CardContent className="p-3 space-y-2">
         <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
           <CalcIcon className="h-3.5 w-3.5" /> Rekenmachine
