@@ -317,12 +317,12 @@ export default function NaskSpeedStories({ onBack }: Props) {
   };
 
   const formulePlaceholder = q.type === "speed" ? "v = s / t" : q.type === "distance" ? "s = v · t" : "t = s / v";
-  const gegevenPlaceholder =
+  const gegevenPlaceholders: [string, string] =
     q.type === "speed"
-      ? "bv. t = 10 s; s = 50 m"
+      ? ["bv. t = 10 s", "bv. s = 50 m"]
       : q.type === "distance"
-        ? "bv. v = 5 m/s; t = 10 s"
-        : "bv. v = 5 m/s; s = 50 m";
+        ? ["bv. v = 5 m/s", "bv. t = 10 s"]
+        : ["bv. v = 5 m/s", "bv. s = 50 m"];
   const gevraagdPlaceholder = q.type === "speed" ? "v in m/s en km/h" : q.type === "distance" ? "s in m" : "t in s";
   const otherUnitLabel = q.speedUnit === "ms" ? "km/h" : "m/s";
 
