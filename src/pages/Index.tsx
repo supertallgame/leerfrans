@@ -80,6 +80,7 @@ const naskGames = [
   { id: "match" as Game, title: "Koppel Paren", description: "Verbind begrippen met omschrijvingen", icon: Puzzle, color: "bg-destructive/10 text-destructive" },
   { id: "type" as Game, title: "Typ het Begrip", description: "Lees de omschrijving en typ het begrip", icon: Keyboard, color: "bg-primary/10 text-primary" },
   { id: "ai" as Game, title: "AI Leraar", description: "Chat met een AI die je overhoort", icon: Bot, color: "bg-secondary/20 dark:bg-secondary/30 text-secondary-foreground" },
+  { id: "naskspeed" as Game, title: "Snelheid Verhalen", description: "Reken snelheid, afstand en tijd uit verhalen", icon: Hash, color: "bg-[hsl(var(--success))]/10 text-[hsl(var(--success))]" },
 ];
 
 const biologyGames = [
