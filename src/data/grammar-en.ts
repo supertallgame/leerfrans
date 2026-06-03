@@ -360,6 +360,7 @@ export const allGrammarQuestions: GrammarQuestion[] = [
   ...hv6SomeAny,
   ...hvCh1,
   ...ch5,
+  ...ch6,
 ];
 
 export function getGrammarByChapter(chapterId: string): GrammarQuestion[] {
