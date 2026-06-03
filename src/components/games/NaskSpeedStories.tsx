@@ -223,7 +223,7 @@ export default function NaskSpeedStories({ onBack }: Props) {
   const handleCheck = () => {
     if (submitted) return;
 
-    const okGegeven = checkGegeven(gegeven, q);
+    const okGegeven = checkGegevenPair(gegeven1, gegeven2, q);
     const okGevraagd = checkGevraagd(gevraagd, q);
     const okFormule = checkFormule(formule, q.type);
 
