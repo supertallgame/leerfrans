@@ -256,7 +256,8 @@ export default function NaskSpeedStories({ onBack }: Props) {
 
   const handleNext = useCallback(() => {
     setQ((prev) => generateQuestion(prev));
-    setGegeven("");
+    setGegeven1("");
+    setGegeven2("");
     setGevraagd("");
     setFormule("");
     setMs("");
