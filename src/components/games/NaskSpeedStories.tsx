@@ -189,7 +189,8 @@ export default function NaskSpeedStories({ onBack }: Props) {
   const [score, setScore] = useState(0);
 
   // Worksheet fields
-  const [gegeven, setGegeven] = useState("");
+  const [gegeven1, setGegeven1] = useState("");
+  const [gegeven2, setGegeven2] = useState("");
   const [gevraagd, setGevraagd] = useState("");
   const [formule, setFormule] = useState("");
 
