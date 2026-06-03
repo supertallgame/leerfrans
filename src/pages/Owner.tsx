@@ -354,7 +354,7 @@ export default function Owner() {
   };
 
   const promoteToTester = async (user: AppUser) => {
-    const allRoleEmails = [...adminRoles, ...headAdminRoles, ...testerRoles].map(r => r.email);
+    const allRoleEmails = [...adminRoles, ...headAdminRoles, ...testerRoles, ...headTesterRoles].map(r => r.email);
     if (OWNER_EMAILS.includes(user.email) || allRoleEmails.includes(user.email)) {
       toast.error("Deze gebruiker heeft al een rol");
       return;
