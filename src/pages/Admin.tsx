@@ -545,16 +545,18 @@ export default function Admin() {
           {sortedMonths.length > 0 && (
             <div className="space-y-2">
               <p className="text-sm font-medium text-muted-foreground">Per maand</p>
-              <div className="flex items-end gap-1 h-20">
+              <div className="flex items-stretch gap-1 h-32">
                 {sortedMonths.map(([month, count]) => {
                   const maxCount = Math.max(...sortedMonths.map(([, c]) => c));
                   const height = maxCount > 0 ? (count / maxCount) * 100 : 0;
                   const [y, m] = month.split("-");
                   const label = new Date(Number(y), Number(m) - 1).toLocaleDateString("nl-NL", { month: "short" });
                   return (
-                    <div key={month} className="flex-1 flex flex-col items-center gap-1">
+                    <div key={month} className="flex-1 flex flex-col items-center gap-1 h-full">
                       <span className="text-[10px] text-muted-foreground font-medium">{count}</span>
-                      <div className="w-full rounded-t bg-primary/80 transition-all" style={{ height: `${height}%`, minHeight: count > 0 ? 4 : 0 }} />
+                      <div className="w-full flex-1 flex items-end">
+                        <div className="w-full rounded-t bg-primary/80 transition-all" style={{ height: `${height}%`, minHeight: count > 0 ? 4 : 0 }} />
+                      </div>
                       <span className="text-[10px] text-muted-foreground">{label}</span>
                     </div>
                   );
