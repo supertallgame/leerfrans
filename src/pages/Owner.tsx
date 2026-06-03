@@ -118,6 +118,7 @@ export default function Owner() {
   const [adminRoles, setAdminRoles] = useState<UserRole[]>([]);
   const [headAdminRoles, setHeadAdminRoles] = useState<UserRole[]>([]);
   const [testerRoles, setTesterRoles] = useState<UserRole[]>([]);
+  const [headTesterRoles, setHeadTesterRoles] = useState<UserRole[]>([]);
   const [allUsers, setAllUsers] = useState<AppUser[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [promoting, setPromoting] = useState<string | null>(null);
