@@ -164,16 +164,16 @@ function checkFormule(input: string, type: QuestionType): boolean {
   return n === "t=s/v" || n === "t=s:v" || n === "tijd=afstand/snelheid";
 }
 
-/** Loose check: gegeven must mention the two known values */
-function checkGegeven(input: string, q: Generated): boolean {
-  const n = input.toLowerCase();
+/** Loose check: each gegeven field must mention one of the two known values */
+function checkGegevenPair(a: string, b: string, q: Generated): boolean {
+  const both = `${a}\n${b}`;
   if (q.type === "speed") {
-    return /(tijd|t\s*=)/i.test(input) && /(afstand|s\s*=)/i.test(input);
+    return /(tijd|t\s*=)/i.test(both) && /(afstand|s\s*=)/i.test(both);
   }
   if (q.type === "distance") {
-    return /(snelheid|v\s*=)/i.test(input) && /(tijd|t\s*=)/i.test(input);
+    return /(snelheid|v\s*=)/i.test(both) && /(tijd|t\s*=)/i.test(both);
   }
-  return /(snelheid|v\s*=)/i.test(input) && /(afstand|s\s*=)/i.test(input);
+  return /(snelheid|v\s*=)/i.test(both) && /(afstand|s\s*=)/i.test(both);
 }
 
 function checkGevraagd(input: string, q: Generated): boolean {
