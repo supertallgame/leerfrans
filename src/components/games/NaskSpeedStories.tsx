@@ -348,15 +348,24 @@ export default function NaskSpeedStories({ onBack }: Props) {
           <p className="text-base md:text-lg leading-relaxed">{prompt}</p>
 
           <div className="border rounded-lg p-4 space-y-3 bg-muted/30">
-            <div className="grid grid-cols-[110px,1fr] gap-2 items-center">
-              <label className="text-sm font-semibold text-muted-foreground">Gegeven:</label>
-              <Input
-                value={gegeven}
-                onChange={(e) => setGegeven(e.target.value)}
-                disabled={submitted}
-                placeholder={gegevenPlaceholder}
-                className={`text-base ${fieldStatusClass(feedback?.gegeven)}`}
-              />
+            <div className="grid grid-cols-[110px,1fr] gap-2 items-start">
+              <label className="text-sm font-semibold text-muted-foreground pt-2">Gegeven:</label>
+              <div className="space-y-2">
+                <Input
+                  value={gegeven1}
+                  onChange={(e) => setGegeven1(e.target.value)}
+                  disabled={submitted}
+                  placeholder={gegevenPlaceholders[0]}
+                  className={`text-base ${fieldStatusClass(feedback?.gegeven)}`}
+                />
+                <Input
+                  value={gegeven2}
+                  onChange={(e) => setGegeven2(e.target.value)}
+                  disabled={submitted}
+                  placeholder={gegevenPlaceholders[1]}
+                  className={`text-base ${fieldStatusClass(feedback?.gegeven)}`}
+                />
+              </div>
             </div>
             <div className="grid grid-cols-[110px,1fr] gap-2 items-center">
               <label className="text-sm font-semibold text-muted-foreground">Gevraagd:</label>
