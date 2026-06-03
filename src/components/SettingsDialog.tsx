@@ -32,7 +32,7 @@ export default function SettingsDialog({ open, onOpenChange, user, children }: S
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deletingAccount, setDeletingAccount] = useState(false);
   const [deleteEmailInput, setDeleteEmailInput] = useState("");
-  const [obamaUnlocked, setObamaUnlocked] = useState(() => localStorage.getItem("obama_unlocked") === "true");
+  const [obamaUnlocked, setObamaUnlocked] = useState(() => localStorage.getItem("obama_unlocked") === "true" || localStorage.getItem("obama_mode") === "true");
   const [obamaMode, setObamaMode] = useState(() => localStorage.getItem("obama_mode") === "true");
   const [showPoll, setShowPoll] = useState(false);
   const [hasPoll, setHasPoll] = useState(false);
@@ -47,7 +47,12 @@ export default function SettingsDialog({ open, onOpenChange, user, children }: S
   }, []);
 
   useEffect(() => {
+    if (obamaUnlocked) {
+      localStorage.setItem("obama_unlocked", "true");
+    }
+
     const handler = () => {
+      localStorage.setItem("obama_unlocked", "true");
       setObamaUnlocked(true);
       setObamaMode(true);
     };
