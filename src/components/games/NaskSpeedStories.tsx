@@ -94,7 +94,9 @@ function generateQuestion(prev?: Generated): Generated {
   const types: QuestionType[] = ["speed", "speed", "distance", "distance", "time"];
   const type = types[Math.floor(Math.random() * types.length)];
 
-  const profile = pickInt(2, 30); // m/s
+  // Pick speed as multiple of 5 m/s so km/h is also a whole number (×3.6)
+  const speedChoices = [5, 10, 15, 20, 25, 30];
+  const profile = speedChoices[Math.floor(Math.random() * speedChoices.length)]; // m/s
   const t_s = pickInt(10, 600);
   const d_m = profile * t_s;
 
@@ -162,16 +164,16 @@ function checkFormule(input: string, type: QuestionType): boolean {
   return n === "t=s/v" || n === "t=s:v" || n === "tijd=afstand/snelheid";
 }
 
-/** Loose check: gegeven must mention the two known values */
-function checkGegeven(input: string, q: Generated): boolean {
-  const n = input.toLowerCase();
+/** Loose check: each gegeven field must mention one of the two known values */
+function checkGegevenPair(a: string, b: string, q: Generated): boolean {
+  const both = `${a}\n${b}`;
   if (q.type === "speed") {
-    return /(tijd|t\s*=)/i.test(input) && /(afstand|s\s*=)/i.test(input);
+    return /(tijd|t\s*=)/i.test(both) && /(afstand|s\s*=)/i.test(both);
   }
   if (q.type === "distance") {
-    return /(snelheid|v\s*=)/i.test(input) && /(tijd|t\s*=)/i.test(input);
+    return /(snelheid|v\s*=)/i.test(both) && /(tijd|t\s*=)/i.test(both);
   }
-  return /(snelheid|v\s*=)/i.test(input) && /(afstand|s\s*=)/i.test(input);
+  return /(snelheid|v\s*=)/i.test(both) && /(afstand|s\s*=)/i.test(both);
 }
 
 function checkGevraagd(input: string, q: Generated): boolean {
@@ -187,7 +189,8 @@ export default function NaskSpeedStories({ onBack }: Props) {
   const [score, setScore] = useState(0);
 
   // Worksheet fields
-  const [gegeven, setGegeven] = useState("");
+  const [gegeven1, setGegeven1] = useState("");
+  const [gegeven2, setGegeven2] = useState("");
   const [gevraagd, setGevraagd] = useState("");
   const [formule, setFormule] = useState("");
 
@@ -220,7 +223,7 @@ export default function NaskSpeedStories({ onBack }: Props) {
   const handleCheck = () => {
     if (submitted) return;
 
-    const okGegeven = checkGegeven(gegeven, q);
+    const okGegeven = checkGegevenPair(gegeven1, gegeven2, q);
     const okGevraagd = checkGevraagd(gevraagd, q);
     const okFormule = checkFormule(formule, q.type);
 
@@ -253,7 +256,8 @@ export default function NaskSpeedStories({ onBack }: Props) {
 
   const handleNext = useCallback(() => {
     setQ((prev) => generateQuestion(prev));
-    setGegeven("");
+    setGegeven1("");
+    setGegeven2("");
     setGevraagd("");
     setFormule("");
     setMs("");
@@ -271,7 +275,8 @@ export default function NaskSpeedStories({ onBack }: Props) {
     setQ(generateQuestion());
     setIndex(1);
     setScore(0);
-    setGegeven("");
+    setGegeven1("");
+    setGegeven2("");
     setGevraagd("");
     setFormule("");
     setMs("");
@@ -312,12 +317,12 @@ export default function NaskSpeedStories({ onBack }: Props) {
   };
 
   const formulePlaceholder = q.type === "speed" ? "v = s / t" : q.type === "distance" ? "s = v · t" : "t = s / v";
-  const gegevenPlaceholder =
+  const gegevenPlaceholders: [string, string] =
     q.type === "speed"
-      ? "bv. t = 10 s; s = 50 m"
+      ? ["bv. t = 10 s", "bv. s = 50 m"]
       : q.type === "distance"
-        ? "bv. v = 5 m/s; t = 10 s"
-        : "bv. v = 5 m/s; s = 50 m";
+        ? ["bv. v = 5 m/s", "bv. t = 10 s"]
+        : ["bv. v = 5 m/s", "bv. s = 50 m"];
   const gevraagdPlaceholder = q.type === "speed" ? "v in m/s en km/h" : q.type === "distance" ? "s in m" : "t in s";
   const otherUnitLabel = q.speedUnit === "ms" ? "km/h" : "m/s";
 
@@ -343,15 +348,24 @@ export default function NaskSpeedStories({ onBack }: Props) {
           <p className="text-base md:text-lg leading-relaxed">{prompt}</p>
 
           <div className="border rounded-lg p-4 space-y-3 bg-muted/30">
-            <div className="grid grid-cols-[110px,1fr] gap-2 items-center">
-              <label className="text-sm font-semibold text-muted-foreground">Gegeven:</label>
-              <Input
-                value={gegeven}
-                onChange={(e) => setGegeven(e.target.value)}
-                disabled={submitted}
-                placeholder={gegevenPlaceholder}
-                className={`text-base ${fieldStatusClass(feedback?.gegeven)}`}
-              />
+            <div className="grid grid-cols-[110px,1fr] gap-2 items-start">
+              <label className="text-sm font-semibold text-muted-foreground pt-2">Gegeven:</label>
+              <div className="space-y-2">
+                <Input
+                  value={gegeven1}
+                  onChange={(e) => setGegeven1(e.target.value)}
+                  disabled={submitted}
+                  placeholder={gegevenPlaceholders[0]}
+                  className={`text-base ${fieldStatusClass(feedback?.gegeven)}`}
+                />
+                <Input
+                  value={gegeven2}
+                  onChange={(e) => setGegeven2(e.target.value)}
+                  disabled={submitted}
+                  placeholder={gegevenPlaceholders[1]}
+                  className={`text-base ${fieldStatusClass(feedback?.gegeven)}`}
+                />
+              </div>
             </div>
             <div className="grid grid-cols-[110px,1fr] gap-2 items-center">
               <label className="text-sm font-semibold text-muted-foreground">Gevraagd:</label>
