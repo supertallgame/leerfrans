@@ -346,7 +346,7 @@ export default function NaskSpeedStories({ onBack }: Props) {
         <span>Score: {score}</span>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-4 w-full items-start">
+      <div className="flex flex-col md:flex-row gap-4 w-full items-start">
         <Card className="w-full flex-1">
           <CardContent className="p-5 md:p-6 space-y-4">
             <p className="text-base md:text-lg leading-relaxed">{prompt}</p>
