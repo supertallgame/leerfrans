@@ -181,7 +181,7 @@ function MiniCalculator() {
   ];
 
   return (
-    <Card className="w-full lg:w-64 shrink-0">
+    <Card className="w-full md:w-56 shrink-0">
       <CardContent className="p-3 space-y-2">
         <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
           <CalcIcon className="h-3.5 w-3.5" /> Rekenmachine
@@ -346,7 +346,7 @@ export default function NaskSpeedStories({ onBack }: Props) {
         <span>Score: {score}</span>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-4 w-full items-start">
+      <div className="flex flex-col md:flex-row gap-4 w-full items-start">
         <Card className="w-full flex-1">
           <CardContent className="p-5 md:p-6 space-y-4">
             <p className="text-base md:text-lg leading-relaxed">{prompt}</p>
