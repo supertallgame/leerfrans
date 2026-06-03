@@ -94,7 +94,9 @@ function generateQuestion(prev?: Generated): Generated {
   const types: QuestionType[] = ["speed", "speed", "distance", "distance", "time"];
   const type = types[Math.floor(Math.random() * types.length)];
 
-  const profile = pickInt(2, 30); // m/s
+  // Pick speed as multiple of 5 m/s so km/h is also a whole number (×3.6)
+  const speedChoices = [5, 10, 15, 20, 25, 30];
+  const profile = speedChoices[Math.floor(Math.random() * speedChoices.length)]; // m/s
   const t_s = pickInt(10, 600);
   const d_m = profile * t_s;
 
