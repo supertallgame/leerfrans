@@ -368,28 +368,43 @@ export default function NaskSpeedStories({ onBack }: Props) {
                 <Input value={formule} onChange={(e) => setFormule(e.target.value)} disabled={submitted} placeholder={formulePlaceholder} className={`text-base font-mono ${fieldStatusClass(feedback?.formule)}`} />
               </div>
 
-              <div className="grid grid-cols-[110px,1fr] gap-2 items-center">
-                <label className="text-sm font-semibold text-muted-foreground">Antwoord:</label>
-                <div className="flex gap-2">
+              <div className="grid grid-cols-[110px,1fr] gap-2 items-start">
+                <label className="text-sm font-semibold text-muted-foreground pt-2">Antwoord:</label>
+                <div className="space-y-2">
                   <Input
                     value={answer}
                     onChange={(e) => setAnswer(e.target.value)}
                     disabled={submitted}
                     placeholder="bv. 5,5"
                     inputMode="decimal"
-                    className={`text-base flex-1 ${fieldStatusClass(feedback?.numeric)}`}
+                    className={`text-base ${fieldStatusClass(feedback?.numeric)}`}
                   />
-                  <button
-                    type="button"
-                    onClick={cycleUnit}
-                    disabled={submitted}
-                    title="Klik om eenheid te wisselen"
-                    className="inline-flex items-center gap-1.5 px-3 rounded-md border bg-card hover:bg-accent text-sm font-medium min-w-[5.5rem] justify-center transition disabled:opacity-60"
-                  >
-                    {currentUnitLabel} <Repeat className="h-3.5 w-3.5 opacity-70" />
-                  </button>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-xs text-muted-foreground">Eenheid:</span>
+                    {(q.type === "speed"
+                      ? (["ms", "kmh"] as const).map((u) => ({ key: u, label: u === "ms" ? "m/s" : "km/h", active: speedUnit === u, set: () => setSpeedUnit(u) }))
+                      : q.type === "distance"
+                        ? (["m", "km"] as const).map((u) => ({ key: u, label: u, active: distUnit === u, set: () => setDistUnit(u) }))
+                        : (["s", "min", "uur"] as const).map((u) => ({ key: u, label: u, active: timeUnit === u, set: () => setTimeUnit(u) }))
+                    ).map((opt) => (
+                      <button
+                        key={opt.key}
+                        type="button"
+                        onClick={opt.set}
+                        disabled={submitted}
+                        className={`px-3 py-1.5 rounded-md border text-sm font-medium transition disabled:opacity-60 ${
+                          opt.active
+                            ? "bg-primary text-primary-foreground border-primary shadow-sm"
+                            : "bg-card hover:bg-accent border-border text-muted-foreground"
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
+
             </div>
 
             {showHint && !submitted && (
