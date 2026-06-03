@@ -384,6 +384,61 @@ export default function Owner() {
     await loadRoles();
   };
 
+  const promoteToHeadTester = async (user: AppUser) => {
+    const allEmails = [...adminRoles, ...headAdminRoles, ...testerRoles, ...headTesterRoles].map(r => r.email);
+    if (OWNER_EMAILS.includes(user.email) || allEmails.includes(user.email)) {
+      toast.error("Deze gebruiker heeft al een rol");
+      return;
+    }
+    setPromoting(user.id);
+    try {
+      const { error } = await supabase.from("user_roles").insert({
+        user_id: user.id,
+        email: user.email,
+        role: "head_tester",
+      });
+      if (error) throw error;
+      toast.success(`${user.email} is nu head tester`);
+      await loadRoles();
+    } catch (e: any) {
+      console.error(e);
+      toast.error("Kon niet promoveren tot head tester");
+    } finally {
+      setPromoting(null);
+    }
+  };
+
+  const promoteTesterToHeadTester = async (role: UserRole) => {
+    try {
+      await supabase.from("user_roles").delete().eq("id", role.id);
+      const { error } = await supabase.from("user_roles").insert({
+        user_id: role.user_id, email: role.email, role: "head_tester",
+      });
+      if (error) throw error;
+      toast.success(`${role.email} is nu head tester`);
+      await loadRoles();
+    } catch { toast.error("Kon niet promoveren"); }
+  };
+
+  const demoteHeadTester = async (role: UserRole) => {
+    try {
+      await supabase.from("user_roles").delete().eq("id", role.id);
+      const { error } = await supabase.from("user_roles").insert({
+        user_id: role.user_id, email: role.email, role: "tester",
+      });
+      if (error) throw error;
+      toast.success(`${role.email} is nu tester`);
+      await loadRoles();
+    } catch { toast.error("Kon niet demoteren"); }
+  };
+
+  const removeHeadTester = async (role: UserRole) => {
+    const { error } = await supabase.from("user_roles").delete().eq("id", role.id);
+    if (error) { toast.error("Kon niet verwijderen"); return; }
+    toast.success(`${role.email} is geen head tester meer`);
+    await loadRoles();
+  };
+
   const promoteToHeadAdmin = async (role: UserRole) => {
     try {
       // Delete admin role and insert head_admin role
