@@ -145,8 +145,23 @@ export default function SupportAdminPanel() {
       setReports(rows);
       const newest = rows.reduce((acc, r) => (r.updated_at > acc ? r.updated_at : acc), "");
       if (newest) lastSeenUpdatedAtRef.current = newest;
+      void fetchRolesFor(rows.map((r) => r.user_id));
     }
   };
+
+  const fetchRolesFor = async (ids: string[]) => {
+    const unknown = Array.from(new Set(ids)).filter((id) => id && !(id in rolesMap));
+    if (unknown.length === 0) return;
+    const { data: rows } = await supabase
+      .from("user_roles")
+      .select("user_id, role")
+      .in("user_id", unknown);
+    setRolesMap((prev) => {
+      const next = { ...prev };
+      unknown.forEach((id) => { if (!(id in next)) next[id] = ""; });
+      (rows || []).forEach((r: any) => { if (!next[r.user_id]) next[r.user_id] = r.role; });
+      return next;
+    });
 
   const loadMessages = async (reportId: string) => {
     setLoadingMsgs(true);
