@@ -269,6 +269,7 @@ export default function Owner() {
       setAdminRoles(data.filter(r => r.role === "admin"));
       setHeadAdminRoles(data.filter(r => r.role === "head_admin"));
       setTesterRoles(data.filter(r => r.role === "tester"));
+      setHeadTesterRoles(data.filter(r => r.role === "head_tester"));
     }
   };
 
