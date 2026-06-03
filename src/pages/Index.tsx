@@ -48,8 +48,9 @@ const Chapitre3Grammaire = lazy(() => import("@/components/games/Chapitre3Gramma
 const Chapitre5Grammaire = lazy(() => import("@/components/games/Chapitre5Grammaire"));
 const Chapitre6Grammaire = lazy(() => import("@/components/games/Chapitre6Grammaire"));
 const EnglishClockTimes = lazy(() => import("@/components/games/EnglishClockTimes"));
+const NaskSpeedStories = lazy(() => import("@/components/games/NaskSpeedStories"));
 
-type Game = "menu" | "flashcards" | "quiz" | "match" | "type" | "multiplayer" | "fill" | "sentence" | "ai" | "truefalse" | "memory" | "skeleton" | "clocktimes" | "etre" | "explorer" | "grammar" | "grammaire1" | "grammaire2" | "grammaire3" | "grammaire5" | "grammaire6" | "enclock";
+type Game = "menu" | "flashcards" | "quiz" | "match" | "type" | "multiplayer" | "fill" | "sentence" | "ai" | "truefalse" | "memory" | "skeleton" | "clocktimes" | "etre" | "explorer" | "grammar" | "grammaire1" | "grammaire2" | "grammaire3" | "grammaire5" | "grammaire6" | "enclock" | "naskspeed";
 
 const languageGames = [
   { id: "flashcards" as Game, title: "Flashcards", description: "Draai kaarten om en leer de woorden", icon: BookOpen, color: "bg-primary/10 text-primary" },
@@ -79,6 +80,7 @@ const naskGames = [
   { id: "match" as Game, title: "Koppel Paren", description: "Verbind begrippen met omschrijvingen", icon: Puzzle, color: "bg-destructive/10 text-destructive" },
   { id: "type" as Game, title: "Typ het Begrip", description: "Lees de omschrijving en typ het begrip", icon: Keyboard, color: "bg-primary/10 text-primary" },
   { id: "ai" as Game, title: "AI Leraar", description: "Chat met een AI die je overhoort", icon: Bot, color: "bg-secondary/20 dark:bg-secondary/30 text-secondary-foreground" },
+  { id: "naskspeed" as Game, title: "Snelheid Verhalen", description: "Reken snelheid, afstand en tijd uit verhalen", icon: Hash, color: "bg-[hsl(var(--success))]/10 text-[hsl(var(--success))]" },
 ];
 
 const biologyGames = [
@@ -271,6 +273,7 @@ const Index = () => {
   if (activeGame === "grammaire5") return <Suspense fallback={gameLoader}><Chapitre5Grammaire onBack={() => setActiveGame("menu")} /></Suspense>;
   if (activeGame === "grammaire6") return <Suspense fallback={gameLoader}><Chapitre6Grammaire onBack={() => setActiveGame("menu")} /></Suspense>;
   if (activeGame === "enclock") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6"><EnglishClockTimes onBack={() => setActiveGame("menu")} /></div></Suspense>;
+  if (activeGame === "naskspeed") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6"><NaskSpeedStories onBack={() => setActiveGame("menu")} /></div></Suspense>;
 
   const hasSentences = activeVocabulary.some((v) => v.french.includes(" ") && v.french.length > 15);
   const isVmboHavoCh3 = niveau === "vmbo-havo" && chapterId === "chapitre3";
@@ -283,7 +286,11 @@ const Index = () => {
   const isVhCh6 = language === "french" && niveau === "vmbo-havo" && chapterId === "chapitre6";
   const chapterHasGrammar = language === "english" && hasGrammarForChapter(chapterId);
   const filterAiTeacher = (list: typeof languageGames) => aiTeacherEnabled ? list : list.filter(g => g.id !== "ai");
-  const games = language === "biology" ? filterAiTeacher(biologyGames) : (language === "nask") ? filterAiTeacher(naskGames) : filterAiTeacher(languageGames).filter((g) => {
+  const isNaskCh4 = language === "nask" && chapterId === "nask_chapter4";
+  const games = language === "biology" ? filterAiTeacher(biologyGames) : (language === "nask") ? filterAiTeacher(naskGames).filter((g) => {
+    if (g.id === "naskspeed" && !isNaskCh4) return false;
+    return true;
+  }) : filterAiTeacher(languageGames).filter((g) => {
     if ((g as any).frenchOnly && language !== "french") return false;
     if ((g as any).englishOnly && language !== "english") return false;
     if (g.id === "grammar" && !chapterHasGrammar) return false;
