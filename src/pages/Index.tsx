@@ -286,7 +286,11 @@ const Index = () => {
   const isVhCh6 = language === "french" && niveau === "vmbo-havo" && chapterId === "chapitre6";
   const chapterHasGrammar = language === "english" && hasGrammarForChapter(chapterId);
   const filterAiTeacher = (list: typeof languageGames) => aiTeacherEnabled ? list : list.filter(g => g.id !== "ai");
-  const games = language === "biology" ? filterAiTeacher(biologyGames) : (language === "nask") ? filterAiTeacher(naskGames) : filterAiTeacher(languageGames).filter((g) => {
+  const isNaskCh4 = language === "nask" && chapterId === "nask_chapter4";
+  const games = language === "biology" ? filterAiTeacher(biologyGames) : (language === "nask") ? filterAiTeacher(naskGames).filter((g) => {
+    if (g.id === "naskspeed" && !isNaskCh4) return false;
+    return true;
+  }) : filterAiTeacher(languageGames).filter((g) => {
     if ((g as any).frenchOnly && language !== "french") return false;
     if ((g as any).englishOnly && language !== "english") return false;
     if (g.id === "grammar" && !chapterHasGrammar) return false;
