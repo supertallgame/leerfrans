@@ -275,7 +275,8 @@ export default function NaskSpeedStories({ onBack }: Props) {
     setQ(generateQuestion());
     setIndex(1);
     setScore(0);
-    setGegeven("");
+    setGegeven1("");
+    setGegeven2("");
     setGevraagd("");
     setFormule("");
     setMs("");
