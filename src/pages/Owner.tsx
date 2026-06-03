@@ -996,6 +996,16 @@ export default function Owner() {
                         size="sm"
                         className="gap-1"
                         disabled={promoting === user.id}
+                        onClick={() => promoteToHeadTester(user)}
+                        title="Promoveer tot head tester"
+                      >
+                        <Star className="h-4 w-4 text-orange-500" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="gap-1"
+                        disabled={promoting === user.id}
                         onClick={() => promoteToAdmin(user)}
                       >
                         <ShieldPlus className="h-4 w-4" />
