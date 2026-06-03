@@ -11,12 +11,11 @@ interface Props {
 }
 
 type QuestionType = "speed" | "distance" | "time";
+/** Which unit the speed is presented in (for distance/time questions) */
+type SpeedUnit = "ms" | "kmh";
 
 interface Scenario {
-  /** Subject + verb fragment, e.g. "Tom fietst naar school" */
   text: string;
-  /** Verb in past participle for distance/time questions, e.g. "afgelegd" */
-  pastAction?: string;
 }
 
 const SCENARIOS: Scenario[] = [
@@ -70,11 +69,10 @@ const SCENARIOS: Scenario[] = [
 interface Generated {
   scenario: Scenario;
   type: QuestionType;
-  /** Distance in meters */
+  /** For distance/time: in which unit speed is presented in the prompt */
+  speedUnit: SpeedUnit;
   d_m: number;
-  /** Time in seconds */
   t_s: number;
-  /** Display values */
   display: {
     distance: string;
     distanceUnit: "m" | "km";
@@ -85,7 +83,6 @@ interface Generated {
   };
 }
 
-const round1 = (n: number) => Math.round(n * 10) / 10;
 const round2 = (n: number) => Math.round(n * 100) / 100;
 
 function pickInt(min: number, max: number) {
@@ -94,16 +91,13 @@ function pickInt(min: number, max: number) {
 
 function generateQuestion(prev?: Generated): Generated {
   const scenario = SCENARIOS[Math.floor(Math.random() * SCENARIOS.length)];
-  const types: QuestionType[] = ["speed", "speed", "speed", "distance", "time"]; // weight speed
+  const types: QuestionType[] = ["speed", "speed", "distance", "distance", "time"];
   const type = types[Math.floor(Math.random() * types.length)];
 
-  // Pick a "profile" so numbers are realistic
-  // profile = average speed in m/s the scenario will roughly have
-  const profile = pickInt(2, 30); // m/s (slow walker to fast car)
-  const t_s = pickInt(10, 600); // seconds
+  const profile = pickInt(2, 30); // m/s
+  const t_s = pickInt(10, 600);
   const d_m = profile * t_s;
 
-  // Choose display units that produce nice values
   const useKm = d_m >= 1000;
   const distance = useKm ? round2(d_m / 1000) : d_m;
   const distanceUnit: "m" | "km" = useKm ? "km" : "m";
@@ -123,10 +117,13 @@ function generateQuestion(prev?: Generated): Generated {
 
   const speedMs = round2(d_m / t_s);
   const speedKmh = round2(speedMs * 3.6);
+  // Randomly present speed in m/s or km/h for distance/time questions
+  const speedUnit: SpeedUnit = Math.random() < 0.5 ? "ms" : "kmh";
 
   const result: Generated = {
     scenario,
     type,
+    speedUnit,
     d_m,
     t_s,
     display: { distance: String(distance), distanceUnit, time: String(time), timeUnit, speedMs, speedKmh },
@@ -149,51 +146,106 @@ function isClose(input: number, target: number, tol = 0.15) {
   return Math.abs(input - target) <= tol;
 }
 
+function normText(s: string) {
+  return s.toLowerCase().replace(/\s+/g, "").replace(/[·*×]/g, "*").replace(/[•∙]/g, "*");
+}
+
+/** Check the formule input. Accepts common variants. */
+function checkFormule(input: string, type: QuestionType): boolean {
+  const n = normText(input);
+  if (type === "speed") {
+    return n === "v=s/t" || n === "v=s:t" || n === "snelheid=afstand/tijd";
+  }
+  if (type === "distance") {
+    return n === "s=v*t" || n === "s=v.t" || n === "s=vt" || n === "afstand=snelheid*tijd";
+  }
+  return n === "t=s/v" || n === "t=s:v" || n === "tijd=afstand/snelheid";
+}
+
+/** Loose check: gegeven must mention the two known values */
+function checkGegeven(input: string, q: Generated): boolean {
+  const n = input.toLowerCase();
+  if (q.type === "speed") {
+    return /(tijd|t\s*=)/i.test(input) && /(afstand|s\s*=)/i.test(input);
+  }
+  if (q.type === "distance") {
+    return /(snelheid|v\s*=)/i.test(input) && /(tijd|t\s*=)/i.test(input);
+  }
+  return /(snelheid|v\s*=)/i.test(input) && /(afstand|s\s*=)/i.test(input);
+}
+
+function checkGevraagd(input: string, q: Generated): boolean {
+  if (q.type === "speed") return /(snelheid|v\b|m\/s|km\/h)/i.test(input);
+  if (q.type === "distance") return /(afstand|s\b|\bm\b)/i.test(input);
+  return /(tijd|t\b|\bs\b|secon)/i.test(input);
+}
+
 export default function NaskSpeedStories({ onBack }: Props) {
   const [q, setQ] = useState<Generated>(() => generateQuestion());
   const [index, setIndex] = useState(1);
   const TOTAL = 10;
   const [score, setScore] = useState(0);
+
+  // Worksheet fields
+  const [gegeven, setGegeven] = useState("");
+  const [gevraagd, setGevraagd] = useState("");
+  const [formule, setFormule] = useState("");
+
+  // Numeric answers
   const [ms, setMs] = useState("");
   const [kmh, setKmh] = useState("");
   const [singleAns, setSingleAns] = useState("");
+  // For distance/time, also ask the missing speed unit
+  const [extraKmh, setExtraKmh] = useState("");
+
   const [submitted, setSubmitted] = useState(false);
   const [resultCorrect, setResultCorrect] = useState<boolean | null>(null);
+  const [feedback, setFeedback] = useState<{ gegeven: boolean; gevraagd: boolean; formule: boolean; numeric: boolean } | null>(null);
   const [showHint, setShowHint] = useState(false);
 
   const finished = index > TOTAL;
 
   const prompt = useMemo(() => {
-    const { scenario, display, type } = q;
+    const { scenario, display, type, speedUnit } = q;
+    const shownSpeed = speedUnit === "ms" ? `${display.speedMs} m/s` : `${display.speedKmh} km/h`;
     if (type === "speed") {
       return `${scenario.text} en legt in ${display.time} ${display.timeUnit} een afstand van ${display.distance} ${display.distanceUnit} af. Bereken de gemiddelde snelheid in m/s én km/h.`;
     }
     if (type === "distance") {
-      return `${scenario.text} met een gemiddelde snelheid van ${display.speedMs} m/s gedurende ${display.time} ${display.timeUnit}. Bereken de afstand in meter.`;
+      return `${scenario.text} met een gemiddelde snelheid van ${shownSpeed} gedurende ${display.time} ${display.timeUnit}. Bereken de afstand in meter en geef ook de snelheid in ${speedUnit === "ms" ? "km/h" : "m/s"}.`;
     }
-    // time
-    return `${scenario.text} met een gemiddelde snelheid van ${display.speedMs} m/s en legt ${q.d_m} m af. Bereken de tijd in seconden.`;
+    return `${scenario.text} met een gemiddelde snelheid van ${shownSpeed} en legt ${q.d_m} m af. Bereken de tijd in seconden en geef ook de snelheid in ${speedUnit === "ms" ? "km/h" : "m/s"}.`;
   }, [q]);
 
   const handleCheck = () => {
     if (submitted) return;
-    let correct = false;
+
+    const okGegeven = checkGegeven(gegeven, q);
+    const okGevraagd = checkGevraagd(gevraagd, q);
+    const okFormule = checkFormule(formule, q.type);
+
+    let okNumeric = false;
     if (q.type === "speed") {
       const a = normalizeNumber(ms);
       const b = normalizeNumber(kmh);
-      if (a !== null && b !== null) {
-        correct = isClose(a, q.display.speedMs, 0.2) && isClose(b, q.display.speedKmh, 0.5);
-      }
+      okNumeric = a !== null && b !== null && isClose(a, q.display.speedMs, 0.2) && isClose(b, q.display.speedKmh, 0.5);
     } else if (q.type === "distance") {
       const a = normalizeNumber(singleAns);
-      if (a !== null) correct = isClose(a, q.d_m, 1);
+      const conv = normalizeNumber(extraKmh);
+      const target = q.speedUnit === "ms" ? q.display.speedKmh : q.display.speedMs;
+      okNumeric = a !== null && conv !== null && isClose(a, q.d_m, 1) && isClose(conv, target, 0.5);
     } else {
       const a = normalizeNumber(singleAns);
-      if (a !== null) correct = isClose(a, q.t_s, 1);
+      const conv = normalizeNumber(extraKmh);
+      const target = q.speedUnit === "ms" ? q.display.speedKmh : q.display.speedMs;
+      okNumeric = a !== null && conv !== null && isClose(a, q.t_s, 1) && isClose(conv, target, 0.5);
     }
-    setResultCorrect(correct);
+
+    const allCorrect = okGegeven && okGevraagd && okFormule && okNumeric;
+    setFeedback({ gegeven: okGegeven, gevraagd: okGevraagd, formule: okFormule, numeric: okNumeric });
+    setResultCorrect(allCorrect);
     setSubmitted(true);
-    if (correct) {
+    if (allCorrect) {
       setScore((s) => s + 1);
       playCorrect();
     }
@@ -201,11 +253,16 @@ export default function NaskSpeedStories({ onBack }: Props) {
 
   const handleNext = useCallback(() => {
     setQ((prev) => generateQuestion(prev));
+    setGegeven("");
+    setGevraagd("");
+    setFormule("");
     setMs("");
     setKmh("");
     setSingleAns("");
+    setExtraKmh("");
     setSubmitted(false);
     setResultCorrect(null);
+    setFeedback(null);
     setShowHint(false);
     setIndex((i) => i + 1);
   }, []);
@@ -214,11 +271,16 @@ export default function NaskSpeedStories({ onBack }: Props) {
     setQ(generateQuestion());
     setIndex(1);
     setScore(0);
+    setGegeven("");
+    setGevraagd("");
+    setFormule("");
     setMs("");
     setKmh("");
     setSingleAns("");
+    setExtraKmh("");
     setSubmitted(false);
     setResultCorrect(null);
+    setFeedback(null);
     setShowHint(false);
   };
 
@@ -244,6 +306,21 @@ export default function NaskSpeedStories({ onBack }: Props) {
     );
   }
 
+  const fieldStatusClass = (ok: boolean | undefined) => {
+    if (feedback === null || ok === undefined) return "";
+    return ok ? "border-[hsl(var(--success))]" : "border-destructive";
+  };
+
+  const formulePlaceholder = q.type === "speed" ? "v = s / t" : q.type === "distance" ? "s = v · t" : "t = s / v";
+  const gegevenPlaceholder =
+    q.type === "speed"
+      ? "bv. t = 10 s; s = 50 m"
+      : q.type === "distance"
+        ? "bv. v = 5 m/s; t = 10 s"
+        : "bv. v = 5 m/s; s = 50 m";
+  const gevraagdPlaceholder = q.type === "speed" ? "v in m/s en km/h" : q.type === "distance" ? "s in m" : "t in s";
+  const otherUnitLabel = q.speedUnit === "ms" ? "km/h" : "m/s";
+
   return (
     <div className="flex flex-col items-center gap-4 w-full max-w-2xl mx-auto">
       <div className="flex items-center justify-between w-full">
@@ -265,66 +342,88 @@ export default function NaskSpeedStories({ onBack }: Props) {
         <CardContent className="p-5 md:p-6 space-y-4">
           <p className="text-base md:text-lg leading-relaxed">{prompt}</p>
 
-          {/* Worksheet-style form */}
           <div className="border rounded-lg p-4 space-y-3 bg-muted/30">
-            <div className="grid grid-cols-[110px,1fr] gap-2 items-baseline">
-              <span className="text-sm font-semibold text-muted-foreground">Gegeven:</span>
-              <span className="text-sm">
-                {q.type === "speed" && <>tijd = {q.display.time} {q.display.timeUnit}; afstand = {q.display.distance} {q.display.distanceUnit}</>}
-                {q.type === "distance" && <>snelheid = {q.display.speedMs} m/s; tijd = {q.display.time} {q.display.timeUnit}</>}
-                {q.type === "time" && <>snelheid = {q.display.speedMs} m/s; afstand = {q.d_m} m</>}
-              </span>
+            <div className="grid grid-cols-[110px,1fr] gap-2 items-center">
+              <label className="text-sm font-semibold text-muted-foreground">Gegeven:</label>
+              <Input
+                value={gegeven}
+                onChange={(e) => setGegeven(e.target.value)}
+                disabled={submitted}
+                placeholder={gegevenPlaceholder}
+                className={`text-base ${fieldStatusClass(feedback?.gegeven)}`}
+              />
             </div>
-            <div className="grid grid-cols-[110px,1fr] gap-2 items-baseline">
-              <span className="text-sm font-semibold text-muted-foreground">Gevraagd:</span>
-              <span className="text-sm">
-                {q.type === "speed" && <>gemiddelde snelheid in m/s = ? en in km/h = ?</>}
-                {q.type === "distance" && <>afstand in m = ?</>}
-                {q.type === "time" && <>tijd in s = ?</>}
-              </span>
+            <div className="grid grid-cols-[110px,1fr] gap-2 items-center">
+              <label className="text-sm font-semibold text-muted-foreground">Gevraagd:</label>
+              <Input
+                value={gevraagd}
+                onChange={(e) => setGevraagd(e.target.value)}
+                disabled={submitted}
+                placeholder={gevraagdPlaceholder}
+                className={`text-base ${fieldStatusClass(feedback?.gevraagd)}`}
+              />
             </div>
-            <div className="grid grid-cols-[110px,1fr] gap-2 items-baseline">
-              <span className="text-sm font-semibold text-muted-foreground">Formule:</span>
-              <span className="text-sm font-mono">
-                {q.type === "speed" && <>v = s / t</>}
-                {q.type === "distance" && <>s = v · t</>}
-                {q.type === "time" && <>t = s / v</>}
-              </span>
+            <div className="grid grid-cols-[110px,1fr] gap-2 items-center">
+              <label className="text-sm font-semibold text-muted-foreground">Formule:</label>
+              <Input
+                value={formule}
+                onChange={(e) => setFormule(e.target.value)}
+                disabled={submitted}
+                placeholder={formulePlaceholder}
+                className={`text-base font-mono ${fieldStatusClass(feedback?.formule)}`}
+              />
             </div>
 
             {q.type === "speed" ? (
               <div className="space-y-2">
                 <div className="grid grid-cols-[110px,1fr] gap-2 items-center">
                   <label className="text-sm font-semibold text-muted-foreground">Antwoord m/s:</label>
-                  <Input value={ms} onChange={(e) => setMs(e.target.value)} disabled={submitted} placeholder="bv. 5,5" inputMode="decimal" className="text-base" />
+                  <Input value={ms} onChange={(e) => setMs(e.target.value)} disabled={submitted} placeholder="bv. 5,5" inputMode="decimal" className={`text-base ${fieldStatusClass(feedback?.numeric)}`} />
                 </div>
                 <div className="grid grid-cols-[110px,1fr] gap-2 items-center">
                   <label className="text-sm font-semibold text-muted-foreground">Antwoord km/h:</label>
-                  <Input value={kmh} onChange={(e) => setKmh(e.target.value)} disabled={submitted} placeholder="bv. 19,8" inputMode="decimal" className="text-base" />
+                  <Input value={kmh} onChange={(e) => setKmh(e.target.value)} disabled={submitted} placeholder="bv. 19,8" inputMode="decimal" className={`text-base ${fieldStatusClass(feedback?.numeric)}`} />
                 </div>
               </div>
             ) : (
-              <div className="grid grid-cols-[110px,1fr] gap-2 items-center">
-                <label className="text-sm font-semibold text-muted-foreground">Antwoord:</label>
-                <Input value={singleAns} onChange={(e) => setSingleAns(e.target.value)} disabled={submitted} placeholder={q.type === "distance" ? "afstand in m" : "tijd in s"} inputMode="decimal" className="text-base" />
+              <div className="space-y-2">
+                <div className="grid grid-cols-[110px,1fr] gap-2 items-center">
+                  <label className="text-sm font-semibold text-muted-foreground">Antwoord:</label>
+                  <Input value={singleAns} onChange={(e) => setSingleAns(e.target.value)} disabled={submitted} placeholder={q.type === "distance" ? "afstand in m" : "tijd in s"} inputMode="decimal" className={`text-base ${fieldStatusClass(feedback?.numeric)}`} />
+                </div>
+                <div className="grid grid-cols-[110px,1fr] gap-2 items-center">
+                  <label className="text-sm font-semibold text-muted-foreground">Snelheid in {otherUnitLabel}:</label>
+                  <Input value={extraKmh} onChange={(e) => setExtraKmh(e.target.value)} disabled={submitted} placeholder={`snelheid in ${otherUnitLabel}`} inputMode="decimal" className={`text-base ${fieldStatusClass(feedback?.numeric)}`} />
+                </div>
               </div>
             )}
           </div>
 
           {showHint && !submitted && (
             <div className="text-xs text-muted-foreground bg-accent/10 border border-accent/30 rounded-lg p-3">
-              💡 Tip: zet eerst alles om naar SI-eenheden (meters en seconden). 1 km = 1000 m, 1 min = 60 s, 1 uur = 3600 s. Voor km/h: m/s × 3,6.
+              💡 Tip: zet eerst alles om naar SI-eenheden (meters en seconden). 1 km = 1000 m, 1 min = 60 s, 1 uur = 3600 s. Voor km/h → m/s: deel door 3,6. Voor m/s → km/h: maal 3,6.
             </div>
           )}
 
           {submitted && (
             <div className={`rounded-lg p-3 text-sm space-y-2 ${resultCorrect ? "bg-[hsl(var(--success))]/10 border border-[hsl(var(--success))]/30" : "bg-destructive/10 border border-destructive/30"}`}>
               <div className={`flex items-center gap-2 font-medium ${resultCorrect ? "text-[hsl(var(--success))]" : "text-destructive"}`}>
-                {resultCorrect ? <><Check className="h-4 w-4" /> Goed!</> : <><X className="h-4 w-4" /> Net niet</>}
+                {resultCorrect ? <><Check className="h-4 w-4" /> Helemaal goed!</> : <><X className="h-4 w-4" /> Bekijk je antwoord</>}
               </div>
-              <div className="space-y-1 text-foreground">
-                <p className="font-semibold">Berekenen:</p>
-                <p className="font-mono text-xs">afstand = {q.d_m} m, tijd = {q.t_s} s</p>
+              {feedback && (
+                <ul className="text-xs space-y-0.5">
+                  <li>Gegeven: {feedback.gegeven ? "✅" : "❌"}</li>
+                  <li>Gevraagd: {feedback.gevraagd ? "✅" : "❌"}</li>
+                  <li>Formule: {feedback.formule ? "✅" : "❌"}</li>
+                  <li>Berekening: {feedback.numeric ? "✅" : "❌"}</li>
+                </ul>
+              )}
+              <div className="space-y-1 text-foreground pt-1 border-t border-current/10">
+                <p className="font-semibold">Voorbeeld uitwerking:</p>
+                <p className="font-mono text-xs">Gegeven: afstand = {q.d_m} m, tijd = {q.t_s} s</p>
+                <p className="font-mono text-xs">
+                  Formule: {q.type === "speed" ? "v = s / t" : q.type === "distance" ? "s = v · t" : "t = s / v"}
+                </p>
                 {q.type === "speed" && (
                   <>
                     <p className="font-mono text-xs">v = {q.d_m} / {q.t_s} = {q.display.speedMs} m/s</p>
@@ -335,13 +434,13 @@ export default function NaskSpeedStories({ onBack }: Props) {
                 {q.type === "distance" && (
                   <>
                     <p className="font-mono text-xs">s = {q.display.speedMs} × {q.t_s} = {q.d_m} m</p>
-                    <p className="font-semibold">Antwoord: {q.d_m} m</p>
+                    <p className="font-semibold">Antwoord: {q.d_m} m — snelheid = {q.display.speedMs} m/s = {q.display.speedKmh} km/h</p>
                   </>
                 )}
                 {q.type === "time" && (
                   <>
                     <p className="font-mono text-xs">t = {q.d_m} / {q.display.speedMs} = {q.t_s} s</p>
-                    <p className="font-semibold">Antwoord: {q.t_s} s</p>
+                    <p className="font-semibold">Antwoord: {q.t_s} s — snelheid = {q.display.speedMs} m/s = {q.display.speedKmh} km/h</p>
                   </>
                 )}
               </div>
