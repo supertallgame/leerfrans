@@ -162,6 +162,7 @@ export default function SupportAdminPanel() {
       (rows || []).forEach((r: any) => { if (!next[r.user_id]) next[r.user_id] = r.role; });
       return next;
     });
+  };
 
   const loadMessages = async (reportId: string) => {
     setLoadingMsgs(true);
