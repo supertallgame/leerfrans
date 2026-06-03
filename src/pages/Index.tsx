@@ -87,7 +87,6 @@ const biologyGames = [
   { id: "flashcards" as Game, title: "Flashcards", description: "Draai kaarten om en leer begrippen", icon: BookOpen, color: "bg-secondary/20 dark:bg-secondary/30 text-secondary-foreground" },
   { id: "quiz" as Game, title: "Meerkeuze Quiz", description: "Kies de juiste omschrijving", icon: Brain, color: "bg-accent/10 text-accent" },
   { id: "truefalse" as Game, title: "Waar of Onwaar", description: "Klopt de omschrijving bij het begrip?", icon: CheckCircle, color: "bg-[hsl(var(--success))]/10 text-[hsl(var(--success))]" },
-  { id: "memory" as Game, title: "Memory", description: "Vind de paren van begrip en omschrijving", icon: Layers, color: "bg-destructive/10 text-destructive" },
   { id: "match" as Game, title: "Koppel Paren", description: "Verbind begrippen met omschrijvingen", icon: Puzzle, color: "bg-primary/10 text-primary" },
   { id: "type" as Game, title: "Typ het Begrip", description: "Lees de omschrijving en typ het begrip", icon: Keyboard, color: "bg-accent/10 text-accent" },
   { id: "ai" as Game, title: "AI Leraar", description: "Chat met een AI die je overhoort", icon: Bot, color: "bg-secondary/20 dark:bg-secondary/30 text-secondary-foreground" },
