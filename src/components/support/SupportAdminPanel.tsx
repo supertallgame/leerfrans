@@ -273,7 +273,14 @@ export default function SupportAdminPanel() {
                     <span className="text-[10px] px-1.5 py-0.5 rounded bg-primary/10 text-primary">{r.category}</span>
                     <p className="text-sm font-medium truncate">{r.subject}</p>
                   </div>
-                  <p className="text-xs text-muted-foreground truncate mt-0.5">{r.user_email}</p>
+                  <p className="text-xs text-muted-foreground truncate mt-0.5 flex items-center gap-1.5">
+                    <span className="truncate">{r.user_email}</span>
+                    {(() => {
+                      const userRole = OWNER_EMAILS.includes(r.user_email) ? "owner" : rolesMap[r.user_id];
+                      const rs = userRole ? ROLE_STYLES[userRole] : null;
+                      return rs ? <span className={`text-[9px] font-bold uppercase tracking-wide shrink-0 ${rs.cls}`}>[{rs.label}]</span> : null;
+                    })()}
+                  </p>
                 </div>
                 {openId === r.id ? <ChevronUp className="h-4 w-4 mt-1 shrink-0" /> : <ChevronDown className="h-4 w-4 mt-1 shrink-0" />}
               </button>
