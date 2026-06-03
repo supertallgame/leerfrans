@@ -269,10 +269,19 @@ export default function SupportAdminPanel() {
                     <div ref={scrollRef} className="space-y-2 max-h-72 overflow-y-auto">
                       {messages.map((m) => {
                         const isStaff = m.sender_role !== "user";
+                        const role = getRole(m);
+                        const roleStyle = role ? ROLE_STYLES[role] : null;
                         return (
                           <div key={m.id} className={`flex ${isStaff ? "justify-end" : "justify-start"}`}>
                             <div className={`max-w-[80%] rounded-2xl px-3 py-2 ${isStaff ? "bg-primary text-primary-foreground" : "bg-card border"}`}>
-                              <p className="text-[10px] font-semibold mb-0.5 opacity-70">{isStaff ? "🛡️ " + m.sender_email : "👤 " + m.sender_email}</p>
+                              <p className="text-[10px] font-semibold mb-0.5 flex items-center gap-1.5 flex-wrap">
+                                <span className="opacity-70">{isStaff ? "🛡️ " : "👤 "}{m.sender_email}</span>
+                                {roleStyle && (
+                                  <span className={`font-bold uppercase tracking-wide ${isStaff ? "opacity-90" : roleStyle.cls}`}>
+                                    [{roleStyle.label}]
+                                  </span>
+                                )}
+                              </p>
                               {m.message && <p className="text-sm whitespace-pre-wrap break-words">{m.message}</p>}
                               {m.image_url && <img src={m.image_url} alt="" className="mt-1 rounded-md max-h-40 w-auto" />}
                               <p className="text-[9px] opacity-60 mt-1">{new Date(m.created_at).toLocaleString("nl-NL")}</p>
