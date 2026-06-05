@@ -187,10 +187,14 @@ export default function StaffChat({ open, onOpenChange }: Props) {
     else setMessages((prev) => prev.filter((m) => m.id !== id));
   };
 
-  const getRoleForMessage = (m: Message): string => {
-    // Owners are detected by hardcoded email
-    if (m.sender_email === "brankovantland@gmail.com" || m.sender_email === "branko18vantland@gmail.com") return "owner";
-    return rolesMap[m.sender_id] || "";
+  const getRolesForMessage = (m: Message): string[] => {
+    const roles = [...(rolesMap[m.sender_id] || [])];
+    // Owners are detected by hardcoded email and rendered first
+    if (m.sender_email === "brankovantland@gmail.com" || m.sender_email === "branko18vantland@gmail.com") {
+      if (!roles.includes("owner")) roles.unshift("owner");
+    }
+    // Sort by display priority
+    return roles.filter(r => ROLE_STYLES[r]).sort((a, b) => ROLE_ORDER.indexOf(a) - ROLE_ORDER.indexOf(b));
   };
 
   return (
