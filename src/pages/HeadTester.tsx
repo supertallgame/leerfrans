@@ -24,6 +24,7 @@ export default function HeadTester() {
   const [hasAccess, setHasAccess] = useState(false);
   const [adminMode, setAdminMode] = useState(false);
   const [polarExpressEnabled, setPolarExpressEnabled] = useState(false);
+  const [obamaEnabled, setObamaEnabled] = useState(false);
   const [disabledNiveaus, setDisabledNiveaus] = useState<string[]>([]);
 
   const [users, setUsers] = useState<{ id: string; email: string; created_at: string }[]>([]);
