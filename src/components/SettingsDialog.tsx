@@ -169,10 +169,13 @@ export default function SettingsDialog({ open, onOpenChange, user, children }: S
                         try {
                           const { error } = await supabase.functions.invoke("delete-account");
                           if (error) throw error;
-                          await supabase.auth.signOut();
+                          // User is already deleted server-side — clear local session only
+                          // (a normal signOut would POST /logout with a stale JWT and 403)
+                          await supabase.auth.signOut({ scope: "local" });
                           onOpenChange(false);
                           setShowDeleteConfirm(false);
                           toast.success("Account verwijderd");
+                          window.location.href = "/";
                         } catch (e: any) {
                           console.error(e);
                           toast.error("Kon account niet verwijderen. Probeer opnieuw.");
