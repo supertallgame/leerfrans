@@ -52,7 +52,7 @@ export default function HeadAdmin() {
     // Owners also have access
     if (OWNER_EMAILS.includes(session.user.email ?? "")) {
       setIsHeadAdmin(true);
-      await Promise.all([loadAllRoles(), loadUsers()]);
+      await Promise.all([loadAllRoles(), loadUsers(), loadOnboardingSetting()]);
       setLoading(false);
       return;
     }
