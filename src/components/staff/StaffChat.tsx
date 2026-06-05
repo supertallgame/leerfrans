@@ -143,9 +143,7 @@ export default function StaffChat({ open, onOpenChange }: Props) {
       const unknownIds = Array.from(new Set(msgs.map(m => m.sender_id))).filter(id => !(id in rolesMap));
       if (unknownIds.length > 0) {
         const { data: rows } = await supabase
-          .from("user_roles")
-          .select("user_id, role")
-          .in("user_id", unknownIds);
+          .rpc("get_staff_user_roles", { _user_ids: unknownIds });
         const next: Record<string, string[]> = { ...rolesMap };
         unknownIds.forEach(id => { next[id] = []; });
         (rows || []).forEach((r: any) => { next[r.user_id] = [...(next[r.user_id] || []), r.role]; });
