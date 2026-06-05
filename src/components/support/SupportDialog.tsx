@@ -91,12 +91,9 @@ export default function SupportDialog({ open, onOpenChange }: Props) {
       });
       if (already) return;
       const { data } = await supabase
-        .from("user_roles")
-        .select("user_id, role")
-        .eq("user_id", senderId)
-        .maybeSingle();
-      if (data) setRolesMap((prev) => ({ ...prev, [data.user_id]: data.role }));
-      else setRolesMap((prev) => ({ ...prev, [senderId]: "" }));
+        .rpc("get_staff_user_roles", { _user_ids: [senderId] });
+      const roles = ((data as any[]) || []).map((r) => r.role);
+      setRolesMap((prev) => ({ ...prev, [senderId]: roles }));
     };
 
     const subscribeMessages = (reportId: string) => {
