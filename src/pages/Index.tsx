@@ -378,18 +378,18 @@ const Index = () => {
                 <MessagesSquare className="h-5 w-5" />
               </Button>
             )}
-            <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => setShowSupport(true)} aria-label="Support / Bug">
+            <Button data-tour="btn-support" variant="ghost" size="icon" className="h-9 w-9" onClick={() => setShowSupport(true)} aria-label="Support / Bug">
               <LifeBuoy className="h-5 w-5" />
             </Button>
             {user && !isStaff && (
-              <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => setShowApply(true)} aria-label="Admin worden">
+              <Button data-tour="btn-apply" variant="ghost" size="icon" className="h-9 w-9" onClick={() => setShowApply(true)} aria-label="Admin worden">
                 <ShieldQuestion className="h-5 w-5" />
               </Button>
             )}
-            <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => navigate("/reviews")} aria-label="Reviews">
+            <Button data-tour="btn-reviews" variant="ghost" size="icon" className="h-9 w-9" onClick={() => navigate("/reviews")} aria-label="Reviews">
               <Star className="h-5 w-5" />
             </Button>
-            <Button variant="ghost" size="icon" className="h-9 w-9" onClick={handleSettingsClick} aria-label="Instellingen">
+            <Button data-tour="btn-settings" variant="ghost" size="icon" className="h-9 w-9" onClick={handleSettingsClick} aria-label="Instellingen">
               <Settings className="h-5 w-5" />
             </Button>
           </div>
