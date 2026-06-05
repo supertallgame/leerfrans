@@ -26,6 +26,7 @@ import UpdateBanner from "@/components/UpdateBanner";
 import SupportDialog from "@/components/support/SupportDialog";
 import AdminApplyDialog from "@/components/support/AdminApplyDialog";
 import StaffChat from "@/components/staff/StaffChat";
+import OnboardingTour, { type TourStep } from "@/components/OnboardingTour";
 
 const Flashcards = lazy(() => import("@/components/games/Flashcards"));
 const MultipleChoice = lazy(() => import("@/components/games/MultipleChoice"));
@@ -127,6 +128,8 @@ const Index = () => {
   const [showSupport, setShowSupport] = useState(false);
   const [showApply, setShowApply] = useState(false);
   const [showStaffChat, setShowStaffChat] = useState(false);
+  const [onboardingEnabled, setOnboardingEnabled] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   const chaptersForLanguage = getChaptersForLanguage(language, niveau);
   const foreignLabel = getForeignLabel(language);
@@ -146,6 +149,7 @@ const Index = () => {
       if (Array.isArray(data.disabled_niveaus)) setDisabledNiveaus(data.disabled_niveaus as string[]);
       setPolarExpressEnabled(data.polar_express_enabled === true);
       setObamaEnabled(data.obama_enabled === true);
+      setOnboardingEnabled(data.onboarding_enabled === true);
     });
   };
 
@@ -239,6 +243,33 @@ const Index = () => {
       window.removeEventListener("storage", onStorage);
     };
   }, []);
+
+  // Show onboarding tour once per account when enabled by admins
+  useEffect(() => {
+    if (!user || !onboardingEnabled || authLoading || activeGame !== "menu") return;
+    const key = `onboarding_seen_${user.id}`;
+    if (localStorage.getItem(key)) return;
+    const t = window.setTimeout(() => setShowOnboarding(true), 600);
+    return () => window.clearTimeout(t);
+  }, [user, onboardingEnabled, authLoading, activeGame]);
+
+  const finishOnboarding = () => {
+    setShowOnboarding(false);
+    if (user) localStorage.setItem(`onboarding_seen_${user.id}`, "1");
+  };
+
+  const tourSteps: TourStep[] = [
+    { target: "subject-pill", title: "Kies je vak", description: "Wissel hier tussen Frans, Engels, NASK en Biologie." },
+    { target: "niveau-pill", title: "Kies je niveau", description: "Schakel tussen VMBO-HAVO en HAVO-VWO (alleen bij talen)." },
+    { target: "chapter-pill", title: "Kies een hoofdstuk", description: "Selecteer welke unit of chapter je wilt oefenen." },
+    { target: "section-pill", title: "Kies secties", description: "Beperk de woordenlijst tot specifieke paragrafen." },
+    { target: "game-grid", title: "Kies een spel", description: "Klik op een tegel om met dat spel te beginnen." },
+    { target: "btn-support", title: "Hulp & bugs", description: "Stel een vraag of meld een bug aan het team." },
+    { target: "btn-apply", title: "Word admin", description: "Solliciteer hier om admin te worden." },
+    { target: "btn-reviews", title: "Reviews", description: "Lees of schrijf reviews over de app." },
+    { target: "btn-settings", title: "Instellingen", description: "Wijzig thema, account en andere voorkeuren." },
+  ];
+
 
   const handleSettingsClick = () => {
     if (!user) {
@@ -347,18 +378,18 @@ const Index = () => {
                 <MessagesSquare className="h-5 w-5" />
               </Button>
             )}
-            <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => setShowSupport(true)} aria-label="Support / Bug">
+            <Button data-tour="btn-support" variant="ghost" size="icon" className="h-9 w-9" onClick={() => setShowSupport(true)} aria-label="Support / Bug">
               <LifeBuoy className="h-5 w-5" />
             </Button>
             {user && !isStaff && (
-              <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => setShowApply(true)} aria-label="Admin worden">
+              <Button data-tour="btn-apply" variant="ghost" size="icon" className="h-9 w-9" onClick={() => setShowApply(true)} aria-label="Admin worden">
                 <ShieldQuestion className="h-5 w-5" />
               </Button>
             )}
-            <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => navigate("/reviews")} aria-label="Reviews">
+            <Button data-tour="btn-reviews" variant="ghost" size="icon" className="h-9 w-9" onClick={() => navigate("/reviews")} aria-label="Reviews">
               <Star className="h-5 w-5" />
             </Button>
-            <Button variant="ghost" size="icon" className="h-9 w-9" onClick={handleSettingsClick} aria-label="Instellingen">
+            <Button data-tour="btn-settings" variant="ghost" size="icon" className="h-9 w-9" onClick={handleSettingsClick} aria-label="Instellingen">
               <Settings className="h-5 w-5" />
             </Button>
           </div>
@@ -374,6 +405,7 @@ const Index = () => {
           {/* Language, niveau & chapter badges */}
           <div className="flex items-center justify-center gap-2 flex-wrap">
             <button
+              data-tour="subject-pill"
               onClick={() => setShowLanguagePicker(true)}
               className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors cursor-pointer"
             >
@@ -382,6 +414,7 @@ const Index = () => {
             </button>
             {(language === "french" || language === "english") && (
               <button
+                data-tour="niveau-pill"
                 onClick={() => setShowNiveauPicker(true)}
                 className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors cursor-pointer"
               >
@@ -390,6 +423,7 @@ const Index = () => {
               </button>
             )}
             <button
+              data-tour="chapter-pill"
               onClick={() => setShowChapterPicker(true)}
               className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors cursor-pointer"
             >
@@ -398,6 +432,7 @@ const Index = () => {
             </button>
             {availableSections.length > 0 && (
               <button
+                data-tour="section-pill"
                 onClick={() => setShowSectionPicker(true)}
                 className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors cursor-pointer"
               >
@@ -410,7 +445,7 @@ const Index = () => {
 
         <UpdateBanner />
 
-        <div className="grid grid-cols-2 sm:grid-cols-2 gap-2.5 md:gap-4 w-full">
+        <div data-tour="game-grid" className="grid grid-cols-2 sm:grid-cols-2 gap-2.5 md:gap-4 w-full">
           {games.map((game) => (
             <Card
               key={game.id}
@@ -664,6 +699,7 @@ const Index = () => {
       <AdminApplyDialog open={showApply} onOpenChange={setShowApply} />
       <StaffChat open={showStaffChat} onOpenChange={setShowStaffChat} />
 
+      {showOnboarding && <OnboardingTour steps={tourSteps} onClose={finishOnboarding} />}
       <SettingsDialog open={showSettings} onOpenChange={setShowSettings} user={user}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
