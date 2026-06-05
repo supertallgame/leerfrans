@@ -299,11 +299,23 @@ export default function Owner() {
     if (data) setPolarExpressEnabled(data.value === true);
   };
 
+  const loadOnboardingSetting = async () => {
+    const { data } = await supabase.from("admin_settings").select("value").eq("key", "onboarding_enabled").maybeSingle();
+    if (data) setOnboardingEnabled(data.value === true);
+  };
+
   const togglePolarExpress = async (checked: boolean) => {
     const { error } = await supabase.from("admin_settings").upsert({ key: "polar_express_enabled", value: checked as any, updated_at: new Date().toISOString() } as any, { onConflict: "key" });
     if (error) { toast.error("Kon instelling niet opslaan"); return; }
     setPolarExpressEnabled(checked);
     toast.success(checked ? "Polar Express ingeschakeld" : "Polar Express uitgeschakeld");
+  };
+
+  const toggleOnboarding = async (checked: boolean) => {
+    const { error } = await supabase.from("admin_settings").upsert({ key: "onboarding_enabled", value: checked as any, updated_at: new Date().toISOString() } as any, { onConflict: "key" });
+    if (error) { toast.error("Kon instelling niet opslaan"); return; }
+    setOnboardingEnabled(checked);
+    toast.success(checked ? "Onboarding ingeschakeld" : "Onboarding uitgeschakeld");
   };
 
   const toggleExplorer = async (checked: boolean) => {
