@@ -244,6 +244,33 @@ const Index = () => {
     };
   }, []);
 
+  // Show onboarding tour once per account when enabled by admins
+  useEffect(() => {
+    if (!user || !onboardingEnabled || authLoading || activeGame !== "menu") return;
+    const key = `onboarding_seen_${user.id}`;
+    if (localStorage.getItem(key)) return;
+    const t = window.setTimeout(() => setShowOnboarding(true), 600);
+    return () => window.clearTimeout(t);
+  }, [user, onboardingEnabled, authLoading, activeGame]);
+
+  const finishOnboarding = () => {
+    setShowOnboarding(false);
+    if (user) localStorage.setItem(`onboarding_seen_${user.id}`, "1");
+  };
+
+  const tourSteps: TourStep[] = [
+    { target: "subject-pill", title: "Kies je vak", description: "Wissel hier tussen Frans, Engels, NASK en Biologie." },
+    { target: "niveau-pill", title: "Kies je niveau", description: "Schakel tussen VMBO-HAVO en HAVO-VWO (alleen bij talen)." },
+    { target: "chapter-pill", title: "Kies een hoofdstuk", description: "Selecteer welke unit of chapter je wilt oefenen." },
+    { target: "section-pill", title: "Kies secties", description: "Beperk de woordenlijst tot specifieke paragrafen." },
+    { target: "game-grid", title: "Kies een spel", description: "Klik op een tegel om met dat spel te beginnen." },
+    { target: "btn-support", title: "Hulp & bugs", description: "Stel een vraag of meld een bug aan het team." },
+    { target: "btn-apply", title: "Word admin", description: "Solliciteer hier om admin te worden." },
+    { target: "btn-reviews", title: "Reviews", description: "Lees of schrijf reviews over de app." },
+    { target: "btn-settings", title: "Instellingen", description: "Wijzig thema, account en andere voorkeuren." },
+  ];
+
+
   const handleSettingsClick = () => {
     if (!user) {
       setShowLoginPrompt(true);
