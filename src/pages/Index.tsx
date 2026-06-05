@@ -714,6 +714,30 @@ const Index = () => {
       <AdminApplyDialog open={showApply} onOpenChange={setShowApply} />
       <StaffChat open={showStaffChat} onOpenChange={setShowStaffChat} />
 
+      {/* Eminem-only: background music toggle while playing a game */}
+      {isEminem && activeGame !== "menu" && (
+        <>
+          <button
+            onClick={() => setEminemMusicOn((v) => !v)}
+            className="fixed bottom-4 right-4 z-50 flex items-center gap-2 rounded-full bg-pink-500 hover:bg-pink-600 text-white px-4 py-2 shadow-lg text-sm font-semibold transition-colors"
+            aria-label="Eminem muziek"
+          >
+            {eminemMusicOn ? <VolumeX className="h-4 w-4" /> : <Music2 className="h-4 w-4" />}
+            {eminemMusicOn ? "Stop Eminem" : "Eminem 🎤"}
+          </button>
+          {eminemMusicOn && (
+            <iframe
+              title="eminem-bg"
+              src="https://www.youtube.com/embed/_Yhyp-_hX2s?autoplay=1&loop=1&playlist=_Yhyp-_hX2s&controls=0"
+              allow="autoplay"
+              className="fixed -left-[9999px] w-1 h-1 opacity-0 pointer-events-none"
+            />
+          )}
+        </>
+      )}
+      {/* Auto-stop music when leaving a game */}
+      {activeGame === "menu" && eminemMusicOn && (() => { setEminemMusicOn(false); return null; })()}
+
       {showOnboarding && <OnboardingTour steps={tourSteps} onClose={finishOnboarding} />}
       <SettingsDialog open={showSettings} onOpenChange={setShowSettings} user={user}>
           <div className="flex items-center justify-between">
