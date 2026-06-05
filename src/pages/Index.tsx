@@ -179,7 +179,7 @@ const Index = () => {
           const banned = !!data?.banned;
           localStorage.setItem(CACHE_KEY, JSON.stringify({ banned, ts: Date.now() }));
           if (banned) {
-            supabase.auth.signOut();
+            safeSignOut();
             window.location.reload();
           }
         }).catch(() => {});
