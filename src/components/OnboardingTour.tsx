@@ -33,15 +33,19 @@ export default function OnboardingTour({ steps, onClose }: Props) {
 
   useLayoutEffect(() => {
     if (!step) return;
+    const el = document.querySelector<HTMLElement>(`[data-tour="${step.target}"]`);
+    if (!el) { setRect(null); return; }
+    // Scroll once when the step changes (not on every scroll/resize tick)
+    try { el.scrollIntoView({ block: "center", behavior: "smooth" }); } catch {}
+
     const update = () => {
-      const el = document.querySelector<HTMLElement>(`[data-tour="${step.target}"]`);
-      if (!el) { setRect(null); return; }
-      el.scrollIntoView({ block: "center", behavior: "smooth" });
-      const r = el.getBoundingClientRect();
+      const node = document.querySelector<HTMLElement>(`[data-tour="${step.target}"]`);
+      if (!node) { setRect(null); return; }
+      const r = node.getBoundingClientRect();
       setRect({ top: r.top, left: r.left, width: r.width, height: r.height });
     };
     update();
-    const id = window.setTimeout(update, 350);
+    const id = window.setTimeout(update, 400);
     window.addEventListener("resize", update);
     window.addEventListener("scroll", update, true);
     return () => {
