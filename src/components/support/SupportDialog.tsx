@@ -198,9 +198,15 @@ export default function SupportDialog({ open, onOpenChange }: Props) {
       rows.forEach((r) => { if (!ids.has(r.id)) merged.push(r); });
       return merged;
     });
-    rows.forEach((r) => { if (r.sender_role !== "user") void supabase
-      .from("user_roles").select("user_id, role").eq("user_id", r.sender_id).maybeSingle()
-      .then(({ data: rd }) => { if (rd) setRolesMap((p) => ({ ...p, [rd.user_id]: rd.role })); }); });
+    const staffIds = Array.from(new Set(rows.filter(r => r.sender_role !== "user").map(r => r.sender_id)));
+    if (staffIds.length > 0) {
+      void supabase.rpc("get_staff_user_roles", { _user_ids: staffIds }).then(({ data: rd }) => {
+        const grouped: Record<string, string[]> = {};
+        staffIds.forEach((id) => { grouped[id] = []; });
+        ((rd as any[]) || []).forEach((r: any) => { grouped[r.user_id] = [...(grouped[r.user_id] || []), r.role]; });
+        setRolesMap((p) => ({ ...p, ...grouped }));
+      });
+    }
   }, [open, report?.id]);
   usePollingInterval(incrementalReload, open ? 30000 : null);
 
