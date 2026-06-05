@@ -72,12 +72,10 @@ export default function StaffChat({ open, onOpenChange }: Props) {
           });
           if (row.sender_id && !(row.sender_id in rolesMap)) {
             supabase
-              .from("user_roles")
-              .select("user_id, role")
-              .eq("user_id", row.sender_id)
+              .rpc("get_staff_user_roles", { _user_ids: [row.sender_id] })
               .then(({ data }) => {
                 if (data) {
-                  const roles = data.map((r: any) => r.role);
+                  const roles = (data as any[]).map((r) => r.role);
                   setRolesMap((prev) => ({ ...prev, [row.sender_id]: roles }));
                 }
               });
@@ -96,13 +94,17 @@ export default function StaffChat({ open, onOpenChange }: Props) {
           const row: any = payload.new || payload.old;
           if (!row?.user_id) return;
           supabase
-            .from("user_roles")
-            .select("role")
-            .eq("user_id", row.user_id)
+            .rpc("get_staff_user_roles", { _user_ids: [row.user_id] })
             .then(({ data }) => {
-              const roles = (data || []).map((r: any) => r.role);
+              const roles = ((data as any[]) || []).map((r) => r.role);
               setRolesMap((prev) => ({ ...prev, [row.user_id]: roles }));
             });
+          // If it's the current user's row, also refresh their own staff role label
+          if (user && row.user_id === user.id) {
+            supabase.rpc("get_my_staff_role").then(({ data }) => {
+              if (data) setUser((u) => (u ? { ...u, role: data as string } : u));
+            });
+          }
         }
       )
       .subscribe();
@@ -141,9 +143,7 @@ export default function StaffChat({ open, onOpenChange }: Props) {
       const unknownIds = Array.from(new Set(msgs.map(m => m.sender_id))).filter(id => !(id in rolesMap));
       if (unknownIds.length > 0) {
         const { data: rows } = await supabase
-          .from("user_roles")
-          .select("user_id, role")
-          .in("user_id", unknownIds);
+          .rpc("get_staff_user_roles", { _user_ids: unknownIds });
         const next: Record<string, string[]> = { ...rolesMap };
         unknownIds.forEach(id => { next[id] = []; });
         (rows || []).forEach((r: any) => { next[r.user_id] = [...(next[r.user_id] || []), r.role]; });
