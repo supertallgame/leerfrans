@@ -72,12 +72,10 @@ export default function StaffChat({ open, onOpenChange }: Props) {
           });
           if (row.sender_id && !(row.sender_id in rolesMap)) {
             supabase
-              .from("user_roles")
-              .select("user_id, role")
-              .eq("user_id", row.sender_id)
+              .rpc("get_staff_user_roles", { _user_ids: [row.sender_id] })
               .then(({ data }) => {
                 if (data) {
-                  const roles = data.map((r: any) => r.role);
+                  const roles = (data as any[]).map((r) => r.role);
                   setRolesMap((prev) => ({ ...prev, [row.sender_id]: roles }));
                 }
               });
