@@ -301,6 +301,9 @@ export default function Owner() {
     if (error) { toast.error("Kon niet verwijderen"); return; }
     toast.success(`${role.email} is geen Eminem meer`);
     await loadRoles();
+  };
+
+
 
   const loadUsers = async () => {
     const { data, error } = await supabase.rpc("list_all_users");
