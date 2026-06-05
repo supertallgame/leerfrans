@@ -126,6 +126,7 @@ export default function Owner() {
   const [aiTeacherEnabled, setAiTeacherEnabled] = useState(true);
   const [disabledNiveaus, setDisabledNiveaus] = useState<string[]>([]);
   const [polarExpressEnabled, setPolarExpressEnabled] = useState(false);
+  const [onboardingEnabled, setOnboardingEnabled] = useState(false);
 
   // Poll management
   const [polls, setPolls] = useState<any[]>([]);
