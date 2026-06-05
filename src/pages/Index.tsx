@@ -3,7 +3,7 @@ import { useThemeSync } from "@/hooks/use-theme-sync";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { BookOpen, Brain, Puzzle, Keyboard, Users, PenTool, MessageSquare, Bot, Settings, Star, Lock, BookMarked, FlaskConical, CheckCircle, Layers, Microscope, Bone, Clock, BookType, Map, ShieldCheck, GraduationCap, Hash, BookText, LifeBuoy, ShieldQuestion, MessagesSquare } from "lucide-react";
+import { BookOpen, Brain, Puzzle, Keyboard, Users, PenTool, MessageSquare, Bot, Settings, Star, Lock, BookMarked, FlaskConical, CheckCircle, Layers, Microscope, Bone, Clock, BookType, Map, ShieldCheck, GraduationCap, Hash, BookText, LifeBuoy, ShieldQuestion, MessagesSquare, Music2, VolumeX } from "lucide-react";
 import polarExpressImg from "@/assets/polar-express.png";
 import { FlagNL, FlagFR } from "@/components/Flags";
 import { getChaptersForLanguage, getChapter, getForeignLabel, getForeignLabelNative, Language, Niveau } from "@/data/vocabulary";
@@ -131,6 +131,13 @@ const Index = () => {
   const [showStaffChat, setShowStaffChat] = useState(false);
   const [onboardingEnabled, setOnboardingEnabled] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [isEminem, setIsEminem] = useState(false);
+  const [eminemMusicOn, setEminemMusicOn] = useState(false);
+
+  // Auto-stop Eminem music when returning to the menu
+  useEffect(() => {
+    if (activeGame === "menu" && eminemMusicOn) setEminemMusicOn(false);
+  }, [activeGame]);
 
   const chaptersForLanguage = getChaptersForLanguage(language, niveau);
   const foreignLabel = getForeignLabel(language);
@@ -205,9 +212,13 @@ const Index = () => {
 
   useEffect(() => {
     const checkRoles = async (userId: string | undefined) => {
-      if (!userId) { setIsHeadAdmin(false); setIsStaff(false); return; }
+      if (!userId) { setIsHeadAdmin(false); setIsStaff(false); setIsEminem(false); return; }
       const OWNER_EMAILS = ["brankovantland@gmail.com", "branko18vantland@gmail.com"];
       const { data: { session } } = await supabase.auth.getSession();
+      // Check eminem role (independent of staff hierarchy)
+      const { data: roleRows } = await supabase.rpc("get_staff_user_roles", { _user_ids: [userId] });
+      const roles = ((roleRows as any[]) || []).map(r => r.role);
+      setIsEminem(roles.includes("eminem"));
       if (session?.user?.email && OWNER_EMAILS.includes(session.user.email)) {
         setIsHeadAdmin(true);
         setIsStaff(true);
@@ -707,6 +718,28 @@ const Index = () => {
       <SupportDialog open={showSupport} onOpenChange={setShowSupport} />
       <AdminApplyDialog open={showApply} onOpenChange={setShowApply} />
       <StaffChat open={showStaffChat} onOpenChange={setShowStaffChat} />
+
+      {/* Eminem-only: background music toggle while playing a game */}
+      {isEminem && activeGame !== "menu" && (
+        <>
+          <button
+            onClick={() => setEminemMusicOn((v) => !v)}
+            className="fixed bottom-4 right-4 z-50 flex items-center gap-2 rounded-full bg-pink-500 hover:bg-pink-600 text-white px-4 py-2 shadow-lg text-sm font-semibold transition-colors"
+            aria-label="Eminem muziek"
+          >
+            {eminemMusicOn ? <VolumeX className="h-4 w-4" /> : <Music2 className="h-4 w-4" />}
+            {eminemMusicOn ? "Stop Eminem" : "Eminem 🎤"}
+          </button>
+          {eminemMusicOn && (
+            <iframe
+              title="eminem-bg"
+              src="https://www.youtube.com/embed/_Yhyp-_hX2s?autoplay=1&loop=1&playlist=_Yhyp-_hX2s&controls=0"
+              allow="autoplay"
+              className="fixed -left-[9999px] w-1 h-1 opacity-0 pointer-events-none"
+            />
+          )}
+        </>
+      )}
 
       {showOnboarding && <OnboardingTour steps={tourSteps} onClose={finishOnboarding} />}
       <SettingsDialog open={showSettings} onOpenChange={setShowSettings} user={user}>
