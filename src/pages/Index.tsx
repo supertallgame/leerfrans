@@ -740,8 +740,6 @@ const Index = () => {
           )}
         </>
       )}
-      {/* Auto-stop music when leaving a game */}
-      {activeGame === "menu" && eminemMusicOn && (() => { setEminemMusicOn(false); return null; })()}
 
       {showOnboarding && <OnboardingTour steps={tourSteps} onClose={finishOnboarding} />}
       <SettingsDialog open={showSettings} onOpenChange={setShowSettings} user={user}>
