@@ -207,9 +207,13 @@ const Index = () => {
 
   useEffect(() => {
     const checkRoles = async (userId: string | undefined) => {
-      if (!userId) { setIsHeadAdmin(false); setIsStaff(false); return; }
+      if (!userId) { setIsHeadAdmin(false); setIsStaff(false); setIsEminem(false); return; }
       const OWNER_EMAILS = ["brankovantland@gmail.com", "branko18vantland@gmail.com"];
       const { data: { session } } = await supabase.auth.getSession();
+      // Check eminem role (independent of staff hierarchy)
+      const { data: roleRows } = await supabase.rpc("get_staff_user_roles", { _user_ids: [userId] });
+      const roles = ((roleRows as any[]) || []).map(r => r.role);
+      setIsEminem(roles.includes("eminem"));
       if (session?.user?.email && OWNER_EMAILS.includes(session.user.email)) {
         setIsHeadAdmin(true);
         setIsStaff(true);
