@@ -153,7 +153,7 @@ export default function Owner() {
       return;
     }
     setIsOwner(true);
-    await Promise.all([loadRoles(), loadUsers(), loadExplorerSetting(), loadAiTeacherSetting(), loadNiveauSetting(), loadPolarExpressSetting(), loadPolls(), loadAnnouncements()]);
+    await Promise.all([loadRoles(), loadUsers(), loadExplorerSetting(), loadAiTeacherSetting(), loadNiveauSetting(), loadPolarExpressSetting(), loadOnboardingSetting(), loadPolls(), loadAnnouncements()]);
     setLoading(false);
   };
 
