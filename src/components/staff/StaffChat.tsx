@@ -49,8 +49,9 @@ export default function StaffChat({ open, onOpenChange }: Props) {
 
   useEffect(() => {
     if (!open) return;
-    setDisplayName("");
-    setNameInput("");
+    const saved = localStorage.getItem(SESSION_NAME_KEY) || "";
+    setDisplayName(saved);
+    setNameInput(saved);
     void init();
 
     const channel = supabase
