@@ -245,11 +245,19 @@ const Index = () => {
     };
   }, []);
 
-  // Show onboarding tour once per account when enabled by admins
+  // Show onboarding tour once per account when enabled by admins.
+  // Existing accounts (created before this cutoff) are auto-marked as seen
+  // so only brand-new users get the tour.
+  const ONBOARDING_CUTOFF = "2026-06-05T11:00:00Z";
   useEffect(() => {
     if (!user || !onboardingEnabled || authLoading || activeGame !== "menu") return;
     const key = `onboarding_seen_${user.id}`;
     if (localStorage.getItem(key)) return;
+    const createdAt = (user as any).created_at as string | undefined;
+    if (createdAt && new Date(createdAt).getTime() < new Date(ONBOARDING_CUTOFF).getTime()) {
+      localStorage.setItem(key, "1");
+      return;
+    }
     const t = window.setTimeout(() => setShowOnboarding(true), 600);
     return () => window.clearTimeout(t);
   }, [user, onboardingEnabled, authLoading, activeGame]);
