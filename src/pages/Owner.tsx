@@ -275,8 +275,32 @@ export default function Owner() {
       setHeadAdminRoles(data.filter(r => r.role === "head_admin"));
       setTesterRoles(data.filter(r => r.role === "tester"));
       setHeadTesterRoles(data.filter(r => r.role === "head_tester"));
+      setEminemRoles(data.filter(r => r.role === "eminem"));
     }
   };
+
+  const giveEminemRole = async () => {
+    const email = eminemEmailInput.trim().toLowerCase();
+    if (!email) return;
+    const target = allUsers.find(u => u.email.toLowerCase() === email);
+    if (!target) { toast.error("Geen gebruiker met dit e-mailadres gevonden"); return; }
+    if (eminemRoles.some(r => r.user_id === target.id)) { toast.error("Heeft de Eminem rol al"); return; }
+    const { error } = await supabase.from("user_roles").insert({
+      user_id: target.id,
+      email: target.email,
+      role: "eminem",
+    });
+    if (error) { toast.error(error.message); return; }
+    toast.success(`${target.email} is nu Eminem 🎤`);
+    setEminemEmailInput("");
+    await loadRoles();
+  };
+
+  const removeEminem = async (role: UserRole) => {
+    const { error } = await supabase.from("user_roles").delete().eq("id", role.id);
+    if (error) { toast.error("Kon niet verwijderen"); return; }
+    toast.success(`${role.email} is geen Eminem meer`);
+    await loadRoles();
 
   const loadUsers = async () => {
     const { data, error } = await supabase.rpc("list_all_users");
