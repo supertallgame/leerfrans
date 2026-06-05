@@ -194,7 +194,7 @@ export default function StaffChat({ open, onOpenChange }: Props) {
       sender_id: user.id,
       sender_email: user.email,
       sender_display: displayName,
-      message: text.trim().slice(0, 2000),
+      message: text.trim().slice(0, 250),
       image_url: imageUrl,
     });
     if (error) toast.error(error.message);
@@ -310,13 +310,14 @@ export default function StaffChat({ open, onOpenChange }: Props) {
               <Textarea
                 placeholder="Bericht aan team..."
                 value={text}
-                maxLength={2000}
+                maxLength={250}
                 rows={2}
                 onChange={(e) => setText(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); void send(); }
                 }}
               />
+              <p className="text-[10px] text-muted-foreground text-right -mt-1">{text.length}/250</p>
               <div className="flex items-center gap-2">
                 <label className="flex items-center gap-1.5 text-xs text-muted-foreground cursor-pointer hover:text-foreground">
                   <ImageIcon className="h-3.5 w-3.5" />
