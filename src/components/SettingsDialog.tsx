@@ -6,6 +6,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Volume2, VolumeX, Sun, Moon, LogOut, Trash2, ImageIcon, BarChart3 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -89,6 +90,7 @@ export default function SettingsDialog({ open, onOpenChange, user, children }: S
       <DialogContent className="sm:max-w-sm">
         <DialogHeader>
           <DialogTitle>Instellingen</DialogTitle>
+          <DialogDescription className="sr-only">Beheer je voorkeuren en account.</DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
           <div className="flex items-center justify-between">
@@ -167,10 +169,13 @@ export default function SettingsDialog({ open, onOpenChange, user, children }: S
                         try {
                           const { error } = await supabase.functions.invoke("delete-account");
                           if (error) throw error;
-                          await supabase.auth.signOut();
+                          // User is already deleted server-side — clear local session only
+                          // (a normal signOut would POST /logout with a stale JWT and 403)
+                          await supabase.auth.signOut({ scope: "local" });
                           onOpenChange(false);
                           setShowDeleteConfirm(false);
                           toast.success("Account verwijderd");
+                          window.location.href = "/";
                         } catch (e: any) {
                           console.error(e);
                           toast.error("Kon account niet verwijderen. Probeer opnieuw.");
