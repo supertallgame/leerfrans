@@ -221,13 +221,6 @@ export default function HeadAdmin() {
               </div>
               <Switch checked={onboardingEnabled} onCheckedChange={toggleOnboarding} />
             </div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Star className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm font-medium">Obama Easter Egg</span>
-              </div>
-              <Switch checked={obamaEnabled} onCheckedChange={toggleObama} />
-            </div>
           </CardContent>
         </Card>
 
