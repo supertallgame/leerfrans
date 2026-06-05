@@ -402,6 +402,9 @@ export default function SupportDialog({ open, onOpenChange }: Props) {
           <DialogTitle>
             {report ? `Support: ${report.subject}` : isAnon ? "Bug melden (anoniem)" : "Support / Bug melden"}
           </DialogTitle>
+          <DialogDescription className="sr-only">
+            Support chat met het team
+          </DialogDescription>
         </DialogHeader>
 
         {loading ? (
