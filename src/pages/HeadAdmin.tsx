@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
-import { Shield, Home, ShieldPlus, ShieldMinus, Search, Users, ShieldCheck, Sparkles, Settings as SettingsIcon } from "lucide-react";
+import { Shield, Home, ShieldPlus, ShieldMinus, Search, Users, ShieldCheck, Sparkles, Settings as SettingsIcon, Star } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -36,6 +36,7 @@ export default function HeadAdmin() {
   const [searchQuery, setSearchQuery] = useState("");
   const [promoting, setPromoting] = useState<string | null>(null);
   const [onboardingEnabled, setOnboardingEnabled] = useState(false);
+  const [obamaEnabled, setObamaEnabled] = useState(false);
 
   useEffect(() => {
     checkAccess();
@@ -52,7 +53,7 @@ export default function HeadAdmin() {
     // Owners also have access
     if (OWNER_EMAILS.includes(session.user.email ?? "")) {
       setIsHeadAdmin(true);
-      await Promise.all([loadAllRoles(), loadUsers(), loadOnboardingSetting()]);
+      await Promise.all([loadAllRoles(), loadUsers(), loadOnboardingSetting(), loadObamaSetting()]);
       setLoading(false);
       return;
     }
@@ -71,7 +72,7 @@ export default function HeadAdmin() {
     }
 
     setIsHeadAdmin(true);
-    await Promise.all([loadAllRoles(), loadUsers(), loadOnboardingSetting()]);
+    await Promise.all([loadAllRoles(), loadUsers(), loadOnboardingSetting(), loadObamaSetting()]);
     setLoading(false);
   };
 
@@ -88,6 +89,20 @@ export default function HeadAdmin() {
     setOnboardingEnabled(checked);
     toast.success(checked ? "Onboarding ingeschakeld" : "Onboarding uitgeschakeld");
   };
+  const loadObamaSetting = async () => {
+    const { data } = await supabase.from("admin_settings").select("value").eq("key", "obama_enabled").maybeSingle();
+    if (data) setObamaEnabled(data.value === true);
+  };
+
+  const toggleObama = async (checked: boolean) => {
+    const { error } = await supabase
+      .from("admin_settings")
+      .upsert({ key: "obama_enabled", value: checked as any, updated_at: new Date().toISOString() } as any, { onConflict: "key" });
+    if (error) { toast.error("Kon instelling niet opslaan"); return; }
+    setObamaEnabled(checked);
+    toast.success(checked ? "Obama easter egg ingeschakeld" : "Obama easter egg uitgeschakeld");
+  };
+
 
 
   const loadAllRoles = async () => {
@@ -198,13 +213,20 @@ export default function HeadAdmin() {
               <SettingsIcon className="h-5 w-5 text-primary" /> Instellingen
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Sparkles className="h-4 w-4 text-muted-foreground" />
                 <span className="text-sm font-medium">Onboarding rondleiding (nieuwe accounts)</span>
               </div>
               <Switch checked={onboardingEnabled} onCheckedChange={toggleOnboarding} />
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Star className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-medium">Obama Easter Egg</span>
+              </div>
+              <Switch checked={obamaEnabled} onCheckedChange={toggleObama} />
             </div>
           </CardContent>
         </Card>
