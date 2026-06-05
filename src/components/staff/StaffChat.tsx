@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -244,6 +244,9 @@ export default function StaffChat({ open, onOpenChange }: Props) {
             <MessagesSquare className="h-5 w-5 text-primary" /> Staff Chat
             <span className="text-xs font-normal text-muted-foreground">({messages.length})</span>
           </DialogTitle>
+          <DialogDescription className="sr-only">
+            Interne chat voor het staff team
+          </DialogDescription>
         </DialogHeader>
 
         {loading ? (

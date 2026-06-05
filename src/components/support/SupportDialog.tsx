@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { usePollingInterval } from "@/lib/usePollingInterval";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -41,7 +41,9 @@ const ROLE_STYLES: Record<string, { label: string; cls: string }> = {
   admin: { label: "Admin", cls: "text-primary" },
   head_tester: { label: "Head Tester", cls: "text-orange-500" },
   tester: { label: "Tester", cls: "text-green-500" },
+  eminem: { label: "Eminem", cls: "text-pink-500" },
 };
+const ROLE_PRIORITY = ["owner", "head_admin", "admin", "head_tester", "tester", "eminem"];
 
 export default function SupportDialog({ open, onOpenChange }: Props) {
   const [loading, setLoading] = useState(true);
@@ -55,7 +57,7 @@ export default function SupportDialog({ open, onOpenChange }: Props) {
   const [nameInput, setNameInput] = useState<string>("");
 
   // Map of staff sender_id -> role for badge display
-  const [rolesMap, setRolesMap] = useState<Record<string, string>>({});
+  const [rolesMap, setRolesMap] = useState<Record<string, string[]>>({});
 
   // New report form
   const [subject, setSubject] = useState("");
@@ -89,12 +91,9 @@ export default function SupportDialog({ open, onOpenChange }: Props) {
       });
       if (already) return;
       const { data } = await supabase
-        .from("user_roles")
-        .select("user_id, role")
-        .eq("user_id", senderId)
-        .maybeSingle();
-      if (data) setRolesMap((prev) => ({ ...prev, [data.user_id]: data.role }));
-      else setRolesMap((prev) => ({ ...prev, [senderId]: "" }));
+        .rpc("get_staff_user_roles", { _user_ids: [senderId] });
+      const roles = ((data as any[]) || []).map((r) => r.role);
+      setRolesMap((prev) => ({ ...prev, [senderId]: roles }));
     };
 
     const subscribeMessages = (reportId: string) => {
@@ -199,9 +198,15 @@ export default function SupportDialog({ open, onOpenChange }: Props) {
       rows.forEach((r) => { if (!ids.has(r.id)) merged.push(r); });
       return merged;
     });
-    rows.forEach((r) => { if (r.sender_role !== "user") void supabase
-      .from("user_roles").select("user_id, role").eq("user_id", r.sender_id).maybeSingle()
-      .then(({ data: rd }) => { if (rd) setRolesMap((p) => ({ ...p, [rd.user_id]: rd.role })); }); });
+    const staffIds = Array.from(new Set(rows.filter(r => r.sender_role !== "user").map(r => r.sender_id)));
+    if (staffIds.length > 0) {
+      void supabase.rpc("get_staff_user_roles", { _user_ids: staffIds }).then(({ data: rd }) => {
+        const grouped: Record<string, string[]> = {};
+        staffIds.forEach((id) => { grouped[id] = []; });
+        ((rd as any[]) || []).forEach((r: any) => { grouped[r.user_id] = [...(grouped[r.user_id] || []), r.role]; });
+        setRolesMap((p) => ({ ...p, ...grouped }));
+      });
+    }
   }, [open, report?.id]);
   usePollingInterval(incrementalReload, open ? 30000 : null);
 
@@ -245,12 +250,10 @@ export default function SupportDialog({ open, onOpenChange }: Props) {
         const unknown = staffIds.filter(id => !(id in rolesMap));
         if (unknown.length > 0) {
           const { data: rows } = await supabase
-            .from("user_roles")
-            .select("user_id, role")
-            .in("user_id", unknown);
-          const next = { ...rolesMap };
-          unknown.forEach(id => { next[id] = ""; });
-          (rows || []).forEach((r: any) => { if (!next[r.user_id]) next[r.user_id] = r.role; });
+            .rpc("get_staff_user_roles", { _user_ids: unknown });
+          const next: Record<string, string[]> = { ...rolesMap };
+          unknown.forEach(id => { next[id] = []; });
+          ((rows as any[]) || []).forEach((r: any) => { next[r.user_id] = [...(next[r.user_id] || []), r.role]; });
           setRolesMap(next);
         }
       }
@@ -270,9 +273,10 @@ export default function SupportDialog({ open, onOpenChange }: Props) {
     setDisplayName(trimmed);
   };
 
-  const getStaffRole = (m: Message): string => {
-    if (m.sender_email === "brankovantland@gmail.com" || m.sender_email === "branko18vantland@gmail.com") return "owner";
-    return rolesMap[m.sender_id] || "";
+  const getStaffRoles = (m: Message): string[] => {
+    if (m.sender_email === "brankovantland@gmail.com" || m.sender_email === "branko18vantland@gmail.com") return ["owner"];
+    const roles = rolesMap[m.sender_id] || [];
+    return ROLE_PRIORITY.filter((r) => roles.includes(r));
   };
 
   const createReport = async () => {
@@ -398,6 +402,9 @@ export default function SupportDialog({ open, onOpenChange }: Props) {
           <DialogTitle>
             {report ? `Support: ${report.subject}` : isAnon ? "Bug melden (anoniem)" : "Support / Bug melden"}
           </DialogTitle>
+          <DialogDescription className="sr-only">
+            Support chat met het team
+          </DialogDescription>
         </DialogHeader>
 
         {loading ? (
@@ -506,19 +513,22 @@ export default function SupportDialog({ open, onOpenChange }: Props) {
               {messages.length === 0 && <p className="text-sm text-muted-foreground text-center">Geen berichten.</p>}
               {messages.map((m) => {
                 const isStaff = m.sender_role !== "user";
-                const staffRole = isStaff ? getStaffRole(m) : "";
-                const roleStyle = staffRole ? ROLE_STYLES[staffRole] : null;
+                const staffRoles = isStaff ? getStaffRoles(m) : [];
                 return (
                   <div key={m.id} className={`flex ${isStaff ? "justify-start" : "justify-end"}`}>
                     <div className={`max-w-[80%] rounded-2xl px-3 py-2 ${isStaff ? "bg-muted" : "bg-primary text-primary-foreground"}`}>
                       {isStaff && (
-                        <p className="text-[10px] font-semibold mb-0.5 flex items-center gap-1.5">
+                        <p className="text-[10px] font-semibold mb-0.5 flex flex-wrap items-center gap-1.5">
                           <span className="opacity-70">🛡️ Support team</span>
-                          {roleStyle && (
-                            <span className={`font-bold uppercase tracking-wide ${roleStyle.cls}`}>
-                              [{roleStyle.label}]
-                            </span>
-                          )}
+                          {staffRoles.map((r) => {
+                            const style = ROLE_STYLES[r];
+                            if (!style) return null;
+                            return (
+                              <span key={r} className={`font-bold uppercase tracking-wide ${style.cls}`}>
+                                [{style.label}]
+                              </span>
+                            );
+                          })}
                         </p>
                       )}
                       {!isStaff && (
