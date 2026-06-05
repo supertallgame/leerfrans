@@ -6,6 +6,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Volume2, VolumeX, Sun, Moon, LogOut, Trash2, ImageIcon, BarChart3 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
