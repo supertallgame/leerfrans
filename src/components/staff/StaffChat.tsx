@@ -310,7 +310,7 @@ export default function StaffChat({ open, onOpenChange }: Props) {
               <Textarea
                 placeholder="Bericht aan team..."
                 value={text}
-                maxLength={2000}
+                maxLength={250}
                 rows={2}
                 onChange={(e) => setText(e.target.value)}
                 onKeyDown={(e) => {
