@@ -71,9 +71,25 @@ export default function HeadAdmin() {
     }
 
     setIsHeadAdmin(true);
-    await Promise.all([loadAllRoles(), loadUsers()]);
+    await Promise.all([loadAllRoles(), loadUsers(), loadOnboardingSetting()]);
     setLoading(false);
   };
+
+  const loadOnboardingSetting = async () => {
+    const { data } = await supabase.from("admin_settings").select("value").eq("key", "onboarding_enabled").maybeSingle();
+    if (data) setOnboardingEnabled(data.value === true);
+  };
+
+  const toggleOnboarding = async (checked: boolean) => {
+    const { error } = await supabase
+      .from("admin_settings")
+      .upsert({ key: "onboarding_enabled", value: checked as any, updated_at: new Date().toISOString() } as any, { onConflict: "key" });
+    if (error) { toast.error("Kon instelling niet opslaan"); return; }
+    setOnboardingEnabled(checked);
+    toast.success(checked ? "Onboarding ingeschakeld" : "Onboarding uitgeschakeld");
+  };
+
+  const _placeholder = () => {
 
   const loadAllRoles = async () => {
     const { data, error } = await supabase
