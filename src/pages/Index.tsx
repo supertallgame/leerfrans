@@ -149,6 +149,7 @@ const Index = () => {
       if (Array.isArray(data.disabled_niveaus)) setDisabledNiveaus(data.disabled_niveaus as string[]);
       setPolarExpressEnabled(data.polar_express_enabled === true);
       setObamaEnabled(data.obama_enabled === true);
+      setOnboardingEnabled(data.onboarding_enabled === true);
     });
   };
 
