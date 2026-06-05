@@ -80,7 +80,7 @@ export default function SettingsDialog({ open, onOpenChange, user, children }: S
   };
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    await safeSignOut();
     onOpenChange(false);
     toast.success("Uitgelogd");
   };
