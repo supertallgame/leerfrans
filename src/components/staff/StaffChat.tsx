@@ -94,13 +94,17 @@ export default function StaffChat({ open, onOpenChange }: Props) {
           const row: any = payload.new || payload.old;
           if (!row?.user_id) return;
           supabase
-            .from("user_roles")
-            .select("role")
-            .eq("user_id", row.user_id)
+            .rpc("get_staff_user_roles", { _user_ids: [row.user_id] })
             .then(({ data }) => {
-              const roles = (data || []).map((r: any) => r.role);
+              const roles = ((data as any[]) || []).map((r) => r.role);
               setRolesMap((prev) => ({ ...prev, [row.user_id]: roles }));
             });
+          // If it's the current user's row, also refresh their own staff role label
+          if (user && row.user_id === user.id) {
+            supabase.rpc("get_my_staff_role").then(({ data }) => {
+              if (data) setUser((u) => (u ? { ...u, role: data as string } : u));
+            });
+          }
         }
       )
       .subscribe();
