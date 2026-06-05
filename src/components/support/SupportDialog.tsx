@@ -57,7 +57,7 @@ export default function SupportDialog({ open, onOpenChange }: Props) {
   const [nameInput, setNameInput] = useState<string>("");
 
   // Map of staff sender_id -> role for badge display
-  const [rolesMap, setRolesMap] = useState<Record<string, string>>({});
+  const [rolesMap, setRolesMap] = useState<Record<string, string[]>>({});
 
   // New report form
   const [subject, setSubject] = useState("");
