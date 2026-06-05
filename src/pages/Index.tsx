@@ -3,7 +3,7 @@ import { useThemeSync } from "@/hooks/use-theme-sync";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { BookOpen, Brain, Puzzle, Keyboard, Users, PenTool, MessageSquare, Bot, Settings, Star, Lock, BookMarked, FlaskConical, CheckCircle, Layers, Microscope, Bone, Clock, BookType, Map, ShieldCheck, GraduationCap, Hash, BookText, LifeBuoy, ShieldQuestion, MessagesSquare } from "lucide-react";
+import { BookOpen, Brain, Puzzle, Keyboard, Users, PenTool, MessageSquare, Bot, Settings, Star, Lock, BookMarked, FlaskConical, CheckCircle, Layers, Microscope, Bone, Clock, BookType, Map, ShieldCheck, GraduationCap, Hash, BookText, LifeBuoy, ShieldQuestion, MessagesSquare, Music2, VolumeX } from "lucide-react";
 import polarExpressImg from "@/assets/polar-express.png";
 import { FlagNL, FlagFR } from "@/components/Flags";
 import { getChaptersForLanguage, getChapter, getForeignLabel, getForeignLabelNative, Language, Niveau } from "@/data/vocabulary";
