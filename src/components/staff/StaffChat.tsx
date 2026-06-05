@@ -156,7 +156,7 @@ export default function StaffChat({ open, onOpenChange }: Props) {
         setSending(false);
         return;
       }
-      const path = `staff/${user.id}/${Date.now()}.${ext}`;
+      const path = `${user.id}/staff/${Date.now()}.${ext}`;
       const { error: upErr } = await supabase.storage.from("support-uploads").upload(path, image);
       if (upErr) {
         toast.error("Upload mislukt");
