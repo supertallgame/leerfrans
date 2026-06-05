@@ -36,7 +36,6 @@ export default function HeadAdmin() {
   const [searchQuery, setSearchQuery] = useState("");
   const [promoting, setPromoting] = useState<string | null>(null);
   const [onboardingEnabled, setOnboardingEnabled] = useState(false);
-  const [obamaEnabled, setObamaEnabled] = useState(false);
 
   useEffect(() => {
     checkAccess();
@@ -53,7 +52,7 @@ export default function HeadAdmin() {
     // Owners also have access
     if (OWNER_EMAILS.includes(session.user.email ?? "")) {
       setIsHeadAdmin(true);
-      await Promise.all([loadAllRoles(), loadUsers(), loadOnboardingSetting(), loadObamaSetting()]);
+      await Promise.all([loadAllRoles(), loadUsers(), loadOnboardingSetting()]);
       setLoading(false);
       return;
     }
@@ -72,7 +71,7 @@ export default function HeadAdmin() {
     }
 
     setIsHeadAdmin(true);
-    await Promise.all([loadAllRoles(), loadUsers(), loadOnboardingSetting(), loadObamaSetting()]);
+    await Promise.all([loadAllRoles(), loadUsers(), loadOnboardingSetting()]);
     setLoading(false);
   };
 
@@ -88,19 +87,6 @@ export default function HeadAdmin() {
     if (error) { toast.error("Kon instelling niet opslaan"); return; }
     setOnboardingEnabled(checked);
     toast.success(checked ? "Onboarding ingeschakeld" : "Onboarding uitgeschakeld");
-  };
-  const loadObamaSetting = async () => {
-    const { data } = await supabase.from("admin_settings").select("value").eq("key", "obama_enabled").maybeSingle();
-    if (data) setObamaEnabled(data.value === true);
-  };
-
-  const toggleObama = async (checked: boolean) => {
-    const { error } = await supabase
-      .from("admin_settings")
-      .upsert({ key: "obama_enabled", value: checked as any, updated_at: new Date().toISOString() } as any, { onConflict: "key" });
-    if (error) { toast.error("Kon instelling niet opslaan"); return; }
-    setObamaEnabled(checked);
-    toast.success(checked ? "Obama easter egg ingeschakeld" : "Obama easter egg uitgeschakeld");
   };
 
 
@@ -220,13 +206,6 @@ export default function HeadAdmin() {
                 <span className="text-sm font-medium">Onboarding rondleiding (nieuwe accounts)</span>
               </div>
               <Switch checked={onboardingEnabled} onCheckedChange={toggleOnboarding} />
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Star className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm font-medium">Obama Easter Egg</span>
-              </div>
-              <Switch checked={obamaEnabled} onCheckedChange={toggleObama} />
             </div>
           </CardContent>
         </Card>

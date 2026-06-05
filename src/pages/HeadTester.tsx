@@ -24,6 +24,7 @@ export default function HeadTester() {
   const [hasAccess, setHasAccess] = useState(false);
   const [adminMode, setAdminMode] = useState(false);
   const [polarExpressEnabled, setPolarExpressEnabled] = useState(false);
+  const [obamaEnabled, setObamaEnabled] = useState(false);
   const [disabledNiveaus, setDisabledNiveaus] = useState<string[]>([]);
 
   const [users, setUsers] = useState<{ id: string; email: string; created_at: string }[]>([]);
@@ -76,12 +77,14 @@ export default function HeadTester() {
   };
 
   const loadSettings = async () => {
-    const [polar, niv] = await Promise.all([
+    const [polar, niv, obama] = await Promise.all([
       supabase.from("admin_settings").select("value").eq("key", "polar_express_enabled").maybeSingle(),
       supabase.from("admin_settings").select("value").eq("key", "disabled_niveaus").maybeSingle(),
+      supabase.from("admin_settings").select("value").eq("key", "obama_enabled").maybeSingle(),
     ]);
     if (polar.data) setPolarExpressEnabled(polar.data.value === true);
     if (niv.data && Array.isArray(niv.data.value)) setDisabledNiveaus(niv.data.value as string[]);
+    if (obama.data) setObamaEnabled(obama.data.value === true);
   };
 
   const loadUsers = async () => {
@@ -109,6 +112,13 @@ export default function HeadTester() {
     if (error) return toast.error("Kon niet opslaan");
     setPolarExpressEnabled(v);
     toast.success(v ? "Polar Express aan" : "Polar Express uit");
+  };
+
+  const toggleObama = async (v: boolean) => {
+    const { error } = await supabase.from("admin_settings").upsert({ key: "obama_enabled", value: v as any, updated_at: new Date().toISOString() } as any, { onConflict: "key" });
+    if (error) return toast.error("Kon niet opslaan");
+    setObamaEnabled(v);
+    toast.success(v ? "Obama easter egg aan" : "Obama easter egg uit");
   };
 
   const toggleNiveau = async (id: string, enabled: boolean) => {
@@ -331,6 +341,10 @@ export default function HeadTester() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2"><Train className="h-4 w-4 text-muted-foreground" /><span className="text-sm font-medium">Polar Express Easter Egg</span></div>
                   <Switch checked={polarExpressEnabled} onCheckedChange={togglePolar} />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2"><Star className="h-4 w-4 text-muted-foreground" /><span className="text-sm font-medium">Obama Easter Egg</span></div>
+                  <Switch checked={obamaEnabled} onCheckedChange={toggleObama} />
                 </div>
                 <div className="border-t pt-3 space-y-2">
                   <p className="text-xs font-medium text-muted-foreground flex items-center gap-1"><GraduationCap className="h-3 w-3" /> Niveaus</p>
