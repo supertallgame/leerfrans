@@ -77,12 +77,14 @@ export default function HeadTester() {
   };
 
   const loadSettings = async () => {
-    const [polar, niv] = await Promise.all([
+    const [polar, niv, obama] = await Promise.all([
       supabase.from("admin_settings").select("value").eq("key", "polar_express_enabled").maybeSingle(),
       supabase.from("admin_settings").select("value").eq("key", "disabled_niveaus").maybeSingle(),
+      supabase.from("admin_settings").select("value").eq("key", "obama_enabled").maybeSingle(),
     ]);
     if (polar.data) setPolarExpressEnabled(polar.data.value === true);
     if (niv.data && Array.isArray(niv.data.value)) setDisabledNiveaus(niv.data.value as string[]);
+    if (obama.data) setObamaEnabled(obama.data.value === true);
   };
 
   const loadUsers = async () => {
