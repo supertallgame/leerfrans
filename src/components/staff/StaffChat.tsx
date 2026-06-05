@@ -226,6 +226,16 @@ export default function StaffChat({ open, onOpenChange }: Props) {
     return roles.filter(r => ROLE_STYLES[r]).sort((a, b) => ROLE_ORDER.indexOf(a) - ROLE_ORDER.indexOf(b));
   };
 
+  // Parse image_url field: supports legacy single URL or JSON array of URLs
+  const parseImageUrls = (raw: string | null): string[] => {
+    if (!raw) return [];
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed.filter((u) => typeof u === "string");
+    } catch { /* not JSON — treat as legacy single URL */ }
+    return [raw];
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
