@@ -699,6 +699,7 @@ const Index = () => {
       <AdminApplyDialog open={showApply} onOpenChange={setShowApply} />
       <StaffChat open={showStaffChat} onOpenChange={setShowStaffChat} />
 
+      {showOnboarding && <OnboardingTour steps={tourSteps} onClose={finishOnboarding} />}
       <SettingsDialog open={showSettings} onOpenChange={setShowSettings} user={user}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
