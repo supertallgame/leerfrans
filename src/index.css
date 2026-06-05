@@ -137,6 +137,27 @@
   background-color: transparent !important;
 }
 
+/* Obama-mode readability: only affects obama mode, leaves light/dark untouched.
+   Adds a strong dark text-shadow so text pops against the photo background. */
+.obama-mode,
+.obama-mode * {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.95), 0 0 8px rgba(0, 0, 0, 0.8);
+}
+/* Don't apply text-shadow inside elements that have their own solid background
+   (cards, dialogs, buttons) — they're already readable. */
+.obama-mode .bg-card,
+.obama-mode .bg-card *,
+.obama-mode .bg-background,
+.obama-mode .bg-background *,
+.obama-mode .bg-popover,
+.obama-mode .bg-popover *,
+.obama-mode [role="dialog"],
+.obama-mode [role="dialog"] *,
+.obama-mode button,
+.obama-mode button * {
+  text-shadow: none;
+}
+
 @keyframes countdown-pop {
   0% {
     transform: scale(2.5);

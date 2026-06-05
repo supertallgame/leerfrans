@@ -13,6 +13,7 @@ import StaffChat from "@/components/staff/StaffChat";
 import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { setDebugLogging } from "@/lib/debug";
 
 const OWNER_EMAILS = ["brankovantland@gmail.com", "branko18vantland@gmail.com"];
 
@@ -127,6 +128,7 @@ export default function Owner() {
   const [disabledNiveaus, setDisabledNiveaus] = useState<string[]>([]);
   const [polarExpressEnabled, setPolarExpressEnabled] = useState(false);
   const [onboardingEnabled, setOnboardingEnabled] = useState(false);
+  const [debugLogs, setDebugLogs] = useState(() => typeof window !== "undefined" && localStorage.getItem("debug_logs") === "true");
 
   // Poll management
   const [polls, setPolls] = useState<any[]>([]);
@@ -775,6 +777,20 @@ export default function Owner() {
                 <span className="text-sm font-medium">Onboarding rondleiding (nieuwe accounts)</span>
               </div>
               <Switch checked={onboardingEnabled} onCheckedChange={toggleOnboarding} />
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Bot className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-medium">Debug console logs (alleen jouw browser)</span>
+              </div>
+              <Switch
+                checked={debugLogs}
+                onCheckedChange={(v) => {
+                  setDebugLogs(v);
+                  setDebugLogging(v);
+                  toast.success(v ? "Console logs aan" : "Console logs uit");
+                }}
+              />
             </div>
           </CardContent>
         </Card>
