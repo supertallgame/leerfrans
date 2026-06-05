@@ -46,8 +46,8 @@ export default function StaffChat({ open, onOpenChange }: Props) {
   // Per-session display name; cleared every time the dialog opens fresh.
   const [displayName, setDisplayName] = useState<string>("");
   const [nameInput, setNameInput] = useState<string>("");
-  // Map of sender_id -> role, fetched once for visible messages.
-  const [rolesMap, setRolesMap] = useState<Record<string, string>>({});
+  // Map of sender_id -> array of roles, fetched once for visible messages.
+  const [rolesMap, setRolesMap] = useState<Record<string, string[]>>({});
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
