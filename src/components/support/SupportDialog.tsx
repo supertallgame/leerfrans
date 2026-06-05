@@ -510,19 +510,22 @@ export default function SupportDialog({ open, onOpenChange }: Props) {
               {messages.length === 0 && <p className="text-sm text-muted-foreground text-center">Geen berichten.</p>}
               {messages.map((m) => {
                 const isStaff = m.sender_role !== "user";
-                const staffRole = isStaff ? getStaffRole(m) : "";
-                const roleStyle = staffRole ? ROLE_STYLES[staffRole] : null;
+                const staffRoles = isStaff ? getStaffRoles(m) : [];
                 return (
                   <div key={m.id} className={`flex ${isStaff ? "justify-start" : "justify-end"}`}>
                     <div className={`max-w-[80%] rounded-2xl px-3 py-2 ${isStaff ? "bg-muted" : "bg-primary text-primary-foreground"}`}>
                       {isStaff && (
-                        <p className="text-[10px] font-semibold mb-0.5 flex items-center gap-1.5">
+                        <p className="text-[10px] font-semibold mb-0.5 flex flex-wrap items-center gap-1.5">
                           <span className="opacity-70">🛡️ Support team</span>
-                          {roleStyle && (
-                            <span className={`font-bold uppercase tracking-wide ${roleStyle.cls}`}>
-                              [{roleStyle.label}]
-                            </span>
-                          )}
+                          {staffRoles.map((r) => {
+                            const style = ROLE_STYLES[r];
+                            if (!style) return null;
+                            return (
+                              <span key={r} className={`font-bold uppercase tracking-wide ${style.cls}`}>
+                                [{style.label}]
+                              </span>
+                            );
+                          })}
                         </p>
                       )}
                       {!isStaff && (
