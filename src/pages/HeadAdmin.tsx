@@ -36,6 +36,7 @@ export default function HeadAdmin() {
   const [searchQuery, setSearchQuery] = useState("");
   const [promoting, setPromoting] = useState<string | null>(null);
   const [onboardingEnabled, setOnboardingEnabled] = useState(false);
+  const [obamaEnabled, setObamaEnabled] = useState(false);
 
   useEffect(() => {
     checkAccess();
@@ -52,7 +53,7 @@ export default function HeadAdmin() {
     // Owners also have access
     if (OWNER_EMAILS.includes(session.user.email ?? "")) {
       setIsHeadAdmin(true);
-      await Promise.all([loadAllRoles(), loadUsers(), loadOnboardingSetting()]);
+      await Promise.all([loadAllRoles(), loadUsers(), loadOnboardingSetting(), loadObamaSetting()]);
       setLoading(false);
       return;
     }
@@ -71,7 +72,7 @@ export default function HeadAdmin() {
     }
 
     setIsHeadAdmin(true);
-    await Promise.all([loadAllRoles(), loadUsers(), loadOnboardingSetting()]);
+    await Promise.all([loadAllRoles(), loadUsers(), loadOnboardingSetting(), loadObamaSetting()]);
     setLoading(false);
   };
 
