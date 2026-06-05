@@ -13,6 +13,7 @@ import StaffChat from "@/components/staff/StaffChat";
 import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { setDebugLogging } from "@/lib/debug";
 
 const OWNER_EMAILS = ["brankovantland@gmail.com", "branko18vantland@gmail.com"];
 
