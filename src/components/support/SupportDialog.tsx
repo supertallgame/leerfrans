@@ -41,7 +41,9 @@ const ROLE_STYLES: Record<string, { label: string; cls: string }> = {
   admin: { label: "Admin", cls: "text-primary" },
   head_tester: { label: "Head Tester", cls: "text-orange-500" },
   tester: { label: "Tester", cls: "text-green-500" },
+  eminem: { label: "Eminem", cls: "text-pink-500" },
 };
+const ROLE_PRIORITY = ["owner", "head_admin", "admin", "head_tester", "tester", "eminem"];
 
 export default function SupportDialog({ open, onOpenChange }: Props) {
   const [loading, setLoading] = useState(true);
