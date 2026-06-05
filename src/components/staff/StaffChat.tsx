@@ -117,8 +117,12 @@ export default function StaffChat({ open, onOpenChange }: Props) {
   }, [open]);
 
   useEffect(() => {
-    if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-  }, [messages.length]);
+    if (loading || !displayName) return;
+    // Defer to next frame so the messages list has mounted/rendered first
+    requestAnimationFrame(() => {
+      if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    });
+  }, [messages.length, loading, displayName]);
 
   const init = async () => {
     setLoading(true);
