@@ -778,6 +778,20 @@ export default function Owner() {
               </div>
               <Switch checked={onboardingEnabled} onCheckedChange={toggleOnboarding} />
             </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Bot className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-medium">Debug console logs (alleen jouw browser)</span>
+              </div>
+              <Switch
+                checked={debugLogs}
+                onCheckedChange={(v) => {
+                  setDebugLogs(v);
+                  setDebugLogging(v);
+                  toast.success(v ? "Console logs aan" : "Console logs uit");
+                }}
+              />
+            </div>
           </CardContent>
         </Card>
 
