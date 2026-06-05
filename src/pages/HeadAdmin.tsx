@@ -191,6 +191,24 @@ export default function HeadAdmin() {
           </Button>
         </div>
 
+        {/* App settings */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <SettingsIcon className="h-5 w-5 text-primary" /> Instellingen
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Sparkles className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-medium">Onboarding rondleiding (nieuwe accounts)</span>
+              </div>
+              <Switch checked={onboardingEnabled} onCheckedChange={toggleOnboarding} />
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Current Admins */}
         <Card>
           <CardHeader>
