@@ -194,7 +194,7 @@ export default function StaffChat({ open, onOpenChange }: Props) {
       sender_id: user.id,
       sender_email: user.email,
       sender_display: displayName,
-      message: text.trim().slice(0, 2000),
+      message: text.trim().slice(0, 250),
       image_url: imageUrl,
     });
     if (error) toast.error(error.message);
