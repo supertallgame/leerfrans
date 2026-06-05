@@ -128,6 +128,8 @@ const Index = () => {
   const [showSupport, setShowSupport] = useState(false);
   const [showApply, setShowApply] = useState(false);
   const [showStaffChat, setShowStaffChat] = useState(false);
+  const [onboardingEnabled, setOnboardingEnabled] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   const chaptersForLanguage = getChaptersForLanguage(language, niveau);
   const foreignLabel = getForeignLabel(language);
