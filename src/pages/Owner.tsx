@@ -769,6 +769,13 @@ export default function Owner() {
               </div>
               <Switch checked={polarExpressEnabled} onCheckedChange={togglePolarExpress} />
             </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Sparkles className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-medium">Onboarding rondleiding (nieuwe accounts)</span>
+              </div>
+              <Switch checked={onboardingEnabled} onCheckedChange={toggleOnboarding} />
+            </div>
           </CardContent>
         </Card>
 
