@@ -273,9 +273,10 @@ export default function SupportDialog({ open, onOpenChange }: Props) {
     setDisplayName(trimmed);
   };
 
-  const getStaffRole = (m: Message): string => {
-    if (m.sender_email === "brankovantland@gmail.com" || m.sender_email === "branko18vantland@gmail.com") return "owner";
-    return rolesMap[m.sender_id] || "";
+  const getStaffRoles = (m: Message): string[] => {
+    if (m.sender_email === "brankovantland@gmail.com" || m.sender_email === "branko18vantland@gmail.com") return ["owner"];
+    const roles = rolesMap[m.sender_id] || [];
+    return ROLE_PRIORITY.filter((r) => roles.includes(r));
   };
 
   const createReport = async () => {
