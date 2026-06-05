@@ -114,6 +114,13 @@ export default function HeadTester() {
     toast.success(v ? "Polar Express aan" : "Polar Express uit");
   };
 
+  const toggleObama = async (v: boolean) => {
+    const { error } = await supabase.from("admin_settings").upsert({ key: "obama_enabled", value: v as any, updated_at: new Date().toISOString() } as any, { onConflict: "key" });
+    if (error) return toast.error("Kon niet opslaan");
+    setObamaEnabled(v);
+    toast.success(v ? "Obama easter egg aan" : "Obama easter egg uit");
+  };
+
   const toggleNiveau = async (id: string, enabled: boolean) => {
     const next = enabled ? disabledNiveaus.filter((n) => n !== id) : [...disabledNiveaus, id];
     const { error } = await supabase.from("admin_settings").upsert({ key: "disabled_niveaus", value: next as any, updated_at: new Date().toISOString() } as any, { onConflict: "key" });
