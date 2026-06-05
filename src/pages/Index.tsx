@@ -131,6 +131,8 @@ const Index = () => {
   const [showStaffChat, setShowStaffChat] = useState(false);
   const [onboardingEnabled, setOnboardingEnabled] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [isEminem, setIsEminem] = useState(false);
+  const [eminemMusicOn, setEminemMusicOn] = useState(false);
 
   const chaptersForLanguage = getChaptersForLanguage(language, niveau);
   const foreignLabel = getForeignLabel(language);
