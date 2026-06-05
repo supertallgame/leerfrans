@@ -24,14 +24,17 @@ interface Props {
 
 const SESSION_NAME_KEY = "staff_chat_username";
 
-// Role display config — single source of truth so support + chat stay in sync
+// Role display config — single source of truth so support + chat stay in sync.
+// Order defines render priority (owner first, eminem last).
 const ROLE_STYLES: Record<string, { label: string; cls: string }> = {
   owner: { label: "Owner", cls: "text-destructive" },
   head_admin: { label: "Head Admin", cls: "text-purple-500" },
   admin: { label: "Admin", cls: "text-primary" },
   head_tester: { label: "Head Tester", cls: "text-orange-500" },
   tester: { label: "Tester", cls: "text-green-500" },
+  eminem: { label: "Eminem", cls: "text-pink-500" },
 };
+const ROLE_ORDER = ["owner", "head_admin", "admin", "head_tester", "tester", "eminem"];
 
 export default function StaffChat({ open, onOpenChange }: Props) {
   const [messages, setMessages] = useState<Message[]>([]);
