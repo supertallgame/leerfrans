@@ -250,12 +250,10 @@ export default function SupportDialog({ open, onOpenChange }: Props) {
         const unknown = staffIds.filter(id => !(id in rolesMap));
         if (unknown.length > 0) {
           const { data: rows } = await supabase
-            .from("user_roles")
-            .select("user_id, role")
-            .in("user_id", unknown);
-          const next = { ...rolesMap };
-          unknown.forEach(id => { next[id] = ""; });
-          (rows || []).forEach((r: any) => { if (!next[r.user_id]) next[r.user_id] = r.role; });
+            .rpc("get_staff_user_roles", { _user_ids: unknown });
+          const next: Record<string, string[]> = { ...rolesMap };
+          unknown.forEach(id => { next[id] = []; });
+          ((rows as any[]) || []).forEach((r: any) => { next[r.user_id] = [...(next[r.user_id] || []), r.role]; });
           setRolesMap(next);
         }
       }
