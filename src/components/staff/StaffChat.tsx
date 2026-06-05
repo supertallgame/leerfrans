@@ -86,7 +86,31 @@ export default function StaffChat({ open, onOpenChange }: Props) {
       )
       .subscribe();
 
-    return () => { void supabase.removeChannel(channel); };
+    // Listen for role grants/removals so badges (Eminem, etc.) appear live without reload
+    const rolesChannel = supabase
+      .channel("admin_chat_user_roles")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "user_roles" },
+        (payload) => {
+          const row: any = payload.new || payload.old;
+          if (!row?.user_id) return;
+          supabase
+            .from("user_roles")
+            .select("role")
+            .eq("user_id", row.user_id)
+            .then(({ data }) => {
+              const roles = (data || []).map((r: any) => r.role);
+              setRolesMap((prev) => ({ ...prev, [row.user_id]: roles }));
+            });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      void supabase.removeChannel(channel);
+      void supabase.removeChannel(rolesChannel);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
