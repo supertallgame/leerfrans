@@ -133,7 +133,7 @@ export default function StaffChat({ open, onOpenChange }: Props) {
       return;
     }
     setDisplayName(trimmed);
-    sessionStorage.setItem(SESSION_NAME_KEY, trimmed);
+    localStorage.setItem(SESSION_NAME_KEY, trimmed);
   };
 
   const send = async () => {
