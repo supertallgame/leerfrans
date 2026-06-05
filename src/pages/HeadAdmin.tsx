@@ -213,7 +213,7 @@ export default function HeadAdmin() {
               <SettingsIcon className="h-5 w-5 text-primary" /> Instellingen
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Sparkles className="h-4 w-4 text-muted-foreground" />
