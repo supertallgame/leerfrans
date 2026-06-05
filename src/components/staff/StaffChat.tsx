@@ -75,10 +75,10 @@ export default function StaffChat({ open, onOpenChange }: Props) {
               .from("user_roles")
               .select("user_id, role")
               .eq("user_id", row.sender_id)
-              .single()
               .then(({ data }) => {
                 if (data) {
-                  setRolesMap((prev) => ({ ...prev, [data.user_id]: data.role }));
+                  const roles = data.map((r: any) => r.role);
+                  setRolesMap((prev) => ({ ...prev, [row.sender_id]: roles }));
                 }
               });
           }
