@@ -90,6 +90,7 @@ export default function SettingsDialog({ open, onOpenChange, user, children }: S
       <DialogContent className="sm:max-w-sm">
         <DialogHeader>
           <DialogTitle>Instellingen</DialogTitle>
+          <DialogDescription className="sr-only">Beheer je voorkeuren en account.</DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
           <div className="flex items-center justify-between">
