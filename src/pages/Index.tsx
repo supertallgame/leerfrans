@@ -405,6 +405,7 @@ const Index = () => {
           {/* Language, niveau & chapter badges */}
           <div className="flex items-center justify-center gap-2 flex-wrap">
             <button
+              data-tour="subject-pill"
               onClick={() => setShowLanguagePicker(true)}
               className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors cursor-pointer"
             >
@@ -413,6 +414,7 @@ const Index = () => {
             </button>
             {(language === "french" || language === "english") && (
               <button
+                data-tour="niveau-pill"
                 onClick={() => setShowNiveauPicker(true)}
                 className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors cursor-pointer"
               >
@@ -421,6 +423,7 @@ const Index = () => {
               </button>
             )}
             <button
+              data-tour="chapter-pill"
               onClick={() => setShowChapterPicker(true)}
               className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors cursor-pointer"
             >
@@ -429,6 +432,7 @@ const Index = () => {
             </button>
             {availableSections.length > 0 && (
               <button
+                data-tour="section-pill"
                 onClick={() => setShowSectionPicker(true)}
                 className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors cursor-pointer"
               >
@@ -441,7 +445,7 @@ const Index = () => {
 
         <UpdateBanner />
 
-        <div className="grid grid-cols-2 sm:grid-cols-2 gap-2.5 md:gap-4 w-full">
+        <div data-tour="game-grid" className="grid grid-cols-2 sm:grid-cols-2 gap-2.5 md:gap-4 w-full">
           {games.map((game) => (
             <Card
               key={game.id}
