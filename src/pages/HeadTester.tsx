@@ -342,6 +342,10 @@ export default function HeadTester() {
                   <div className="flex items-center gap-2"><Train className="h-4 w-4 text-muted-foreground" /><span className="text-sm font-medium">Polar Express Easter Egg</span></div>
                   <Switch checked={polarExpressEnabled} onCheckedChange={togglePolar} />
                 </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2"><Star className="h-4 w-4 text-muted-foreground" /><span className="text-sm font-medium">Obama Easter Egg</span></div>
+                  <Switch checked={obamaEnabled} onCheckedChange={toggleObama} />
+                </div>
                 <div className="border-t pt-3 space-y-2">
                   <p className="text-xs font-medium text-muted-foreground flex items-center gap-1"><GraduationCap className="h-3 w-3" /> Niveaus</p>
                   {[{ id: "vmbo-havo", label: "VMBO-HAVO" }, { id: "havo-vwo", label: "HAVO-VWO" }].map(n => (
