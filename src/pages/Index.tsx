@@ -167,7 +167,7 @@ const Index = () => {
             const cached = JSON.parse(raw);
             if (typeof cached.ts === "number" && Date.now() - cached.ts < ONE_HOUR) {
               if (cached.banned) {
-                supabase.auth.signOut();
+                safeSignOut();
                 window.location.reload();
               }
               return;
