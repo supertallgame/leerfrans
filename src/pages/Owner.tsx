@@ -127,6 +127,7 @@ export default function Owner() {
   const [disabledNiveaus, setDisabledNiveaus] = useState<string[]>([]);
   const [polarExpressEnabled, setPolarExpressEnabled] = useState(false);
   const [onboardingEnabled, setOnboardingEnabled] = useState(false);
+  const [debugLogs, setDebugLogs] = useState(() => typeof window !== "undefined" && localStorage.getItem("debug_logs") === "true");
 
   // Poll management
   const [polls, setPolls] = useState<any[]>([]);
