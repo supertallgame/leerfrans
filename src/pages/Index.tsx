@@ -134,6 +134,11 @@ const Index = () => {
   const [isEminem, setIsEminem] = useState(false);
   const [eminemMusicOn, setEminemMusicOn] = useState(false);
 
+  // Auto-stop Eminem music when returning to the menu
+  useEffect(() => {
+    if (activeGame === "menu" && eminemMusicOn) setEminemMusicOn(false);
+  }, [activeGame]);
+
   const chaptersForLanguage = getChaptersForLanguage(language, niveau);
   const foreignLabel = getForeignLabel(language);
   const foreignLabelNative = getForeignLabelNative(language);
