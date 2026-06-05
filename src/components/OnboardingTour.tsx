@@ -79,7 +79,7 @@ export default function OnboardingTour({ steps, onClose }: Props) {
   const last = index === steps.length - 1;
 
   return createPortal(
-    <div className="fixed inset-0 z-[100]" aria-live="polite">
+    <div className="fixed inset-0 z-[100] pointer-events-none" aria-live="polite">
       {/* Dim overlay with spotlight cut-out via box-shadow */}
       {spotlight ? (
         <div
@@ -95,12 +95,12 @@ export default function OnboardingTour({ steps, onClose }: Props) {
           }}
         />
       ) : (
-        <div className="absolute inset-0 bg-background/85" />
+        <div className="absolute inset-0 bg-background/85 pointer-events-none" />
       )}
 
       {/* Tooltip */}
       <div
-        className="absolute rounded-xl border border-border bg-card text-card-foreground shadow-2xl p-4 animate-in fade-in zoom-in-95"
+        className="absolute rounded-xl border border-border bg-card text-card-foreground shadow-2xl p-4 animate-in fade-in zoom-in-95 pointer-events-auto"
         style={{ top: tooltipTop, left: tooltipLeft, width: tooltipWidth }}
       >
         <button
