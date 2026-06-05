@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/dialog";
 import AuthDialog from "@/components/AuthDialog";
 import { supabase } from "@/integrations/supabase/client";
+import { safeSignOut } from "@/lib/auth";
 import { usePollingInterval } from "@/lib/usePollingInterval";
 import { toast } from "sonner";
 import UpdateBanner from "@/components/UpdateBanner";
