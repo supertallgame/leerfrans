@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Volume2, VolumeX, Sun, Moon, LogOut, Trash2, ImageIcon, BarChart3 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { safeSignOut } from "@/lib/auth";
 import { isSoundEnabled, setSoundEnabled } from "@/lib/sounds";
 import { fireConfetti } from "@/lib/confetti";
 import { toast } from "sonner";
@@ -80,7 +81,7 @@ export default function SettingsDialog({ open, onOpenChange, user, children }: S
   };
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    await safeSignOut();
     onOpenChange(false);
     toast.success("Uitgelogd");
   };

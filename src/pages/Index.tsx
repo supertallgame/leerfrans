@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/dialog";
 import AuthDialog from "@/components/AuthDialog";
 import { supabase } from "@/integrations/supabase/client";
+import { safeSignOut } from "@/lib/auth";
 import { usePollingInterval } from "@/lib/usePollingInterval";
 import { toast } from "sonner";
 import UpdateBanner from "@/components/UpdateBanner";
@@ -167,7 +168,7 @@ const Index = () => {
             const cached = JSON.parse(raw);
             if (typeof cached.ts === "number" && Date.now() - cached.ts < ONE_HOUR) {
               if (cached.banned) {
-                supabase.auth.signOut();
+                safeSignOut();
                 window.location.reload();
               }
               return;
@@ -178,7 +179,7 @@ const Index = () => {
           const banned = !!data?.banned;
           localStorage.setItem(CACHE_KEY, JSON.stringify({ banned, ts: Date.now() }));
           if (banned) {
-            supabase.auth.signOut();
+            safeSignOut();
             window.location.reload();
           }
         }).catch(() => {});
