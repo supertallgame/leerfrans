@@ -230,8 +230,7 @@ export default function StaffChat({ open, onOpenChange }: Props) {
               {messages.length === 0 && <p className="text-sm text-muted-foreground text-center py-8">Nog geen berichten. Start het gesprek!</p>}
               {messages.map((m) => {
                 const isMine = m.sender_id === user?.id;
-                const roleKey = getRoleForMessage(m);
-                const roleStyle = ROLE_STYLES[roleKey];
+                const roles = getRolesForMessage(m);
                 return (
                   <div key={m.id} className={`flex ${isMine ? "justify-end" : "justify-start"} group`}>
                     <div className={`max-w-[75%] rounded-2xl px-3 py-2 ${isMine ? "bg-primary text-primary-foreground" : "bg-muted"}`}>
@@ -240,11 +239,17 @@ export default function StaffChat({ open, onOpenChange }: Props) {
                           <p className={`text-[11px] font-semibold ${isMine ? "opacity-90" : "text-foreground"}`}>
                             {m.sender_display}
                           </p>
-                          {roleStyle && (
-                            <span className={`text-[9px] font-bold uppercase tracking-wide ${isMine ? "opacity-90" : roleStyle.cls}`}>
-                              [{roleStyle.label}]
-                            </span>
-                          )}
+                          {roles.map((rk) => {
+                            const rs = ROLE_STYLES[rk];
+                            return (
+                              <span
+                                key={rk}
+                                className={`text-[9px] font-bold uppercase tracking-wide whitespace-nowrap ${isMine ? "opacity-90" : rs.cls}`}
+                              >
+                                [{rs.label}]
+                              </span>
+                            );
+                          })}
                         </div>
                         {isMine && (
                           <button
