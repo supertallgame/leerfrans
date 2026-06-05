@@ -317,6 +317,7 @@ export default function StaffChat({ open, onOpenChange }: Props) {
                   if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); void send(); }
                 }}
               />
+              <p className="text-[10px] text-muted-foreground text-right -mt-1">{text.length}/250</p>
               <div className="flex items-center gap-2">
                 <label className="flex items-center gap-1.5 text-xs text-muted-foreground cursor-pointer hover:text-foreground">
                   <ImageIcon className="h-3.5 w-3.5" />
