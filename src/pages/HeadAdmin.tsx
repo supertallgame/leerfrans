@@ -35,6 +35,7 @@ export default function HeadAdmin() {
   const [allUsers, setAllUsers] = useState<AppUser[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [promoting, setPromoting] = useState<string | null>(null);
+  const [onboardingEnabled, setOnboardingEnabled] = useState(false);
 
   useEffect(() => {
     checkAccess();
