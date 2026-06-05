@@ -24,14 +24,17 @@ interface Props {
 
 const SESSION_NAME_KEY = "staff_chat_username";
 
-// Role display config — single source of truth so support + chat stay in sync
+// Role display config — single source of truth so support + chat stay in sync.
+// Order defines render priority (owner first, eminem last).
 const ROLE_STYLES: Record<string, { label: string; cls: string }> = {
   owner: { label: "Owner", cls: "text-destructive" },
   head_admin: { label: "Head Admin", cls: "text-purple-500" },
   admin: { label: "Admin", cls: "text-primary" },
   head_tester: { label: "Head Tester", cls: "text-orange-500" },
   tester: { label: "Tester", cls: "text-green-500" },
+  eminem: { label: "Eminem", cls: "text-pink-500" },
 };
+const ROLE_ORDER = ["owner", "head_admin", "admin", "head_tester", "tester", "eminem"];
 
 export default function StaffChat({ open, onOpenChange }: Props) {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -43,8 +46,8 @@ export default function StaffChat({ open, onOpenChange }: Props) {
   // Per-session display name; cleared every time the dialog opens fresh.
   const [displayName, setDisplayName] = useState<string>("");
   const [nameInput, setNameInput] = useState<string>("");
-  // Map of sender_id -> role, fetched once for visible messages.
-  const [rolesMap, setRolesMap] = useState<Record<string, string>>({});
+  // Map of sender_id -> array of roles, fetched once for visible messages.
+  const [rolesMap, setRolesMap] = useState<Record<string, string[]>>({});
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -72,10 +75,10 @@ export default function StaffChat({ open, onOpenChange }: Props) {
               .from("user_roles")
               .select("user_id, role")
               .eq("user_id", row.sender_id)
-              .single()
               .then(({ data }) => {
                 if (data) {
-                  setRolesMap((prev) => ({ ...prev, [data.user_id]: data.role }));
+                  const roles = data.map((r: any) => r.role);
+                  setRolesMap((prev) => ({ ...prev, [row.sender_id]: roles }));
                 }
               });
           }
@@ -117,9 +120,9 @@ export default function StaffChat({ open, onOpenChange }: Props) {
           .from("user_roles")
           .select("user_id, role")
           .in("user_id", unknownIds);
-        const next = { ...rolesMap };
-        unknownIds.forEach(id => { next[id] = ""; });
-        (rows || []).forEach((r: any) => { if (!next[r.user_id]) next[r.user_id] = r.role; });
+        const next: Record<string, string[]> = { ...rolesMap };
+        unknownIds.forEach(id => { next[id] = []; });
+        (rows || []).forEach((r: any) => { next[r.user_id] = [...(next[r.user_id] || []), r.role]; });
         setRolesMap(next);
       }
     }
@@ -184,10 +187,14 @@ export default function StaffChat({ open, onOpenChange }: Props) {
     else setMessages((prev) => prev.filter((m) => m.id !== id));
   };
 
-  const getRoleForMessage = (m: Message): string => {
-    // Owners are detected by hardcoded email
-    if (m.sender_email === "brankovantland@gmail.com" || m.sender_email === "branko18vantland@gmail.com") return "owner";
-    return rolesMap[m.sender_id] || "";
+  const getRolesForMessage = (m: Message): string[] => {
+    const roles = [...(rolesMap[m.sender_id] || [])];
+    // Owners are detected by hardcoded email and rendered first
+    if (m.sender_email === "brankovantland@gmail.com" || m.sender_email === "branko18vantland@gmail.com") {
+      if (!roles.includes("owner")) roles.unshift("owner");
+    }
+    // Sort by display priority
+    return roles.filter(r => ROLE_STYLES[r]).sort((a, b) => ROLE_ORDER.indexOf(a) - ROLE_ORDER.indexOf(b));
   };
 
   return (
@@ -223,8 +230,7 @@ export default function StaffChat({ open, onOpenChange }: Props) {
               {messages.length === 0 && <p className="text-sm text-muted-foreground text-center py-8">Nog geen berichten. Start het gesprek!</p>}
               {messages.map((m) => {
                 const isMine = m.sender_id === user?.id;
-                const roleKey = getRoleForMessage(m);
-                const roleStyle = ROLE_STYLES[roleKey];
+                const roles = getRolesForMessage(m);
                 return (
                   <div key={m.id} className={`flex ${isMine ? "justify-end" : "justify-start"} group`}>
                     <div className={`max-w-[75%] rounded-2xl px-3 py-2 ${isMine ? "bg-primary text-primary-foreground" : "bg-muted"}`}>
@@ -233,11 +239,17 @@ export default function StaffChat({ open, onOpenChange }: Props) {
                           <p className={`text-[11px] font-semibold ${isMine ? "opacity-90" : "text-foreground"}`}>
                             {m.sender_display}
                           </p>
-                          {roleStyle && (
-                            <span className={`text-[9px] font-bold uppercase tracking-wide ${isMine ? "opacity-90" : roleStyle.cls}`}>
-                              [{roleStyle.label}]
-                            </span>
-                          )}
+                          {roles.map((rk) => {
+                            const rs = ROLE_STYLES[rk];
+                            return (
+                              <span
+                                key={rk}
+                                className={`text-[9px] font-bold uppercase tracking-wide whitespace-nowrap ${isMine ? "opacity-90" : rs.cls}`}
+                              >
+                                [{rs.label}]
+                              </span>
+                            );
+                          })}
                         </div>
                         {isMine && (
                           <button

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { Shield, Home, Crown, Users, ShieldPlus, ShieldMinus, Search, Map, ShieldCheck, ArrowUpCircle, ArrowDownCircle, BarChart3, Megaphone, Plus, Trash2, X, ImageIcon, Bot, GraduationCap, Train, Ban, Beaker, MessagesSquare, Star, Sparkles } from "lucide-react";
+import { Shield, Home, Crown, Users, ShieldPlus, ShieldMinus, Search, Map, ShieldCheck, ArrowUpCircle, ArrowDownCircle, BarChart3, Megaphone, Plus, Trash2, X, ImageIcon, Bot, GraduationCap, Train, Ban, Beaker, MessagesSquare, Star, Sparkles, Mic } from "lucide-react";
 import BanManagement from "@/components/owner/BanManagement";
 import SupportAdminPanel from "@/components/support/SupportAdminPanel";
 import AdminApplicationsPanel from "@/components/support/AdminApplicationsPanel";
@@ -120,6 +120,8 @@ export default function Owner() {
   const [headAdminRoles, setHeadAdminRoles] = useState<UserRole[]>([]);
   const [testerRoles, setTesterRoles] = useState<UserRole[]>([]);
   const [headTesterRoles, setHeadTesterRoles] = useState<UserRole[]>([]);
+  const [eminemRoles, setEminemRoles] = useState<UserRole[]>([]);
+  const [eminemEmailInput, setEminemEmailInput] = useState("");
   const [allUsers, setAllUsers] = useState<AppUser[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [promoting, setPromoting] = useState<string | null>(null);
@@ -273,8 +275,35 @@ export default function Owner() {
       setHeadAdminRoles(data.filter(r => r.role === "head_admin"));
       setTesterRoles(data.filter(r => r.role === "tester"));
       setHeadTesterRoles(data.filter(r => r.role === "head_tester"));
+      setEminemRoles(data.filter(r => r.role === "eminem"));
     }
   };
+
+  const giveEminemRole = async () => {
+    const email = eminemEmailInput.trim().toLowerCase();
+    if (!email) return;
+    const target = allUsers.find(u => u.email.toLowerCase() === email);
+    if (!target) { toast.error("Geen gebruiker met dit e-mailadres gevonden"); return; }
+    if (eminemRoles.some(r => r.user_id === target.id)) { toast.error("Heeft de Eminem rol al"); return; }
+    const { error } = await supabase.from("user_roles").insert({
+      user_id: target.id,
+      email: target.email,
+      role: "eminem",
+    });
+    if (error) { toast.error(error.message); return; }
+    toast.success(`${target.email} is nu Eminem 🎤`);
+    setEminemEmailInput("");
+    await loadRoles();
+  };
+
+  const removeEminem = async (role: UserRole) => {
+    const { error } = await supabase.from("user_roles").delete().eq("id", role.id);
+    if (error) { toast.error("Kon niet verwijderen"); return; }
+    toast.success(`${role.email} is geen Eminem meer`);
+    await loadRoles();
+  };
+
+
 
   const loadUsers = async () => {
     const { data, error } = await supabase.rpc("list_all_users");
@@ -741,6 +770,53 @@ export default function Owner() {
             )}
           </CardContent>
         </Card>
+
+        {/* Eminem role (purely cosmetic, stackable with any other role) */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <Mic className="h-5 w-5 text-pink-500" /> Eminem
+              <span className="text-sm font-normal text-muted-foreground">({eminemRoles.length})</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <p className="text-xs text-muted-foreground">
+              Geef een gebruiker de Eminem rol. Deze rol is puur cosmetisch en kan naast andere rollen bestaan.
+            </p>
+            <div className="flex gap-2">
+              <Input
+                placeholder="E-mailadres van gebruiker"
+                value={eminemEmailInput}
+                onChange={(e) => setEminemEmailInput(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter") giveEminemRole(); }}
+              />
+              <Button onClick={giveEminemRole} className="gap-1 shrink-0">
+                <Mic className="h-4 w-4" /> Geef
+              </Button>
+            </div>
+            {eminemRoles.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Nog geen Eminems.</p>
+            ) : (
+              eminemRoles.map((role) => (
+                <div key={role.id} className="flex items-center justify-between rounded-lg border p-3">
+                  <div className="flex items-center gap-2">
+                    <Mic className="h-4 w-4 text-pink-500" />
+                    <span className="text-sm font-medium">{role.email}</span>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                    onClick={() => removeEminem(role)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))
+            )}
+          </CardContent>
+        </Card>
+
 
         {/* Game settings */}
         <Card>
