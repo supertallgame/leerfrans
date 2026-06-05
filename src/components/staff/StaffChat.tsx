@@ -41,7 +41,7 @@ export default function StaffChat({ open, onOpenChange }: Props) {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<{ id: string; email: string; role: string } | null>(null);
   const [text, setText] = useState("");
-  const [image, setImage] = useState<File | null>(null);
+  const [images, setImages] = useState<File[]>([]);
   const [sending, setSending] = useState(false);
   // Per-session display name; cleared every time the dialog opens fresh.
   const [displayName, setDisplayName] = useState<string>("");
@@ -164,32 +164,37 @@ export default function StaffChat({ open, onOpenChange }: Props) {
   };
 
   const send = async () => {
-    if (!text.trim() && !image) return;
+    if (!text.trim() && images.length === 0) return;
     if (!user || !displayName) return;
+    if (images.length > 5) {
+      toast.error("Maximaal 5 afbeeldingen per bericht");
+      return;
+    }
     setSending(true);
-    let imageUrl: string | null = null;
-    if (image) {
-      const ext = image.name.split(".").pop()?.toLowerCase() || "jpg";
+    const uploadedUrls: string[] = [];
+    for (const img of images) {
+      const ext = img.name.split(".").pop()?.toLowerCase() || "jpg";
       if (!["jpg","jpeg","png","gif","webp"].includes(ext)) {
-        toast.error("Alleen afbeeldingen");
+        toast.error(`Alleen afbeeldingen: ${img.name}`);
         setSending(false);
         return;
       }
-      if (image.size > 5 * 1024 * 1024) {
-        toast.error("Max 5MB");
+      if (img.size > 5 * 1024 * 1024) {
+        toast.error(`Max 5MB: ${img.name}`);
         setSending(false);
         return;
       }
-      const path = `${user.id}/staff/${Date.now()}.${ext}`;
-      const { error: upErr } = await supabase.storage.from("support-uploads").upload(path, image);
+      const path = `${user.id}/staff/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+      const { error: upErr } = await supabase.storage.from("support-uploads").upload(path, img);
       if (upErr) {
-        toast.error("Upload mislukt");
+        toast.error(`Upload mislukt: ${img.name}`);
         setSending(false);
         return;
       }
       const { data: signed } = await supabase.storage.from("support-uploads").createSignedUrl(path, 60 * 60 * 24 * 30);
-      imageUrl = signed?.signedUrl || null;
+      if (signed?.signedUrl) uploadedUrls.push(signed.signedUrl);
     }
+    const imageUrl = uploadedUrls.length > 0 ? JSON.stringify(uploadedUrls) : null;
     const { error } = await supabase.from("admin_chat_messages").insert({
       sender_id: user.id,
       sender_email: user.email,
@@ -200,7 +205,7 @@ export default function StaffChat({ open, onOpenChange }: Props) {
     if (error) toast.error(error.message);
     else {
       setText("");
-      setImage(null);
+      setImages([]);
     }
     setSending(false);
   };
@@ -219,6 +224,16 @@ export default function StaffChat({ open, onOpenChange }: Props) {
     }
     // Sort by display priority
     return roles.filter(r => ROLE_STYLES[r]).sort((a, b) => ROLE_ORDER.indexOf(a) - ROLE_ORDER.indexOf(b));
+  };
+
+  // Parse image_url field: supports legacy single URL or JSON array of URLs
+  const parseImageUrls = (raw: string | null): string[] => {
+    if (!raw) return [];
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed.filter((u) => typeof u === "string");
+    } catch { /* not JSON — treat as legacy single URL */ }
+    return [raw];
   };
 
   return (
@@ -286,9 +301,9 @@ export default function StaffChat({ open, onOpenChange }: Props) {
                         )}
                       </div>
                       {m.message && <p className="text-sm whitespace-pre-wrap break-words">{m.message}</p>}
-                      {m.image_url && (
-                        <img src={m.image_url} alt="" className="mt-1 rounded-md max-h-56 w-auto" />
-                      )}
+                      {m.image_url && parseImageUrls(m.image_url).map((url, idx) => (
+                        <img key={idx} src={url} alt="" className="mt-1 rounded-md max-h-56 w-auto" />
+                      ))}
                       <p className="text-[9px] opacity-60 mt-1">
                         {new Date(m.created_at).toLocaleTimeString("nl-NL", { hour: "2-digit", minute: "2-digit" })}
                       </p>
@@ -319,15 +334,34 @@ export default function StaffChat({ open, onOpenChange }: Props) {
               />
               <p className="text-[10px] text-muted-foreground text-right -mt-1">{text.length}/250</p>
               <div className="flex items-center gap-2">
-                <label className="flex items-center gap-1.5 text-xs text-muted-foreground cursor-pointer hover:text-foreground">
+                <label className="flex items-center gap-1.5 text-xs text-muted-foreground cursor-pointer hover:text-foreground relative">
                   <ImageIcon className="h-3.5 w-3.5" />
-                  {image ? image.name.slice(0, 20) : "Bestand"}
-                  <input type="file" accept="image/*" className="hidden" onChange={(e) => setImage(e.target.files?.[0] ?? null)} />
+                  {images.length > 0 ? `${images.length}/5` : "Bestand"}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    className="hidden"
+                    onChange={(e) => {
+                      const files = Array.from(e.target.files || []).slice(0, 5 - images.length);
+                      if (files.length + images.length > 5) {
+                        toast.error("Maximaal 5 afbeeldingen per bericht");
+                      }
+                      setImages((prev) => [...prev, ...files].slice(0, 5));
+                    }}
+                  />
                 </label>
-                {image && (
-                  <Button variant="ghost" size="sm" className="h-6 px-1" onClick={() => setImage(null)}>
-                    <X className="h-3 w-3" />
-                  </Button>
+                {images.length > 0 && (
+                  <div className="flex items-center gap-1 flex-wrap">
+                    {images.map((img, idx) => (
+                      <span key={idx} className="inline-flex items-center gap-1 text-[10px] bg-muted px-1.5 py-0.5 rounded">
+                        {img.name.slice(0, 12)}{img.name.length > 12 ? "…" : ""}
+                        <button onClick={() => setImages((prev) => prev.filter((_, i) => i !== idx))}>
+                          <X className="h-2.5 w-2.5" />
+                        </button>
+                      </span>
+                    ))}
+                  </div>
                 )}
                 <div className="flex-1" />
                 <Button onClick={send} disabled={sending} size="sm" className="gap-1">
