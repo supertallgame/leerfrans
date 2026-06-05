@@ -89,7 +89,6 @@ export default function HeadAdmin() {
     toast.success(checked ? "Onboarding ingeschakeld" : "Onboarding uitgeschakeld");
   };
 
-  const _placeholder = () => {
 
   const loadAllRoles = async () => {
     const { data, error } = await supabase
