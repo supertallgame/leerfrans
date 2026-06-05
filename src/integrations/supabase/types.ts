@@ -1036,6 +1036,13 @@ export type Database = {
           team_number: number
         }[]
       }
+      get_staff_user_roles: {
+        Args: { _user_ids: string[] }
+        Returns: {
+          role: string
+          user_id: string
+        }[]
+      }
       has_open_report: { Args: never; Returns: boolean }
       is_head_admin: { Args: { _user_id: string }; Returns: boolean }
       is_head_tester: { Args: { _user_id: string }; Returns: boolean }
