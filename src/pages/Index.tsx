@@ -780,7 +780,8 @@ const Index = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <BookMarked className="h-4 w-4" />
-              <span className="text-sm font-medium">{(language === "nask" || language === "biology") ? "Hoofdstuk" : "Unit"}</span>
+              <span className="text-sm font-medium">{(language === "nask" || language === "biology") ? "Hoofdstuk" : language === "french" ? "Chapitre" : "Unit"}</span>
+
             </div>
             <button
               onClick={() => { setShowSettings(false); setShowChapterPicker(true); }}
