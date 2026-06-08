@@ -1246,7 +1246,7 @@ export const frenchChaptersHavoVwo: Chapter[] = [
   },
   {
     id: "hv_chapitre5",
-    title: "Unit 5",
+    title: "Chapitre 5",
     description: "Le passé composé & bijvoeglijk naamwoord",
     words: chapitre5Words,
     requiresLogin: false,
