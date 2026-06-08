@@ -222,7 +222,7 @@ const Index = () => {
       setIsEminem(roles.includes("eminem"));
       if (session?.user?.email && OWNER_EMAILS.includes(session.user.email)) {
         setIsHeadAdmin(true);
-        setIsHeadTester(false);
+        setIsHeadTester(true);
         setIsStaff(true);
         return;
       }
