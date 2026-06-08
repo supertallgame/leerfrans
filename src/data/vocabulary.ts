@@ -887,7 +887,7 @@ export const frenchChaptersVmboHavo: Chapter[] = [
   },
   {
     id: "chapitre3",
-    title: "Unit 3",
+    title: "Chapitre 3",
     description: "School, vakken & de kamer",
     words: chapitre3Words,
     requiresLogin: false,
