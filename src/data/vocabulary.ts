@@ -873,7 +873,7 @@ const vmboHavoChapitre1WithNumbers = [...chapitre1Words, ...numbers1to20];
 export const frenchChaptersVmboHavo: Chapter[] = [
   {
     id: "chapitre1",
-    title: "Unit 1",
+    title: "Chapitre 1",
     description: "Kennismaken, dieren & familie",
     words: vmboHavoChapitre1WithNumbers,
     requiresLogin: false,
