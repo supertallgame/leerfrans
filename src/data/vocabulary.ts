@@ -1258,7 +1258,7 @@ export const frenchChaptersHavoVwo: Chapter[] = [
 // "used before declaration" errors with the const ordering.
 frenchChaptersVmboHavo.push({
   id: "chapitre6",
-  title: "Unit 6",
+  title: "Chapitre 6",
   description: "De weg vragen, je stad & futur proche",
   words: havoVwoChapitre6Words,
   requiresLogin: false,
