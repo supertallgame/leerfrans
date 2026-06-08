@@ -380,7 +380,7 @@ const Index = () => {
     <main className="min-h-screen flex flex-col items-center px-3 py-6 md:px-4 md:py-12">
       <div className="max-w-2xl w-full flex flex-col items-center gap-5 md:gap-8">
         <div className="flex items-center justify-between w-full mb-1">
-          <div className="w-16 md:w-40 shrink-0" />
+          <div className="w-16 md:w-56 shrink-0" />
           <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 text-primary text-[10px] md:text-xs font-medium tracking-wide uppercase whitespace-nowrap">
             {language === "nask" ? (
               <><FlaskConical className="w-4 h-4 md:w-5 md:h-4 shrink-0" /> NASK</>
