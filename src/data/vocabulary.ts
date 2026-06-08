@@ -1239,7 +1239,7 @@ export const frenchChaptersHavoVwo: Chapter[] = [
   },
   {
     id: "hv_chapitre3",
-    title: "Unit 3",
+    title: "Chapitre 3",
     description: "School, vakken & de profs (HAVO-VWO)",
     words: havoVwoChapitre3Words,
     requiresLogin: false,
