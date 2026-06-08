@@ -534,7 +534,7 @@ const Index = () => {
       <Dialog open={showChapterPicker} onOpenChange={setShowChapterPicker}>
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
-            <DialogTitle>Kies een {(language === "nask" || language === "biology") ? "Hoofdstuk" : "Unit"}</DialogTitle>
+            <DialogTitle>Kies een {(language === "nask" || language === "biology") ? "Hoofdstuk" : language === "french" ? "Chapitre" : "Unit"}</DialogTitle>
           </DialogHeader>
           <div className="space-y-1.5">
             {chaptersForLanguage.map((ch) => {
