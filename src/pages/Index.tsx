@@ -787,7 +787,7 @@ const Index = () => {
               onClick={() => { setShowSettings(false); setShowChapterPicker(true); }}
               className="text-sm font-medium px-3 py-1 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
             >
-              {getChapter(chapterId)?.title ?? "Unit"}
+              {getChapter(chapterId)?.title ?? (language === "french" ? "Chapitre" : "Unit")}
             </button>
           </div>
           {availableSections.length > 0 && (
