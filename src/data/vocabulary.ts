@@ -873,28 +873,28 @@ const vmboHavoChapitre1WithNumbers = [...chapitre1Words, ...numbers1to20];
 export const frenchChaptersVmboHavo: Chapter[] = [
   {
     id: "chapitre1",
-    title: "Unit 1",
+    title: "Chapitre 1",
     description: "Kennismaken, dieren & familie",
     words: vmboHavoChapitre1WithNumbers,
     requiresLogin: false,
   },
   {
     id: "chapitre2",
-    title: "Unit 2",
+    title: "Chapitre 2",
     description: "Eten, drinken & winkelen",
     words: chapitre2Words,
     requiresLogin: false,
   },
   {
     id: "chapitre3",
-    title: "Unit 3",
+    title: "Chapitre 3",
     description: "School, vakken & de kamer",
     words: chapitre3Words,
     requiresLogin: false,
   },
   {
     id: "chapitre5",
-    title: "Unit 5",
+    title: "Chapitre 5",
     description: "Familie, maanden & uiterlijk",
     words: chapitre5Words,
     requiresLogin: false,
@@ -1225,28 +1225,28 @@ const havoVwoChapitre6Words: VocabItem[] = [
 export const frenchChaptersHavoVwo: Chapter[] = [
   {
     id: "hv_chapitre1",
-    title: "Unit 1",
+    title: "Chapitre 1",
     description: "Kennismaken, familie & dagelijks leven",
     words: havoVwoChapitre1Words,
     requiresLogin: false,
   },
   {
     id: "hv_chapitre2",
-    title: "Unit 2",
+    title: "Chapitre 2",
     description: "Eten, drinken & winkelen (HAVO-VWO)",
     words: havoVwoChapitre2Words,
     requiresLogin: false,
   },
   {
     id: "hv_chapitre3",
-    title: "Unit 3",
+    title: "Chapitre 3",
     description: "School, vakken & de profs (HAVO-VWO)",
     words: havoVwoChapitre3Words,
     requiresLogin: false,
   },
   {
     id: "hv_chapitre5",
-    title: "Unit 5",
+    title: "Chapitre 5",
     description: "Le passé composé & bijvoeglijk naamwoord",
     words: chapitre5Words,
     requiresLogin: false,
@@ -1258,7 +1258,7 @@ export const frenchChaptersHavoVwo: Chapter[] = [
 // "used before declaration" errors with the const ordering.
 frenchChaptersVmboHavo.push({
   id: "chapitre6",
-  title: "Unit 6",
+  title: "Chapitre 6",
   description: "De weg vragen, je stad & futur proche",
   words: havoVwoChapitre6Words,
   requiresLogin: false,
@@ -1368,7 +1368,7 @@ const chapitre7Words: VocabItem[] = [
 
 frenchChaptersVmboHavo.push({
   id: "chapitre7",
-  title: "Unit 7",
+  title: "Chapitre 7",
   description: "Muziek, sport, afspreken & klok",
   words: chapitre7Words,
   requiresLogin: false,

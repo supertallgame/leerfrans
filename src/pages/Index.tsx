@@ -3,7 +3,7 @@ import { useThemeSync } from "@/hooks/use-theme-sync";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { BookOpen, Brain, Puzzle, Keyboard, Users, PenTool, MessageSquare, Bot, Settings, Star, Lock, BookMarked, FlaskConical, CheckCircle, Layers, Microscope, Bone, Clock, BookType, Map, ShieldCheck, GraduationCap, Hash, BookText, LifeBuoy, ShieldQuestion, MessagesSquare, Music2, VolumeX } from "lucide-react";
+import { BookOpen, Brain, Puzzle, Keyboard, Users, PenTool, MessageSquare, Bot, Settings, Star, Lock, BookMarked, FlaskConical, CheckCircle, Layers, Microscope, Bone, Clock, BookType, Map, ShieldCheck, GraduationCap, Hash, BookText, LifeBuoy, ShieldQuestion, MessagesSquare, Music2, VolumeX, TestTube } from "lucide-react";
 import polarExpressImg from "@/assets/polar-express.png";
 import { FlagNL, FlagFR } from "@/components/Flags";
 import { getChaptersForLanguage, getChapter, getForeignLabel, getForeignLabelNative, Language, Niveau } from "@/data/vocabulary";
@@ -122,6 +122,7 @@ const Index = () => {
   const [aiTeacherEnabled, setAiTeacherEnabled] = useState(false);
   const [disabledNiveaus, setDisabledNiveaus] = useState<string[]>([]);
   const [isHeadAdmin, setIsHeadAdmin] = useState(false);
+  const [isHeadTester, setIsHeadTester] = useState(false);
   const [isStaff, setIsStaff] = useState(false);
   const [polarExpressEnabled, setPolarExpressEnabled] = useState(false);
   const [obamaEnabled, setObamaEnabled] = useState(false);
@@ -212,7 +213,7 @@ const Index = () => {
 
   useEffect(() => {
     const checkRoles = async (userId: string | undefined) => {
-      if (!userId) { setIsHeadAdmin(false); setIsStaff(false); setIsEminem(false); return; }
+      if (!userId) { setIsHeadAdmin(false); setIsHeadTester(false); setIsStaff(false); setIsEminem(false); return; }
       const OWNER_EMAILS = ["brankovantland@gmail.com", "branko18vantland@gmail.com"];
       const { data: { session } } = await supabase.auth.getSession();
       // Check eminem role (independent of staff hierarchy)
@@ -221,12 +222,14 @@ const Index = () => {
       setIsEminem(roles.includes("eminem"));
       if (session?.user?.email && OWNER_EMAILS.includes(session.user.email)) {
         setIsHeadAdmin(true);
+        setIsHeadTester(false);
         setIsStaff(true);
         return;
       }
       const { data: staffRole } = await supabase.rpc("get_my_staff_role");
       const role = staffRole as string | null;
       setIsHeadAdmin(role === "head_admin");
+      setIsHeadTester(role === "head_tester");
       // Testers/head_testers must explicitly enable admin-mode in /tester or
       // /headtester before staff features (badge, staff chat, etc.) become active.
       const testerAdminMode = localStorage.getItem("tester_admin_mode") === "1";
@@ -393,6 +396,11 @@ const Index = () => {
                 <ShieldCheck className="h-5 w-5" />
               </Button>
             )}
+            {isHeadTester && (
+              <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => navigate("/headtester")} aria-label="Head Tester">
+                <TestTube className="h-5 w-5" />
+              </Button>
+            )}
             {isStaff && (
               <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => setShowStaffChat(true)} aria-label="Staff Chat">
                 <MessagesSquare className="h-5 w-5" />
@@ -448,7 +456,7 @@ const Index = () => {
               className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors cursor-pointer"
             >
               <BookMarked className="h-3.5 w-3.5" />
-              {getChapter(chapterId)?.title ?? "Unit"}
+              {getChapter(chapterId)?.title ?? (language === "french" ? "Chapitre" : "Unit")}
             </button>
             {availableSections.length > 0 && (
               <button
@@ -526,7 +534,7 @@ const Index = () => {
       <Dialog open={showChapterPicker} onOpenChange={setShowChapterPicker}>
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
-            <DialogTitle>Kies een {(language === "nask" || language === "biology") ? "Hoofdstuk" : "Unit"}</DialogTitle>
+            <DialogTitle>Kies een {(language === "nask" || language === "biology") ? "Hoofdstuk" : language === "french" ? "Chapitre" : "Unit"}</DialogTitle>
           </DialogHeader>
           <div className="space-y-1.5">
             {chaptersForLanguage.map((ch) => {
@@ -772,13 +780,14 @@ const Index = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <BookMarked className="h-4 w-4" />
-              <span className="text-sm font-medium">{(language === "nask" || language === "biology") ? "Hoofdstuk" : "Unit"}</span>
+              <span className="text-sm font-medium">{(language === "nask" || language === "biology") ? "Hoofdstuk" : language === "french" ? "Chapitre" : "Unit"}</span>
+
             </div>
             <button
               onClick={() => { setShowSettings(false); setShowChapterPicker(true); }}
               className="text-sm font-medium px-3 py-1 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
             >
-              {getChapter(chapterId)?.title ?? "Unit"}
+              {getChapter(chapterId)?.title ?? (language === "french" ? "Chapitre" : "Unit")}
             </button>
           </div>
           {availableSections.length > 0 && (
