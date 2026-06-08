@@ -1368,7 +1368,7 @@ const chapitre7Words: VocabItem[] = [
 
 frenchChaptersVmboHavo.push({
   id: "chapitre7",
-  title: "Unit 7",
+  title: "Chapitre 7",
   description: "Muziek, sport, afspreken & klok",
   words: chapitre7Words,
   requiresLogin: false,
