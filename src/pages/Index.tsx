@@ -213,7 +213,7 @@ const Index = () => {
 
   useEffect(() => {
     const checkRoles = async (userId: string | undefined) => {
-      if (!userId) { setIsHeadAdmin(false); setIsStaff(false); setIsEminem(false); return; }
+      if (!userId) { setIsHeadAdmin(false); setIsHeadTester(false); setIsStaff(false); setIsEminem(false); return; }
       const OWNER_EMAILS = ["brankovantland@gmail.com", "branko18vantland@gmail.com"];
       const { data: { session } } = await supabase.auth.getSession();
       // Check eminem role (independent of staff hierarchy)
@@ -222,12 +222,14 @@ const Index = () => {
       setIsEminem(roles.includes("eminem"));
       if (session?.user?.email && OWNER_EMAILS.includes(session.user.email)) {
         setIsHeadAdmin(true);
+        setIsHeadTester(false);
         setIsStaff(true);
         return;
       }
       const { data: staffRole } = await supabase.rpc("get_my_staff_role");
       const role = staffRole as string | null;
       setIsHeadAdmin(role === "head_admin");
+      setIsHeadTester(role === "head_tester");
       // Testers/head_testers must explicitly enable admin-mode in /tester or
       // /headtester before staff features (badge, staff chat, etc.) become active.
       const testerAdminMode = localStorage.getItem("tester_admin_mode") === "1";
