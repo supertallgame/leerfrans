@@ -1232,7 +1232,7 @@ export const frenchChaptersHavoVwo: Chapter[] = [
   },
   {
     id: "hv_chapitre2",
-    title: "Unit 2",
+    title: "Chapitre 2",
     description: "Eten, drinken & winkelen (HAVO-VWO)",
     words: havoVwoChapitre2Words,
     requiresLogin: false,
