@@ -1225,7 +1225,7 @@ const havoVwoChapitre6Words: VocabItem[] = [
 export const frenchChaptersHavoVwo: Chapter[] = [
   {
     id: "hv_chapitre1",
-    title: "Unit 1",
+    title: "Chapitre 1",
     description: "Kennismaken, familie & dagelijks leven",
     words: havoVwoChapitre1Words,
     requiresLogin: false,
