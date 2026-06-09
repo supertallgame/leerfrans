@@ -202,12 +202,12 @@ export default function Chapitre5Grammaire({ onBack }: Props) {
               <>
                 <p className="text-xs uppercase tracking-wide text-muted-foreground">Le passé composé</p>
                 <p className="text-2xl font-bold">
-                  <span className="text-primary">{pq.subject.replace("'", "")}</span>{" "}
-                  <span className="text-muted-foreground">+ avoir + </span>
-                  <span className="font-mono">{pq.verbInf}</span>
+                  <span className="text-primary" translate="no" lang="fr">{pq.subject.replace("'", "")}</span>{" "}
+                  <span className="text-muted-foreground">+ <span translate="no" lang="fr">avoir</span> + </span>
+                  <span className="font-mono" translate="no" lang="fr">{pq.verbInf}</span>
                 </p>
                 <p className="text-sm text-muted-foreground italic">
-                  ({pq.subjNl} heeft/heb {pq.verbNl}t — voltooide tijd)
+                  ({pq.subjNl} heeft/heb {pq.verbNl} — voltooide tijd)
                 </p>
                 <p className="text-[11px] text-muted-foreground">
                   Tip: typ de hele zin. Voltooid deelwoord van een <em>-er</em> werkwoord eindigt op <em>-é</em>.
@@ -218,15 +218,15 @@ export default function Chapitre5Grammaire({ onBack }: Props) {
               <>
                 <p className="text-xs uppercase tracking-wide text-muted-foreground">Pas het bijvoeglijk naamwoord aan</p>
                 <p className="text-2xl font-bold">
-                  <span className="font-mono">{dq.noun}</span>{" "}
+                  <span className="font-mono" translate="no" lang="fr">{dq.noun}</span>{" "}
                   <span className="text-muted-foreground">+ </span>
-                  <span className="text-primary">{dq.adj}</span>
+                  <span className="text-primary" translate="no" lang="fr">{dq.adj}</span>
                 </p>
                 <p className="text-sm text-muted-foreground italic">
                   ({dq.nounNl} — {dq.gender === "m" ? "mannelijk" : "vrouwelijk"}{dq.plural ? ", meervoud" : ", enkelvoud"}; <em>{dq.adjNl}</em>)
                 </p>
                 <p className="text-[11px] text-muted-foreground">
-                  Typ alleen het aangepaste bijvoeglijk naamwoord (bv. <span className="font-mono">petite</span> of <span className="font-mono">grands</span>).
+                  Typ alleen het aangepaste bijvoeglijk naamwoord (bv. <span className="font-mono" translate="no" lang="fr">petite</span> of <span className="font-mono" translate="no" lang="fr">grands</span>).
                 </p>
               </>
             )}
