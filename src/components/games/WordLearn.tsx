@@ -4,21 +4,16 @@ import { useChapter } from "@/contexts/ChapterContext";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, ArrowRight, RotateCcw, GraduationCap, CheckCircle2 } from "lucide-react";
-import { FlagNL, FlagFR } from "@/components/Flags";
+import { ArrowLeft, ArrowRight, RotateCcw, Eye, CheckCircle2 } from "lucide-react";
 
 interface Props {
   onBack: () => void;
 }
 
-// Filter out multi-word phrases / sentences — keep single words only.
+// Keep only single-word items (filter sentences/phrases).
 const isWord = (s: string) => {
-  const t = s.trim();
-  if (!t) return false;
-  // strip parens content for the word-count check
-  const cleaned = t.replace(/\([^)]*\)/g, "").trim();
-  // allow hyphenated words (l'école, qu'est-ce, grand-père) but no spaces
-  return !/\s/.test(cleaned);
+  const cleaned = s.trim().replace(/\([^)]*\)/g, "").trim();
+  return cleaned.length > 0 && !/\s/.test(cleaned);
 };
 
 export default function WordLearn({ onBack }: Props) {
@@ -27,36 +22,46 @@ export default function WordLearn({ onBack }: Props) {
     const onlyWords = activeVocabulary.filter((v) => isWord(v.french) && isWord(v.dutch));
     return shuffle(onlyWords.length ? onlyWords : activeVocabulary);
   });
-  const [index, setIndex] = useState(0);
-  const [learned, setLearned] = useState<Set<number>>(new Set());
+  const [qIndex, setQIndex] = useState(0);
+  const [showDutch, setShowDutch] = useState(true);
+  const [revealed, setRevealed] = useState(false);
+  const [learned, setLearned] = useState(0);
 
-  const current = cards[index];
-  const total = cards.length;
-  const allDone = learned.size >= total;
+  const finished = qIndex >= cards.length;
+  const current = cards[qIndex];
 
-  const markLearned = () => {
-    setLearned((prev) => {
-      const n = new Set(prev);
-      n.add(index);
-      return n;
-    });
-    if (index + 1 < total) setIndex((i) => i + 1);
+  const handleNext = (markLearned: boolean) => {
+    if (markLearned) setLearned((n) => n + 1);
+    setRevealed(false);
+    setQIndex((i) => i + 1);
   };
 
-  const next = () => setIndex((i) => (i + 1) % total);
-  const prev = () => setIndex((i) => (i - 1 + total) % total);
-  const reset = () => { setLearned(new Set()); setIndex(0); };
+  const restart = () => { setQIndex(0); setLearned(0); setRevealed(false); };
 
-  if (!current) {
+  if (finished) {
     return (
-      <div className="max-w-md mx-auto p-6">
-        <Button variant="ghost" onClick={onBack} className="gap-2"><ArrowLeft className="h-4 w-4" /> Terug</Button>
-        <p className="mt-4 text-muted-foreground">Geen woorden gevonden in dit hoofdstuk.</p>
+      <div className="flex flex-col items-center gap-6 max-w-lg mx-auto">
+        <Button variant="ghost" onClick={onBack} className="self-start gap-2">
+          <ArrowLeft className="h-4 w-4" /> Terug
+        </Button>
+        <Card className="w-full">
+          <CardContent className="flex flex-col items-center p-8 gap-4 text-center">
+            <p className="text-5xl">🎓</p>
+            <h2 className="text-2xl font-bold">Klaar met leren!</h2>
+            <p className="text-muted-foreground">
+              Je hebt <span className="font-bold text-primary">{learned}</span> van de {cards.length} woorden gemarkeerd als geleerd.
+            </p>
+            <Button onClick={restart} className="gap-2"><RotateCcw className="h-4 w-4" /> Opnieuw</Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
-  const isLearned = learned.has(index);
+  const prompt = showDutch ? current.dutch : current.french;
+  const answer = showDutch ? current.french : current.dutch;
+  const promptLabel = showDutch ? "Nederlands" : "Frans";
+  const answerLabel = showDutch ? "Frans" : "Nederlands";
 
   return (
     <div className="flex flex-col items-center gap-4 md:gap-6 w-full max-w-lg mx-auto">
@@ -64,67 +69,70 @@ export default function WordLearn({ onBack }: Props) {
         <Button variant="ghost" onClick={onBack} className="gap-2 text-sm">
           <ArrowLeft className="h-4 w-4" /> Terug
         </Button>
-        <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground bg-muted px-2 py-1 rounded-full">
-          <GraduationCap className="h-3.5 w-3.5" /> Alleen leren
-        </span>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => { setShowDutch(!showDutch); setRevealed(false); }}
+          className="text-xs md:text-sm"
+        >
+          {showDutch ? "NL → FR" : "FR → NL"}
+        </Button>
       </div>
 
       <div className="w-full flex items-center justify-between text-xs text-muted-foreground">
-        <span>{index + 1} / {total}</span>
-        <span>Geleerd: {learned.size}</span>
+        <span>Woord {qIndex + 1} / {cards.length}</span>
+        <span>Geleerd: {learned}</span>
       </div>
-      <Progress value={(learned.size / total) * 100} className="w-full h-2" />
+      <Progress value={(qIndex / cards.length) * 100} className="w-full h-2" />
 
-      <Card className="w-full min-h-[220px] md:min-h-[260px] relative overflow-hidden">
-        {isLearned && (
-          <div className="absolute top-3 right-3 text-[hsl(var(--success))] flex items-center gap-1 text-xs font-medium">
-            <CheckCircle2 className="h-4 w-4" /> geleerd
-          </div>
-        )}
-        <CardContent className="flex flex-col items-center justify-center p-6 md:p-8 text-center gap-5 h-full">
-          <div className="flex flex-col items-center gap-1.5">
-            <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-widest text-muted-foreground">
-              <FlagFR className="w-4 h-3 rounded-sm" /> Frans
-            </div>
-            <p className="text-3xl md:text-4xl font-bold text-primary" translate="no" lang="fr">
-              {current.french}
-            </p>
-          </div>
-          <div className="w-12 h-px bg-border" />
-          <div className="flex flex-col items-center gap-1.5">
-            <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-widest text-muted-foreground">
-              <FlagNL className="w-4 h-3 rounded-sm" /> Nederlands
-            </div>
-            <p className="text-xl md:text-2xl font-semibold">{current.dutch}</p>
-          </div>
+      <Card className="w-full">
+        <CardContent className="p-4 md:p-6 text-center">
+          <p className="text-xs uppercase tracking-widest text-muted-foreground mb-1 md:mb-2">
+            {promptLabel}
+          </p>
+          <p
+            className="text-2xl md:text-3xl font-bold"
+            {...(!showDutch ? { translate: "no" as const, lang: "fr" } : {})}
+          >
+            {prompt}
+          </p>
         </CardContent>
       </Card>
 
-      <div className="flex flex-col gap-2 w-full">
-        <Button
-          onClick={markLearned}
-          className="w-full"
-          variant={isLearned ? "outline" : "default"}
-        >
-          <CheckCircle2 className="h-4 w-4 mr-2" />
-          {isLearned ? "Volgende →" : "Ik ken dit woord →"}
-        </Button>
-        <div className="flex gap-2 justify-center">
-          <Button variant="outline" size="sm" onClick={prev}>
-            <ArrowLeft className="h-4 w-4" />
+      <div className="grid grid-cols-1 gap-2 md:gap-3 w-full">
+        {!revealed ? (
+          <Button
+            variant="outline"
+            className="h-auto py-4 px-4 justify-center gap-2 text-base"
+            onClick={() => setRevealed(true)}
+          >
+            <Eye className="h-4 w-4" /> Toon antwoord
           </Button>
-          <Button variant="outline" size="sm" onClick={reset} title="Reset">
-            <RotateCcw className="h-4 w-4" />
-          </Button>
-          <Button variant="outline" size="sm" onClick={next}>
-            <ArrowRight className="h-4 w-4" />
-          </Button>
-        </div>
+        ) : (
+          <Card className="w-full border-primary/40 bg-primary/5">
+            <CardContent className="p-4 md:p-5 text-center">
+              <p className="text-xs uppercase tracking-widest text-muted-foreground mb-1">
+                {answerLabel}
+              </p>
+              <p
+                className="text-2xl md:text-3xl font-bold text-primary"
+                {...(showDutch ? { translate: "no" as const, lang: "fr" } : {})}
+              >
+                {answer}
+              </p>
+            </CardContent>
+          </Card>
+        )}
       </div>
 
-      {allDone && (
-        <div className="w-full bg-[hsl(var(--success))]/10 text-[hsl(var(--success))] text-sm rounded-lg p-3 text-center font-medium">
-          🎉 Bravo! Je hebt alle woorden gemarkeerd als geleerd.
+      {revealed && (
+        <div className="w-full grid grid-cols-2 gap-2">
+          <Button variant="outline" onClick={() => handleNext(false)} className="gap-2">
+            Nog niet <ArrowRight className="h-4 w-4" />
+          </Button>
+          <Button onClick={() => handleNext(true)} className="gap-2">
+            <CheckCircle2 className="h-4 w-4" /> Geleerd
+          </Button>
         </div>
       )}
     </div>
