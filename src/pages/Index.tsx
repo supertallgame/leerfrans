@@ -3,7 +3,7 @@ import { useThemeSync } from "@/hooks/use-theme-sync";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { BookOpen, Brain, Puzzle, Keyboard, Users, PenTool, MessageSquare, Bot, Settings, Star, Lock, BookMarked, FlaskConical, CheckCircle, Layers, Microscope, Bone, Clock, BookType, Map, ShieldCheck, GraduationCap, Hash, BookText, LifeBuoy, ShieldQuestion, MessagesSquare, Music2, VolumeX, TestTube } from "lucide-react";
+import { BookOpen, Brain, Puzzle, Keyboard, Users, PenTool, MessageSquare, Bot, Settings, Star, Lock, BookMarked, FlaskConical, CheckCircle, Layers, Microscope, Bone, Clock, BookType, Map, ShieldCheck, GraduationCap, Hash, BookText, LifeBuoy, ShieldQuestion, MessagesSquare, Music2, VolumeX, TestTube, Shield, Beaker } from "lucide-react";
 import polarExpressImg from "@/assets/polar-express.png";
 import { FlagNL, FlagFR } from "@/components/Flags";
 import { getChaptersForLanguage, getChapter, getForeignLabel, getForeignLabelNative, Language, Niveau } from "@/data/vocabulary";
@@ -125,6 +125,8 @@ const Index = () => {
   const [disabledNiveaus, setDisabledNiveaus] = useState<string[]>([]);
   const [isHeadAdmin, setIsHeadAdmin] = useState(false);
   const [isHeadTester, setIsHeadTester] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [isTester, setIsTester] = useState(false);
   const [isStaff, setIsStaff] = useState(false);
   const [polarExpressEnabled, setPolarExpressEnabled] = useState(false);
   const [obamaEnabled, setObamaEnabled] = useState(false);
@@ -215,7 +217,7 @@ const Index = () => {
 
   useEffect(() => {
     const checkRoles = async (userId: string | undefined) => {
-      if (!userId) { setIsHeadAdmin(false); setIsHeadTester(false); setIsStaff(false); setIsEminem(false); return; }
+      if (!userId) { setIsHeadAdmin(false); setIsHeadTester(false); setIsAdmin(false); setIsTester(false); setIsStaff(false); setIsEminem(false); return; }
       const OWNER_EMAILS = ["brankovantland@gmail.com", "branko18vantland@gmail.com"];
       const { data: { session } } = await supabase.auth.getSession();
       // Check eminem role (independent of staff hierarchy)
@@ -225,6 +227,8 @@ const Index = () => {
       if (session?.user?.email && OWNER_EMAILS.includes(session.user.email)) {
         setIsHeadAdmin(true);
         setIsHeadTester(true);
+        setIsAdmin(true);
+        setIsTester(true);
         setIsStaff(true);
         return;
       }
@@ -232,6 +236,8 @@ const Index = () => {
       const role = staffRole as string | null;
       setIsHeadAdmin(role === "head_admin");
       setIsHeadTester(role === "head_tester");
+      setIsAdmin(role === "admin" || role === "head_admin");
+      setIsTester(role === "tester" || role === "head_tester");
       // Testers/head_testers must explicitly enable admin-mode in /tester or
       // /headtester before staff features (badge, staff chat, etc.) become active.
       const testerAdminMode = localStorage.getItem("tester_admin_mode") === "1";
@@ -399,9 +405,19 @@ const Index = () => {
                 <ShieldCheck className="h-5 w-5" />
               </Button>
             )}
+            {isAdmin && (
+              <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => navigate("/admin")} aria-label="Admin">
+                <Shield className="h-5 w-5" />
+              </Button>
+            )}
             {isHeadTester && (
               <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => navigate("/headtester")} aria-label="Head Tester">
                 <TestTube className="h-5 w-5" />
+              </Button>
+            )}
+            {isTester && (
+              <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => navigate("/tester")} aria-label="Tester">
+                <Beaker className="h-5 w-5" />
               </Button>
             )}
             {isStaff && (
