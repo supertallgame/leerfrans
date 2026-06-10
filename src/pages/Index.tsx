@@ -125,6 +125,8 @@ const Index = () => {
   const [disabledNiveaus, setDisabledNiveaus] = useState<string[]>([]);
   const [isHeadAdmin, setIsHeadAdmin] = useState(false);
   const [isHeadTester, setIsHeadTester] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [isTester, setIsTester] = useState(false);
   const [isStaff, setIsStaff] = useState(false);
   const [polarExpressEnabled, setPolarExpressEnabled] = useState(false);
   const [obamaEnabled, setObamaEnabled] = useState(false);
