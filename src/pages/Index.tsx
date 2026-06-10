@@ -51,11 +51,13 @@ const Chapitre5Grammaire = lazy(() => import("@/components/games/Chapitre5Gramma
 const Chapitre6Grammaire = lazy(() => import("@/components/games/Chapitre6Grammaire"));
 const EnglishClockTimes = lazy(() => import("@/components/games/EnglishClockTimes"));
 const NaskSpeedStories = lazy(() => import("@/components/games/NaskSpeedStories"));
+const WordLearn = lazy(() => import("@/components/games/WordLearn"));
 
-type Game = "menu" | "flashcards" | "quiz" | "match" | "type" | "multiplayer" | "fill" | "sentence" | "ai" | "truefalse" | "memory" | "skeleton" | "clocktimes" | "etre" | "explorer" | "grammar" | "grammaire1" | "grammaire2" | "grammaire3" | "grammaire5" | "grammaire6" | "enclock" | "naskspeed";
+type Game = "menu" | "flashcards" | "quiz" | "match" | "type" | "multiplayer" | "fill" | "sentence" | "ai" | "truefalse" | "memory" | "skeleton" | "clocktimes" | "etre" | "explorer" | "grammar" | "grammaire1" | "grammaire2" | "grammaire3" | "grammaire5" | "grammaire6" | "enclock" | "naskspeed" | "wordlearn";
 
 const languageGames = [
   { id: "flashcards" as Game, title: "Flashcards", description: "Draai kaarten om en leer de woorden", icon: BookOpen, color: "bg-primary/10 text-primary" },
+  { id: "wordlearn" as Game, title: "Woorden Leren", description: "Bekijk Frans + Nederlands samen, geen vragen", icon: GraduationCap, color: "bg-[hsl(var(--success))]/10 text-[hsl(var(--success))]", frenchOnly: true },
   { id: "quiz" as Game, title: "Meerkeuze Quiz", description: "Kies het juiste antwoord uit 4 opties", icon: Brain, color: "bg-secondary/20 dark:bg-secondary/30 text-secondary-foreground" },
   { id: "match" as Game, title: "Koppel Paren", description: "Verbind de Nederlandse en vreemde woorden", icon: Puzzle, color: "bg-accent/10 text-accent" },
   { id: "type" as Game, title: "Typ het Antwoord", description: "Typ de vertaling zelf in", icon: Keyboard, color: "bg-destructive/10 text-destructive" },
@@ -327,6 +329,7 @@ const Index = () => {
   if (activeGame === "grammaire6") return <Suspense fallback={gameLoader}><Chapitre6Grammaire onBack={() => setActiveGame("menu")} /></Suspense>;
   if (activeGame === "enclock") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6"><EnglishClockTimes onBack={() => setActiveGame("menu")} /></div></Suspense>;
   if (activeGame === "naskspeed") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6"><NaskSpeedStories onBack={() => setActiveGame("menu")} /></div></Suspense>;
+  if (activeGame === "wordlearn") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6"><WordLearn onBack={() => setActiveGame("menu")} /></div></Suspense>;
 
   const hasSentences = activeVocabulary.some((v) => v.french.includes(" ") && v.french.length > 15);
   const isVmboHavoCh3 = niveau === "vmbo-havo" && chapterId === "chapitre3";
