@@ -405,9 +405,19 @@ const Index = () => {
                 <ShieldCheck className="h-5 w-5" />
               </Button>
             )}
+            {isAdmin && (
+              <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => navigate("/admin")} aria-label="Admin">
+                <Shield className="h-5 w-5" />
+              </Button>
+            )}
             {isHeadTester && (
               <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => navigate("/headtester")} aria-label="Head Tester">
                 <TestTube className="h-5 w-5" />
+              </Button>
+            )}
+            {isTester && (
+              <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => navigate("/tester")} aria-label="Tester">
+                <Beaker className="h-5 w-5" />
               </Button>
             )}
             {isStaff && (
