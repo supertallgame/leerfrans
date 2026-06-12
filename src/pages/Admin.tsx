@@ -921,6 +921,7 @@ export default function Admin() {
                   toast.error("Kon stemmen niet verwijderen");
                 } else {
                   toast.success("Alle stemmen verwijderd");
+                  logStaffAction("review_votes.delete_all", deleteVotesReviewId);
                 }
                 setDeleteVotesReviewId(null);
               }}
