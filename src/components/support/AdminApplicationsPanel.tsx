@@ -59,8 +59,10 @@ export default function AdminApplicationsPanel() {
       });
       if (roleErr) toast.warning("Status bijgewerkt, maar rol kon niet worden toegekend");
       else toast.success(`${a.user_email} is admin`);
+      logStaffAction("admin_application.approve", a.user_email);
     } else {
       toast.success("Aanvraag afgewezen");
+      logStaffAction("admin_application.reject", a.user_email);
     }
     await load();
   };
