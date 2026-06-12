@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { logStaffAction } from "@/lib/logStaffAction";
 import { Beaker, BarChart3, GraduationCap, Home, Megaphone, MessagesSquare, Plus, Search, ShieldMinus, ShieldPlus, Star, Train, Trash2, Users, X, ImageIcon } from "lucide-react";
 import SupportAdminPanel from "@/components/support/SupportAdminPanel";
 import AdminApplicationsPanel from "@/components/support/AdminApplicationsPanel";
