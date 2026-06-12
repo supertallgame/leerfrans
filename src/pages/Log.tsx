@@ -210,8 +210,11 @@ export default function Log() {
                     <span className="text-xs text-muted-foreground">{new Date(l.created_at).toLocaleString("nl-NL")}</span>
                   </div>
                   <div className="text-sm">
-                    <span className="font-semibold">{l.action}</span>
-                    {l.target && <span className="text-muted-foreground"> → {l.target}</span>}
+                    <p className="font-medium">{describeAction(l.action, l.target, l.details)}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      <span className="font-mono">{l.action}</span>
+                      {l.target && <span> → {l.target}</span>}
+                    </p>
                   </div>
                   {l.details && Object.keys(l.details).length > 0 && (
                     <pre className="text-xs bg-muted/50 rounded p-2 overflow-x-auto">{JSON.stringify(l.details, null, 2)}</pre>
