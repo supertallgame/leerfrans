@@ -132,6 +132,7 @@ export default function HeadAdmin() {
       });
       if (error) throw error;
       toast.success(`${user.email} is nu admin`);
+      logStaffAction("role.grant.admin", user.email);
       await loadAllRoles();
     } catch (e: any) {
       console.error("Promote error:", e);
@@ -149,6 +150,7 @@ export default function HeadAdmin() {
       return;
     }
     toast.success(`${role.email} is geen admin meer`);
+    logStaffAction("role.revoke.admin", role.email);
     await loadAllRoles();
   };
 
