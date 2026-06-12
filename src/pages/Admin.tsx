@@ -29,6 +29,7 @@ import {
 import { FlagFR } from "@/components/Flags";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { logStaffAction } from "@/lib/logStaffAction";
 import { Language } from "@/data/vocabulary";
 
 interface Review {
