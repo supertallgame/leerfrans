@@ -28,6 +28,70 @@ const ROLE_META: Record<string, { label: string; icon: any; cls: string }> = {
   tester:      { label: "Tester",      icon: Beaker,      cls: "bg-emerald-500/15 text-emerald-500 border-emerald-500/30" },
 };
 
+function describeAction(action: string, target: string | null, details: Record<string, unknown> | null): string {
+  const d = details ?? {};
+  const onOff = (v: unknown) => (v ? "ingeschakeld" : "uitgeschakeld");
+  const name = (target ?? "").replace(/^setting\./, "").replace(/_/g, " ");
+
+  // Settings toggles
+  if (action === "setting.toggle" || action.startsWith("setting.")) {
+    const key = target?.replace(/^setting\./, "") ?? action.replace(/^setting\./, "");
+    const pretty: Record<string, string> = {
+      block_anonymous_reviews: "Anonieme reviews blokkeren",
+      explorer_enabled: "Explorer-spel",
+      ai_teacher_enabled: "AI-leraar",
+      polar_express_enabled: "Polar Express easter egg",
+      obama_enabled: "Obama easter egg",
+      onboarding_enabled: "Onboarding",
+      disabled_subjects: "Uitgeschakelde vakken",
+      disabled_niveaus: "Uitgeschakelde niveaus",
+    };
+    const label = pretty[key] ?? key.replace(/_/g, " ");
+    if ("enabled" in d) return `${label} ${onOff(d.enabled)}`;
+    if ("value" in d) return `${label} ingesteld op ${JSON.stringify(d.value)}`;
+    return `${label} aangepast`;
+  }
+
+  // Role changes
+  if (action === "role.assign" || action === "role.promote") return `Rol toegekend: ${d.role ?? "?"} aan ${target ?? "?"}`;
+  if (action === "role.revoke" || action === "role.demote") return `Rol ingetrokken: ${d.role ?? "?"} van ${target ?? "?"}`;
+
+  // Bans / mutes
+  if (action === "user.ban")   return `Gebruiker ${target} gebanned${d.reason ? ` (reden: ${d.reason})` : ""}`;
+  if (action === "user.unban") return `Ban opgeheven voor ${target}`;
+  if (action === "user.mute")  return `Gebruiker ${target} gedempt${d.until ? ` tot ${d.until}` : ""}`;
+  if (action === "user.unmute")return `Demping opgeheven voor ${target}`;
+  if (action === "ip.ban")     return `IP gebanned: ${target}`;
+  if (action === "ip.unban")   return `IP-ban opgeheven: ${target}`;
+
+  // Reviews / replies
+  if (action === "review.delete") return `Review verwijderd (${target})`;
+  if (action === "reply.delete")  return `Reactie verwijderd (${target})`;
+  if (action === "votes.delete")  return `Stemmen verwijderd op review ${target}`;
+
+  // Game rooms
+  if (action === "room.close")    return `Multiplayer-kamer gesloten: ${target}`;
+
+  // Subjects
+  if (action === "subject.toggle") return `Vak ${target} ${onOff(d.enabled)}`;
+  if (action === "niveau.toggle")  return `Niveau ${target} ${onOff(d.enabled)}`;
+
+  // Admin applications
+  if (action === "application.approve") return `Admin-aanvraag goedgekeurd voor ${target}`;
+  if (action === "application.reject")  return `Admin-aanvraag afgewezen voor ${target}`;
+
+  // Polls / announcements
+  if (action === "poll.create")       return `Poll aangemaakt${d.question ? `: "${d.question}"` : ""}`;
+  if (action === "poll.delete")       return `Poll verwijderd (${target})`;
+  if (action === "announcement.create") return `Aankondiging geplaatst${d.title ? `: "${d.title}"` : ""}`;
+  if (action === "announcement.delete") return `Aankondiging verwijderd (${target})`;
+
+  // Generic fallbacks
+  const verb = action.split(".").pop() ?? action;
+  const subj = action.split(".")[0] ?? "";
+  return `${subj || "Actie"} ${verb}${target ? ` → ${target}` : ""}`;
+}
+
 export default function Log() {
   const navigate = useNavigate();
   useThemeSync();
