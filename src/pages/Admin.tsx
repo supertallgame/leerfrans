@@ -261,6 +261,7 @@ export default function Admin() {
     setMuteEmail("");
     setMuteReason("");
     toast.success(`${muteEmail.trim()} is gemute`);
+    logStaffAction("mute.user", muteEmail.trim(), { duration: muteDuration, reason: muteReason.trim() });
   };
 
   const handleUnmute = async (id: string) => {
@@ -271,6 +272,7 @@ export default function Admin() {
     }
     setMutedUsers((prev) => prev.filter((m) => m.id !== id));
     toast.success("Gebruiker is unmuted");
+    logStaffAction("unmute.user", id);
   };
 
   const handleDeleteReview = async () => {
@@ -281,6 +283,7 @@ export default function Admin() {
     } else {
       setReviews((prev) => prev.filter((r) => r.id !== deleteId));
       toast.success("Review verwijderd");
+      logStaffAction("review.delete", deleteId);
     }
     setDeleteId(null);
   };
@@ -293,6 +296,7 @@ export default function Admin() {
     } else {
       setReplies((prev) => prev.filter((r) => r.id !== deleteReplyId));
       toast.success("Reactie verwijderd");
+      logStaffAction("review_reply.delete", deleteReplyId);
     }
     setDeleteReplyId(null);
   };
@@ -308,6 +312,7 @@ export default function Admin() {
     } else {
       setGameRooms((prev) => prev.filter((r) => r.id !== closeRoomId));
       toast.success("Kamer gesloten");
+      logStaffAction("multiplayer.close_room", closeRoomId);
     }
     setCloseRoomId(null);
   };
