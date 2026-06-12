@@ -570,6 +570,39 @@ export type Database = {
         }
         Relationships: []
       }
+      staff_action_logs: {
+        Row: {
+          action: string
+          actor_email: string
+          actor_role: string
+          actor_user_id: string | null
+          created_at: string
+          details: Json
+          id: string
+          target: string | null
+        }
+        Insert: {
+          action: string
+          actor_email: string
+          actor_role: string
+          actor_user_id?: string | null
+          created_at?: string
+          details?: Json
+          id?: string
+          target?: string | null
+        }
+        Update: {
+          action?: string
+          actor_email?: string
+          actor_role?: string
+          actor_user_id?: string | null
+          created_at?: string
+          details?: Json
+          id?: string
+          target?: string | null
+        }
+        Relationships: []
+      }
       support_report_messages: {
         Row: {
           created_at: string
