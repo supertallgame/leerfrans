@@ -568,6 +568,9 @@ export default function Owner() {
             <Button variant="outline" size="sm" onClick={() => setStaffChatOpen(true)} className="gap-2">
               <MessagesSquare className="h-4 w-4" /> Staff Chat
             </Button>
+            <Button variant="outline" size="sm" onClick={() => navigate("/log")} className="gap-2">
+              <ScrollText className="h-4 w-4" /> Action Log
+            </Button>
             <Button variant="outline" size="sm" onClick={() => navigate("/")} className="gap-2">
               <Home className="h-4 w-4" /> Home
             </Button>
