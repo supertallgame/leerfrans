@@ -195,6 +195,7 @@ export default function Owner() {
       toast.error("Kon poll niet aanmaken");
     } else {
       toast.success("Poll aangemaakt!");
+      logStaffAction("poll.create", newPollQuestion.trim(), { options: opts });
       setNewPollQuestion("");
       setNewPollOptions(["", ""]);
       await loadPolls();
@@ -205,12 +206,14 @@ export default function Owner() {
   const togglePoll = async (pollId: string, active: boolean) => {
     await supabase.from("update_polls").update({ is_active: active }).eq("id", pollId);
     await loadPolls();
+    logStaffAction(active ? "poll.activate" : "poll.deactivate", pollId);
     toast.success(active ? "Poll geactiveerd" : "Poll gestopt");
   };
 
   const deletePoll = async (pollId: string) => {
     await supabase.from("update_polls").delete().eq("id", pollId);
     await loadPolls();
+    logStaffAction("poll.delete", pollId);
     toast.success("Poll verwijderd");
   };
 
