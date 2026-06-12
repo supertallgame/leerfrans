@@ -299,6 +299,7 @@ export default function Owner() {
     });
     if (error) { toast.error(error.message); return; }
     toast.success(`${target.email} is nu Eminem 🎤`);
+    logStaffAction("role.grant.eminem", target.email);
     setEminemEmailInput("");
     await loadRoles();
   };
@@ -307,6 +308,7 @@ export default function Owner() {
     const { error } = await supabase.from("user_roles").delete().eq("id", role.id);
     if (error) { toast.error("Kon niet verwijderen"); return; }
     toast.success(`${role.email} is geen Eminem meer`);
+    logStaffAction("role.revoke.eminem", role.email);
     await loadRoles();
   };
 
