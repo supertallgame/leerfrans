@@ -217,6 +217,7 @@ export default function Admin() {
     }
     setBlockAnonymous(newValue);
     toast.success(newValue ? "Anonieme reviews geblokkeerd" : "Anonieme reviews weer toegestaan");
+    logStaffAction("setting.block_anonymous_reviews", null, { enabled: newValue });
   };
 
   const toggleObamaEnabled = async () => {
@@ -230,6 +231,7 @@ export default function Admin() {
     }
     setObamaEnabled(newValue);
     toast.success(newValue ? "Obama easter egg ingeschakeld" : "Obama easter egg uitgeschakeld");
+    logStaffAction("setting.obama", null, { enabled: newValue });
   };
   const handleMuteUser = async () => {
     if (!muteEmail.trim()) return toast.error("Vul een e-mailadres in");
