@@ -23,6 +23,7 @@ const Owner = lazyRetry(() => import("./pages/Owner.tsx"));
 const HeadAdmin = lazyRetry(() => import("./pages/HeadAdmin.tsx"));
 const Tester = lazyRetry(() => import("./pages/Tester.tsx"));
 const HeadTester = lazyRetry(() => import("./pages/HeadTester.tsx"));
+const Log = lazyRetry(() => import("./pages/Log.tsx"));
 const NotFound = lazyRetry(() => import("./pages/NotFound.tsx"));
 
 const queryClient = new QueryClient();
@@ -52,6 +53,7 @@ const App = () => (
               <Route path="/headadmin" element={<HeadAdmin />} />
               <Route path="/tester" element={<Tester />} />
               <Route path="/headtester" element={<HeadTester />} />
+              <Route path="/log" element={<Log />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

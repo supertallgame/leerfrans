@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Shield, Ban, Search, Wifi, WifiOff, Globe, Trash2, Clock, AlertTriangle, Users, ChevronDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { logStaffAction } from "@/lib/logStaffAction";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -116,6 +117,7 @@ export default function BanManagement() {
     );
     if (error) { toast.error("Kon IP niet bannen"); return; }
     toast.success(`IP ${ip} geband`);
+    logStaffAction("ban.ip", ip, { reason });
     await Promise.all([loadIpBans(), loadUserIps()]);
   };
 
@@ -128,12 +130,14 @@ export default function BanManagement() {
     );
     if (error) { toast.error("Kon IP niet muten"); return; }
     toast.success(`IP ${ip} gemutet`);
+    logStaffAction("mute.ip", ip, { duration, reason });
     await Promise.all([loadIpBans(), loadUserIps()]);
   };
 
   const unbanIp = async (id: string) => {
     await supabase.from("ip_bans").delete().eq("id", id);
     toast.success("IP ban/mute verwijderd");
+    logStaffAction("unban.ip", id);
     await Promise.all([loadIpBans(), loadUserIps()]);
   };
 
@@ -145,6 +149,7 @@ export default function BanManagement() {
     );
     if (error) { toast.error("Kon gebruiker niet bannen"); return; }
     toast.success(`${email} geband`);
+    logStaffAction("ban.user", email, { reason });
     await Promise.all([loadUserBans(), loadUserIps()]);
   };
 
@@ -157,12 +162,14 @@ export default function BanManagement() {
     );
     if (error) { toast.error("Kon gebruiker niet muten"); return; }
     toast.success(`${email} gemutet`);
+    logStaffAction("mute.user", email, { duration, reason });
     await Promise.all([loadUserBans(), loadUserIps()]);
   };
 
   const removeBan = async (id: string) => {
     await supabase.from("user_bans").delete().eq("id", id);
     toast.success("Ban/mute verwijderd");
+    logStaffAction("unban.user", id);
     await Promise.all([loadUserBans(), loadUserIps()]);
   };
 

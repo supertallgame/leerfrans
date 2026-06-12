@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { logStaffAction } from "@/lib/logStaffAction";
 import { Beaker, BarChart3, GraduationCap, Home, Megaphone, MessagesSquare, Plus, Search, Train, Trash2, Users, X, ImageIcon } from "lucide-react";
 import SupportAdminPanel from "@/components/support/SupportAdminPanel";
 import AdminApplicationsPanel from "@/components/support/AdminApplicationsPanel";
@@ -100,6 +101,7 @@ export default function Tester() {
     const { error } = await supabase.from("admin_settings").upsert({ key: "polar_express_enabled", value: v as any, updated_at: new Date().toISOString() } as any, { onConflict: "key" });
     if (error) return toast.error("Kon niet opslaan");
     setPolarExpressEnabled(v);
+    logStaffAction("setting.polar_express", null, { enabled: v });
     toast.success(v ? "Polar Express aan" : "Polar Express uit");
   };
 
@@ -108,6 +110,7 @@ export default function Tester() {
     const { error } = await supabase.from("admin_settings").upsert({ key: "disabled_niveaus", value: next as any, updated_at: new Date().toISOString() } as any, { onConflict: "key" });
     if (error) return toast.error("Kon niet opslaan");
     setDisabledNiveaus(next);
+    logStaffAction("setting.niveau", id, { enabled });
     toast.success(`${id.toUpperCase()} ${enabled ? "aan" : "uit"}`);
   };
 
@@ -121,6 +124,7 @@ export default function Tester() {
       created_by: session!.user.id,
     });
     if (error) return toast.error("Kon poll niet maken");
+    logStaffAction("poll.create", newPollQ.trim(), { options: opts });
     setNewPollQ(""); setNewPollOpts(["", ""]);
     toast.success("Poll aangemaakt");
     await loadPolls();
@@ -128,11 +132,13 @@ export default function Tester() {
 
   const togglePoll = async (id: string, active: boolean) => {
     await supabase.from("update_polls").update({ is_active: active }).eq("id", id);
+    logStaffAction(active ? "poll.activate" : "poll.deactivate", id);
     await loadPolls();
   };
 
   const deletePoll = async (id: string) => {
     await supabase.from("update_polls").delete().eq("id", id);
+    logStaffAction("poll.delete", id);
     await loadPolls();
   };
 
@@ -154,6 +160,7 @@ export default function Tester() {
       created_by: session!.user.id,
     });
     if (error) return toast.error("Kon bericht niet plaatsen");
+    logStaffAction("announcement.create", newAnnMsg.trim(), { hasImage: !!imageUrl });
     setNewAnnMsg(""); setNewAnnImg(null);
     toast.success("Bericht geplaatst");
     await loadAnnouncements();
@@ -161,11 +168,13 @@ export default function Tester() {
 
   const toggleAnn = async (id: string, active: boolean) => {
     await supabase.from("update_announcements").update({ is_active: active }).eq("id", id);
+    logStaffAction(active ? "announcement.activate" : "announcement.deactivate", id);
     await loadAnnouncements();
   };
 
   const deleteAnn = async (id: string) => {
     await supabase.from("update_announcements").delete().eq("id", id);
+    logStaffAction("announcement.delete", id);
     await loadAnnouncements();
   };
 

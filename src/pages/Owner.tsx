@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { Shield, Home, Crown, Users, ShieldPlus, ShieldMinus, Search, Map, ShieldCheck, ArrowUpCircle, ArrowDownCircle, BarChart3, Megaphone, Plus, Trash2, X, ImageIcon, Bot, GraduationCap, Train, Ban, Beaker, MessagesSquare, Star, Sparkles, Mic } from "lucide-react";
+import { Shield, Home, Crown, Users, ShieldPlus, ShieldMinus, Search, Map, ShieldCheck, ArrowUpCircle, ArrowDownCircle, BarChart3, Megaphone, Plus, Trash2, X, ImageIcon, Bot, GraduationCap, Train, Ban, Beaker, MessagesSquare, Star, Sparkles, Mic, ScrollText } from "lucide-react";
 import BanManagement from "@/components/owner/BanManagement";
 import SupportAdminPanel from "@/components/support/SupportAdminPanel";
 import AdminApplicationsPanel from "@/components/support/AdminApplicationsPanel";
@@ -14,6 +14,7 @@ import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { setDebugLogging } from "@/lib/debug";
+import { logStaffAction } from "@/lib/logStaffAction";
 
 const OWNER_EMAILS = ["brankovantland@gmail.com", "branko18vantland@gmail.com"];
 
@@ -194,6 +195,7 @@ export default function Owner() {
       toast.error("Kon poll niet aanmaken");
     } else {
       toast.success("Poll aangemaakt!");
+      logStaffAction("poll.create", newPollQuestion.trim(), { options: opts });
       setNewPollQuestion("");
       setNewPollOptions(["", ""]);
       await loadPolls();
@@ -204,12 +206,14 @@ export default function Owner() {
   const togglePoll = async (pollId: string, active: boolean) => {
     await supabase.from("update_polls").update({ is_active: active }).eq("id", pollId);
     await loadPolls();
+    logStaffAction(active ? "poll.activate" : "poll.deactivate", pollId);
     toast.success(active ? "Poll geactiveerd" : "Poll gestopt");
   };
 
   const deletePoll = async (pollId: string) => {
     await supabase.from("update_polls").delete().eq("id", pollId);
     await loadPolls();
+    logStaffAction("poll.delete", pollId);
     toast.success("Poll verwijderd");
   };
 
@@ -246,6 +250,7 @@ export default function Owner() {
       toast.error("Kon bericht niet plaatsen");
     } else {
       toast.success("Update-bericht geplaatst!");
+      logStaffAction("announcement.create", newAnnouncementMsg.trim(), { hasImage: !!imageUrl });
       setNewAnnouncementMsg("");
       setNewAnnouncementImg(null);
       await loadAnnouncements();
@@ -256,12 +261,14 @@ export default function Owner() {
   const toggleAnnouncement = async (id: string, active: boolean) => {
     await supabase.from("update_announcements").update({ is_active: active }).eq("id", id);
     await loadAnnouncements();
+    logStaffAction(active ? "announcement.activate" : "announcement.deactivate", id);
     toast.success(active ? "Bericht geactiveerd" : "Bericht verborgen");
   };
 
   const deleteAnnouncement = async (id: string) => {
     await supabase.from("update_announcements").delete().eq("id", id);
     await loadAnnouncements();
+    logStaffAction("announcement.delete", id);
     toast.success("Bericht verwijderd");
   };
 
@@ -292,6 +299,7 @@ export default function Owner() {
     });
     if (error) { toast.error(error.message); return; }
     toast.success(`${target.email} is nu Eminem 🎤`);
+    logStaffAction("role.grant.eminem", target.email);
     setEminemEmailInput("");
     await loadRoles();
   };
@@ -300,6 +308,7 @@ export default function Owner() {
     const { error } = await supabase.from("user_roles").delete().eq("id", role.id);
     if (error) { toast.error("Kon niet verwijderen"); return; }
     toast.success(`${role.email} is geen Eminem meer`);
+    logStaffAction("role.revoke.eminem", role.email);
     await loadRoles();
   };
 
@@ -339,6 +348,7 @@ export default function Owner() {
     const { error } = await supabase.from("admin_settings").upsert({ key: "polar_express_enabled", value: checked as any, updated_at: new Date().toISOString() } as any, { onConflict: "key" });
     if (error) { toast.error("Kon instelling niet opslaan"); return; }
     setPolarExpressEnabled(checked);
+    logStaffAction("setting.polar_express", null, { enabled: checked });
     toast.success(checked ? "Polar Express ingeschakeld" : "Polar Express uitgeschakeld");
   };
 
@@ -346,6 +356,7 @@ export default function Owner() {
     const { error } = await supabase.from("admin_settings").upsert({ key: "onboarding_enabled", value: checked as any, updated_at: new Date().toISOString() } as any, { onConflict: "key" });
     if (error) { toast.error("Kon instelling niet opslaan"); return; }
     setOnboardingEnabled(checked);
+    logStaffAction("setting.onboarding", null, { enabled: checked });
     toast.success(checked ? "Onboarding ingeschakeld" : "Onboarding uitgeschakeld");
   };
 
@@ -353,6 +364,7 @@ export default function Owner() {
     const { error } = await supabase.from("admin_settings").upsert({ key: "explorer_enabled", value: checked as any, updated_at: new Date().toISOString() } as any, { onConflict: "key" });
     if (error) { toast.error("Kon instelling niet opslaan"); return; }
     setExplorerEnabled(checked);
+    logStaffAction("setting.explorer", null, { enabled: checked });
     toast.success(checked ? "Verkenner ingeschakeld" : "Verkenner uitgeschakeld");
   };
 
@@ -360,6 +372,7 @@ export default function Owner() {
     const { error } = await supabase.from("admin_settings").upsert({ key: "ai_teacher_enabled", value: checked as any, updated_at: new Date().toISOString() } as any, { onConflict: "key" });
     if (error) { toast.error("Kon instelling niet opslaan"); return; }
     setAiTeacherEnabled(checked);
+    logStaffAction("setting.ai_teacher", null, { enabled: checked });
     toast.success(checked ? "AI Leraar ingeschakeld" : "AI Leraar uitgeschakeld");
   };
 
@@ -370,6 +383,7 @@ export default function Owner() {
     const { error } = await supabase.from("admin_settings").upsert({ key: "disabled_niveaus", value: newDisabled as any, updated_at: new Date().toISOString() } as any, { onConflict: "key" });
     if (error) { toast.error("Kon instelling niet opslaan"); return; }
     setDisabledNiveaus(newDisabled);
+    logStaffAction("setting.niveau", niveauId, { enabled });
     toast.success(`${niveauId.toUpperCase()} ${enabled ? "ingeschakeld" : "uitgeschakeld"}`);
   };
 
@@ -388,6 +402,7 @@ export default function Owner() {
       });
       if (error) throw error;
       toast.success(`${user.email} is nu admin`);
+      logStaffAction("role.grant.admin", user.email);
       await loadRoles();
     } catch (e: any) {
       console.error(e);
@@ -412,6 +427,7 @@ export default function Owner() {
       });
       if (error) throw error;
       toast.success(`${user.email} is nu tester`);
+      logStaffAction("role.grant.tester", user.email);
       await loadRoles();
     } catch (e: any) {
       console.error(e);
@@ -425,6 +441,7 @@ export default function Owner() {
     const { error } = await supabase.from("user_roles").delete().eq("id", role.id);
     if (error) { toast.error("Kon niet verwijderen"); return; }
     toast.success(`${role.email} is geen tester meer`);
+    logStaffAction("role.revoke.tester", role.email);
     await loadRoles();
   };
 
@@ -443,6 +460,7 @@ export default function Owner() {
       });
       if (error) throw error;
       toast.success(`${user.email} is nu head tester`);
+      logStaffAction("role.grant.head_tester", user.email);
       await loadRoles();
     } catch (e: any) {
       console.error(e);
@@ -460,6 +478,7 @@ export default function Owner() {
       });
       if (error) throw error;
       toast.success(`${role.email} is nu head tester`);
+      logStaffAction("role.promote.tester_to_head_tester", role.email);
       await loadRoles();
     } catch { toast.error("Kon niet promoveren"); }
   };
@@ -472,6 +491,7 @@ export default function Owner() {
       });
       if (error) throw error;
       toast.success(`${role.email} is nu tester`);
+      logStaffAction("role.demote.head_tester_to_tester", role.email);
       await loadRoles();
     } catch { toast.error("Kon niet demoteren"); }
   };
@@ -480,6 +500,7 @@ export default function Owner() {
     const { error } = await supabase.from("user_roles").delete().eq("id", role.id);
     if (error) { toast.error("Kon niet verwijderen"); return; }
     toast.success(`${role.email} is geen head tester meer`);
+    logStaffAction("role.revoke.head_tester", role.email);
     await loadRoles();
   };
 
@@ -494,6 +515,7 @@ export default function Owner() {
       });
       if (error) throw error;
       toast.success(`${role.email} is nu head admin`);
+      logStaffAction("role.promote.admin_to_head_admin", role.email);
       await loadRoles();
     } catch (e: any) {
       console.error(e);
@@ -511,6 +533,7 @@ export default function Owner() {
       });
       if (error) throw error;
       toast.success(`${role.email} is nu weer gewone admin`);
+      logStaffAction("role.demote.head_admin_to_admin", role.email);
       await loadRoles();
     } catch (e: any) {
       console.error(e);
@@ -525,6 +548,7 @@ export default function Owner() {
       return;
     }
     toast.success(`${role.email} is geen admin meer`);
+    logStaffAction("role.revoke.admin", role.email);
     await loadRoles();
   };
 
@@ -567,6 +591,9 @@ export default function Owner() {
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" onClick={() => setStaffChatOpen(true)} className="gap-2">
               <MessagesSquare className="h-4 w-4" /> Staff Chat
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => navigate("/log")} className="gap-2">
+              <ScrollText className="h-4 w-4" /> Action Log
             </Button>
             <Button variant="outline" size="sm" onClick={() => navigate("/")} className="gap-2">
               <Home className="h-4 w-4" /> Home

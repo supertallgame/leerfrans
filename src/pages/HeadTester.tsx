@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { logStaffAction } from "@/lib/logStaffAction";
 import { Beaker, BarChart3, GraduationCap, Home, Megaphone, MessagesSquare, Plus, Search, ShieldMinus, ShieldPlus, Star, Train, Trash2, Users, X, ImageIcon } from "lucide-react";
 import SupportAdminPanel from "@/components/support/SupportAdminPanel";
 import AdminApplicationsPanel from "@/components/support/AdminApplicationsPanel";
@@ -111,6 +112,7 @@ export default function HeadTester() {
     const { error } = await supabase.from("admin_settings").upsert({ key: "polar_express_enabled", value: v as any, updated_at: new Date().toISOString() } as any, { onConflict: "key" });
     if (error) return toast.error("Kon niet opslaan");
     setPolarExpressEnabled(v);
+    logStaffAction("setting.polar_express", null, { enabled: v });
     toast.success(v ? "Polar Express aan" : "Polar Express uit");
   };
 
@@ -118,6 +120,7 @@ export default function HeadTester() {
     const { error } = await supabase.from("admin_settings").upsert({ key: "obama_enabled", value: v as any, updated_at: new Date().toISOString() } as any, { onConflict: "key" });
     if (error) return toast.error("Kon niet opslaan");
     setObamaEnabled(v);
+    logStaffAction("setting.obama", null, { enabled: v });
     toast.success(v ? "Obama easter egg aan" : "Obama easter egg uit");
   };
 
@@ -126,6 +129,7 @@ export default function HeadTester() {
     const { error } = await supabase.from("admin_settings").upsert({ key: "disabled_niveaus", value: next as any, updated_at: new Date().toISOString() } as any, { onConflict: "key" });
     if (error) return toast.error("Kon niet opslaan");
     setDisabledNiveaus(next);
+    logStaffAction("setting.niveau", id, { enabled });
     toast.success(`${id.toUpperCase()} ${enabled ? "aan" : "uit"}`);
   };
 
@@ -139,6 +143,7 @@ export default function HeadTester() {
       created_by: session!.user.id,
     });
     if (error) return toast.error("Kon poll niet maken");
+    logStaffAction("poll.create", newPollQ.trim(), { options: opts });
     setNewPollQ(""); setNewPollOpts(["", ""]);
     toast.success("Poll aangemaakt");
     await loadPolls();
@@ -146,11 +151,13 @@ export default function HeadTester() {
 
   const togglePoll = async (id: string, active: boolean) => {
     await supabase.from("update_polls").update({ is_active: active }).eq("id", id);
+    logStaffAction(active ? "poll.activate" : "poll.deactivate", id);
     await loadPolls();
   };
 
   const deletePoll = async (id: string) => {
     await supabase.from("update_polls").delete().eq("id", id);
+    logStaffAction("poll.delete", id);
     await loadPolls();
   };
 
@@ -172,6 +179,7 @@ export default function HeadTester() {
       created_by: session!.user.id,
     });
     if (error) return toast.error("Kon bericht niet plaatsen");
+    logStaffAction("announcement.create", newAnnMsg.trim(), { hasImage: !!imageUrl });
     setNewAnnMsg(""); setNewAnnImg(null);
     toast.success("Bericht geplaatst");
     await loadAnnouncements();
@@ -179,11 +187,13 @@ export default function HeadTester() {
 
   const toggleAnn = async (id: string, active: boolean) => {
     await supabase.from("update_announcements").update({ is_active: active }).eq("id", id);
+    logStaffAction(active ? "announcement.activate" : "announcement.deactivate", id);
     await loadAnnouncements();
   };
 
   const deleteAnn = async (id: string) => {
     await supabase.from("update_announcements").delete().eq("id", id);
+    logStaffAction("announcement.delete", id);
     await loadAnnouncements();
   };
 
@@ -201,6 +211,7 @@ export default function HeadTester() {
     setPromoting(null);
     if (error) { toast.error("Kon niet promoveren"); return; }
     toast.success(`${user.email} is nu tester`);
+    logStaffAction("role.grant.tester", user.email);
     await loadTesters();
   };
 
@@ -208,6 +219,7 @@ export default function HeadTester() {
     const { error } = await supabase.from("user_roles").delete().eq("id", role.id);
     if (error) { toast.error("Kon niet verwijderen"); return; }
     toast.success(`${role.email} is geen tester meer`);
+    logStaffAction("role.revoke.tester", role.email);
     await loadTesters();
   };
 

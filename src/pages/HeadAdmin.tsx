@@ -8,6 +8,7 @@ import { Switch } from "@/components/ui/switch";
 import { Shield, Home, ShieldPlus, ShieldMinus, Search, Users, ShieldCheck, Sparkles, Settings as SettingsIcon, Star } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { logStaffAction } from "@/lib/logStaffAction";
 
 const OWNER_EMAILS = ["brankovantland@gmail.com", "branko18vantland@gmail.com"];
 
@@ -86,6 +87,7 @@ export default function HeadAdmin() {
       .upsert({ key: "onboarding_enabled", value: checked as any, updated_at: new Date().toISOString() } as any, { onConflict: "key" });
     if (error) { toast.error("Kon instelling niet opslaan"); return; }
     setOnboardingEnabled(checked);
+    logStaffAction("setting.onboarding", null, { enabled: checked });
     toast.success(checked ? "Onboarding ingeschakeld" : "Onboarding uitgeschakeld");
   };
 
@@ -130,6 +132,7 @@ export default function HeadAdmin() {
       });
       if (error) throw error;
       toast.success(`${user.email} is nu admin`);
+      logStaffAction("role.grant.admin", user.email);
       await loadAllRoles();
     } catch (e: any) {
       console.error("Promote error:", e);
@@ -147,6 +150,7 @@ export default function HeadAdmin() {
       return;
     }
     toast.success(`${role.email} is geen admin meer`);
+    logStaffAction("role.revoke.admin", role.email);
     await loadAllRoles();
   };
 

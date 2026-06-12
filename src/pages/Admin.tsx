@@ -29,6 +29,7 @@ import {
 import { FlagFR } from "@/components/Flags";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { logStaffAction } from "@/lib/logStaffAction";
 import { Language } from "@/data/vocabulary";
 
 interface Review {
@@ -216,6 +217,7 @@ export default function Admin() {
     }
     setBlockAnonymous(newValue);
     toast.success(newValue ? "Anonieme reviews geblokkeerd" : "Anonieme reviews weer toegestaan");
+    logStaffAction("setting.block_anonymous_reviews", null, { enabled: newValue });
   };
 
   const toggleObamaEnabled = async () => {
@@ -229,6 +231,7 @@ export default function Admin() {
     }
     setObamaEnabled(newValue);
     toast.success(newValue ? "Obama easter egg ingeschakeld" : "Obama easter egg uitgeschakeld");
+    logStaffAction("setting.obama", null, { enabled: newValue });
   };
   const handleMuteUser = async () => {
     if (!muteEmail.trim()) return toast.error("Vul een e-mailadres in");
@@ -258,6 +261,7 @@ export default function Admin() {
     setMuteEmail("");
     setMuteReason("");
     toast.success(`${muteEmail.trim()} is gemute`);
+    logStaffAction("mute.user", muteEmail.trim(), { duration: muteDuration, reason: muteReason.trim() });
   };
 
   const handleUnmute = async (id: string) => {
@@ -268,6 +272,7 @@ export default function Admin() {
     }
     setMutedUsers((prev) => prev.filter((m) => m.id !== id));
     toast.success("Gebruiker is unmuted");
+    logStaffAction("unmute.user", id);
   };
 
   const handleDeleteReview = async () => {
@@ -278,6 +283,7 @@ export default function Admin() {
     } else {
       setReviews((prev) => prev.filter((r) => r.id !== deleteId));
       toast.success("Review verwijderd");
+      logStaffAction("review.delete", deleteId);
     }
     setDeleteId(null);
   };
@@ -290,6 +296,7 @@ export default function Admin() {
     } else {
       setReplies((prev) => prev.filter((r) => r.id !== deleteReplyId));
       toast.success("Reactie verwijderd");
+      logStaffAction("review_reply.delete", deleteReplyId);
     }
     setDeleteReplyId(null);
   };
@@ -305,6 +312,7 @@ export default function Admin() {
     } else {
       setGameRooms((prev) => prev.filter((r) => r.id !== closeRoomId));
       toast.success("Kamer gesloten");
+      logStaffAction("multiplayer.close_room", closeRoomId);
     }
     setCloseRoomId(null);
   };
@@ -356,7 +364,9 @@ export default function Admin() {
 
     setDisabledSubjects(newDisabled);
     const subject = ALL_SUBJECTS.find((s) => s.id === subjectId);
-    if (newDisabled.includes(subjectId)) {
+    const nowDisabled = newDisabled.includes(subjectId);
+    logStaffAction(nowDisabled ? "subject.disable" : "subject.enable", subjectId);
+    if (nowDisabled) {
       toast.success(`${subject?.label} is uitgeschakeld`);
     } else {
       toast.success(`${subject?.label} is ingeschakeld`);
@@ -911,6 +921,7 @@ export default function Admin() {
                   toast.error("Kon stemmen niet verwijderen");
                 } else {
                   toast.success("Alle stemmen verwijderd");
+                  logStaffAction("review_votes.delete_all", deleteVotesReviewId);
                 }
                 setDeleteVotesReviewId(null);
               }}
