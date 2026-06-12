@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Shield, Ban, Search, Wifi, WifiOff, Globe, Trash2, Clock, AlertTriangle, Users, ChevronDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { logStaffAction } from "@/lib/logStaffAction";
 import {
   DropdownMenu,
   DropdownMenuContent,
