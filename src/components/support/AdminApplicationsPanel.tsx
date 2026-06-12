@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { logStaffAction } from "@/lib/logStaffAction";
 import { Check, ShieldQuestion, X } from "lucide-react";
 
 interface App {
