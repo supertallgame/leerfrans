@@ -87,6 +87,7 @@ export default function HeadAdmin() {
       .upsert({ key: "onboarding_enabled", value: checked as any, updated_at: new Date().toISOString() } as any, { onConflict: "key" });
     if (error) { toast.error("Kon instelling niet opslaan"); return; }
     setOnboardingEnabled(checked);
+    logStaffAction("setting.onboarding", null, { enabled: checked });
     toast.success(checked ? "Onboarding ingeschakeld" : "Onboarding uitgeschakeld");
   };
 
