@@ -364,7 +364,9 @@ export default function Admin() {
 
     setDisabledSubjects(newDisabled);
     const subject = ALL_SUBJECTS.find((s) => s.id === subjectId);
-    if (newDisabled.includes(subjectId)) {
+    const nowDisabled = newDisabled.includes(subjectId);
+    logStaffAction(nowDisabled ? "subject.disable" : "subject.enable", subjectId);
+    if (nowDisabled) {
       toast.success(`${subject?.label} is uitgeschakeld`);
     } else {
       toast.success(`${subject?.label} is ingeschakeld`);
