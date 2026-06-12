@@ -348,6 +348,7 @@ export default function Owner() {
     const { error } = await supabase.from("admin_settings").upsert({ key: "polar_express_enabled", value: checked as any, updated_at: new Date().toISOString() } as any, { onConflict: "key" });
     if (error) { toast.error("Kon instelling niet opslaan"); return; }
     setPolarExpressEnabled(checked);
+    logStaffAction("setting.polar_express", null, { enabled: checked });
     toast.success(checked ? "Polar Express ingeschakeld" : "Polar Express uitgeschakeld");
   };
 
@@ -355,6 +356,7 @@ export default function Owner() {
     const { error } = await supabase.from("admin_settings").upsert({ key: "onboarding_enabled", value: checked as any, updated_at: new Date().toISOString() } as any, { onConflict: "key" });
     if (error) { toast.error("Kon instelling niet opslaan"); return; }
     setOnboardingEnabled(checked);
+    logStaffAction("setting.onboarding", null, { enabled: checked });
     toast.success(checked ? "Onboarding ingeschakeld" : "Onboarding uitgeschakeld");
   };
 
@@ -362,6 +364,7 @@ export default function Owner() {
     const { error } = await supabase.from("admin_settings").upsert({ key: "explorer_enabled", value: checked as any, updated_at: new Date().toISOString() } as any, { onConflict: "key" });
     if (error) { toast.error("Kon instelling niet opslaan"); return; }
     setExplorerEnabled(checked);
+    logStaffAction("setting.explorer", null, { enabled: checked });
     toast.success(checked ? "Verkenner ingeschakeld" : "Verkenner uitgeschakeld");
   };
 
@@ -369,6 +372,7 @@ export default function Owner() {
     const { error } = await supabase.from("admin_settings").upsert({ key: "ai_teacher_enabled", value: checked as any, updated_at: new Date().toISOString() } as any, { onConflict: "key" });
     if (error) { toast.error("Kon instelling niet opslaan"); return; }
     setAiTeacherEnabled(checked);
+    logStaffAction("setting.ai_teacher", null, { enabled: checked });
     toast.success(checked ? "AI Leraar ingeschakeld" : "AI Leraar uitgeschakeld");
   };
 
@@ -379,6 +383,7 @@ export default function Owner() {
     const { error } = await supabase.from("admin_settings").upsert({ key: "disabled_niveaus", value: newDisabled as any, updated_at: new Date().toISOString() } as any, { onConflict: "key" });
     if (error) { toast.error("Kon instelling niet opslaan"); return; }
     setDisabledNiveaus(newDisabled);
+    logStaffAction("setting.niveau", niveauId, { enabled });
     toast.success(`${niveauId.toUpperCase()} ${enabled ? "ingeschakeld" : "uitgeschakeld"}`);
   };
 
@@ -397,6 +402,7 @@ export default function Owner() {
       });
       if (error) throw error;
       toast.success(`${user.email} is nu admin`);
+      logStaffAction("role.grant.admin", user.email);
       await loadRoles();
     } catch (e: any) {
       console.error(e);
@@ -421,6 +427,7 @@ export default function Owner() {
       });
       if (error) throw error;
       toast.success(`${user.email} is nu tester`);
+      logStaffAction("role.grant.tester", user.email);
       await loadRoles();
     } catch (e: any) {
       console.error(e);
@@ -434,6 +441,7 @@ export default function Owner() {
     const { error } = await supabase.from("user_roles").delete().eq("id", role.id);
     if (error) { toast.error("Kon niet verwijderen"); return; }
     toast.success(`${role.email} is geen tester meer`);
+    logStaffAction("role.revoke.tester", role.email);
     await loadRoles();
   };
 
@@ -452,6 +460,7 @@ export default function Owner() {
       });
       if (error) throw error;
       toast.success(`${user.email} is nu head tester`);
+      logStaffAction("role.grant.head_tester", user.email);
       await loadRoles();
     } catch (e: any) {
       console.error(e);
@@ -469,6 +478,7 @@ export default function Owner() {
       });
       if (error) throw error;
       toast.success(`${role.email} is nu head tester`);
+      logStaffAction("role.promote.tester_to_head_tester", role.email);
       await loadRoles();
     } catch { toast.error("Kon niet promoveren"); }
   };
@@ -481,6 +491,7 @@ export default function Owner() {
       });
       if (error) throw error;
       toast.success(`${role.email} is nu tester`);
+      logStaffAction("role.demote.head_tester_to_tester", role.email);
       await loadRoles();
     } catch { toast.error("Kon niet demoteren"); }
   };
@@ -489,6 +500,7 @@ export default function Owner() {
     const { error } = await supabase.from("user_roles").delete().eq("id", role.id);
     if (error) { toast.error("Kon niet verwijderen"); return; }
     toast.success(`${role.email} is geen head tester meer`);
+    logStaffAction("role.revoke.head_tester", role.email);
     await loadRoles();
   };
 
@@ -503,6 +515,7 @@ export default function Owner() {
       });
       if (error) throw error;
       toast.success(`${role.email} is nu head admin`);
+      logStaffAction("role.promote.admin_to_head_admin", role.email);
       await loadRoles();
     } catch (e: any) {
       console.error(e);
@@ -520,6 +533,7 @@ export default function Owner() {
       });
       if (error) throw error;
       toast.success(`${role.email} is nu weer gewone admin`);
+      logStaffAction("role.demote.head_admin_to_admin", role.email);
       await loadRoles();
     } catch (e: any) {
       console.error(e);
@@ -534,6 +548,7 @@ export default function Owner() {
       return;
     }
     toast.success(`${role.email} is geen admin meer`);
+    logStaffAction("role.revoke.admin", role.email);
     await loadRoles();
   };
 
