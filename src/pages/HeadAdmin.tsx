@@ -8,6 +8,7 @@ import { Switch } from "@/components/ui/switch";
 import { Shield, Home, ShieldPlus, ShieldMinus, Search, Users, ShieldCheck, Sparkles, Settings as SettingsIcon, Star } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { logStaffAction } from "@/lib/logStaffAction";
 
 const OWNER_EMAILS = ["brankovantland@gmail.com", "branko18vantland@gmail.com"];
 
