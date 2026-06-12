@@ -250,6 +250,7 @@ export default function Owner() {
       toast.error("Kon bericht niet plaatsen");
     } else {
       toast.success("Update-bericht geplaatst!");
+      logStaffAction("announcement.create", newAnnouncementMsg.trim(), { hasImage: !!imageUrl });
       setNewAnnouncementMsg("");
       setNewAnnouncementImg(null);
       await loadAnnouncements();
@@ -260,12 +261,14 @@ export default function Owner() {
   const toggleAnnouncement = async (id: string, active: boolean) => {
     await supabase.from("update_announcements").update({ is_active: active }).eq("id", id);
     await loadAnnouncements();
+    logStaffAction(active ? "announcement.activate" : "announcement.deactivate", id);
     toast.success(active ? "Bericht geactiveerd" : "Bericht verborgen");
   };
 
   const deleteAnnouncement = async (id: string) => {
     await supabase.from("update_announcements").delete().eq("id", id);
     await loadAnnouncements();
+    logStaffAction("announcement.delete", id);
     toast.success("Bericht verwijderd");
   };
 
