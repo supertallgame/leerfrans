@@ -13,6 +13,7 @@ import { Beaker, BarChart3, GraduationCap, Home, Megaphone, MessagesSquare, Plus
 import SupportAdminPanel from "@/components/support/SupportAdminPanel";
 import AdminApplicationsPanel from "@/components/support/AdminApplicationsPanel";
 import StaffChat from "@/components/staff/StaffChat";
+import WarningsCheck from "@/components/staff/WarningsCheck";
 
 const OWNER_EMAILS = ["brankovantland@gmail.com", "branko18vantland@gmail.com"];
 
