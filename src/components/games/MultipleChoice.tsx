@@ -18,11 +18,7 @@ export default function MultipleChoice({ onBack }: Props) {
   const { activeVocabulary, language, chapterId } = useChapter();
   const locale = useLocale();
   const i = t(locale);
-  const wordsOnly = useMemo(
-    () => activeVocabulary.filter((v) => !v.french.includes(",") && !v.dutch.includes(",")),
-    [activeVocabulary]
-  );
-  const [questions] = useState(() => shuffle(wordsOnly.length >= 4 ? wordsOnly : activeVocabulary));
+  const [questions] = useState(() => shuffle(activeVocabulary));
   const [qIndex, setQIndex] = useState(0);
   const [selected, setSelected] = useState<string | null>(null);
   const [score, setScore] = useState(0);
