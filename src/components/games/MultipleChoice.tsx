@@ -18,10 +18,10 @@ export default function MultipleChoice({ onBack }: Props) {
   const { activeVocabulary, language, chapterId } = useChapter();
   const locale = useLocale();
   const i = t(locale);
-  const wordsOnly = useMemo(
-    () => activeVocabulary.filter((v) => !/[.,!?]/.test(v.french) && !/[.,!?]/.test(v.dutch)),
-    [activeVocabulary]
-  );
+  const wordsOnly = useMemo(() => {
+    const isSentence = (s: string) => /[.!?]\s*$/.test(s) || s.trim().split(/\s+/).length >= 4;
+    return activeVocabulary.filter((v) => !isSentence(v.french) && !isSentence(v.dutch));
+  }, [activeVocabulary]);
   const pool = wordsOnly.length >= 4 ? wordsOnly : activeVocabulary;
   const [questions] = useState(() => shuffle(pool));
   const [qIndex, setQIndex] = useState(0);
