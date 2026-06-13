@@ -111,6 +111,7 @@ const Index = () => {
   const navigate = useNavigate();
   const { chapterId, setChapterId, activeVocabulary, language, setLanguage, selectedSections, setSelectedSections, availableSections, niveau, setNiveau } = useChapter();
   const [activeGame, setActiveGame] = useState<Game>("menu");
+  const [showWordLearnPicker, setShowWordLearnPicker] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showChapterPicker, setShowChapterPicker] = useState(false);
   const [showLanguagePicker, setShowLanguagePicker] = useState(false);
