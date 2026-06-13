@@ -652,6 +652,14 @@ export default function Owner() {
                     <Button
                       variant="ghost"
                       size="sm"
+                      className="text-amber-600 hover:text-amber-700 hover:bg-amber-500/10 gap-1"
+                      onClick={() => setWarnTarget({ user_id: role.user_id, email: role.email })}
+                    >
+                      <AlertTriangle className="h-4 w-4" /> Waarschuw
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       className="text-muted-foreground hover:text-foreground gap-1"
                       onClick={() => demoteHeadAdmin(role)}
                       title="Degraderen naar admin"
@@ -692,6 +700,14 @@ export default function Owner() {
                     <span className="text-sm font-medium">{role.email}</span>
                   </div>
                   <div className="flex gap-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-amber-600 hover:text-amber-700 hover:bg-amber-500/10 gap-1"
+                      onClick={() => setWarnTarget({ user_id: role.user_id, email: role.email })}
+                    >
+                      <AlertTriangle className="h-4 w-4" /> Waarschuw
+                    </Button>
                     <Button
                       variant="ghost"
                       size="sm"
@@ -736,6 +752,14 @@ export default function Owner() {
                   </div>
                   <div className="flex gap-1">
                     <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-amber-600 hover:text-amber-700 hover:bg-amber-500/10 gap-1"
+                      onClick={() => setWarnTarget({ user_id: role.user_id, email: role.email })}
+                    >
+                      <AlertTriangle className="h-4 w-4" /> Waarschuw
+                    </Button>
+                    <Button
                       variant="outline"
                       size="sm"
                       className="gap-1"
@@ -778,6 +802,14 @@ export default function Owner() {
                     <span className="text-sm font-medium">{role.email}</span>
                   </div>
                   <div className="flex gap-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-amber-600 hover:text-amber-700 hover:bg-amber-500/10 gap-1"
+                      onClick={() => setWarnTarget({ user_id: role.user_id, email: role.email })}
+                    >
+                      <AlertTriangle className="h-4 w-4" /> Waarschuw
+                    </Button>
                     <Button
                       variant="outline"
                       size="sm"
@@ -1163,6 +1195,12 @@ export default function Owner() {
         </Card>
       </div>
       <StaffChat open={staffChatOpen} onOpenChange={setStaffChatOpen} />
+      <GiveWarningDialog
+        open={!!warnTarget}
+        onOpenChange={(v) => { if (!v) setWarnTarget(null); }}
+        recipient={warnTarget}
+        roleTarget="head_admin"
+      />
     </div>
   );
 }
