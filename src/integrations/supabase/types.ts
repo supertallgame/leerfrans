@@ -428,6 +428,7 @@ export type Database = {
           poll_id: string
           selected_option: string
           user_id: string
+          voter_email: string | null
         }
         Insert: {
           created_at?: string
@@ -435,6 +436,7 @@ export type Database = {
           poll_id: string
           selected_option: string
           user_id: string
+          voter_email?: string | null
         }
         Update: {
           created_at?: string
@@ -442,6 +444,7 @@ export type Database = {
           poll_id?: string
           selected_option?: string
           user_id?: string
+          voter_email?: string | null
         }
         Relationships: [
           {
