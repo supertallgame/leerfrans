@@ -352,6 +352,7 @@ export default function Tester() {
       </div>
 
       <StaffChat open={chatOpen} onOpenChange={setChatOpen} />
+      <WarningsCheck />
     </div>
   );
 }
