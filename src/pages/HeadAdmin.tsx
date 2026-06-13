@@ -305,6 +305,12 @@ export default function HeadAdmin() {
           </CardContent>
         </Card>
       </div>
+      <GiveWarningDialog
+        open={!!warnTarget}
+        onOpenChange={(v) => { if (!v) setWarnTarget(null); }}
+        recipient={warnTarget}
+        roleTarget="admin"
+      />
     </div>
   );
 }
