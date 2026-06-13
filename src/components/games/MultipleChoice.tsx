@@ -36,11 +36,11 @@ export default function MultipleChoice({ onBack }: Props) {
     const correct = showDutch ? current.french : current.dutch;
     const isSentence = (s: string) => s.includes(" ") && s.length >= 20;
     const correctIsSentence = isSentence(correct);
-    const sameType = activeVocabulary
+    const sameType = wordsOnly
       .filter((v) => v !== current && isSentence(showDutch ? v.french : v.dutch) === correctIsSentence)
       .map((v) => (showDutch ? v.french : v.dutch))
       .filter((v) => v !== correct);
-    const pool = sameType.length >= 3 ? sameType : activeVocabulary.filter((v) => v !== current).map((v) => (showDutch ? v.french : v.dutch)).filter((v) => v !== correct);
+    const pool = sameType.length >= 3 ? sameType : wordsOnly.filter((v) => v !== current).map((v) => (showDutch ? v.french : v.dutch)).filter((v) => v !== correct);
     // Ensure unique distractors
     const uniquePool = [...new Set(pool)];
     // Plain Fisher-Yates (vocabulary's shuffle has an adjacency constraint that
