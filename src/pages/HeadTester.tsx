@@ -44,6 +44,7 @@ export default function HeadTester() {
   const [newAnnImg, setNewAnnImg] = useState<File | null>(null);
 
   const [chatOpen, setChatOpen] = useState(false);
+  const [warnTarget, setWarnTarget] = useState<{ user_id: string; email: string } | null>(null);
 
   useEffect(() => {
     void check();
