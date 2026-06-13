@@ -18,7 +18,12 @@ export default function MultipleChoice({ onBack }: Props) {
   const { activeVocabulary, language, chapterId } = useChapter();
   const locale = useLocale();
   const i = t(locale);
-  const [questions] = useState(() => shuffle(activeVocabulary));
+  const wordsOnly = useMemo(
+    () => activeVocabulary.filter((v) => !/[.,!?]/.test(v.french) && !/[.,!?]/.test(v.dutch)),
+    [activeVocabulary]
+  );
+  const pool = wordsOnly.length >= 4 ? wordsOnly : activeVocabulary;
+  const [questions] = useState(() => shuffle(pool));
   const [qIndex, setQIndex] = useState(0);
   const [selected, setSelected] = useState<string | null>(null);
   const [score, setScore] = useState(0);
@@ -32,13 +37,13 @@ export default function MultipleChoice({ onBack }: Props) {
     const correct = showDutch ? current.french : current.dutch;
     const isSentence = (s: string) => s.includes(" ") && s.length >= 20;
     const correctIsSentence = isSentence(correct);
-    const sameType = activeVocabulary
+    const sameType = pool
       .filter((v) => v !== current && isSentence(showDutch ? v.french : v.dutch) === correctIsSentence)
       .map((v) => (showDutch ? v.french : v.dutch))
       .filter((v) => v !== correct);
-    const pool = sameType.length >= 3 ? sameType : activeVocabulary.filter((v) => v !== current).map((v) => (showDutch ? v.french : v.dutch)).filter((v) => v !== correct);
+    const distractorPool = sameType.length >= 3 ? sameType : pool.filter((v) => v !== current).map((v) => (showDutch ? v.french : v.dutch)).filter((v) => v !== correct);
     // Ensure unique distractors
-    const uniquePool = [...new Set(pool)];
+    const uniquePool = [...new Set(distractorPool)];
     // Plain Fisher-Yates (vocabulary's shuffle has an adjacency constraint that
     // biases 4-item shuffles toward placing the correct answer in the middle).
     const fy = <T,>(arr: T[]): T[] => {
