@@ -934,6 +934,7 @@ export default function Admin() {
         </AlertDialogContent>
       </AlertDialog>
       <StaffChat open={staffChatOpen} onOpenChange={setStaffChatOpen} />
+      <WarningsCheck />
     </div>
   );
 }
