@@ -498,7 +498,13 @@ const Index = () => {
             <Card
               key={game.id}
               className="cursor-pointer transition-all duration-200 hover:shadow-lg hover:-translate-y-1 active:scale-[0.98]"
-              onClick={() => setActiveGame(game.id)}
+              onClick={() => {
+                if (game.id === "wordlearn") {
+                  setShowWordLearnPicker(true);
+                } else {
+                  setActiveGame(game.id);
+                }
+              }}
             >
               <CardContent className="p-3 md:p-6 flex flex-col gap-2 md:gap-3">
                 <div className={`w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center ${game.color}`}>
