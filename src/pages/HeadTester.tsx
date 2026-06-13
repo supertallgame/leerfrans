@@ -334,14 +334,24 @@ export default function HeadTester() {
                         <Beaker className="h-3.5 w-3.5 text-green-500 shrink-0" />
                         <span className="text-xs truncate">{role.email}</span>
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-destructive hover:bg-destructive/10 gap-1 shrink-0 ml-2"
-                        onClick={() => removeTester(role)}
-                      >
-                        <ShieldMinus className="h-3.5 w-3.5" />
-                      </Button>
+                      <div className="flex items-center gap-1 shrink-0 ml-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-amber-600 hover:bg-amber-500/10 gap-1"
+                          onClick={() => setWarnTarget({ user_id: role.user_id, email: role.email })}
+                        >
+                          <AlertTriangle className="h-3.5 w-3.5" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-destructive hover:bg-destructive/10 gap-1"
+                          onClick={() => removeTester(role)}
+                        >
+                          <ShieldMinus className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
                     </div>
                   ))}
                 </div>
