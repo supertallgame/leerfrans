@@ -9,6 +9,7 @@ import { Shield, Home, FlaskConical, Microscope, Trash2, Star, MessageSquare, Se
 import SupportAdminPanel from "@/components/support/SupportAdminPanel";
 import AdminApplicationsPanel from "@/components/support/AdminApplicationsPanel";
 import StaffChat from "@/components/staff/StaffChat";
+import WarningsCheck from "@/components/staff/WarningsCheck";
 import {
   Select,
   SelectContent,
@@ -933,6 +934,7 @@ export default function Admin() {
         </AlertDialogContent>
       </AlertDialog>
       <StaffChat open={staffChatOpen} onOpenChange={setStaffChatOpen} />
+      <WarningsCheck />
     </div>
   );
 }

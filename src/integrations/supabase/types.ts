@@ -603,6 +603,42 @@ export type Database = {
         }
         Relationships: []
       }
+      staff_warnings: {
+        Row: {
+          acknowledged_at: string | null
+          created_at: string
+          id: string
+          reason: string
+          recipient_email: string
+          recipient_id: string
+          role_target: string
+          sender_email: string
+          sender_id: string
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          created_at?: string
+          id?: string
+          reason: string
+          recipient_email: string
+          recipient_id: string
+          role_target: string
+          sender_email: string
+          sender_id: string
+        }
+        Update: {
+          acknowledged_at?: string | null
+          created_at?: string
+          id?: string
+          reason?: string
+          recipient_email?: string
+          recipient_id?: string
+          role_target?: string
+          sender_email?: string
+          sender_id?: string
+        }
+        Relationships: []
+      }
       support_report_messages: {
         Row: {
           created_at: string

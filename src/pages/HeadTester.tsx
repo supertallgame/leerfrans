@@ -9,10 +9,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { logStaffAction } from "@/lib/logStaffAction";
-import { Beaker, BarChart3, GraduationCap, Home, Megaphone, MessagesSquare, Plus, Search, ShieldMinus, ShieldPlus, Star, Train, Trash2, Users, X, ImageIcon } from "lucide-react";
+import { Beaker, BarChart3, GraduationCap, Home, Megaphone, MessagesSquare, Plus, Search, ShieldMinus, ShieldPlus, Star, Train, Trash2, Users, X, ImageIcon, AlertTriangle } from "lucide-react";
 import SupportAdminPanel from "@/components/support/SupportAdminPanel";
 import AdminApplicationsPanel from "@/components/support/AdminApplicationsPanel";
 import StaffChat from "@/components/staff/StaffChat";
+import GiveWarningDialog from "@/components/staff/GiveWarningDialog";
 
 const OWNER_EMAILS = ["brankovantland@gmail.com", "branko18vantland@gmail.com"];
 
@@ -43,6 +44,7 @@ export default function HeadTester() {
   const [newAnnImg, setNewAnnImg] = useState<File | null>(null);
 
   const [chatOpen, setChatOpen] = useState(false);
+  const [warnTarget, setWarnTarget] = useState<{ user_id: string; email: string } | null>(null);
 
   useEffect(() => {
     void check();
@@ -332,14 +334,24 @@ export default function HeadTester() {
                         <Beaker className="h-3.5 w-3.5 text-green-500 shrink-0" />
                         <span className="text-xs truncate">{role.email}</span>
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-destructive hover:bg-destructive/10 gap-1 shrink-0 ml-2"
-                        onClick={() => removeTester(role)}
-                      >
-                        <ShieldMinus className="h-3.5 w-3.5" />
-                      </Button>
+                      <div className="flex items-center gap-1 shrink-0 ml-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-amber-600 hover:bg-amber-500/10 gap-1"
+                          onClick={() => setWarnTarget({ user_id: role.user_id, email: role.email })}
+                        >
+                          <AlertTriangle className="h-3.5 w-3.5" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-destructive hover:bg-destructive/10 gap-1"
+                          onClick={() => removeTester(role)}
+                        >
+                          <ShieldMinus className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -462,6 +474,12 @@ export default function HeadTester() {
       </div>
 
       <StaffChat open={chatOpen} onOpenChange={setChatOpen} />
+      <GiveWarningDialog
+        open={!!warnTarget}
+        onOpenChange={(v) => { if (!v) setWarnTarget(null); }}
+        recipient={warnTarget}
+        roleTarget="tester"
+      />
     </div>
   );
 }

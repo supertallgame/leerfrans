@@ -5,10 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
-import { Shield, Home, ShieldPlus, ShieldMinus, Search, Users, ShieldCheck, Sparkles, Settings as SettingsIcon, Star } from "lucide-react";
+import { Shield, Home, ShieldPlus, ShieldMinus, Search, Users, ShieldCheck, Sparkles, Settings as SettingsIcon, Star, AlertTriangle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { logStaffAction } from "@/lib/logStaffAction";
+import GiveWarningDialog from "@/components/staff/GiveWarningDialog";
 
 const OWNER_EMAILS = ["brankovantland@gmail.com", "branko18vantland@gmail.com"];
 
@@ -37,6 +38,7 @@ export default function HeadAdmin() {
   const [searchQuery, setSearchQuery] = useState("");
   const [promoting, setPromoting] = useState<string | null>(null);
   const [onboardingEnabled, setOnboardingEnabled] = useState(false);
+  const [warnTarget, setWarnTarget] = useState<{ user_id: string; email: string } | null>(null);
 
   useEffect(() => {
     checkAccess();
@@ -228,18 +230,28 @@ export default function HeadAdmin() {
             ) : (
               adminRoles.map((role) => (
                 <div key={role.id} className="flex items-center justify-between rounded-lg border p-3">
-                  <div className="flex items-center gap-2">
-                    <Shield className="h-4 w-4 text-primary" />
-                    <span className="text-sm font-medium">{role.email}</span>
+                  <div className="flex items-center gap-2 min-w-0">
+                    <Shield className="h-4 w-4 text-primary shrink-0" />
+                    <span className="text-sm font-medium truncate">{role.email}</span>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-destructive hover:text-destructive hover:bg-destructive/10 gap-1"
-                    onClick={() => demoteAdmin(role)}
-                  >
-                    <ShieldMinus className="h-4 w-4" /> Degraderen
-                  </Button>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-amber-600 hover:text-amber-700 hover:bg-amber-500/10 gap-1"
+                      onClick={() => setWarnTarget({ user_id: role.user_id, email: role.email })}
+                    >
+                      <AlertTriangle className="h-4 w-4" /> Waarschuw
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-destructive hover:text-destructive hover:bg-destructive/10 gap-1"
+                      onClick={() => demoteAdmin(role)}
+                    >
+                      <ShieldMinus className="h-4 w-4" /> Degraderen
+                    </Button>
+                  </div>
                 </div>
               ))
             )}
@@ -293,6 +305,12 @@ export default function HeadAdmin() {
           </CardContent>
         </Card>
       </div>
+      <GiveWarningDialog
+        open={!!warnTarget}
+        onOpenChange={(v) => { if (!v) setWarnTarget(null); }}
+        recipient={warnTarget}
+        roleTarget="admin"
+      />
     </div>
   );
 }
