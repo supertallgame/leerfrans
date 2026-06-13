@@ -111,6 +111,7 @@ const Index = () => {
   const navigate = useNavigate();
   const { chapterId, setChapterId, activeVocabulary, language, setLanguage, selectedSections, setSelectedSections, availableSections, niveau, setNiveau } = useChapter();
   const [activeGame, setActiveGame] = useState<Game>("menu");
+  const [showWordLearnPicker, setShowWordLearnPicker] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showChapterPicker, setShowChapterPicker] = useState(false);
   const [showLanguagePicker, setShowLanguagePicker] = useState(false);
@@ -497,7 +498,13 @@ const Index = () => {
             <Card
               key={game.id}
               className="cursor-pointer transition-all duration-200 hover:shadow-lg hover:-translate-y-1 active:scale-[0.98]"
-              onClick={() => setActiveGame(game.id)}
+              onClick={() => {
+                if (game.id === "wordlearn") {
+                  setShowWordLearnPicker(true);
+                } else {
+                  setActiveGame(game.id);
+                }
+              }}
             >
               <CardContent className="p-3 md:p-6 flex flex-col gap-2 md:gap-3">
                 <div className={`w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center ${game.color}`}>
@@ -720,6 +727,45 @@ const Index = () => {
                 </button>
               );
             })}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Woorden Leren mode picker */}
+      <Dialog open={showWordLearnPicker} onOpenChange={setShowWordLearnPicker}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Kies een modus</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2">
+            <button
+              onClick={() => { setShowWordLearnPicker(false); setActiveGame("wordlearn"); }}
+              className="w-full text-left px-3 py-3 rounded-lg border border-border hover:border-primary/50 hover:bg-primary/5 cursor-pointer transition-all"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[hsl(var(--success))]/10 text-[hsl(var(--success))]">
+                  <GraduationCap className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="font-medium">Woorden Leren</p>
+                  <p className="text-xs text-muted-foreground">Bekijk woorden, geen vragen</p>
+                </div>
+              </div>
+            </button>
+            <button
+              onClick={() => { setShowWordLearnPicker(false); setActiveGame("quiz"); }}
+              className="w-full text-left px-3 py-3 rounded-lg border border-border hover:border-primary/50 hover:bg-primary/5 cursor-pointer transition-all"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-secondary/20 dark:bg-secondary/30 text-secondary-foreground">
+                  <Brain className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="font-medium">Meerkeuze Quiz</p>
+                  <p className="text-xs text-muted-foreground">Kies het juiste antwoord uit 4 opties</p>
+                </div>
+              </div>
+            </button>
           </div>
         </DialogContent>
       </Dialog>
