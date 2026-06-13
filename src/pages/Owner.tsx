@@ -134,6 +134,9 @@ export default function Owner() {
   const [onboardingEnabled, setOnboardingEnabled] = useState(false);
   const [debugLogs, setDebugLogs] = useState(() => typeof window !== "undefined" && localStorage.getItem("debug_logs") === "true");
 
+  // Warning management
+  const [warnTarget, setWarnTarget] = useState<{ user_id: string; email: string } | null>(null);
+
   // Poll management
   const [polls, setPolls] = useState<any[]>([]);
   const [newPollQuestion, setNewPollQuestion] = useState("");
