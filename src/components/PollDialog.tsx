@@ -64,10 +64,13 @@ export default function PollDialog({ open, onOpenChange, user }: PollDialogProps
     };
     setPoll(parsedPoll);
 
-    // Get votes + my vote in parallel
+    // Get votes + my vote in parallel (match by email so abuse via account-recreation fails)
+    const email = user?.email?.toLowerCase() ?? null;
     const [votesRes, myVoteRes] = await Promise.all([
       supabase.from("poll_votes").select("selected_option").eq("poll_id", p.id),
-      user ? supabase.from("poll_votes").select("selected_option").eq("poll_id", p.id).eq("user_id", user.id).maybeSingle() : Promise.resolve({ data: null }),
+      email
+        ? supabase.from("poll_votes").select("selected_option").eq("poll_id", p.id).eq("voter_email", email).maybeSingle()
+        : Promise.resolve({ data: null }),
     ]);
 
     const counts: Record<string, number> = {};
@@ -84,18 +87,25 @@ export default function PollDialog({ open, onOpenChange, user }: PollDialogProps
     if (!user || !poll) return;
     setVoting(true);
     try {
+      const email = user.email?.toLowerCase();
       if (myVote) {
-        // Update existing vote
         await supabase
           .from("poll_votes")
-          .update({ selected_option: option })
+          .update({ selected_option: option, user_id: user.id })
           .eq("poll_id", poll.id)
-          .eq("user_id", user.id);
+          .eq("voter_email", email);
       } else {
-        // Insert new vote
-        await supabase
+        const { error } = await supabase
           .from("poll_votes")
           .insert({ poll_id: poll.id, user_id: user.id, selected_option: option });
+        if (error) {
+          if ((error as any).code === "23505") {
+            toast.error("Je hebt al gestemd op deze poll");
+            await loadPoll();
+            return;
+          }
+          throw error;
+        }
       }
       setMyVote(option);
       toast.success("Stem opgeslagen!");
