@@ -474,6 +474,12 @@ export default function HeadTester() {
       </div>
 
       <StaffChat open={chatOpen} onOpenChange={setChatOpen} />
+      <GiveWarningDialog
+        open={!!warnTarget}
+        onOpenChange={(v) => { if (!v) setWarnTarget(null); }}
+        recipient={warnTarget}
+        roleTarget="tester"
+      />
     </div>
   );
 }
