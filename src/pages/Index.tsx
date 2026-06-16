@@ -334,11 +334,11 @@ const Index = () => {
   if (activeGame === "etre") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6 max-w-5xl mx-auto w-full"><EtreConjugation onBack={() => setActiveGame("menu")} /></div></Suspense>;
   if (activeGame === "explorer") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6 max-w-5xl mx-auto w-full"><FrenchExplorer onBack={() => setActiveGame("menu")} /></div></Suspense>;
   if (activeGame === "grammar") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6 max-w-5xl mx-auto w-full"><GrammarQuiz onBack={() => setActiveGame("menu")} chapterId={chapterId} /></div></Suspense>;
-  if (activeGame === "grammaire1") return <Suspense fallback={gameLoader}><Chapitre1Grammaire onBack={() => setActiveGame("menu")} /></Suspense>;
-  if (activeGame === "grammaire2") return <Suspense fallback={gameLoader}><Chapitre2Grammaire onBack={() => setActiveGame("menu")} /></Suspense>;
-  if (activeGame === "grammaire3") return <Suspense fallback={gameLoader}><Chapitre3Grammaire onBack={() => setActiveGame("menu")} /></Suspense>;
-  if (activeGame === "grammaire5") return <Suspense fallback={gameLoader}><Chapitre5Grammaire onBack={() => setActiveGame("menu")} /></Suspense>;
-  if (activeGame === "grammaire6") return <Suspense fallback={gameLoader}><Chapitre6Grammaire onBack={() => setActiveGame("menu")} /></Suspense>;
+  if (activeGame === "grammaire1") return <Suspense fallback={gameLoader}><div className="min-h-screen max-w-5xl mx-auto w-full"><Chapitre1Grammaire onBack={() => setActiveGame("menu")} /></div></Suspense>;
+  if (activeGame === "grammaire2") return <Suspense fallback={gameLoader}><div className="min-h-screen max-w-5xl mx-auto w-full"><Chapitre2Grammaire onBack={() => setActiveGame("menu")} /></div></Suspense>;
+  if (activeGame === "grammaire3") return <Suspense fallback={gameLoader}><div className="min-h-screen max-w-5xl mx-auto w-full"><Chapitre3Grammaire onBack={() => setActiveGame("menu")} /></div></Suspense>;
+  if (activeGame === "grammaire5") return <Suspense fallback={gameLoader}><div className="min-h-screen max-w-5xl mx-auto w-full"><Chapitre5Grammaire onBack={() => setActiveGame("menu")} /></div></Suspense>;
+  if (activeGame === "grammaire6") return <Suspense fallback={gameLoader}><div className="min-h-screen max-w-5xl mx-auto w-full"><Chapitre6Grammaire onBack={() => setActiveGame("menu")} /></div></Suspense>;
   if (activeGame === "enclock") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6 max-w-5xl mx-auto w-full"><EnglishClockTimes onBack={() => setActiveGame("menu")} /></div></Suspense>;
   if (activeGame === "naskspeed") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6 max-w-5xl mx-auto w-full"><NaskSpeedStories onBack={() => setActiveGame("menu")} /></div></Suspense>;
   if (activeGame === "wordlearn") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6 max-w-5xl mx-auto w-full"><WordLearn onBack={() => setActiveGame("menu")} /></div></Suspense>;
