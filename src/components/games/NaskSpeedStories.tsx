@@ -310,7 +310,7 @@ export default function NaskSpeedStories({ onBack }: Props) {
 
     const okGegeven = checkGegevenPair(gegeven1, gegeven2, q);
     const okGevraagd = checkGevraagd(gevraagd, q);
-    const okFormule = checkFormule(formule, q.type);
+    const okFormule = checkFormule(formule, q);
 
     let okNumeric = false;
     const a = normalizeNumber(answer);
