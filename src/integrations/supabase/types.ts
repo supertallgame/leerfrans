@@ -397,6 +397,36 @@ export type Database = {
         }
         Relationships: []
       }
+      leadership_chat_messages: {
+        Row: {
+          created_at: string
+          id: string
+          image_url: string | null
+          message: string
+          sender_display: string
+          sender_email: string
+          sender_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          message: string
+          sender_display: string
+          sender_email: string
+          sender_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          message?: string
+          sender_display?: string
+          sender_email?: string
+          sender_id?: string
+        }
+        Relationships: []
+      }
       muted_users: {
         Row: {
           created_at: string
@@ -1118,6 +1148,7 @@ export type Database = {
       has_open_report: { Args: never; Returns: boolean }
       is_head_admin: { Args: { _user_id: string }; Returns: boolean }
       is_head_tester: { Args: { _user_id: string }; Returns: boolean }
+      is_leadership: { Args: { _user_id: string }; Returns: boolean }
       is_owner: { Args: { _user_id: string }; Returns: boolean }
       is_staff: { Args: { _user_id: string }; Returns: boolean }
       is_tester: { Args: { _user_id: string }; Returns: boolean }
