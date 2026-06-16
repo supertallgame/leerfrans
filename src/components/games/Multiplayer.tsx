@@ -1408,7 +1408,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
     const quizVocab = getQuizVocabulary();
 
     return (
-      <div className="min-h-screen flex flex-col items-center px-3 py-6 md:px-4 md:py-12">
+      <div className="min-h-screen flex flex-col items-center px-3 py-6 md:px-4 md:py-12 md:justify-center">
         <div className="max-w-md w-full space-y-4 md:space-y-6">
           <Button variant="ghost" onClick={() => setPhase("team-select")} className="gap-2 text-sm">
             <ArrowLeft className="h-4 w-4" /> {m.back}
@@ -1525,7 +1525,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
     const allAssigned = isTeamMode ? unassignedPlayers.length === 0 && players.length > 0 : true;
 
     return (
-      <div className="min-h-screen flex flex-col items-center px-3 py-6 md:px-4 md:py-12">
+      <div className="min-h-screen flex flex-col items-center px-3 py-6 md:px-4 md:py-12 md:justify-center">
         <div className="max-w-md w-full space-y-4 md:space-y-6">
           <div className="text-center space-y-2 md:space-y-3">
             <p className="text-xs md:text-sm text-muted-foreground uppercase tracking-wide">{m.gameCode}</p>
@@ -1765,7 +1765,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
     const isFinalShowdown = isLava && activePlayers.length === 2;
 
     return (
-      <div className="min-h-screen flex flex-col items-center px-4 py-8">
+      <div className="min-h-screen flex flex-col items-center px-4 py-8 md:justify-center">
         <div className="max-w-lg w-full space-y-6">
           <div className="flex items-center justify-between">
             <Button variant="ghost" size="sm" onClick={() => setShowLeaveConfirm(true)} className="gap-1 text-muted-foreground">
