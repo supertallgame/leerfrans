@@ -538,6 +538,15 @@ const Index = () => {
         </Card>
 
         <div className="flex gap-2 w-full">
+          <Card
+            className="cursor-pointer transition-all hover:shadow-md hover:-translate-y-0.5 active:scale-[0.98] bg-primary/5 border-primary/20"
+            onClick={() => navigate("/regels")}
+          >
+            <CardContent className="p-3 md:p-4 flex items-center gap-2">
+              <ShieldCheck className="h-4 w-4 text-primary" />
+              <span className="text-xs md:text-sm font-medium text-primary">Regels</span>
+            </CardContent>
+          </Card>
           <Card className="flex-1 bg-muted/50">
             <CardContent className="p-3 md:p-4 text-center">
               <p className="text-xs md:text-sm text-muted-foreground">
