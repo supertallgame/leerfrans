@@ -3,7 +3,7 @@ import { useThemeSync } from "@/hooks/use-theme-sync";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { BookOpen, Brain, Puzzle, Keyboard, Users, PenTool, MessageSquare, Bot, Settings, Star, Lock, BookMarked, FlaskConical, CheckCircle, Layers, Microscope, Bone, Clock, BookType, Map, ShieldCheck, GraduationCap, Hash, BookText, LifeBuoy, ShieldQuestion, MessagesSquare, Music2, VolumeX, TestTube, Shield, Beaker, Crown } from "lucide-react";
+import { BookOpen, Brain, Puzzle, Keyboard, Users, PenTool, MessageSquare, Bot, Settings, Star, Lock, BookMarked, FlaskConical, CheckCircle, Layers, Microscope, Bone, Clock, BookType, Map, ShieldCheck, GraduationCap, Hash, BookText, LifeBuoy, ShieldQuestion, MessagesSquare, Music2, VolumeX, TestTube, Shield, Beaker, Crown, KeyRound } from "lucide-react";
 import polarExpressImg from "@/assets/polar-express.png";
 import { FlagNL, FlagFR } from "@/components/Flags";
 import { getChaptersForLanguage, getChapter, getForeignLabel, getForeignLabelNative, Language, Niveau } from "@/data/vocabulary";
@@ -130,6 +130,7 @@ const Index = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isTester, setIsTester] = useState(false);
   const [isStaff, setIsStaff] = useState(false);
+  const [isOwner, setIsOwner] = useState(false);
   const [polarExpressEnabled, setPolarExpressEnabled] = useState(false);
   const [obamaEnabled, setObamaEnabled] = useState(false);
   const [includeGrammar, setIncludeGrammar] = useState(false);
@@ -220,7 +221,7 @@ const Index = () => {
 
   useEffect(() => {
     const checkRoles = async (userId: string | undefined) => {
-      if (!userId) { setIsHeadAdmin(false); setIsHeadTester(false); setIsAdmin(false); setIsTester(false); setIsStaff(false); setIsEminem(false); return; }
+      if (!userId) { setIsHeadAdmin(false); setIsHeadTester(false); setIsAdmin(false); setIsTester(false); setIsStaff(false); setIsOwner(false); return; }
       const OWNER_EMAILS = ["brankovantland@gmail.com", "branko18vantland@gmail.com"];
       const { data: { session } } = await supabase.auth.getSession();
       // Check eminem role (independent of staff hierarchy)
@@ -228,6 +229,7 @@ const Index = () => {
       const roles = ((roleRows as any[]) || []).map(r => r.role);
       setIsEminem(roles.includes("eminem"));
       if (session?.user?.email && OWNER_EMAILS.includes(session.user.email)) {
+        setIsOwner(true);
         setIsHeadAdmin(true);
         setIsHeadTester(true);
         setIsAdmin(true);
@@ -235,6 +237,7 @@ const Index = () => {
         setIsStaff(true);
         return;
       }
+      setIsOwner(false);
       const { data: staffRole } = await supabase.rpc("get_my_staff_role");
       const role = staffRole as string | null;
       setIsHeadAdmin(role === "head_admin");
@@ -403,6 +406,11 @@ const Index = () => {
             )}
           </div>
           <div className="flex items-center gap-0.5">
+            {isOwner && (
+              <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => navigate("/owner")} aria-label="Owner Dashboard">
+                <KeyRound className="h-5 w-5 text-amber-500" />
+              </Button>
+            )}
             {isHeadAdmin && (
               <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => navigate("/headadmin")} aria-label="Head Admin">
                 <ShieldCheck className="h-5 w-5" />
