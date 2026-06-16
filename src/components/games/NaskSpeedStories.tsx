@@ -206,18 +206,31 @@ function checkGevraagd(input: string, q: Generated): boolean {
 function MiniCalculator() {
   const [expr, setExpr] = useState("");
   const [result, setResult] = useState<string>("");
+  const [done, setDone] = useState(false);
 
-  const append = (v: string) => setExpr((e) => e + v);
-  const clear = () => { setExpr(""); setResult(""); };
-  const back = () => setExpr((e) => e.slice(0, -1));
+  const append = (v: string) => {
+    if (done) {
+      // After =, start a fresh calculation. If user presses an operator,
+      // continue from the previous result; otherwise start with the new digit.
+      const isOperator = /[+\-*/×÷)]/.test(v);
+      setExpr(isOperator && result && result !== "Err" ? result + v : v);
+      setResult("");
+      setDone(false);
+      return;
+    }
+    setExpr((e) => e + v);
+  };
+  const clear = () => { setExpr(""); setResult(""); setDone(false); };
+  const back = () => { setDone(false); setExpr((e) => e.slice(0, -1)); };
   const evalNow = () => {
     try {
       const sanitized = expr.replace(/,/g, ".").replace(/×/g, "*").replace(/÷/g, "/");
-      if (!/^[-+/*().0-9\s]*$/.test(sanitized)) { setResult("Err"); return; }
+      if (!/^[-+/*().0-9\s]*$/.test(sanitized)) { setResult("Err"); setDone(true); return; }
       // eslint-disable-next-line no-new-func
       const v = Function(`"use strict";return (${sanitized || "0"})`)();
       setResult(String(Math.round(v * 10000) / 10000));
-    } catch { setResult("Err"); }
+      setDone(true);
+    } catch { setResult("Err"); setDone(true); }
   };
 
   const keys: { l: string; v?: string; act?: () => void; cls?: string }[] = [
