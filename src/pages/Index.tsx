@@ -394,48 +394,48 @@ const Index = () => {
   return (
     <main className="min-h-screen flex flex-col items-center px-3 py-6 md:px-4 md:py-12">
       <div className="max-w-2xl w-full flex flex-col items-center gap-5 md:gap-8">
-        <div className="relative w-full mb-1 min-h-[2.5rem] flex items-center">
+        <div className="w-full mb-1 min-h-[2.5rem] flex items-center justify-center">
           {/* Left side: role/dashboard navigation buttons */}
-          <div className="flex items-center gap-0.5 flex-wrap justify-start mr-auto pr-2">
+          <div className="flex-1 flex items-center gap-0.5 flex-wrap justify-end pr-2 min-w-0">
             {isOwner && (
-              <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => navigate("/owner")} aria-label="Owner Dashboard">
+              <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0" onClick={() => navigate("/owner")} aria-label="Owner Dashboard">
                 <KeyRound className="h-5 w-5 text-amber-500" />
               </Button>
             )}
             {isHeadAdmin && (
-              <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => navigate("/headadmin")} aria-label="Head Admin">
+              <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0" onClick={() => navigate("/headadmin")} aria-label="Head Admin">
                 <ShieldCheck className="h-5 w-5" />
               </Button>
             )}
             {isAdmin && (
-              <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => navigate("/admin")} aria-label="Admin">
+              <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0" onClick={() => navigate("/admin")} aria-label="Admin">
                 <Shield className="h-5 w-5" />
               </Button>
             )}
             {isHeadTester && (
-              <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => navigate("/headtester")} aria-label="Head Tester">
+              <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0" onClick={() => navigate("/headtester")} aria-label="Head Tester">
                 <TestTube className="h-5 w-5" />
               </Button>
             )}
             {isTester && (
-              <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => navigate("/tester")} aria-label="Tester">
+              <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0" onClick={() => navigate("/tester")} aria-label="Tester">
                 <Beaker className="h-5 w-5" />
               </Button>
             )}
             {isStaff && (
-              <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => setShowStaffChat(true)} aria-label="Staff Chat">
+              <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0" onClick={() => setShowStaffChat(true)} aria-label="Staff Chat">
                 <MessagesSquare className="h-5 w-5" />
               </Button>
             )}
             {(isHeadAdmin || isHeadTester) && (
-              <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => setShowLeadershipChat(true)} aria-label="Leadership Chat">
+              <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0" onClick={() => setShowLeadershipChat(true)} aria-label="Leadership Chat">
                 <Crown className="h-5 w-5 text-yellow-500" />
               </Button>
             )}
           </div>
 
-          {/* Center: subject badge — absolutely centered so it stays in the middle regardless of button counts */}
-          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 text-primary text-[10px] md:text-xs font-medium tracking-wide uppercase whitespace-nowrap pointer-events-none">
+          {/* Center: subject badge — stays centered because left/right flex-1 containers balance each other */}
+          <div className="shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 text-primary text-[10px] md:text-xs font-medium tracking-wide uppercase whitespace-nowrap pointer-events-none">
             {language === "nask" ? (
               <><FlaskConical className="w-4 h-4 md:w-5 md:h-4 shrink-0" /> NASK</>
             ) : language === "biology" ? (
@@ -446,19 +446,19 @@ const Index = () => {
           </div>
 
           {/* Right side: utility buttons */}
-          <div className="flex items-center gap-0.5 flex-wrap justify-end ml-auto pl-2">
-            <Button data-tour="btn-support" variant="ghost" size="icon" className="h-9 w-9" onClick={() => setShowSupport(true)} aria-label="Support / Bug">
+          <div className="flex-1 flex items-center gap-0.5 flex-wrap justify-start pl-2 min-w-0">
+            <Button data-tour="btn-support" variant="ghost" size="icon" className="h-9 w-9 shrink-0" onClick={() => setShowSupport(true)} aria-label="Support / Bug">
               <LifeBuoy className="h-5 w-5" />
             </Button>
             {user && !isStaff && (
-              <Button data-tour="btn-apply" variant="ghost" size="icon" className="h-9 w-9" onClick={() => setShowApply(true)} aria-label="Admin worden">
+              <Button data-tour="btn-apply" variant="ghost" size="icon" className="h-9 w-9 shrink-0" onClick={() => setShowApply(true)} aria-label="Admin worden">
                 <ShieldQuestion className="h-5 w-5" />
               </Button>
             )}
-            <Button data-tour="btn-reviews" variant="ghost" size="icon" className="h-9 w-9" onClick={() => navigate("/reviews")} aria-label="Reviews">
+            <Button data-tour="btn-reviews" variant="ghost" size="icon" className="h-9 w-9 shrink-0" onClick={() => navigate("/reviews")} aria-label="Reviews">
               <Star className="h-5 w-5" />
             </Button>
-            <Button data-tour="btn-settings" variant="ghost" size="icon" className="h-9 w-9" onClick={handleSettingsClick} aria-label="Instellingen">
+            <Button data-tour="btn-settings" variant="ghost" size="icon" className="h-9 w-9 shrink-0" onClick={handleSettingsClick} aria-label="Instellingen">
               <Settings className="h-5 w-5" />
             </Button>
           </div>
