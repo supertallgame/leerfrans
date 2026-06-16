@@ -63,7 +63,7 @@ export default function StaffChat({ open, onOpenChange, tableName = "admin_chat_
     void init();
 
     const channel = supabase
-      .channel(`${tableName}_changes`)
+      .channel(`${tableName}_changes_${Math.random().toString(36).slice(2, 8)}`)
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: tableName },
@@ -87,7 +87,17 @@ export default function StaffChat({ open, onOpenChange, tableName = "admin_chat_
           }
         }
       )
+      .on(
+        "postgres_changes",
+        { event: "DELETE", schema: "public", table: tableName },
+        (payload) => {
+          const oldRow = payload.old as { id?: string };
+          if (!oldRow?.id) return;
+          setMessages((prev) => prev.filter((m) => m.id !== oldRow.id));
+        }
+      )
       .subscribe();
+
 
     // Listen for role grants/removals so badges (Eminem, etc.) appear live without reload
     const rolesChannel = supabase
