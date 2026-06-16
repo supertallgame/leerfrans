@@ -406,6 +406,11 @@ const Index = () => {
             )}
           </div>
           <div className="flex items-center gap-0.5">
+            {isOwner && (
+              <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => navigate("/owner")} aria-label="Owner Dashboard">
+                <KeyRound className="h-5 w-5 text-amber-500" />
+              </Button>
+            )}
             {isHeadAdmin && (
               <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => navigate("/headadmin")} aria-label="Head Admin">
                 <ShieldCheck className="h-5 w-5" />
