@@ -144,7 +144,7 @@ export default function StaffChat({ open, onOpenChange, tableName = "admin_chat_
       .order("created_at", { ascending: true })
       .limit(200);
     if (data) {
-      const msgs = data as Message[];
+      const msgs = (data as unknown as Message[]);
       setMessages(msgs);
       const unknownIds = Array.from(new Set(msgs.map(m => m.sender_id))).filter(id => !(id in rolesMap));
       if (unknownIds.length > 0) {
@@ -201,7 +201,7 @@ export default function StaffChat({ open, onOpenChange, tableName = "admin_chat_
       if (signed?.signedUrl) uploadedUrls.push(signed.signedUrl);
     }
     const imageUrl = uploadedUrls.length > 0 ? JSON.stringify(uploadedUrls) : null;
-    const { error } = await supabase.from(tableName).insert({
+    const { error } = await supabase.from(tableName as any).insert({
       sender_id: user.id,
       sender_email: user.email,
       sender_display: displayName,
@@ -217,7 +217,7 @@ export default function StaffChat({ open, onOpenChange, tableName = "admin_chat_
   };
 
   const remove = async (id: string) => {
-    const { error } = await supabase.from(tableName).delete().eq("id", id);
+    const { error } = await supabase.from(tableName as any).delete().eq("id", id);
     if (error) toast.error("Kon niet verwijderen");
     else setMessages((prev) => prev.filter((m) => m.id !== id));
   };
