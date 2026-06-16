@@ -44,13 +44,19 @@ const Regels = () => {
     toast.success("Regels opgeslagen");
   };
 
-  // Parse rules: if it looks like plain lines (no markdown headers/lists), render as numbered cards
+  // Parse rules into clean numbered items; strip any markdown list prefixes / headers
   const parsed = useMemo(() => {
-    const lines = rules.split("\n").map((l) => l.trim()).filter(Boolean);
-    const hasMarkdown = /^(#|[-*]\s|\d+\.\s|>)/m.test(rules);
-    if (hasMarkdown) return { kind: "md" as const };
-    // strip a leading "Regels" title line if present
-    const items = lines.filter((l) => l.toLowerCase() !== "regels");
+    const lines = rules
+      .split("\n")
+      .map((l) =>
+        l
+          .trim()
+          .replace(/^(#{1,6}\s+|[-*]\s+|\d+\.\s+|>\s*)/, "")
+          .trim()
+      )
+      .filter(Boolean);
+    // strip a leading "Regels" or "Regels:" title line
+    const items = lines.filter((l) => !/^regels:?$/i.test(l));
     return { kind: "list" as const, items };
   }, [rules]);
 
