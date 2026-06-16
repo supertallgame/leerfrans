@@ -323,7 +323,7 @@ const Index = () => {
   if (activeGame === "quiz") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6 max-w-5xl mx-auto w-full"><MultipleChoice onBack={() => setActiveGame("menu")} /></div></Suspense>;
   if (activeGame === "match") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6 max-w-5xl mx-auto w-full"><MatchPairs onBack={() => setActiveGame("menu")} /></div></Suspense>;
   if (activeGame === "type") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6 max-w-5xl mx-auto w-full"><TypeAnswer onBack={() => setActiveGame("menu")} /></div></Suspense>;
-  if (activeGame === "multiplayer") return <Suspense fallback={gameLoader}><Multiplayer onBack={() => setActiveGame("menu")} /></Suspense>;
+  if (activeGame === "multiplayer") return <Suspense fallback={gameLoader}><div className="min-h-screen max-w-5xl mx-auto w-full"><Multiplayer onBack={() => setActiveGame("menu")} /></div></Suspense>;
   if (activeGame === "fill") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6 max-w-5xl mx-auto w-full"><FillLetters onBack={() => setActiveGame("menu")} /></div></Suspense>;
   if (activeGame === "sentence") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6 max-w-5xl mx-auto w-full"><SentenceFill onBack={() => setActiveGame("menu")} /></div></Suspense>;
   if (activeGame === "ai") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6 max-w-5xl mx-auto w-full"><AiChat onBack={() => setActiveGame("menu")} /></div></Suspense>;
