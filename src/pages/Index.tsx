@@ -396,7 +396,7 @@ const Index = () => {
       <div className="max-w-2xl w-full flex flex-col items-center gap-5 md:gap-8">
         <div className="w-full mb-1 min-h-[2.5rem] flex items-center justify-center">
           {/* Left side: role/dashboard navigation buttons */}
-          <div className="flex-1 flex items-center gap-0.5 flex-wrap justify-end pr-2 min-w-0">
+          <div className="flex-1 flex items-center gap-0.5 flex-wrap justify-start pr-2 min-w-0">
             {isOwner && (
               <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0" onClick={() => navigate("/owner")} aria-label="Owner Dashboard">
                 <KeyRound className="h-5 w-5 text-amber-500" />
@@ -446,7 +446,7 @@ const Index = () => {
           </div>
 
           {/* Right side: utility buttons */}
-          <div className="flex-1 flex items-center gap-0.5 flex-wrap justify-start pl-2 min-w-0">
+          <div className="flex-1 flex items-center gap-0.5 flex-wrap justify-end pl-2 min-w-0">
             <Button data-tour="btn-support" variant="ghost" size="icon" className="h-9 w-9 shrink-0" onClick={() => setShowSupport(true)} aria-label="Support / Bug">
               <LifeBuoy className="h-5 w-5" />
             </Button>
