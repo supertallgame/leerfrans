@@ -27,6 +27,7 @@ import UpdateBanner from "@/components/UpdateBanner";
 import SupportDialog from "@/components/support/SupportDialog";
 import AdminApplyDialog from "@/components/support/AdminApplyDialog";
 import StaffChat from "@/components/staff/StaffChat";
+import WarningsCheck from "@/components/staff/WarningsCheck";
 import OnboardingTour, { type TourStep } from "@/components/OnboardingTour";
 
 const Flashcards = lazy(() => import("@/components/games/Flashcards"));
