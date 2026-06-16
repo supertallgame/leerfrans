@@ -1133,6 +1133,7 @@ export type Database = {
           id: string
         }[]
       }
+      upsert_site_rules: { Args: { p_rules: string }; Returns: undefined }
     }
     Enums: {
       [_ in never]: never
