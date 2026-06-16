@@ -1983,7 +1983,7 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
     const teamScores = isTeamMode ? getTeamScores() : [];
 
     return (
-      <div className="min-h-screen flex flex-col items-center px-4 py-12">
+      <div className="min-h-screen flex flex-col items-center px-4 py-12 md:justify-center">
         <div className="max-w-md w-full space-y-6">
           <div className="text-center space-y-3">
             <div className="text-6xl">🏆</div>
