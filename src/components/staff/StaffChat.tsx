@@ -20,6 +20,8 @@ interface Message {
 interface Props {
   open: boolean;
   onOpenChange: (v: boolean) => void;
+  tableName?: string;
+  title?: string;
 }
 
 const SESSION_NAME_KEY = "staff_chat_username";
@@ -36,7 +38,7 @@ const ROLE_STYLES: Record<string, { label: string; cls: string }> = {
 };
 const ROLE_ORDER = ["owner", "head_admin", "admin", "head_tester", "tester", "eminem"];
 
-export default function StaffChat({ open, onOpenChange }: Props) {
+export default function StaffChat({ open, onOpenChange, tableName = "admin_chat_messages", title = "Staff Chat" }: Props) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<{ id: string; email: string; role: string } | null>(null);
@@ -58,10 +60,10 @@ export default function StaffChat({ open, onOpenChange }: Props) {
     void init();
 
     const channel = supabase
-      .channel("admin_chat_messages")
+      .channel(`${tableName}_changes`)
       .on(
         "postgres_changes",
-        { event: "INSERT", schema: "public", table: "admin_chat_messages" },
+        { event: "INSERT", schema: "public", table: tableName },
         (payload) => {
           const row = payload.new as Message;
           setMessages((prev) => {
@@ -137,12 +139,12 @@ export default function StaffChat({ open, onOpenChange }: Props) {
   const load = async (showLoading = true) => {
     if (showLoading) setLoading(true);
     const { data } = await supabase
-      .from("admin_chat_messages")
+      .from(tableName as any)
       .select("id, sender_id, sender_email, sender_display, message, image_url, created_at")
       .order("created_at", { ascending: true })
       .limit(200);
     if (data) {
-      const msgs = data as Message[];
+      const msgs = (data as unknown as Message[]);
       setMessages(msgs);
       const unknownIds = Array.from(new Set(msgs.map(m => m.sender_id))).filter(id => !(id in rolesMap));
       if (unknownIds.length > 0) {
@@ -199,7 +201,7 @@ export default function StaffChat({ open, onOpenChange }: Props) {
       if (signed?.signedUrl) uploadedUrls.push(signed.signedUrl);
     }
     const imageUrl = uploadedUrls.length > 0 ? JSON.stringify(uploadedUrls) : null;
-    const { error } = await supabase.from("admin_chat_messages").insert({
+    const { error } = await supabase.from(tableName as any).insert({
       sender_id: user.id,
       sender_email: user.email,
       sender_display: displayName,
@@ -215,7 +217,7 @@ export default function StaffChat({ open, onOpenChange }: Props) {
   };
 
   const remove = async (id: string) => {
-    const { error } = await supabase.from("admin_chat_messages").delete().eq("id", id);
+    const { error } = await supabase.from(tableName as any).delete().eq("id", id);
     if (error) toast.error("Kon niet verwijderen");
     else setMessages((prev) => prev.filter((m) => m.id !== id));
   };
@@ -245,7 +247,7 @@ export default function StaffChat({ open, onOpenChange }: Props) {
       <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <MessagesSquare className="h-5 w-5 text-primary" /> Staff Chat
+            <MessagesSquare className="h-5 w-5 text-primary" /> {title}
             <span className="text-xs font-normal text-muted-foreground">({messages.length})</span>
           </DialogTitle>
           <DialogDescription className="sr-only">
