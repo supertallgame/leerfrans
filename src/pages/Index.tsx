@@ -401,75 +401,90 @@ const Index = () => {
   return (
     <main className="min-h-screen flex flex-col items-center px-3 py-6 md:px-4 md:py-12">
       <div className="max-w-2xl w-full flex flex-col items-center gap-5 md:gap-8">
-        <div className="w-full mb-1 min-h-[2.5rem] flex items-center justify-center">
-          {/* Left side: role/dashboard navigation buttons */}
-          <div className="flex-1 flex items-center gap-0.5 flex-wrap justify-start pr-2 min-w-0">
-            {isOwner && (
-              <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0" onClick={() => navigate("/owner")} aria-label="Owner Dashboard">
-                <KeyRound className="h-5 w-5 text-amber-500" />
-              </Button>
-            )}
-            {isHeadAdmin && (
-              <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0" onClick={() => navigate("/headadmin")} aria-label="Head Admin">
-                <ShieldCheck className="h-5 w-5" />
-              </Button>
-            )}
-            {isAdmin && (
-              <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0" onClick={() => navigate("/admin")} aria-label="Admin">
-                <Shield className="h-5 w-5" />
-              </Button>
-            )}
-            {isHeadTester && (
-              <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0" onClick={() => navigate("/headtester")} aria-label="Head Tester">
-                <TestTube className="h-5 w-5" />
-              </Button>
-            )}
-            {isTester && (
-              <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0" onClick={() => navigate("/tester")} aria-label="Tester">
-                <Beaker className="h-5 w-5" />
-              </Button>
-            )}
-            {isStaff && (
-              <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0" onClick={() => setShowStaffChat(true)} aria-label="Staff Chat">
-                <MessagesSquare className="h-5 w-5" />
-              </Button>
-            )}
-            {(isHeadAdmin || isHeadTester) && (
-              <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0" onClick={() => setShowLeadershipChat(true)} aria-label="Leadership Chat">
-                <Crown className="h-5 w-5 text-yellow-500" />
-              </Button>
-            )}
-          </div>
+        {(() => {
+          const leftBtns: JSX.Element[] = [];
+          if (isOwner) leftBtns.push(
+            <Button key="owner" variant="ghost" size="icon" className="h-9 w-9 shrink-0" onClick={() => navigate("/owner")} aria-label="Owner Dashboard">
+              <KeyRound className="h-5 w-5 text-amber-500" />
+            </Button>
+          );
+          if (isHeadAdmin) leftBtns.push(
+            <Button key="ha" variant="ghost" size="icon" className="h-9 w-9 shrink-0" onClick={() => navigate("/headadmin")} aria-label="Head Admin">
+              <ShieldCheck className="h-5 w-5" />
+            </Button>
+          );
+          if (isAdmin) leftBtns.push(
+            <Button key="a" variant="ghost" size="icon" className="h-9 w-9 shrink-0" onClick={() => navigate("/admin")} aria-label="Admin">
+              <Shield className="h-5 w-5" />
+            </Button>
+          );
+          if (isHeadTester) leftBtns.push(
+            <Button key="ht" variant="ghost" size="icon" className="h-9 w-9 shrink-0" onClick={() => navigate("/headtester")} aria-label="Head Tester">
+              <TestTube className="h-5 w-5" />
+            </Button>
+          );
+          if (isTester) leftBtns.push(
+            <Button key="t" variant="ghost" size="icon" className="h-9 w-9 shrink-0" onClick={() => navigate("/tester")} aria-label="Tester">
+              <Beaker className="h-5 w-5" />
+            </Button>
+          );
+          if (isStaff) leftBtns.push(
+            <Button key="sc" variant="ghost" size="icon" className="h-9 w-9 shrink-0" onClick={() => setShowStaffChat(true)} aria-label="Staff Chat">
+              <MessagesSquare className="h-5 w-5" />
+            </Button>
+          );
+          if (isHeadAdmin || isHeadTester) leftBtns.push(
+            <Button key="lc" variant="ghost" size="icon" className="h-9 w-9 shrink-0" onClick={() => setShowLeadershipChat(true)} aria-label="Leadership Chat">
+              <Crown className="h-5 w-5 text-yellow-500" />
+            </Button>
+          );
 
-          {/* Center: subject badge — stays centered because left/right flex-1 containers balance each other */}
-          <div className="shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 text-primary text-[10px] md:text-xs font-medium tracking-wide uppercase whitespace-nowrap pointer-events-none">
-            {language === "nask" ? (
-              <><FlaskConical className="w-4 h-4 md:w-5 md:h-4 shrink-0" /> NASK</>
-            ) : language === "biology" ? (
-              <><Microscope className="w-4 h-4 md:w-5 md:h-4 shrink-0" /> Biologie</>
-            ) : (
-              <><FlagNL className="w-4 h-3 md:w-5 md:h-3.5 rounded-sm shrink-0" /> Nederlands ↔ {foreignLabelNative} {language === "french" ? <FlagFR className="w-4 h-3 md:w-5 md:h-3.5 rounded-sm shrink-0" /> : <FlagEN className="w-4 h-3 md:w-5 md:h-3.5 rounded-sm shrink-0" />}</>
-            )}
-          </div>
-
-          {/* Right side: utility buttons */}
-          <div className="flex-1 flex items-center gap-0.5 flex-wrap justify-end pl-2 min-w-0">
-            <Button data-tour="btn-support" variant="ghost" size="icon" className="h-9 w-9 shrink-0" onClick={() => setShowSupport(true)} aria-label="Support / Bug">
+          const rightBtns: JSX.Element[] = [
+            <Button key="sup" data-tour="btn-support" variant="ghost" size="icon" className="h-9 w-9 shrink-0" onClick={() => setShowSupport(true)} aria-label="Support / Bug">
               <LifeBuoy className="h-5 w-5" />
+            </Button>,
+          ];
+          if (user && !isStaff) rightBtns.push(
+            <Button key="apply" data-tour="btn-apply" variant="ghost" size="icon" className="h-9 w-9 shrink-0" onClick={() => setShowApply(true)} aria-label="Admin worden">
+              <ShieldQuestion className="h-5 w-5" />
             </Button>
-            {user && !isStaff && (
-              <Button data-tour="btn-apply" variant="ghost" size="icon" className="h-9 w-9 shrink-0" onClick={() => setShowApply(true)} aria-label="Admin worden">
-                <ShieldQuestion className="h-5 w-5" />
-              </Button>
-            )}
-            <Button data-tour="btn-reviews" variant="ghost" size="icon" className="h-9 w-9 shrink-0" onClick={() => navigate("/reviews")} aria-label="Reviews">
+          );
+          rightBtns.push(
+            <Button key="rev" data-tour="btn-reviews" variant="ghost" size="icon" className="h-9 w-9 shrink-0" onClick={() => navigate("/reviews")} aria-label="Reviews">
               <Star className="h-5 w-5" />
-            </Button>
-            <Button data-tour="btn-settings" variant="ghost" size="icon" className="h-9 w-9 shrink-0" onClick={handleSettingsClick} aria-label="Instellingen">
+            </Button>,
+            <Button key="set" data-tour="btn-settings" variant="ghost" size="icon" className="h-9 w-9 shrink-0" onClick={handleSettingsClick} aria-label="Instellingen">
               <Settings className="h-5 w-5" />
             </Button>
-          </div>
-        </div>
+          );
+
+          // Cap left buttons so they stay on a single row; overflow flips to the right side
+          const MAX_LEFT = 4;
+          const leftOverflow = leftBtns.slice(MAX_LEFT);
+          const leftFinal = leftBtns.slice(0, MAX_LEFT);
+          const rightFinal = [...leftOverflow, ...rightBtns];
+
+          return (
+            <div className="w-full mb-1 min-h-[2.5rem] flex items-center justify-center gap-1">
+              <div className="flex-1 flex items-center gap-0.5 flex-nowrap justify-start min-w-0 overflow-hidden">
+                {leftFinal}
+              </div>
+              <div className="shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 text-primary text-[10px] md:text-xs font-medium tracking-wide uppercase whitespace-nowrap pointer-events-none">
+                {language === "nask" ? (
+                  <><FlaskConical className="w-4 h-4 md:w-5 md:h-4 shrink-0" /> NASK</>
+                ) : language === "biology" ? (
+                  <><Microscope className="w-4 h-4 md:w-5 md:h-4 shrink-0" /> Biologie</>
+                ) : (
+                  <><FlagNL className="w-4 h-3 md:w-5 md:h-3.5 rounded-sm shrink-0" /> Nederlands ↔ {foreignLabelNative} {language === "french" ? <FlagFR className="w-4 h-3 md:w-5 md:h-3.5 rounded-sm shrink-0" /> : <FlagEN className="w-4 h-3 md:w-5 md:h-3.5 rounded-sm shrink-0" />}</>
+                )}
+              </div>
+              <div className="flex-1 flex items-center gap-0.5 flex-nowrap justify-end min-w-0 overflow-hidden">
+                {rightFinal}
+              </div>
+            </div>
+          );
+        })()}
+
 
         <div className="text-center space-y-2 md:space-y-3 w-full">
           <h1 className="text-3xl md:text-5xl font-bold tracking-tight">
