@@ -247,7 +247,7 @@ export default function StaffChat({ open, onOpenChange, tableName = "admin_chat_
       <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <MessagesSquare className="h-5 w-5 text-primary" /> Staff Chat
+            <MessagesSquare className="h-5 w-5 text-primary" /> {title}
             <span className="text-xs font-normal text-muted-foreground">({messages.length})</span>
           </DialogTitle>
           <DialogDescription className="sr-only">
