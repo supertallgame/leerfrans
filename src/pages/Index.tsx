@@ -394,18 +394,9 @@ const Index = () => {
   return (
     <main className="min-h-screen flex flex-col items-center px-3 py-6 md:px-4 md:py-12">
       <div className="max-w-2xl w-full flex flex-col items-center gap-5 md:gap-8">
-        <div className="flex items-center justify-between w-full mb-1">
-          <div className="w-16 md:w-40 shrink-0" />
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 text-primary text-[10px] md:text-xs font-medium tracking-wide uppercase whitespace-nowrap">
-            {language === "nask" ? (
-              <><FlaskConical className="w-4 h-4 md:w-5 md:h-4 shrink-0" /> NASK</>
-            ) : language === "biology" ? (
-              <><Microscope className="w-4 h-4 md:w-5 md:h-4 shrink-0" /> Biologie</>
-            ) : (
-              <><FlagNL className="w-4 h-3 md:w-5 md:h-3.5 rounded-sm shrink-0" /> Nederlands ↔ {foreignLabelNative} {language === "french" ? <FlagFR className="w-4 h-3 md:w-5 md:h-3.5 rounded-sm shrink-0" /> : <FlagEN className="w-4 h-3 md:w-5 md:h-3.5 rounded-sm shrink-0" />}</>
-            )}
-          </div>
-          <div className="flex items-center gap-0.5">
+        <div className="relative w-full mb-1 min-h-[2.5rem] flex items-center">
+          {/* Left side: role/dashboard navigation buttons */}
+          <div className="flex items-center gap-0.5 flex-wrap justify-start mr-auto pr-2">
             {isOwner && (
               <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => navigate("/owner")} aria-label="Owner Dashboard">
                 <KeyRound className="h-5 w-5 text-amber-500" />
@@ -441,6 +432,21 @@ const Index = () => {
                 <Crown className="h-5 w-5 text-yellow-500" />
               </Button>
             )}
+          </div>
+
+          {/* Center: subject badge — absolutely centered so it stays in the middle regardless of button counts */}
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 text-primary text-[10px] md:text-xs font-medium tracking-wide uppercase whitespace-nowrap pointer-events-none">
+            {language === "nask" ? (
+              <><FlaskConical className="w-4 h-4 md:w-5 md:h-4 shrink-0" /> NASK</>
+            ) : language === "biology" ? (
+              <><Microscope className="w-4 h-4 md:w-5 md:h-4 shrink-0" /> Biologie</>
+            ) : (
+              <><FlagNL className="w-4 h-3 md:w-5 md:h-3.5 rounded-sm shrink-0" /> Nederlands ↔ {foreignLabelNative} {language === "french" ? <FlagFR className="w-4 h-3 md:w-5 md:h-3.5 rounded-sm shrink-0" /> : <FlagEN className="w-4 h-3 md:w-5 md:h-3.5 rounded-sm shrink-0" />}</>
+            )}
+          </div>
+
+          {/* Right side: utility buttons */}
+          <div className="flex items-center gap-0.5 flex-wrap justify-end ml-auto pl-2">
             <Button data-tour="btn-support" variant="ghost" size="icon" className="h-9 w-9" onClick={() => setShowSupport(true)} aria-label="Support / Bug">
               <LifeBuoy className="h-5 w-5" />
             </Button>
@@ -457,6 +463,7 @@ const Index = () => {
             </Button>
           </div>
         </div>
+
         <div className="text-center space-y-2 md:space-y-3 w-full">
           <h1 className="text-3xl md:text-5xl font-bold tracking-tight">
             {(language === "nask" || language === "biology") ? (language === "biology" ? "Biologie Leren" : "NASK Leren") : "Woordjes Leren"}
