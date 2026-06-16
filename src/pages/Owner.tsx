@@ -135,7 +135,7 @@ export default function Owner() {
   const [debugLogs, setDebugLogs] = useState(() => typeof window !== "undefined" && localStorage.getItem("debug_logs") === "true");
 
   // Warning management
-  const [warnTarget, setWarnTarget] = useState<{ user_id: string; email: string } | null>(null);
+  const [warnTarget, setWarnTarget] = useState<{ user_id: string; email: string; roleTarget: "admin" | "tester" | "head_admin" | "head_tester" | "member" } | null>(null);
 
   // Poll management
   const [polls, setPolls] = useState<any[]>([]);
