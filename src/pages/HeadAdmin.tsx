@@ -288,16 +288,26 @@ export default function HeadAdmin() {
                       <Users className="h-4 w-4 text-muted-foreground shrink-0" />
                       <span className="text-sm font-medium truncate">{user.email}</span>
                     </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="gap-1 shrink-0 ml-2"
-                      disabled={promoting === user.id}
-                      onClick={() => promoteUser(user)}
-                    >
-                      <ShieldPlus className="h-4 w-4" />
-                      {promoting === user.id ? "Bezig..." : "Promoveren"}
-                    </Button>
+                    <div className="flex gap-1 shrink-0 ml-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-amber-600 hover:text-amber-700 hover:bg-amber-500/10 gap-1"
+                        onClick={() => setWarnTarget({ user_id: user.id, email: user.email, roleTarget: "member" })}
+                      >
+                        <AlertTriangle className="h-4 w-4" /> Waarschuw
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="gap-1"
+                        disabled={promoting === user.id}
+                        onClick={() => promoteUser(user)}
+                      >
+                        <ShieldPlus className="h-4 w-4" />
+                        {promoting === user.id ? "Bezig..." : "Promoveren"}
+                      </Button>
+                    </div>
                   </div>
                 ))
               )}
@@ -309,7 +319,7 @@ export default function HeadAdmin() {
         open={!!warnTarget}
         onOpenChange={(v) => { if (!v) setWarnTarget(null); }}
         recipient={warnTarget}
-        roleTarget="admin"
+        roleTarget={warnTarget?.roleTarget ?? "admin"}
       />
     </div>
   );
