@@ -60,10 +60,10 @@ export default function StaffChat({ open, onOpenChange, tableName = "admin_chat_
     void init();
 
     const channel = supabase
-      .channel("admin_chat_messages")
+      .channel(`${tableName}_changes`)
       .on(
         "postgres_changes",
-        { event: "INSERT", schema: "public", table: "admin_chat_messages" },
+        { event: "INSERT", schema: "public", table: tableName },
         (payload) => {
           const row = payload.new as Message;
           setMessages((prev) => {
@@ -139,7 +139,7 @@ export default function StaffChat({ open, onOpenChange, tableName = "admin_chat_
   const load = async (showLoading = true) => {
     if (showLoading) setLoading(true);
     const { data } = await supabase
-      .from("admin_chat_messages")
+      .from(tableName)
       .select("id, sender_id, sender_email, sender_display, message, image_url, created_at")
       .order("created_at", { ascending: true })
       .limit(200);
@@ -201,7 +201,7 @@ export default function StaffChat({ open, onOpenChange, tableName = "admin_chat_
       if (signed?.signedUrl) uploadedUrls.push(signed.signedUrl);
     }
     const imageUrl = uploadedUrls.length > 0 ? JSON.stringify(uploadedUrls) : null;
-    const { error } = await supabase.from("admin_chat_messages").insert({
+    const { error } = await supabase.from(tableName).insert({
       sender_id: user.id,
       sender_email: user.email,
       sender_display: displayName,
@@ -217,7 +217,7 @@ export default function StaffChat({ open, onOpenChange, tableName = "admin_chat_
   };
 
   const remove = async (id: string) => {
-    const { error } = await supabase.from("admin_chat_messages").delete().eq("id", id);
+    const { error } = await supabase.from(tableName).delete().eq("id", id);
     if (error) toast.error("Kon niet verwijderen");
     else setMessages((prev) => prev.filter((m) => m.id !== id));
   };
