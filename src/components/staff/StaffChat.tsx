@@ -25,6 +25,7 @@ interface Props {
 }
 
 const SESSION_NAME_KEY = "staff_chat_username";
+const DRAFT_KEY_PREFIX = "staff_chat_draft:";
 
 // Role display config — single source of truth so support + chat stay in sync.
 // Order defines render priority (owner first, eminem last).
@@ -57,6 +58,8 @@ export default function StaffChat({ open, onOpenChange, tableName = "admin_chat_
     const saved = localStorage.getItem(SESSION_NAME_KEY) || "";
     setDisplayName(saved);
     setNameInput(saved);
+    const draft = localStorage.getItem(DRAFT_KEY_PREFIX + tableName) || "";
+    setText(draft);
     void init();
 
     const channel = supabase
@@ -212,6 +215,7 @@ export default function StaffChat({ open, onOpenChange, tableName = "admin_chat_
     else {
       setText("");
       setImages([]);
+      try { localStorage.removeItem(DRAFT_KEY_PREFIX + tableName); } catch {}
     }
     setSending(false);
   };
@@ -336,7 +340,11 @@ export default function StaffChat({ open, onOpenChange, tableName = "admin_chat_
                 value={text}
                 maxLength={250}
                 rows={2}
-                onChange={(e) => setText(e.target.value)}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  setText(v);
+                  try { localStorage.setItem(DRAFT_KEY_PREFIX + tableName, v); } catch {}
+                }}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); void send(); }
                 }}
