@@ -1,0 +1,1 @@
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.leadership_chat_messages TO authenticated; GRANT ALL ON public.leadership_chat_messages TO service_role;
