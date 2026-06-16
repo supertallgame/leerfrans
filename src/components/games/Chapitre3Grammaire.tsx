@@ -139,7 +139,7 @@ export default function Chapitre3Grammaire({ onBack }: Props) {
 
   if (stage === "menu") {
     return (
-      <div className="min-h-screen flex flex-col items-center px-3 py-6 md:px-4 md:py-12">
+      <div className="min-h-screen flex flex-col items-center px-3 py-6 md:px-4 md:py-12 md:justify-center">
         <div className="max-w-md w-full space-y-4">
           <Button variant="ghost" onClick={onBack} className="gap-2 text-sm">
             <ArrowLeft className="h-4 w-4" /> Terug
@@ -199,7 +199,7 @@ export default function Chapitre3Grammaire({ onBack }: Props) {
   const pq = possQuestions[index];
 
   return (
-    <div className="min-h-screen flex flex-col items-center px-3 py-6 md:px-4 md:py-12">
+    <div className="min-h-screen flex flex-col items-center px-3 py-6 md:px-4 md:py-12 md:justify-center">
       <div className="max-w-lg w-full space-y-4">
         <Button variant="ghost" onClick={() => setStage("menu")} className="gap-2 text-sm">
           <ArrowLeft className="h-4 w-4" /> Menu

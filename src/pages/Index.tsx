@@ -1,4 +1,4 @@
-import { useState, useEffect, lazy, Suspense } from "react";
+import { useState, useEffect, lazy, Suspense, type ReactNode } from "react";
 import { useThemeSync } from "@/hooks/use-theme-sync";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
@@ -318,30 +318,37 @@ const Index = () => {
 
 
   const gameLoader = <div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>;
+  const GameFrame = ({ children, padded = true }: { children: ReactNode; padded?: boolean }) => (
+    <div className="min-h-screen w-full md:min-h-dvh md:flex md:items-center md:justify-center">
+      <div className={`w-full max-w-5xl mx-auto ${padded ? "p-4 md:p-6" : ""}`}>
+        {children}
+      </div>
+    </div>
+  );
 
-  if (activeGame === "flashcards") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6 max-w-5xl mx-auto w-full md:flex md:flex-col md:items-center md:justify-center"><Flashcards onBack={() => setActiveGame("menu")} /></div></Suspense>;
-  if (activeGame === "quiz") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6 max-w-5xl mx-auto w-full md:flex md:flex-col md:items-center md:justify-center"><MultipleChoice onBack={() => setActiveGame("menu")} /></div></Suspense>;
-  if (activeGame === "match") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6 max-w-5xl mx-auto w-full md:flex md:flex-col md:items-center md:justify-center"><MatchPairs onBack={() => setActiveGame("menu")} /></div></Suspense>;
-  if (activeGame === "type") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6 max-w-5xl mx-auto w-full md:flex md:flex-col md:items-center md:justify-center"><TypeAnswer onBack={() => setActiveGame("menu")} /></div></Suspense>;
-  if (activeGame === "multiplayer") return <Suspense fallback={gameLoader}><div className="min-h-screen max-w-5xl mx-auto w-full md:flex md:flex-col md:items-center md:justify-center"><Multiplayer onBack={() => setActiveGame("menu")} /></div></Suspense>;
-  if (activeGame === "fill") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6 max-w-5xl mx-auto w-full md:flex md:flex-col md:items-center md:justify-center"><FillLetters onBack={() => setActiveGame("menu")} /></div></Suspense>;
-  if (activeGame === "sentence") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6 max-w-5xl mx-auto w-full md:flex md:flex-col md:items-center md:justify-center"><SentenceFill onBack={() => setActiveGame("menu")} /></div></Suspense>;
-  if (activeGame === "ai") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6 max-w-5xl mx-auto w-full md:flex md:flex-col md:items-center md:justify-center"><AiChat onBack={() => setActiveGame("menu")} /></div></Suspense>;
-  if (activeGame === "truefalse") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6 max-w-5xl mx-auto w-full md:flex md:flex-col md:items-center md:justify-center"><TrueOrFalse onBack={() => setActiveGame("menu")} /></div></Suspense>;
-  if (activeGame === "memory") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6 max-w-5xl mx-auto w-full md:flex md:flex-col md:items-center md:justify-center"><MemoryGame onBack={() => setActiveGame("menu")} /></div></Suspense>;
-  if (activeGame === "skeleton") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6 max-w-5xl mx-auto w-full md:flex md:flex-col md:items-center md:justify-center"><SkeletonLabel onBack={() => setActiveGame("menu")} /></div></Suspense>;
-  if (activeGame === "clocktimes") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6 max-w-5xl mx-auto w-full md:flex md:flex-col md:items-center md:justify-center"><ClockTimes onBack={() => setActiveGame("menu")} /></div></Suspense>;
-  if (activeGame === "etre") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6 max-w-5xl mx-auto w-full md:flex md:flex-col md:items-center md:justify-center"><EtreConjugation onBack={() => setActiveGame("menu")} /></div></Suspense>;
-  if (activeGame === "explorer") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6 max-w-5xl mx-auto w-full md:flex md:flex-col md:items-center md:justify-center"><FrenchExplorer onBack={() => setActiveGame("menu")} /></div></Suspense>;
-  if (activeGame === "grammar") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6 max-w-5xl mx-auto w-full md:flex md:flex-col md:items-center md:justify-center"><GrammarQuiz onBack={() => setActiveGame("menu")} chapterId={chapterId} /></div></Suspense>;
-  if (activeGame === "grammaire1") return <Suspense fallback={gameLoader}><div className="min-h-screen max-w-5xl mx-auto w-full md:flex md:flex-col md:items-center md:justify-center"><Chapitre1Grammaire onBack={() => setActiveGame("menu")} /></div></Suspense>;
-  if (activeGame === "grammaire2") return <Suspense fallback={gameLoader}><div className="min-h-screen max-w-5xl mx-auto w-full md:flex md:flex-col md:items-center md:justify-center"><Chapitre2Grammaire onBack={() => setActiveGame("menu")} /></div></Suspense>;
-  if (activeGame === "grammaire3") return <Suspense fallback={gameLoader}><div className="min-h-screen max-w-5xl mx-auto w-full md:flex md:flex-col md:items-center md:justify-center"><Chapitre3Grammaire onBack={() => setActiveGame("menu")} /></div></Suspense>;
-  if (activeGame === "grammaire5") return <Suspense fallback={gameLoader}><div className="min-h-screen max-w-5xl mx-auto w-full md:flex md:flex-col md:items-center md:justify-center"><Chapitre5Grammaire onBack={() => setActiveGame("menu")} /></div></Suspense>;
-  if (activeGame === "grammaire6") return <Suspense fallback={gameLoader}><div className="min-h-screen max-w-5xl mx-auto w-full md:flex md:flex-col md:items-center md:justify-center"><Chapitre6Grammaire onBack={() => setActiveGame("menu")} /></div></Suspense>;
-  if (activeGame === "enclock") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6 max-w-5xl mx-auto w-full md:flex md:flex-col md:items-center md:justify-center"><EnglishClockTimes onBack={() => setActiveGame("menu")} /></div></Suspense>;
-  if (activeGame === "naskspeed") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6 max-w-5xl mx-auto w-full md:flex md:flex-col md:items-center md:justify-center"><NaskSpeedStories onBack={() => setActiveGame("menu")} /></div></Suspense>;
-  if (activeGame === "wordlearn") return <Suspense fallback={gameLoader}><div className="min-h-screen p-4 md:p-6 max-w-5xl mx-auto w-full md:flex md:flex-col md:items-center md:justify-center"><WordLearn onBack={() => setActiveGame("menu")} /></div></Suspense>;
+  if (activeGame === "flashcards") return <Suspense fallback={gameLoader}><GameFrame><Flashcards onBack={() => setActiveGame("menu")} /></GameFrame></Suspense>;
+  if (activeGame === "quiz") return <Suspense fallback={gameLoader}><GameFrame><MultipleChoice onBack={() => setActiveGame("menu")} /></GameFrame></Suspense>;
+  if (activeGame === "match") return <Suspense fallback={gameLoader}><GameFrame><MatchPairs onBack={() => setActiveGame("menu")} /></GameFrame></Suspense>;
+  if (activeGame === "type") return <Suspense fallback={gameLoader}><GameFrame><TypeAnswer onBack={() => setActiveGame("menu")} /></GameFrame></Suspense>;
+  if (activeGame === "multiplayer") return <Suspense fallback={gameLoader}><GameFrame padded={false}><Multiplayer onBack={() => setActiveGame("menu")} /></GameFrame></Suspense>;
+  if (activeGame === "fill") return <Suspense fallback={gameLoader}><GameFrame><FillLetters onBack={() => setActiveGame("menu")} /></GameFrame></Suspense>;
+  if (activeGame === "sentence") return <Suspense fallback={gameLoader}><GameFrame><SentenceFill onBack={() => setActiveGame("menu")} /></GameFrame></Suspense>;
+  if (activeGame === "ai") return <Suspense fallback={gameLoader}><GameFrame><AiChat onBack={() => setActiveGame("menu")} /></GameFrame></Suspense>;
+  if (activeGame === "truefalse") return <Suspense fallback={gameLoader}><GameFrame><TrueOrFalse onBack={() => setActiveGame("menu")} /></GameFrame></Suspense>;
+  if (activeGame === "memory") return <Suspense fallback={gameLoader}><GameFrame><MemoryGame onBack={() => setActiveGame("menu")} /></GameFrame></Suspense>;
+  if (activeGame === "skeleton") return <Suspense fallback={gameLoader}><GameFrame><SkeletonLabel onBack={() => setActiveGame("menu")} /></GameFrame></Suspense>;
+  if (activeGame === "clocktimes") return <Suspense fallback={gameLoader}><GameFrame><ClockTimes onBack={() => setActiveGame("menu")} /></GameFrame></Suspense>;
+  if (activeGame === "etre") return <Suspense fallback={gameLoader}><GameFrame><EtreConjugation onBack={() => setActiveGame("menu")} /></GameFrame></Suspense>;
+  if (activeGame === "explorer") return <Suspense fallback={gameLoader}><GameFrame><FrenchExplorer onBack={() => setActiveGame("menu")} /></GameFrame></Suspense>;
+  if (activeGame === "grammar") return <Suspense fallback={gameLoader}><GameFrame><GrammarQuiz onBack={() => setActiveGame("menu")} chapterId={chapterId} /></GameFrame></Suspense>;
+  if (activeGame === "grammaire1") return <Suspense fallback={gameLoader}><GameFrame padded={false}><Chapitre1Grammaire onBack={() => setActiveGame("menu")} /></GameFrame></Suspense>;
+  if (activeGame === "grammaire2") return <Suspense fallback={gameLoader}><GameFrame padded={false}><Chapitre2Grammaire onBack={() => setActiveGame("menu")} /></GameFrame></Suspense>;
+  if (activeGame === "grammaire3") return <Suspense fallback={gameLoader}><GameFrame padded={false}><Chapitre3Grammaire onBack={() => setActiveGame("menu")} /></GameFrame></Suspense>;
+  if (activeGame === "grammaire5") return <Suspense fallback={gameLoader}><GameFrame padded={false}><Chapitre5Grammaire onBack={() => setActiveGame("menu")} /></GameFrame></Suspense>;
+  if (activeGame === "grammaire6") return <Suspense fallback={gameLoader}><GameFrame padded={false}><Chapitre6Grammaire onBack={() => setActiveGame("menu")} /></GameFrame></Suspense>;
+  if (activeGame === "enclock") return <Suspense fallback={gameLoader}><GameFrame><EnglishClockTimes onBack={() => setActiveGame("menu")} /></GameFrame></Suspense>;
+  if (activeGame === "naskspeed") return <Suspense fallback={gameLoader}><GameFrame><NaskSpeedStories onBack={() => setActiveGame("menu")} /></GameFrame></Suspense>;
+  if (activeGame === "wordlearn") return <Suspense fallback={gameLoader}><GameFrame><WordLearn onBack={() => setActiveGame("menu")} /></GameFrame></Suspense>;
 
   const hasSentences = activeVocabulary.some((v) => v.french.includes(" ") && v.french.length > 15);
   const isVmboHavoCh3 = niveau === "vmbo-havo" && chapterId === "chapitre3";
