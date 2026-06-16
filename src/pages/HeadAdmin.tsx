@@ -38,7 +38,7 @@ export default function HeadAdmin() {
   const [searchQuery, setSearchQuery] = useState("");
   const [promoting, setPromoting] = useState<string | null>(null);
   const [onboardingEnabled, setOnboardingEnabled] = useState(false);
-  const [warnTarget, setWarnTarget] = useState<{ user_id: string; email: string } | null>(null);
+  const [warnTarget, setWarnTarget] = useState<{ user_id: string; email: string; roleTarget: "admin" | "member" } | null>(null);
 
   useEffect(() => {
     checkAccess();
