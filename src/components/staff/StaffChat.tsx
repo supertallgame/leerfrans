@@ -215,6 +215,7 @@ export default function StaffChat({ open, onOpenChange, tableName = "admin_chat_
     else {
       setText("");
       setImages([]);
+      try { localStorage.removeItem(DRAFT_KEY_PREFIX + tableName); } catch {}
     }
     setSending(false);
   };
