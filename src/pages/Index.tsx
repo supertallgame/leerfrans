@@ -130,6 +130,7 @@ const Index = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isTester, setIsTester] = useState(false);
   const [isStaff, setIsStaff] = useState(false);
+  const [isOwner, setIsOwner] = useState(false);
   const [polarExpressEnabled, setPolarExpressEnabled] = useState(false);
   const [obamaEnabled, setObamaEnabled] = useState(false);
   const [includeGrammar, setIncludeGrammar] = useState(false);
