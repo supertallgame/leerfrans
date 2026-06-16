@@ -131,11 +131,48 @@ function normText(s: string) {
   return s.toLowerCase().replace(/\s+/g, "").replace(/[·*×]/g, "*").replace(/[•∙]/g, "*");
 }
 
-function checkFormule(input: string, type: QuestionType): boolean {
+// Extract the first number from a string (supports comma/decimal)
+function extractNumber(s: string): number | null {
+  const m = s.replace(",", ".").match(/-?\d+(?:\.\d+)?/);
+  if (!m) return null;
+  const n = Number(m[0]);
+  return Number.isFinite(n) ? n : null;
+}
+
+function matchesValue(input: string, targets: number[], tol = 0.05): boolean {
+  const n = extractNumber(input);
+  if (n === null) return false;
+  return targets.some((t) => Math.abs(n - t) <= Math.max(tol, Math.abs(t) * 0.02));
+}
+
+function checkFormule(input: string, q: Generated): boolean {
   const n = normText(input);
-  if (type === "speed") return n === "v=s/t" || n === "v=s:t" || n === "snelheid=afstand/tijd";
-  if (type === "distance") return n === "s=v*t" || n === "s=v.t" || n === "s=vt" || n === "afstand=snelheid*tijd";
-  return n === "t=s/v" || n === "t=s:v" || n === "tijd=afstand/snelheid";
+  if (!n) return false;
+  // Symbolic forms
+  if (q.type === "speed" && (n === "v=s/t" || n === "v=s:t" || n === "s/t" || n === "s:t" || n === "snelheid=afstand/tijd")) return true;
+  if (q.type === "distance" && (n === "s=v*t" || n === "s=v.t" || n === "s=vt" || n === "v*t" || n === "v.t" || n === "afstand=snelheid*tijd")) return true;
+  if (q.type === "time" && (n === "t=s/v" || n === "t=s:v" || n === "s/v" || n === "s:v" || n === "tijd=afstand/snelheid")) return true;
+
+  // Numeric substitution: accept "16980/566", "16980:566", "16980 / 566" etc.
+  const numMatch = n.replace(/^[a-z]+=/, "").match(/^(-?\d+(?:\.\d+)?)\s*[\/:×*.]\s*(-?\d+(?:\.\d+)?)$/);
+  if (numMatch) {
+    const a = Number(numMatch[1]);
+    const b = Number(numMatch[2]);
+    if (q.type === "speed") {
+      // s / t
+      return (matchesValue(String(a), [q.d_m, round2(q.d_m / 1000)]) && matchesValue(String(b), [q.t_s, round2(q.t_s / 60), round2(q.t_s / 3600)]));
+    }
+    if (q.type === "time") {
+      return (matchesValue(String(a), [q.d_m, round2(q.d_m / 1000)]) && matchesValue(String(b), [q.display.speedMs, q.display.speedKmh]));
+    }
+    if (q.type === "distance") {
+      // v * t (operator must be multiplication)
+      if (!/[×*.]/.test(n.replace(/^[a-z]+=/, ""))) return false;
+      return (matchesValue(String(a), [q.display.speedMs, q.display.speedKmh]) && matchesValue(String(b), [q.t_s, round2(q.t_s / 60), round2(q.t_s / 3600)]))
+        || (matchesValue(String(b), [q.display.speedMs, q.display.speedKmh]) && matchesValue(String(a), [q.t_s, round2(q.t_s / 60), round2(q.t_s / 3600)]));
+    }
+  }
+  return false;
 }
 
 const hasSpeed = (s: string) => /(snelheid|v\s*=|m\/s|km\/h|km\/u)/i.test(s);
@@ -145,9 +182,18 @@ const hasDistance = (s: string) => /(afstand|s\s*=|\d\s*(m|km|meter|kilometer)\b
 function checkGegevenPair(a: string, b: string, q: Generated): boolean {
   const A = a.trim(), B = b.trim();
   if (!A || !B) return false;
-  if (q.type === "speed") return (hasTime(A) && hasDistance(B)) || (hasTime(B) && hasDistance(A));
-  if (q.type === "distance") return (hasSpeed(A) && hasTime(B)) || (hasSpeed(B) && hasTime(A));
-  return (hasSpeed(A) && hasDistance(B)) || (hasSpeed(B) && hasDistance(A));
+
+  const speedTargets = [q.display.speedMs, q.display.speedKmh];
+  const timeTargets = [q.t_s, round2(q.t_s / 60), round2(q.t_s / 3600)];
+  const distTargets = [q.d_m, round2(q.d_m / 1000)];
+
+  const isSpeedVal = (s: string) => matchesValue(s, speedTargets) || hasSpeed(s);
+  const isTimeVal = (s: string) => matchesValue(s, timeTargets) || hasTime(s);
+  const isDistVal = (s: string) => matchesValue(s, distTargets) || hasDistance(s);
+
+  if (q.type === "speed") return (isTimeVal(A) && isDistVal(B)) || (isTimeVal(B) && isDistVal(A));
+  if (q.type === "distance") return (isSpeedVal(A) && isTimeVal(B)) || (isSpeedVal(B) && isTimeVal(A));
+  return (isSpeedVal(A) && isDistVal(B)) || (isSpeedVal(B) && isDistVal(A));
 }
 
 function checkGevraagd(input: string, q: Generated): boolean {
