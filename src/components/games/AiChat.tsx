@@ -37,11 +37,7 @@ export default function AiChat({ onBack }: Props) {
 
   // Verdict marker emitted by the AI: [VERDICT:CORRECT|WRONG|NONE]
   const VERDICT_RE = /\[VERDICT:(CORRECT|WRONG|NONE)\]\s*$/i;
-  const extractVerdict = (raw: string): { clean: string; verdict: "CORRECT" | "WRONG" | "NONE" | null } => {
-    const m = raw.match(VERDICT_RE);
-    if (!m) return { clean: raw.trim(), verdict: null };
-    return { clean: raw.replace(VERDICT_RE, "").trim(), verdict: m[1].toUpperCase() as any };
-  };
+
 
   // Update score only when the latest assistant reply contains a verdict marker.
   useEffect(() => {
