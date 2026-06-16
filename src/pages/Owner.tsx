@@ -1199,7 +1199,7 @@ export default function Owner() {
         open={!!warnTarget}
         onOpenChange={(v) => { if (!v) setWarnTarget(null); }}
         recipient={warnTarget}
-        roleTarget="head_admin"
+        roleTarget={warnTarget?.roleTarget ?? "admin"}
       />
     </div>
   );
