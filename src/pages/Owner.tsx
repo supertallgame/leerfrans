@@ -1155,7 +1155,15 @@ export default function Owner() {
                       <Users className="h-4 w-4 text-muted-foreground shrink-0" />
                       <span className="text-sm font-medium truncate">{user.email}</span>
                     </div>
-                    <div className="flex gap-1 shrink-0 ml-2">
+                    <div className="flex gap-1 shrink-0 ml-2 flex-wrap">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-amber-600 hover:text-amber-700 hover:bg-amber-500/10 gap-1"
+                        onClick={() => setWarnTarget({ user_id: user.id, email: user.email, roleTarget: "member" })}
+                      >
+                        <AlertTriangle className="h-4 w-4" /> Waarschuw
+                      </Button>
                       <Button
                         variant="outline"
                         size="sm"
