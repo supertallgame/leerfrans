@@ -25,6 +25,7 @@ interface Props {
 }
 
 const SESSION_NAME_KEY = "staff_chat_username";
+const DRAFT_KEY_PREFIX = "staff_chat_draft:";
 
 // Role display config — single source of truth so support + chat stay in sync.
 // Order defines render priority (owner first, eminem last).
