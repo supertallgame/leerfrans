@@ -433,7 +433,13 @@ export default function NaskSpeedStories({ onBack }: Props) {
                 )}
                 <div className="space-y-1 text-foreground pt-1 border-t border-current/10">
                   <p className="font-semibold">Voorbeeld uitwerking:</p>
-                  <p className="font-mono text-xs">Gegeven: afstand = {q.d_m} m, tijd = {q.t_s} s</p>
+                  <p className="font-mono text-xs">
+                    Gegeven: {q.type === "speed"
+                      ? `afstand = ${q.d_m} m, tijd = ${q.t_s} s`
+                      : q.type === "distance"
+                        ? `snelheid = ${q.display.speedMs} m/s, tijd = ${q.t_s} s`
+                        : `snelheid = ${q.display.speedMs} m/s, afstand = ${q.d_m} m`}
+                  </p>
                   <p className="font-mono text-xs">Formule: {q.type === "speed" ? "v = s / t" : q.type === "distance" ? "s = v · t" : "t = s / v"}</p>
                   {q.type === "speed" && (
                     <>
