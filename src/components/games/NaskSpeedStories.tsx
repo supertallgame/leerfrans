@@ -138,16 +138,21 @@ function checkFormule(input: string, type: QuestionType): boolean {
   return n === "t=s/v" || n === "t=s:v" || n === "tijd=afstand/snelheid";
 }
 
+const hasSpeed = (s: string) => /(snelheid|v\s*=|m\/s|km\/h|km\/u)/i.test(s);
+const hasTime = (s: string) => /(tijd|t\s*=|\d\s*(s|sec|seconde[n]?|min|minuten|uur|u)\b)/i.test(s);
+const hasDistance = (s: string) => /(afstand|s\s*=|\d\s*(m|km|meter|kilometer)\b)/i.test(s) && !/m\/s/i.test(s);
+
 function checkGegevenPair(a: string, b: string, q: Generated): boolean {
-  const both = `${a}\n${b}`;
-  if (q.type === "speed") return /(tijd|t\s*=)/i.test(both) && /(afstand|s\s*=)/i.test(both);
-  if (q.type === "distance") return /(snelheid|v\s*=)/i.test(both) && /(tijd|t\s*=)/i.test(both);
-  return /(snelheid|v\s*=)/i.test(both) && /(afstand|s\s*=)/i.test(both);
+  const A = a.trim(), B = b.trim();
+  if (!A || !B) return false;
+  if (q.type === "speed") return (hasTime(A) && hasDistance(B)) || (hasTime(B) && hasDistance(A));
+  if (q.type === "distance") return (hasSpeed(A) && hasTime(B)) || (hasSpeed(B) && hasTime(A));
+  return (hasSpeed(A) && hasDistance(B)) || (hasSpeed(B) && hasDistance(A));
 }
 
 function checkGevraagd(input: string, q: Generated): boolean {
   if (q.type === "speed") return /(snelheid|v\b|m\/s|km\/h)/i.test(input);
-  if (q.type === "distance") return /(afstand|s\b|\bm\b|km)/i.test(input);
+  if (q.type === "distance") return /(afstand|^s$|\bs\b|\bm\b|km)/i.test(input);
   return /(tijd|t\b|\bs\b|secon|min|uur)/i.test(input);
 }
 
