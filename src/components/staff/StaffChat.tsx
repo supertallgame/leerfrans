@@ -144,10 +144,10 @@ export default function StaffChat({ open, onOpenChange, tableName = "admin_chat_
     const { data } = await supabase
       .from(tableName as any)
       .select("id, sender_id, sender_email, sender_display, message, image_url, created_at")
-      .order("created_at", { ascending: true })
+      .order("created_at", { ascending: false })
       .limit(200);
     if (data) {
-      const msgs = (data as unknown as Message[]);
+      const msgs = ((data as unknown as Message[])).slice().reverse();
       setMessages(msgs);
       const unknownIds = Array.from(new Set(msgs.map(m => m.sender_id))).filter(id => !(id in rolesMap));
       if (unknownIds.length > 0) {

@@ -465,8 +465,8 @@ const Index = () => {
           const rightFinal = [...leftOverflow, ...rightBtns];
 
           return (
-            <div className="w-full mb-1 min-h-[2.5rem] flex items-center justify-center gap-1">
-              <div className="flex-1 flex items-center gap-0.5 flex-nowrap justify-start min-w-0 overflow-hidden">
+            <div className="w-full mb-1 min-h-[2.5rem] flex items-center justify-center gap-3">
+              <div className="flex items-center gap-0.5 flex-nowrap justify-end min-w-0">
                 {leftFinal}
               </div>
               <div className="shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 text-primary text-[10px] md:text-xs font-medium tracking-wide uppercase whitespace-nowrap pointer-events-none">
@@ -478,10 +478,11 @@ const Index = () => {
                   <><FlagNL className="w-4 h-3 md:w-5 md:h-3.5 rounded-sm shrink-0" /> Nederlands ↔ {foreignLabelNative} {language === "french" ? <FlagFR className="w-4 h-3 md:w-5 md:h-3.5 rounded-sm shrink-0" /> : <FlagEN className="w-4 h-3 md:w-5 md:h-3.5 rounded-sm shrink-0" />}</>
                 )}
               </div>
-              <div className="flex-1 flex items-center gap-0.5 flex-nowrap justify-end min-w-0 overflow-hidden">
+              <div className="flex items-center gap-0.5 flex-nowrap justify-start min-w-0">
                 {rightFinal}
               </div>
             </div>
+
           );
         })()}
 
