@@ -340,7 +340,11 @@ export default function StaffChat({ open, onOpenChange, tableName = "admin_chat_
                 value={text}
                 maxLength={250}
                 rows={2}
-                onChange={(e) => setText(e.target.value)}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  setText(v);
+                  try { localStorage.setItem(DRAFT_KEY_PREFIX + tableName, v); } catch {}
+                }}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); void send(); }
                 }}
