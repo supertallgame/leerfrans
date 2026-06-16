@@ -817,6 +817,14 @@ const Index = () => {
       )}
 
       {showOnboarding && <OnboardingTour steps={tourSteps} onClose={finishOnboarding} />}
+      <footer className="w-full mt-12 pt-6 pb-4 border-t border-border/50 text-center">
+        <button
+          onClick={() => navigate("/regels")}
+          className="text-sm text-muted-foreground hover:text-foreground underline underline-offset-4 transition-colors"
+        >
+          Regels
+        </button>
+      </footer>
       <SettingsDialog open={showSettings} onOpenChange={setShowSettings} user={user}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
