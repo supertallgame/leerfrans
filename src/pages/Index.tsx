@@ -792,6 +792,7 @@ const Index = () => {
       <SupportDialog open={showSupport} onOpenChange={setShowSupport} />
       <AdminApplyDialog open={showApply} onOpenChange={setShowApply} />
       <StaffChat open={showStaffChat} onOpenChange={setShowStaffChat} />
+      <WarningsCheck />
 
       {/* Eminem-only: background music toggle while playing a game */}
       {isEminem && activeGame !== "menu" && (
