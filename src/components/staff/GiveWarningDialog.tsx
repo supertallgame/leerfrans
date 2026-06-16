@@ -11,7 +11,7 @@ interface Props {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   recipient: { user_id: string; email: string } | null;
-  roleTarget: "admin" | "tester" | "head_admin" | "head_tester";
+  roleTarget: "admin" | "tester" | "head_admin" | "head_tester" | "member";
 }
 
 export default function GiveWarningDialog({ open, onOpenChange, recipient, roleTarget }: Props) {

@@ -135,7 +135,7 @@ export default function Owner() {
   const [debugLogs, setDebugLogs] = useState(() => typeof window !== "undefined" && localStorage.getItem("debug_logs") === "true");
 
   // Warning management
-  const [warnTarget, setWarnTarget] = useState<{ user_id: string; email: string } | null>(null);
+  const [warnTarget, setWarnTarget] = useState<{ user_id: string; email: string; roleTarget: "admin" | "tester" | "head_admin" | "head_tester" | "member" } | null>(null);
 
   // Poll management
   const [polls, setPolls] = useState<any[]>([]);
@@ -653,7 +653,7 @@ export default function Owner() {
                       variant="ghost"
                       size="sm"
                       className="text-amber-600 hover:text-amber-700 hover:bg-amber-500/10 gap-1"
-                      onClick={() => setWarnTarget({ user_id: role.user_id, email: role.email })}
+                      onClick={() => setWarnTarget({ user_id: role.user_id, email: role.email, roleTarget: role.role as any })}
                     >
                       <AlertTriangle className="h-4 w-4" /> Waarschuw
                     </Button>
@@ -704,7 +704,7 @@ export default function Owner() {
                       variant="ghost"
                       size="sm"
                       className="text-amber-600 hover:text-amber-700 hover:bg-amber-500/10 gap-1"
-                      onClick={() => setWarnTarget({ user_id: role.user_id, email: role.email })}
+                      onClick={() => setWarnTarget({ user_id: role.user_id, email: role.email, roleTarget: role.role as any })}
                     >
                       <AlertTriangle className="h-4 w-4" /> Waarschuw
                     </Button>
@@ -755,7 +755,7 @@ export default function Owner() {
                       variant="ghost"
                       size="sm"
                       className="text-amber-600 hover:text-amber-700 hover:bg-amber-500/10 gap-1"
-                      onClick={() => setWarnTarget({ user_id: role.user_id, email: role.email })}
+                      onClick={() => setWarnTarget({ user_id: role.user_id, email: role.email, roleTarget: role.role as any })}
                     >
                       <AlertTriangle className="h-4 w-4" /> Waarschuw
                     </Button>
@@ -806,7 +806,7 @@ export default function Owner() {
                       variant="ghost"
                       size="sm"
                       className="text-amber-600 hover:text-amber-700 hover:bg-amber-500/10 gap-1"
-                      onClick={() => setWarnTarget({ user_id: role.user_id, email: role.email })}
+                      onClick={() => setWarnTarget({ user_id: role.user_id, email: role.email, roleTarget: role.role as any })}
                     >
                       <AlertTriangle className="h-4 w-4" /> Waarschuw
                     </Button>
@@ -1155,7 +1155,15 @@ export default function Owner() {
                       <Users className="h-4 w-4 text-muted-foreground shrink-0" />
                       <span className="text-sm font-medium truncate">{user.email}</span>
                     </div>
-                    <div className="flex gap-1 shrink-0 ml-2">
+                    <div className="flex gap-1 shrink-0 ml-2 flex-wrap">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-amber-600 hover:text-amber-700 hover:bg-amber-500/10 gap-1"
+                        onClick={() => setWarnTarget({ user_id: user.id, email: user.email, roleTarget: "member" })}
+                      >
+                        <AlertTriangle className="h-4 w-4" /> Waarschuw
+                      </Button>
                       <Button
                         variant="outline"
                         size="sm"
@@ -1199,7 +1207,7 @@ export default function Owner() {
         open={!!warnTarget}
         onOpenChange={(v) => { if (!v) setWarnTarget(null); }}
         recipient={warnTarget}
-        roleTarget="head_admin"
+        roleTarget={warnTarget?.roleTarget ?? "admin"}
       />
     </div>
   );

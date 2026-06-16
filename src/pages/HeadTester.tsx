@@ -44,7 +44,7 @@ export default function HeadTester() {
   const [newAnnImg, setNewAnnImg] = useState<File | null>(null);
 
   const [chatOpen, setChatOpen] = useState(false);
-  const [warnTarget, setWarnTarget] = useState<{ user_id: string; email: string } | null>(null);
+  const [warnTarget, setWarnTarget] = useState<{ user_id: string; email: string; roleTarget: "tester" | "member" } | null>(null);
 
   useEffect(() => {
     void check();
@@ -339,7 +339,7 @@ export default function HeadTester() {
                           variant="ghost"
                           size="sm"
                           className="text-amber-600 hover:bg-amber-500/10 gap-1"
-                          onClick={() => setWarnTarget({ user_id: role.user_id, email: role.email })}
+                          onClick={() => setWarnTarget({ user_id: role.user_id, email: role.email, roleTarget: "tester" })}
                         >
                           <AlertTriangle className="h-3.5 w-3.5" />
                         </Button>
@@ -461,9 +461,17 @@ export default function HeadTester() {
                 </div>
                 <div className="space-y-1 max-h-80 overflow-y-auto">
                   {filteredUsers.map(u => (
-                    <div key={u.id} className="text-xs px-3 py-2 rounded border flex items-center justify-between">
-                      <span className="truncate">{u.email}</span>
-                      <span className="text-muted-foreground shrink-0 ml-2">{new Date(u.created_at).toLocaleDateString("nl-NL")}</span>
+                    <div key={u.id} className="text-xs px-3 py-2 rounded border flex items-center justify-between gap-2">
+                      <span className="truncate flex-1">{u.email}</span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-amber-600 hover:text-amber-700 hover:bg-amber-500/10 gap-1 h-7 px-2"
+                        onClick={() => setWarnTarget({ user_id: u.id, email: u.email, roleTarget: "member" })}
+                      >
+                        <AlertTriangle className="h-3.5 w-3.5" /> Waarschuw
+                      </Button>
+                      <span className="text-muted-foreground shrink-0">{new Date(u.created_at).toLocaleDateString("nl-NL")}</span>
                     </div>
                   ))}
                 </div>
@@ -478,7 +486,7 @@ export default function HeadTester() {
         open={!!warnTarget}
         onOpenChange={(v) => { if (!v) setWarnTarget(null); }}
         recipient={warnTarget}
-        roleTarget="tester"
+        roleTarget={warnTarget?.roleTarget ?? "tester"}
       />
     </div>
   );
