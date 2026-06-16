@@ -58,6 +58,8 @@ export default function StaffChat({ open, onOpenChange, tableName = "admin_chat_
     const saved = localStorage.getItem(SESSION_NAME_KEY) || "";
     setDisplayName(saved);
     setNameInput(saved);
+    const draft = localStorage.getItem(DRAFT_KEY_PREFIX + tableName) || "";
+    setText(draft);
     void init();
 
     const channel = supabase
