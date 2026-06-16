@@ -3,7 +3,7 @@ import { useThemeSync } from "@/hooks/use-theme-sync";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { BookOpen, Brain, Puzzle, Keyboard, Users, PenTool, MessageSquare, Bot, Settings, Star, Lock, BookMarked, FlaskConical, CheckCircle, Layers, Microscope, Bone, Clock, BookType, Map, ShieldCheck, GraduationCap, Hash, BookText, LifeBuoy, ShieldQuestion, MessagesSquare, Music2, VolumeX, TestTube, Shield, Beaker } from "lucide-react";
+import { BookOpen, Brain, Puzzle, Keyboard, Users, PenTool, MessageSquare, Bot, Settings, Star, Lock, BookMarked, FlaskConical, CheckCircle, Layers, Microscope, Bone, Clock, BookType, Map, ShieldCheck, GraduationCap, Hash, BookText, LifeBuoy, ShieldQuestion, MessagesSquare, Music2, VolumeX, TestTube, Shield, Beaker, Crown } from "lucide-react";
 import polarExpressImg from "@/assets/polar-express.png";
 import { FlagNL, FlagFR } from "@/components/Flags";
 import { getChaptersForLanguage, getChapter, getForeignLabel, getForeignLabelNative, Language, Niveau } from "@/data/vocabulary";
@@ -136,6 +136,7 @@ const Index = () => {
   const [showSupport, setShowSupport] = useState(false);
   const [showApply, setShowApply] = useState(false);
   const [showStaffChat, setShowStaffChat] = useState(false);
+  const [showLeadershipChat, setShowLeadershipChat] = useState(false);
   const [onboardingEnabled, setOnboardingEnabled] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [isEminem, setIsEminem] = useState(false);
@@ -425,6 +426,11 @@ const Index = () => {
             {isStaff && (
               <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => setShowStaffChat(true)} aria-label="Staff Chat">
                 <MessagesSquare className="h-5 w-5" />
+              </Button>
+            )}
+            {(isHeadAdmin || isHeadTester) && (
+              <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => setShowLeadershipChat(true)} aria-label="Leadership Chat">
+                <Crown className="h-5 w-5 text-yellow-500" />
               </Button>
             )}
             <Button data-tour="btn-support" variant="ghost" size="icon" className="h-9 w-9" onClick={() => setShowSupport(true)} aria-label="Support / Bug">
@@ -801,6 +807,7 @@ const Index = () => {
       <SupportDialog open={showSupport} onOpenChange={setShowSupport} />
       <AdminApplyDialog open={showApply} onOpenChange={setShowApply} />
       <StaffChat open={showStaffChat} onOpenChange={setShowStaffChat} />
+      <StaffChat open={showLeadershipChat} onOpenChange={setShowLeadershipChat} tableName="leadership_chat_messages" title="Leadership Chat" />
       <WarningsCheck />
 
       {/* Eminem-only: background music toggle while playing a game */}
