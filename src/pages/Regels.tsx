@@ -117,7 +117,7 @@ const Regels = () => {
               <div key={i} className="h-16 rounded-xl bg-muted/40 animate-pulse" />
             ))}
           </div>
-        ) : parsed.kind === "list" && parsed.items.length > 0 ? (
+        ) : parsed.items.length > 0 ? (
           <ol className="space-y-3">
             {parsed.items.map((item, i) => (
               <li
@@ -131,14 +131,6 @@ const Regels = () => {
               </li>
             ))}
           </ol>
-        ) : rules.trim() ? (
-          <Card>
-            <CardContent className="pt-6">
-              <article className="prose prose-sm dark:prose-invert max-w-none">
-                <ReactMarkdown>{rules}</ReactMarkdown>
-              </article>
-            </CardContent>
-          </Card>
         ) : (
           <Card>
             <CardContent className="pt-6">
