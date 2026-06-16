@@ -139,7 +139,7 @@ export default function StaffChat({ open, onOpenChange, tableName = "admin_chat_
   const load = async (showLoading = true) => {
     if (showLoading) setLoading(true);
     const { data } = await supabase
-      .from(tableName)
+      .from(tableName as any)
       .select("id, sender_id, sender_email, sender_display, message, image_url, created_at")
       .order("created_at", { ascending: true })
       .limit(200);
