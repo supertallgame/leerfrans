@@ -20,6 +20,8 @@ interface Message {
 interface Props {
   open: boolean;
   onOpenChange: (v: boolean) => void;
+  tableName?: string;
+  title?: string;
 }
 
 const SESSION_NAME_KEY = "staff_chat_username";
@@ -36,7 +38,7 @@ const ROLE_STYLES: Record<string, { label: string; cls: string }> = {
 };
 const ROLE_ORDER = ["owner", "head_admin", "admin", "head_tester", "tester", "eminem"];
 
-export default function StaffChat({ open, onOpenChange }: Props) {
+export default function StaffChat({ open, onOpenChange, tableName = "admin_chat_messages", title = "Staff Chat" }: Props) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<{ id: string; email: string; role: string } | null>(null);
