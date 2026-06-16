@@ -339,7 +339,7 @@ export default function HeadTester() {
                           variant="ghost"
                           size="sm"
                           className="text-amber-600 hover:bg-amber-500/10 gap-1"
-                          onClick={() => setWarnTarget({ user_id: role.user_id, email: role.email })}
+                          onClick={() => setWarnTarget({ user_id: role.user_id, email: role.email, roleTarget: "tester" })}
                         >
                           <AlertTriangle className="h-3.5 w-3.5" />
                         </Button>
