@@ -187,7 +187,7 @@ export default function AiChat({ onBack }: Props) {
               }`}
             >
               <CardContent className="p-3 text-sm prose prose-sm max-w-none">
-                <ReactMarkdown>{msg.content}</ReactMarkdown>
+                <ReactMarkdown>{msg.role === "assistant" ? msg.content.replace(VERDICT_RE, "").trim() : msg.content}</ReactMarkdown>
               </CardContent>
             </Card>
             {msg.role === "user" && (
