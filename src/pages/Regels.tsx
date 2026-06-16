@@ -7,7 +7,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Home, ScrollText, Pencil, Save, X, ShieldCheck, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import ReactMarkdown from "react-markdown";
 
 const OWNER_EMAILS = ["brankovantland@gmail.com", "branko18vantland@gmail.com"];
 
