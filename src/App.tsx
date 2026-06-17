@@ -61,6 +61,7 @@ const App = () => (
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>
+          <OwnerChatLauncher />
         </BrowserRouter>
       </ChapterProvider>
     </TooltipProvider>
