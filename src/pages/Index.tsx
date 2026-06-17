@@ -152,6 +152,16 @@ const Index = () => {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [isEminem, setIsEminem] = useState(false);
   const [eminemMusicOn, setEminemMusicOn] = useState(false);
+  const [hasDirectChats, setHasDirectChats] = useState(false);
+
+  // Check whether the current user has direct chats (with owner)
+  useEffect(() => {
+    if (!user) { setHasDirectChats(false); return; }
+    supabase
+      .from("direct_chats")
+      .select("id", { count: "exact", head: true })
+      .then(({ count }) => setHasDirectChats((count ?? 0) > 0));
+  }, [user]);
 
   // Auto-stop Eminem music when returning to the menu
   useEffect(() => {
