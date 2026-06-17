@@ -353,6 +353,7 @@ const Index = () => {
   if (activeGame === "enclock") return <Suspense fallback={gameLoader}><GameFrame><EnglishClockTimes onBack={() => setActiveGame("menu")} /></GameFrame></Suspense>;
   if (activeGame === "naskspeed") return <Suspense fallback={gameLoader}><GameFrame><NaskSpeedStories onBack={() => setActiveGame("menu")} /></GameFrame></Suspense>;
   if (activeGame === "wordlearn") return <Suspense fallback={gameLoader}><GameFrame><WordLearn onBack={() => setActiveGame("menu")} /></GameFrame></Suspense>;
+  if (activeGame === "getallen") return <Suspense fallback={gameLoader}><GameFrame><FrenchNumbers onBack={() => setActiveGame("menu")} /></GameFrame></Suspense>;
 
   const hasSentences = activeVocabulary.some((v) => v.french.includes(" ") && v.french.length > 15);
   const isVmboHavoCh3 = niveau === "vmbo-havo" && chapterId === "chapitre3";
