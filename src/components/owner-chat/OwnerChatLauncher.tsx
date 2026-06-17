@@ -160,13 +160,12 @@ export default function OwnerChatLauncher() {
   const markRead = async (chatId: string) => {
     if (!userId) return;
     const col = isOwner ? "read_by_owner" : "read_by_user";
-    const opposite = isOwner ? "read_by_user" : "read_by_owner";
     await supabase
       .from("direct_messages")
       .update({ [col]: true })
       .eq("chat_id", chatId)
-      .eq(opposite, isOwner ? true : false) // arbitrary; we just need WHERE not to fail
-      .eq("sender_is_owner", !isOwner);
+      .eq("sender_is_owner", !isOwner)
+      .eq(col, false);
   };
 
   // Expose openers globally
