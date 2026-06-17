@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ChapterProvider } from "@/contexts/ChapterContext";
 import { lazyRetry } from "@/lib/lazyRetry";
+import OwnerChatLauncher from "@/components/owner-chat/OwnerChatLauncher";
 
 const Index = lazyRetry(() => import("./pages/Index.tsx"));
 const ResetPassword = lazyRetry(() => import("./pages/ResetPassword.tsx"));
