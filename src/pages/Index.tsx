@@ -1,4 +1,12 @@
 import { useState, useEffect, lazy, Suspense, type ReactNode } from "react";
+
+const GameFrame = ({ children, padded = true }: { children: ReactNode; padded?: boolean }) => (
+  <div className="min-h-screen w-full md:min-h-dvh md:flex md:items-start md:justify-center md:pt-12 lg:pt-16">
+    <div className={`w-full max-w-5xl mx-auto ${padded ? "p-4 md:p-6" : ""}`}>
+      {children}
+    </div>
+  </div>
+);
 import { useThemeSync } from "@/hooks/use-theme-sync";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
@@ -318,13 +326,7 @@ const Index = () => {
 
 
   const gameLoader = <div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>;
-  const GameFrame = ({ children, padded = true }: { children: ReactNode; padded?: boolean }) => (
-    <div className="min-h-screen w-full md:min-h-dvh md:flex md:items-start md:justify-center md:pt-12 lg:pt-16">
-      <div className={`w-full max-w-5xl mx-auto ${padded ? "p-4 md:p-6" : ""}`}>
-        {children}
-      </div>
-    </div>
-  );
+
 
   if (activeGame === "flashcards") return <Suspense fallback={gameLoader}><GameFrame><Flashcards onBack={() => setActiveGame("menu")} /></GameFrame></Suspense>;
   if (activeGame === "quiz") return <Suspense fallback={gameLoader}><GameFrame><MultipleChoice onBack={() => setActiveGame("menu")} /></GameFrame></Suspense>;
