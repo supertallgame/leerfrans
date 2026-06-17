@@ -597,6 +597,28 @@ const Index = () => {
           </CardContent>
         </Card>
 
+        {(isOwner || hasDirectChats) && (
+          <Card
+            className="w-full cursor-pointer transition-all duration-200 hover:shadow-lg hover:-translate-y-1 active:scale-[0.98] border-2 border-accent/30 bg-gradient-to-r from-accent/5 to-primary/5"
+            onClick={() => window.openOwnerChat?.()}
+          >
+            <CardContent className="p-3 md:p-4 flex items-center gap-3">
+              <div className="w-10 h-10 md:w-12 md:h-12 rounded-2xl bg-accent/10 flex items-center justify-center shrink-0">
+                <MessageCircle className="h-5 w-5 md:h-6 md:w-6 text-accent" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h2 className="text-sm md:text-base font-bold">
+                  {isOwner ? "Owner Chats" : "Berichten van Owner"}
+                </h2>
+                <p className="text-xs text-muted-foreground">
+                  {isOwner ? "Bekijk en start chats met gebruikers" : "Open je chat met de owner"}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+
         <div className="flex gap-2 w-full">
           <Card
             className="cursor-pointer transition-all hover:shadow-md hover:-translate-y-0.5 active:scale-[0.98] bg-primary/5 border-primary/20"
