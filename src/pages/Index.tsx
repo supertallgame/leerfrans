@@ -381,6 +381,7 @@ const Index = () => {
     if (g.id === "grammaire3" && !isVhCh3) return false;
     if (g.id === "grammaire5" && !isVhCh5) return false;
     if (g.id === "grammaire6" && !isVhCh6) return false;
+    if (g.id === "getallen" && !isVhCh5) return false;
     if (g.id === "explorer" && !explorerEnabled) return false;
     if (g.id === "sentence" && !hasSentences) return false;
     if ((g.id === "etre" || g.id === "clocktimes") && !isVmboHavoCh3) return false;
