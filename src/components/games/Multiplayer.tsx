@@ -359,6 +359,11 @@ export default function Multiplayer({ onBack }: MultiplayerProps) {
   const [realtimeOk, setRealtimeOk] = useState(true);
 
   useEffect(() => {
+    (window as any).__inMultiplayer = true;
+    return () => { (window as any).__inMultiplayer = false; };
+  }, []);
+
+  useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       const adminEmails = ["brankovantland@gmail.com", "branko18vantland@gmail.com", "tamoopdam@gmail.com", "jack.ouwerkerk@vsodaafgeluk.nl"];
       setIsAdminUser(adminEmails.includes(session?.user?.email ?? ""));

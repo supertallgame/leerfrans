@@ -596,6 +596,9 @@ export default function Owner() {
             <Button variant="outline" size="sm" onClick={() => setStaffChatOpen(true)} className="gap-2">
               <MessagesSquare className="h-4 w-4" /> Staff Chat
             </Button>
+            <Button variant="outline" size="sm" onClick={() => window.openOwnerChat?.()} className="gap-2">
+              <MessagesSquare className="h-4 w-4" /> Owner Chats
+            </Button>
             <Button variant="outline" size="sm" onClick={() => navigate("/log")} className="gap-2">
               <ScrollText className="h-4 w-4" /> Action Log
             </Button>

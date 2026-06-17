@@ -11,7 +11,7 @@ import { useThemeSync } from "@/hooks/use-theme-sync";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { BookOpen, Brain, Puzzle, Keyboard, Users, PenTool, MessageSquare, Bot, Settings, Star, Lock, BookMarked, FlaskConical, CheckCircle, Layers, Microscope, Bone, Clock, BookType, Map, ShieldCheck, GraduationCap, Hash, BookText, LifeBuoy, ShieldQuestion, MessagesSquare, Music2, VolumeX, TestTube, Shield, Beaker, Crown, KeyRound } from "lucide-react";
+import { BookOpen, Brain, Puzzle, Keyboard, Users, PenTool, MessageSquare, Bot, Settings, Star, Lock, BookMarked, FlaskConical, CheckCircle, Layers, Microscope, Bone, Clock, BookType, Map, ShieldCheck, GraduationCap, Hash, BookText, LifeBuoy, ShieldQuestion, MessagesSquare, Music2, VolumeX, TestTube, Shield, Beaker, Crown, KeyRound, MessageCircle } from "lucide-react";
 import polarExpressImg from "@/assets/polar-express.png";
 import { FlagNL, FlagFR } from "@/components/Flags";
 import { getChaptersForLanguage, getChapter, getForeignLabel, getForeignLabelNative, Language, Niveau } from "@/data/vocabulary";
@@ -152,6 +152,16 @@ const Index = () => {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [isEminem, setIsEminem] = useState(false);
   const [eminemMusicOn, setEminemMusicOn] = useState(false);
+  const [hasDirectChats, setHasDirectChats] = useState(false);
+
+  // Check whether the current user has direct chats (with owner)
+  useEffect(() => {
+    if (!user) { setHasDirectChats(false); return; }
+    supabase
+      .from("direct_chats")
+      .select("id", { count: "exact", head: true })
+      .then(({ count }) => setHasDirectChats((count ?? 0) > 0));
+  }, [user]);
 
   // Auto-stop Eminem music when returning to the menu
   useEffect(() => {
@@ -586,6 +596,28 @@ const Index = () => {
             </div>
           </CardContent>
         </Card>
+
+        {(isOwner || hasDirectChats) && (
+          <Card
+            className="w-full cursor-pointer transition-all duration-200 hover:shadow-lg hover:-translate-y-1 active:scale-[0.98] border-2 border-accent/30 bg-gradient-to-r from-accent/5 to-primary/5"
+            onClick={() => window.openOwnerChat?.()}
+          >
+            <CardContent className="p-3 md:p-4 flex items-center gap-3">
+              <div className="w-10 h-10 md:w-12 md:h-12 rounded-2xl bg-accent/10 flex items-center justify-center shrink-0">
+                <MessageCircle className="h-5 w-5 md:h-6 md:w-6 text-accent" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h2 className="text-sm md:text-base font-bold">
+                  {isOwner ? "Owner Chats" : "Berichten van Owner"}
+                </h2>
+                <p className="text-xs text-muted-foreground">
+                  {isOwner ? "Bekijk en start chats met gebruikers" : "Open je chat met de owner"}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
 
         <div className="flex gap-2 w-full">
           <Card
