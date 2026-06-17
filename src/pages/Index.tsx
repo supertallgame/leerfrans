@@ -85,6 +85,7 @@ const languageGames = [
   { id: "grammaire3" as Game, title: "Grammaire (Ch. 3)", description: "Het werkwoord être & bezittelijke vnw.", icon: BookText, color: "bg-accent/10 text-accent", frenchOnly: true },
   { id: "grammaire5" as Game, title: "Grammaire (Ch. 5)", description: "Le passé composé & bijvoeglijk naamwoord", icon: BookText, color: "bg-destructive/10 text-destructive", frenchOnly: true },
   { id: "grammaire6" as Game, title: "Grammaire (Ch. 6)", description: "Vragen stellen, aller & futur proche", icon: BookText, color: "bg-primary/10 text-primary", frenchOnly: true },
+  { id: "getallen" as Game, title: "Getallen 0-100", description: "Schrijf willekeurige getallen in het Frans, met hints", icon: Hash, color: "bg-accent/10 text-accent", frenchOnly: true },
 ];
 
 const naskGames = [
