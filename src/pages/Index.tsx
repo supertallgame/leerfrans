@@ -319,6 +319,7 @@ const Index = () => {
 
   const gameLoader = <div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>;
 
+
   if (activeGame === "flashcards") return <Suspense fallback={gameLoader}><GameFrame><Flashcards onBack={() => setActiveGame("menu")} /></GameFrame></Suspense>;
   if (activeGame === "quiz") return <Suspense fallback={gameLoader}><GameFrame><MultipleChoice onBack={() => setActiveGame("menu")} /></GameFrame></Suspense>;
   if (activeGame === "match") return <Suspense fallback={gameLoader}><GameFrame><MatchPairs onBack={() => setActiveGame("menu")} /></GameFrame></Suspense>;
