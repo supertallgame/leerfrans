@@ -128,6 +128,77 @@ export type Database = {
         }
         Relationships: []
       }
+      direct_chats: {
+        Row: {
+          created_at: string
+          id: string
+          owner_id: string
+          updated_at: string
+          user_display_name: string | null
+          user_email: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          owner_id: string
+          updated_at?: string
+          user_display_name?: string | null
+          user_email: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          owner_id?: string
+          updated_at?: string
+          user_display_name?: string | null
+          user_email?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      direct_messages: {
+        Row: {
+          body: string
+          chat_id: string
+          created_at: string
+          id: string
+          read_by_owner: boolean
+          read_by_user: boolean
+          sender_id: string
+          sender_is_owner: boolean
+        }
+        Insert: {
+          body: string
+          chat_id: string
+          created_at?: string
+          id?: string
+          read_by_owner?: boolean
+          read_by_user?: boolean
+          sender_id: string
+          sender_is_owner?: boolean
+        }
+        Update: {
+          body?: string
+          chat_id?: string
+          created_at?: string
+          id?: string
+          read_by_owner?: boolean
+          read_by_user?: boolean
+          sender_id?: string
+          sender_is_owner?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "direct_messages_chat_id_fkey"
+            columns: ["chat_id"]
+            isOneToOne: false
+            referencedRelation: "direct_chats"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       game_answers: {
         Row: {
           chapter_id: string
@@ -1006,6 +1077,7 @@ export type Database = {
           reason: string
         }[]
       }
+      create_direct_chat: { Args: { p_user_email: string }; Returns: string }
       create_game_room:
         | {
             Args: {
